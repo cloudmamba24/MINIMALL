@@ -72,17 +72,20 @@ export default async function SitePage({ params, searchParams }: PageProps) {
     notFound();
   }
 
-  // Handle demo config directly without R2 - use simple Renderer like main branch
+  // Handle demo config directly without R2 - use interactive DemoRenderer
   if (configId === 'demo') {
     const demoConfig = createDefaultSiteConfig('demo-shop.myshopify.com');
     demoConfig.id = configId;
+    
+    // Import DemoRenderer dynamically to avoid SSR issues
+    const { DemoRenderer } = await import('@/components/demo-renderer');
     
     return (
       <div className="min-h-screen bg-background">
         <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 mb-4">
           <strong>Demo Mode:</strong> This is a sample configuration showcasing platform features
         </div>
-        <Renderer config={demoConfig} />
+        <DemoRenderer config={demoConfig} />
       </div>
     );
   }

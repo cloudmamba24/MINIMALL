@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { type SiteConfig, type Category } from '@minimall/core';
 import { BrandHeader } from './brand/brand-header';
 import { LinkTabs } from './navigation/link-tabs';
@@ -23,24 +23,29 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
   const openCartDrawer = useOpenCartDrawer();
   const cart = useCart();
   
-  // Stable memoized tabs creation - avoiding JSX in dependencies
+  // Stable callback to prevent re-renders
+  const handlePostModal = useCallback((postId: string, post: Category) => {
+    openPostModal(postId, post);
+  }, [openPostModal]);
+  
+  // Stable memoized tabs creation - removing problematic JSX dependencies
   const tabs = useMemo(() => {
     const categoryTabs = config.categories.map(category => ({
       id: category.id,
       label: category.title,
-      content: <CategoryContent key={category.id} category={category} openPostModal={openPostModal} />
+      content: category, // Pass category data instead of JSX
     }));
     
     const cartTab = {
       id: 'cart',
       label: cart.totalItems > 0 ? `Cart (${cart.totalItems})` : 'Cart',
-      content: null,
+      content: null as Category | null,
       onClick: openCartDrawer,
       isAction: true,
     };
     
     return [...categoryTabs, cartTab];
-  }, [config.categories, cart.totalItems, openPostModal, openCartDrawer]);
+  }, [config.categories, cart.totalItems, openCartDrawer]);
 
   return (
     <div className={`min-h-screen bg-black text-white ${className}`}>
@@ -55,7 +60,17 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
         />
         
         {/* Tab Navigation & Content */}
-        <LinkTabs tabs={tabs} />
+        <LinkTabs 
+          tabs={tabs.map(tab => ({
+            id: tab.id,
+            label: tab.label,
+            content: tab.content && typeof tab.content === 'object' && 'children' in tab.content 
+              ? <CategoryContent key={tab.id} category={tab.content} openPostModal={handlePostModal} />
+              : null,
+            ...(('onClick' in tab) && { onClick: tab.onClick }),
+            ...(('isAction' in tab) && { isAction: tab.isAction })
+          }))} 
+        />
       </div>
 
       {/* Modals */}
