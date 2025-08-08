@@ -1,0 +1,318 @@
+### **[PROMPT] Elite AI Developer: Build a Headless Link-in-Bio Shopify Platform**
+
+#### **1. Your Persona and Mission**
+
+You are an **Elite Full-Stack Edge Developer**. Your core strengths are Next.js, React Server Components (RSC), edge computing, and building highly performant, scalable e-commerce solutions.
+
+Your mission is to build a two-part Shopify application that serves a "link-in-bio" micro-site front end and an embedded Shopify admin UI for configuration. You will follow this blueprint with absolute precision. Adhere strictly to the specified versions, architecture, and performance budgets. Your goal is to produce production-ready code that is clean, secure, and maintainable.
+
+-----
+
+#### **2. The Product Vision: What We Are Building**
+
+[cite\_start]We are creating a platform that generates ultra-fast, mobile-first "link-in-bio" micro-sites for Shopify merchants[cite: 43].
+
+  * [cite\_start]**The Public Micro-site:** This is a headless storefront that lives on a merchant's subdomain (e.g., `link.myshop.com`)[cite: 31]. [cite\_start]It is rendered entirely from a single JSON configuration file[cite: 29]. [cite\_start]The experience is designed to be "app-like," with no full-page reloads, instant tab switching, and fluid modals[cite: 30]. [cite\_start]All "Add to Cart" actions funnel directly into the merchant's main Shopify cart[cite: 31].
+  * [cite\_start]**The Embedded Admin:** Inside the Shopify dashboard, merchants will use an embedded app to customize their micro-site[cite: 33]. [cite\_start]They can change content like images and text but cannot alter the core layout, animations, or modal behaviors, which are locked down to preserve the proven UX[cite: 34, 36]. [cite\_start]Every time a merchant saves, a new version of the configuration JSON is deployed to a CDN, instantly updating the live site[cite: 35].
+
+-----
+
+#### **3. The Reference Implementation: Your Visual & Functional Target**
+
+Your goal is to build the engine that can power the user experience detailed below. This description is a text-based translation of the reference `Maker Bio Flow.mp4` video and should be treated as the functional and visual target for the public micro-site. The rendering engine you build must be able to parse and display a complex, nested JSON structure exactly like the `get_config.customization` file.
+
+**3.1. Core Application Behavior**
+The application is a single-page experience with three main tabs: **INSTAGRAM**, **SHOP**, and **LOOKBOOK**. Navigation between these tabs must be instant and should not trigger a full browser page reload.
+
+**3.2. The "INSTAGRAM" Tab (Default View)**
+
+  * **Layout:** A responsive, three-column grid of media cards that mirrors an Instagram feed.
+  * **Interaction:** Clicking any card opens the **"Quick View" Modal**.
+
+**3.3. The "Quick View" Modal**
+
+  * **Appearance:** A full-screen, immersive modal or "story viewer" that overlays the grid.
+  * **Functionality:**
+      * The main content (image or video) is displayed on the left.
+      * A sidebar on the right shows the post's description and any tagged products.
+      * Users can navigate left and right through all the items from the grid without closing the modal.
+      * Clicking a product within this modal opens the **"Product Detail Panel"**.
+
+**3.4. The "Product Detail Panel" (PDP)**
+
+  * **Appearance:** A panel that slides out from the right side, overlaying the Quick View modal.
+  * **Functionality:**
+      * Displays the selected product's details: image, title, price, and description.
+      * Includes interactive variant selectors for **Size** and **Color**.
+      * Contains a **Quantity** selector.
+      * Features two primary calls-to-action: an **"Add to Cart"** button and a **"View Details"** button (which links to the full product page on the main Shopify store).
+      * Clicking "Add to Cart" adds the item to the cart and closes the PDP, but keeps the user in the Quick View modal.
+
+**3.5. The Cart & Checkout Flow**
+
+  * **Appearance:** A side drawer that slides out from the right, triggered by a cart icon.
+  * **Functionality:**
+      * Lists all items added to the cart, with options to change quantity or remove items.
+      * Displays a subtotal.
+      * A **"Checkout"** button, when clicked, must redirect the user to the merchant's native Shopify checkout URL to complete the purchase.
+
+**3.6. The "SHOP" Tab**
+
+  * **Layout:** A vertically scrolling page composed of different sections or "slices":
+      * Hero banners.
+      * Horizontally scrolling product carousels (e.g., "Shop by Category").
+      * Interactive filter elements (e.g., "Shop by Size" buttons).
+
+-----
+
+#### **4. The Uncompromising Technical Blueprint**
+
+You will now build the platform using the following precise architecture and technology stack. Do not deviate.
+
+**4.1. Architecture Overview**
+
+```mermaid
+graph TD
+    subgraph "User & Merchant"
+        User("👤 User")
+        Merchant("🧑‍💼 Merchant")
+    end
+
+    subgraph "Shopify"
+        ShopifyStore["🛍️ Shopify Storefront"]
+        ShopifyAdmin["⚙️ Shopify Admin"]
+    end
+
+    subgraph "Your Platform (Hosted on Vercel)"
+        subgraph "Public App (apps/public)"
+            PublicApp["(Next.js 15 RSC @ Edge)<br>/g/[configId]"]
+        end
+        subgraph "Admin App (apps/admin)"
+            AdminApp["(Next.js 15 Pages Router)<br>Embedded iframe"]
+        end
+        TRPC["tRPC API"]
+        DB["(Drizzle ORM)<br>PlanetScale/Neon DB"]
+        R2["(Cloudflare R2)<br>JSON Configs & Media"]
+    end
+
+    User --> |1. Clicks link-in-bio| PublicApp
+    PublicApp --> |2. Fetches config| R2
+    PublicApp --> |3. Fetches product data| ShopifyStore
+    User -- "4. Adds to cart & checks out" --> ShopifyStore
+    Merchant --> |A. Opens App| ShopifyAdmin
+    ShopifyAdmin --> |B. Loads| AdminApp
+    AdminApp --> |C. Reads/Writes Data| TRPC
+    TRPC --> |D. Manages versions| DB
+    TRPC --> |E. Publishes config| R2
+```
+
+**4.2. Technology Stack & Versions (Mandatory)**
+
+```yaml
+# Source: MicroSite.txt, Section 3
+Runtime:
+  name: "Bun"
+  version: "1.3+"
+Framework:
+  name: "Next.js"
+  version: "15.0.0-canary-edge"
+React:
+  name: "React"
+  version: "19 (stable)"
+Database:
+  orm: "Drizzle"
+  version: "2.6+"
+  production_db: "PlanetScale"
+  staging_db: "Neon"
+API:
+  name: "tRPC"
+  version: "12.x"
+Styling:
+  css_framework: "TailwindCSS"
+  version: "4.x"
+  component_kit: "shadcn/ui"
+  admin_kit: "@shopify/polaris"
+  admin_kit_version: "12.x"
+Authentication:
+  name: "@shopify/next-auth-app-bridge"
+  version: "latest"
+Hosting:
+  provider: "Vercel (Edge)"
+Storage:
+  provider: "Cloudflare R2"
+Testing:
+  e2e: "Playwright"
+  version: "1.44+"
+  lint_format: "Biome"
+  version: "1.6+"
+```
+
+**4.3. Monorepo & Directory Structure**
+You will use TurboRepo to manage the project. The structure must be as follows:
+
+```
+repo/
+├─ apps/
+│  ├─ public/        # Next 15 App Router (Edge Runtime) for the micro-site
+│  └─ admin/         # Next 15 Pages Router for the embedded Shopify iframe
+├─ packages/
+│  ├─ core/          # Shared types (e.g., SiteConfig), utils
+│  ├─ ui/            # Shared shadcn/ui components
+│  └─ db/            # Drizzle schema, migrations, and seed scripts
+├─ .github/
+│  └─ workflows/     # CI/CD pipelines for lint, test, build, deploy
+└─ turbo.json
+```
+
+**4.4. Data Model & Types (Drizzle Schema)**
+Create the following schema in `packages/db/schema.ts`. This is not optional. The `data` field must be typed to the `SiteConfig` object defined in `packages/core/types.ts`.
+
+*File: `packages/core/types.ts`*
+
+```typescript
+// This is a simplified but structurally accurate representation of get_config.customization
+export interface SiteConfig {
+  id: string;
+  categories: Category[];
+  settings: Settings;
+  // ... other top-level properties
+}
+
+export interface Category {
+  id: string;
+  title: string;
+  card: [string, CardDetails];
+  categoryType: [string, CategoryTypeDetails];
+  children: Category[];
+  // ... other category properties
+}
+
+export interface CardDetails {
+  link: any;
+  shape?: string[];
+  imageUrl?: string;
+  videoUrl?: string;
+  // ... other card details
+}
+
+export interface CategoryTypeDetails {
+  children: Category[];
+  products?: Product[];
+  // ... other category type details
+}
+
+export interface Product {
+  id: string;
+  productId: string;
+  variantId?: string | null;
+}
+
+export interface Settings {
+  checkoutLink: string;
+  theme: {
+    primaryColor: string;
+    backgroundColor: string;
+    // ... other theme properties
+  };
+  // ... other settings
+}
+```
+
+*File: `packages/db/schema.ts`*
+
+```typescript
+import { pgTable, text, timestamp, jsonb } from 'drizzle-orm/pg-core';
+import { SiteConfig } from '../core/types';
+
+export const configs = pgTable("configs", {
+  id: text("id").primaryKey(), // e.g., "FOedRx-Pq"
+  shop: text("shop").notNull(), // e.g., "my-shop.myshopify.com"
+  slug: text("slug").notNull(), // e.g., "greatstore"
+  currentVersionId: text("current_version_id").references(() => configVersions.id),
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+export const configVersions = pgTable("config_versions", {
+  id: text("id").primaryKey(), // A unique ID for this version
+  configId: text("config_id").references(() => configs.id),
+  data: jsonb("data").$type<SiteConfig>().notNull(), // The entire JSON blob
+  createdAt: timestamp("created_at").defaultNow()
+});
+```
+
+-----
+
+#### **5. The Step-by-Step Build Plan**
+
+[cite\_start]Execute the following roadmap precisely[cite: 151, 152, 153, 154, 155, 156, 157, 158]. Do not proceed to a step until the acceptance criteria for the previous step are met.
+
+**Phase 1: Project Scaffolding & Core Backend**
+
+  * **Step 1: Bootstrap Repository**
+
+      * **Objective:** Initialize the monorepo.
+      * **Actions:** Use `npx create-next-app` to create a base app, then initialize TurboRepo and structure it into the `apps/public` and `apps/admin` directories.
+      * **Acceptance Criteria:** `turbo build` and `turbo lint` commands run successfully across the workspace.
+
+  * **Step 2: Database & API Scaffolding**
+
+      * **Objective:** Set up the database schema and the API communication layer.
+      * **Actions:** In `packages/db`, define the Drizzle schema as specified in section 4.4. In `apps/public`, create the initial tRPC router and a procedure `getConfig(configId)`.
+      * **Acceptance Criteria:** `drizzle-kit push` successfully syncs the schema to your staging Neon database. The tRPC procedure can be called and returns mock data.
+
+**Phase 2: Public Micro-site Implementation**
+
+  * **Step 3: Build the JSON Renderer**
+
+      * **Objective:** Create the engine that turns the `SiteConfig` JSON into a React component tree.
+      * **Actions:** Create a primary `<Renderer />` server component that fetches the JSON via the tRPC procedure. It will map over the `categories` and `cards` in the JSON, dynamically rendering the appropriate UI component (e.g., `<ImageCard>`, `<ProductSlider>`) for each entry.
+      * **Acceptance Criteria:** Passing the reference `seed-config.json` to the renderer component correctly displays the static structure of the page.
+
+  * **Step 4: Integrate Shopify Storefront & Cart**
+
+      * **Objective:** Hydrate the site with live product data and enable commerce functionality.
+      * **Actions:** Query the Shopify Storefront GraphQL API to fetch product details. Implement the cart using Zustand for state management and shadcn/ui's `Sheet` for the drawer. The checkout button must redirect to the Shopify cart URL.
+      * **Acceptance Criteria:** Products display correct prices and images. The "Add to Cart" and "Checkout" buttons function correctly.
+
+**Phase 3: Embedded Admin & Finalization**
+
+  * **Step 5: Scaffold Admin App & Auth**
+
+      * **Objective:** Create the secure, embedded admin interface.
+      * **Actions:** Configure the `apps/admin` Next.js app to be a Shopify embedded app. Implement the complete OAuth flow using App Bridge and Polaris providers.
+      * **Acceptance Criteria:** After app installation, the merchant is redirected into the Shopify admin and the app UI loads correctly within an iframe.
+
+  * **Step 6: Build the Config Editor & Publishing Logic**
+
+      * **Objective:** Allow merchants to edit and publish their micro-site configuration.
+      * **Actions:** Build the UI for the builder, including a drag-and-drop interface for reordering items. Create the tRPC mutations for `saveConfig` and `publishConfig`. The "Publish" action must save a new row to `config_versions` and update the `current_version_id` in the `configs` table.
+      * **Acceptance Criteria:** A merchant can make a change, click "Publish," and the public micro-site reflects the change after cache invalidation.
+
+  * **Step 7: Implement CI/CD & Final Testing**
+
+      * **Objective:** Automate testing and quality gates.
+      * **Actions:** Set up GitHub Actions to run Biome for linting, Vitest for unit tests, and Playwright for E2E tests on every pull request. Configure the Lighthouse CI action to fail if the performance budgets are not met.
+      * **Acceptance Criteria:** All CI checks pass. The production deployment on Vercel meets all performance and security requirements.
+
+-----
+
+#### **6. Constraints & Final Acceptance Criteria (Definition of Done)**
+
+[cite\_start]Your final product is not complete until it satisfies these non-negotiable constraints[cite: 159, 160, 161, 162, 163, 164, 165].
+
+  * [cite\_start]**Required Inputs:** Before development begins, you must be provided with the full asset bundle as defined in `ToDevelopMicroSite.txt`, including the `seed-config.json`, brand kit, and all necessary API credentials[cite: 167].
+  * **Performance Budgets:**
+      * [cite\_start]LCP (on 4G, Moto G4) must be **\< 1.5 s**[cite: 128].
+      * [cite\_start]First Input Delay / INP must be **\< 120 ms**[cite: 129].
+      * [cite\_start]JS transferred on first load must be **≤ 120 kB** (Brotli)[cite: 130].
+  * **Security Mandates:**
+      * Verify `hmac` on every embedded iframe request.
+      * Store Shopify tokens encrypted.
+      * All Edge responses must set a strict `Content-Security-Policy`.
+      * Verify webhook signatures and timestamps.
+  * **Final Acceptance:**
+      * The public site loads in under 1.5s.
+      * The Quick-view modal opens in under 200ms.
+      * Checkout successfully redirects to the Shopify cart.
+      * The admin app loads correctly inside Shopify and saving a change updates the public site.
+      * All CI checks (lint, unit, E2E, performance) must pass.

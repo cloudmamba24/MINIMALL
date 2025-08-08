@@ -1,0 +1,52 @@
+### Final asset & context checklist
+
+*(Everything an AI-developer—or a human dev—could conceivably need to build, brand, test, and launch your private link-in-bio platform.)*
+
+| Category                      | Mandatory                                                                                              | Optional / “nice to have”                               | Details & tips                                                                    |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **Core blueprint**            | ✔ `seed-config.json` (your Maker-Bio JSON, or a trimmed starter)                                       | –                                                       | Shows exact tab / card structure to replicate.                                    |
+| **Brand kit**                 | ✔ `logo.svg` (vector) <br>✔ Primary / secondary HEX colors <br>✔ Font names or files                   | Favicon, social share image                             | Provide HEX palette or Tailwind tokens so dev/AI can autogenerate Tailwind theme. |
+| **Commerce creds**            | ✔ Shopify Storefront token (read\_products) <br>✔ Admin API key + secret (for embedded app & webhooks) | Test store with fake products                           | Deliver via secure vault; never put in repo.                                      |
+| **Media library**             | ✔ Hero images (desktop + mobile crops) <br>✔ Instagram/feed thumbnails                                 | Lookbook video, 360° spins, GIFs                        | Label with intended slot: `hero-1@1920x1080.jpg`, `grid-img-01.jpg`.              |
+| **Copy & tone**               | ✔ Button labels, CTA phrases, product-tagline style                                                    | Brand voice guide, content style guide                  | Even a short doc: “Tone is casual-friendly, no exclamation marks.”                |
+| **Legal / policy links**      | ✔ Privacy, TOS URLs                                                                                    | GDPR / CCPA copy blocks                                 | Needed if footer or modal links required.                                         |
+| **Analytics / monitoring**    | GA4 ID, Sentry DSN                                                                                     | Plausible site ID                                       | Drop in `.env`.                                                                   |
+| **Hosting / infra**           | ✔ Vercel org access (or Cloudflare Pages)                                                              | Cloudinary creds if using Cloudinary                    | Dev can create R2 bucket if keys provided.                                        |
+| **Domain**                    | ✔ DNS provider login OR pre-delegated CNAME                                                            | Staging sub-domain                                      | Needed only at go-live.                                                           |
+| **Embedded-app set-up**       | ✔ Allowed redirect URLs list for Shopify App                                                           | App icon (PNG 128×128)                                  | Give exact URLs for auth callback & admin iframe.                                 |
+| **Content for admin seeding** | Example sliders, card titles, descriptions                                                             | Future language translations                            | Helps QA drag-drop builder without lorem ipsum.                                   |
+| **User personas / flows**     | Primary user stories (“IG visitor buys hoodie” / “store owner adds new lookbook”)                      | Success metrics (CR%, AOV)                              | Guides test scenarios & Lighthouse perf budgets.                                  |
+| **Security info**             | List of allowed Shopify scopes, token rotation policy                                                  | Password rules for staff logins                         | Saves time when writing OAuth & webhook code.                                     |
+| **Compliance**                | PCI handled by Shopify (no action)                                                                     | Image licenses / attribution notes                      | Confirm you own or license all photos.                                            |
+| **AI-specific context**       | Allowed model providers (OpenAI, Anthropic) <br>Any prompt style rules                                 | “Don’t generate product descriptions, use Shopify copy” | Reduces hallucinations & mismatched tone.                                         |
+| **QA / acceptance**           | Performance budgets table (already defined)                                                            | Screenshot baseline for visual diff tests               | Visual baselines help Playwright’s `expect(page).toMatchSnapshot()`.              |
+
+#### Optional but high-ROI extras
+
+* **Figma link** with mobile & desktop frames → faster pixel-perfect implementation.
+* **Short screen recording** (\~30 s) of how Maker Bio behaves on your phone → clarifies motion/transition expectations.
+* **Access to a dummy Instagram account** if you’ll later auto-import posts.
+* **Budget guardrails** for infra (e.g., R2 100 GB cap, Vercel 1 TB egress) so the dev sets proper `max-age` headers.
+
+---
+
+### How to deliver
+
+1. Create a private GitHub repo and commit:
+
+   ```
+   /docs/seed-config.json
+   /docs/brand/
+       logo.svg
+       palette.json
+       fonts.txt
+   /docs/media/
+       hero-*.jpg
+       grid-*.jpg
+   /docs/copy.md
+   ```
+2. In GitHub **Secrets** add: `SHOPIFY_API_KEY`, `SHOPIFY_API_SECRET`, `STOREFRONT_TOKEN`, `R2_ACCESS_KEY`, `R2_SECRET`, `SENTRY_DSN`.
+3. Share Figma / video links in the repo README or a Notion page.
+4. Provide DNS or Vercel org invite via secure channel after staging passes acceptance tests.
+
+Give the dev (or AI agent) this asset bundle **plus** the full “context packet” spec I wrote earlier; together they form a complete, unambiguous brief. No other files should be needed to start and carry the project to launch.

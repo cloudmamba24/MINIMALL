@@ -1,0 +1,28 @@
+We’re building a two-part Shopify app that serves:
+
+1. A “link-in-bio” micro-site front end
+One JSON blueprint defines EVERYTHING you see: tabs, sliders, grids, cards, color swatches, buttons, modals, animations, breakpoints.
+
+On page load we fetch that JSON once, then a small React bundle renders the UI on the client in memory—no full-page reloads, instant tab switches and modals, true “app-like” feel.
+
+The site lives on its own subdomain or CDN (e.g. link.myshop.com), but funnels “Add to Cart” and “Visit Store” directly into the merchant’s main Shopify cart and storefront.
+
+We’ll ship with a pre-defined theme JSON (the exact layout/UX you’re familiar with) so merchants get the same polished grid-and-slider experience out of the box.
+
+2. An embedded Shopify admin UI
+Inside the Shopify dashboard, we’ll embed a configuration editor using Shopify App Bridge and Polaris.
+
+Merchants can customize only the fields we expose (swap hero images, update headlines, reorder tabs, tweak button copy, choose accent colors).
+
+Behind the scenes we store a full JSON config every time they save, version it, and deploy it to a CDN so the micro-site instantly reflects their changes.
+
+All un-exposed settings—core layout rules, animation timings, modal behavior—remain locked down to preserve the proven UX.
+
+Why this matters
+Consistency & speed: Clients get a battle-tested, mobile-first UI that loads in <1.5 s on 4 G and never flashes or reloads.
+
+Controlled flexibility: Merchants can brand and tweak their link-in-bio page without touching Liquid or theme code—only the high-level content and colors they need to change.
+
+Future-proof: The same JSON-driven engine can power other micro-apps (e.g., campaign landing pages), and the admin UI can grow later with new fields if we decide to unlock more customization.
+
+Your assignment: Nail the JSON-to-React rendering engine for the public site, then build the embedded admin editor that reads/writes that JSON while safeguarding the core layout rules.

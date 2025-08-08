@@ -1,0 +1,14 @@
+Shopify Store Domain: your-store.myshopify.com
+Admin API access token: shpat_your_admin_api_token
+Storefront API access token: your_storefront_api_token
+API KEY: your_api_key
+API SECRET KEY: your_api_secret_key
+Headless Private access token: shpat_your_headless_token
+CLOUDFLARE R2 Account ID: your_r2_account_id
+CLOUDFLARE R2 API ID: https://your_account_id.r2.cloudflarestorage.com
+R2 TOKEN VALUE: your_r2_token_value
+R2 ACCESS KEY ID: your_r2_access_key_id
+R2 SECRET ACCESS KEY: your_r2_secret_access_key
+R2 S3 ENDPOINTS: https://your_account_id.r2.cloudflarestorage.com
+R2 BUCKET NAME: linkinbio-configs
+Shopify Request Code: your_request_code
