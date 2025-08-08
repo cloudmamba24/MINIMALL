@@ -2,26 +2,25 @@
 const nextConfig = {
   // Enable React Server Components and experimental features
   experimental: {
-    // Use React 19 with RSC
-    ppr: true,
-    reactCompiler: true,
-    // Enable edge runtime by default
-    runtime: 'edge',
     // Enable server actions
-    serverActions: true,
-    // Enable turbo mode for faster development
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+    // Enable optimizations
+    optimizeCss: true,
+  },
+  
+  // External packages that should not be bundled (removed core and db from transpilePackages)
+  
+  // Turbopack configuration (moved from experimental.turbo)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },
-  
-  // Performance optimizations
-  swcMinify: true,
   
   // Image optimization
   images: {

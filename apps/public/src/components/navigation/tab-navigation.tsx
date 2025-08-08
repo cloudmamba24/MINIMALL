@@ -21,7 +21,10 @@ export function TabNavigation({ categories, className, onTabChange }: TabNavigat
   // Set initial active tab
   useEffect(() => {
     if (visibleCategories.length > 0 && !activeTab) {
-      setActiveTab(visibleCategories[0].id);
+      const firstCategory = visibleCategories[0];
+      if (firstCategory) {
+        setActiveTab(firstCategory.id);
+      }
     }
   }, [visibleCategories, activeTab]);
 
@@ -44,7 +47,7 @@ export function TabNavigation({ categories, className, onTabChange }: TabNavigat
     const element = document.getElementById(categoryId);
     if (element) {
       const offset = 80; // Account for sticky header
-      const elementPosition = element.getBoundingClientTop() + window.pageYOffset;
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
       const offsetPosition = elementPosition - offset;
 
       window.scrollTo({

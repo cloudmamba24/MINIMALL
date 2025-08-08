@@ -2,14 +2,18 @@
 const nextConfig = {
   // Use Pages Router for Shopify App Bridge compatibility
   experimental: {
-    // Enable some optimizations but keep Pages Router
-    swcMinify: true,
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+    // Enable optimizations compatible with Pages Router
+    optimizeCss: true,
+  },
+  
+  // External packages that should not be bundled (removed core and db from transpilePackages)
+  
+  // Turbopack configuration (moved from experimental.turbo)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },

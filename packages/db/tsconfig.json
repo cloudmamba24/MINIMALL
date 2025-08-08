@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "noEmit": false,
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
@@ -10,6 +11,6 @@
     "incremental": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*", "drizzle.config.ts"],
-  "exclude": ["node_modules", "dist", "migrations", "**/*.test.ts", "**/*.test.tsx"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "migrations", "drizzle.config.ts", "**/*.test.ts", "**/*.test.tsx"]
 }

@@ -93,7 +93,7 @@ function CategorySection({ category, className }: CategorySectionProps) {
           <CardRenderer
             key={child.id}
             category={child}
-            displayType={categoryTypeDetails.displayType}
+            displayType={categoryTypeDetails.displayType || 'grid'}
           />
         ))}
 
@@ -102,8 +102,8 @@ function CategorySection({ category, className }: CategorySectionProps) {
           <ProductCard
             key={product.id}
             productId={product.productId}
-            variantId={product.variantId}
-            displayType={categoryTypeDetails.displayType}
+            variantId={product.variantId ?? null}
+            displayType={categoryTypeDetails.displayType || 'grid'}
           />
         ))}
 
@@ -114,7 +114,7 @@ function CategorySection({ category, className }: CategorySectionProps) {
             cardType={cardType}
             cardDetails={cardDetails}
             count={categoryTypeDetails.itemsPerRow || 3}
-            displayType={categoryTypeDetails.displayType}
+            displayType={categoryTypeDetails.displayType || 'grid'}
           />
         )}
       </div>
@@ -141,9 +141,9 @@ function CardRenderer({ category, displayType, className }: CardRendererProps) {
       return (
         <ImageCard
           title={category.title}
-          imageUrl={cardDetails.imageUrl}
+          imageUrl={cardDetails.imageUrl || ''}
           link={cardDetails.link}
-          shape={cardDetails.shape?.[0]}
+          shape={cardDetails.shape?.[0] || 'square'}
           className={cardClass}
         />
       );
@@ -152,8 +152,8 @@ function CardRenderer({ category, displayType, className }: CardRendererProps) {
       return (
         <VideoCard
           title={category.title}
-          videoUrl={cardDetails.videoUrl}
-          imageUrl={cardDetails.imageUrl} // Thumbnail
+          videoUrl={cardDetails.videoUrl || ''}
+          imageUrl={cardDetails.imageUrl || ''} // Thumbnail
           link={cardDetails.link}
           className={cardClass}
         />
@@ -173,7 +173,7 @@ function CardRenderer({ category, displayType, className }: CardRendererProps) {
       return (
         <ProductCard
           productId={product.productId}
-          variantId={product.variantId}
+          variantId={product.variantId ?? null}
           className={cardClass}
         />
       );
@@ -183,9 +183,9 @@ function CardRenderer({ category, displayType, className }: CardRendererProps) {
       return (
         <ImageCard
           title={category.title}
-          imageUrl={cardDetails.imageUrl}
+          imageUrl={cardDetails.imageUrl || ''}
           link={cardDetails.link}
-          shape={cardDetails.shape?.[0]}
+          shape={cardDetails.shape?.[0] || 'square'}
           className={cardClass}
         />
       );

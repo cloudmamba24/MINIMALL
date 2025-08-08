@@ -4,12 +4,12 @@ import { r2Service, createDefaultSiteConfig } from '@minimall/core';
 import { Renderer } from '@/components/renderer';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     configId: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     draft?: string;
-  };
+  }>;
 }
 
 // Edge runtime for global performance
@@ -19,8 +19,10 @@ export const runtime = 'edge';
 export const revalidate = 300; // 5 minutes
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { configId } = await params;
+  
   try {
-    const config = await r2Service.getConfig(params.configId);
+    const config = await r2Service.getConfig(configId);
     
     return {
       title: config.settings.seo?.title || `${config.settings.shopDomain} - Link in Bio`,
@@ -35,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   } catch (error) {
     return {
-      title: `Link in Bio - ${params.configId}`,
+      title: `Link in Bio - ${configId}`,
       description: 'Ultra-fast link-in-bio storefront',
       robots: 'index, follow',
     };
@@ -43,8 +45,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function SitePage({ params, searchParams }: PageProps) {
-  const { configId } = params;
-  const { draft } = searchParams;
+  const { configId } = await params;
+  const { draft } = await searchParams;
 
   if (!configId) {
     notFound();

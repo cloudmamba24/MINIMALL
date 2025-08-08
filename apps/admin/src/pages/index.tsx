@@ -54,7 +54,7 @@ export default function HomePage() {
         <Layout.Section>
           <Banner
             title="Welcome to Link-in-Bio Platform"
-            status="success"
+            tone="success"
             onDismiss={() => {}}
           >
             <p>

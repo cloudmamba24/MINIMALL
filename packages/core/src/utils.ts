@@ -136,6 +136,9 @@ export function flattenCategories(categories: Category[]): Category[] {
 export function reorderCategories(categories: Category[], fromIndex: number, toIndex: number): Category[] {
   const result = [...categories];
   const [removed] = result.splice(fromIndex, 1);
+  if (!removed) {
+    return result;
+  }
   result.splice(toIndex, 0, removed);
   
   // Update order properties
@@ -179,10 +182,13 @@ export function addToCart(
   if (existingItemIndex >= 0) {
     // Update existing item quantity
     const updatedItems = [...currentItems];
-    updatedItems[existingItemIndex] = {
-      ...updatedItems[existingItemIndex],
-      quantity: updatedItems[existingItemIndex].quantity + quantity,
-    };
+    const existingItem = updatedItems[existingItemIndex];
+    if (existingItem) {
+      updatedItems[existingItemIndex] = {
+        ...existingItem,
+        quantity: existingItem.quantity + quantity,
+      };
+    }
     return updatedItems;
   }
 
@@ -194,7 +200,7 @@ export function addToCart(
     title: product.title,
     price: parseFloat(variant.price.amount) * 100, // Convert to cents
     quantity,
-    image: variant.image?.url || product.images[0]?.url,
+    image: variant.image?.url || product.images[0]?.url || '',
     variant: {
       title: variant.title,
       selectedOptions: variant.selectedOptions,
@@ -243,7 +249,7 @@ export function extractShopFromDomain(domain: string): string {
   if (domain.includes('.myshopify.com')) {
     return domain.replace('.myshopify.com', '');
   }
-  return domain.split('.')[0];
+  return domain.split('.')[0] || '';
 }
 
 export function buildStorefrontUrl(shopDomain: string): string {
