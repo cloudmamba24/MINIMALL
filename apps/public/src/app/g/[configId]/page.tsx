@@ -3,6 +3,17 @@ import { notFound } from 'next/navigation';
 import { r2Service, createDefaultSiteConfig } from '@minimall/core';
 import { Renderer } from '@/components/renderer';
 
+// Create stable demo config to prevent infinite re-renders
+const STABLE_DEMO_CONFIG = (() => {
+  const config = createDefaultSiteConfig('demo-shop.myshopify.com');
+  return {
+    ...config,
+    id: 'demo',
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-01T00:00:00.000Z',
+  };
+})();
+
 interface PageProps {
   params: Promise<{
     configId: string;
@@ -23,15 +34,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   // Handle demo config directly without R2
   if (configId === 'demo') {
-    const demoConfig = createDefaultSiteConfig('demo-shop.myshopify.com');
     return {
-      title: demoConfig.settings.seo?.title || `${demoConfig.settings.shopDomain} - Link in Bio`,
-      description: demoConfig.settings.seo?.description || 'Ultra-fast link-in-bio storefront',
-      keywords: demoConfig.settings.seo?.keywords,
+      title: STABLE_DEMO_CONFIG.settings.seo?.title || `${STABLE_DEMO_CONFIG.settings.shopDomain} - Link in Bio`,
+      description: STABLE_DEMO_CONFIG.settings.seo?.description || 'Ultra-fast link-in-bio storefront',
+      keywords: STABLE_DEMO_CONFIG.settings.seo?.keywords,
       robots: 'index, follow',
       openGraph: {
-        title: demoConfig.settings.seo?.title || `${demoConfig.settings.shopDomain} - Link in Bio`,
-        description: demoConfig.settings.seo?.description || 'Ultra-fast link-in-bio storefront',
+        title: STABLE_DEMO_CONFIG.settings.seo?.title || `${STABLE_DEMO_CONFIG.settings.shopDomain} - Link in Bio`,
+        description: STABLE_DEMO_CONFIG.settings.seo?.description || 'Ultra-fast link-in-bio storefront',
         type: 'website',
       },
     };
@@ -74,9 +84,6 @@ export default async function SitePage({ params, searchParams }: PageProps) {
 
   // Handle demo config directly without R2 - use interactive DemoRenderer
   if (configId === 'demo') {
-    const demoConfig = createDefaultSiteConfig('demo-shop.myshopify.com');
-    demoConfig.id = configId;
-    
     // Import DemoRenderer dynamically to avoid SSR issues
     const { DemoRenderer } = await import('@/components/demo-renderer');
     
@@ -85,7 +92,7 @@ export default async function SitePage({ params, searchParams }: PageProps) {
         <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 mb-4">
           <strong>Demo Mode:</strong> This is a sample configuration showcasing platform features
         </div>
-        <DemoRenderer config={demoConfig} />
+        <DemoRenderer config={STABLE_DEMO_CONFIG} />
       </div>
     );
   }
@@ -102,8 +109,7 @@ export default async function SitePage({ params, searchParams }: PageProps) {
     
     // In development, show demo config with error notice
     if (process.env.NODE_ENV === 'development') {
-      const demoConfig = createDefaultSiteConfig('demo-shop.myshopify.com');
-      demoConfig.id = configId;
+      const fallbackConfig = { ...STABLE_DEMO_CONFIG, id: configId };
       
       return (
         <div className="min-h-screen bg-background">
@@ -117,7 +123,7 @@ export default async function SitePage({ params, searchParams }: PageProps) {
             <br />
             <small>Error: {error instanceof Error ? error.message : 'Unknown error'}</small>
           </div>
-          <Renderer config={demoConfig} />
+          <Renderer config={fallbackConfig} />
         </div>
       );
     }
