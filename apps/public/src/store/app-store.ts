@@ -306,6 +306,13 @@ export const useAppStore = create<AppState>()(
 
 // Convenience hooks for specific parts of the store
 export const useCart = () => useAppStore((state) => state.cart);
+// Individual selectors for stable function references  
+export const useAddToCart = () => useAppStore((state) => state.addToCart);
+export const useRemoveFromCart = () => useAppStore((state) => state.removeFromCart);
+export const useUpdateQuantity = () => useAppStore((state) => state.updateQuantity);
+export const useClearCart = () => useAppStore((state) => state.clearCart);
+
+// Backward compatibility
 export const useCartActions = () => useAppStore((state) => ({
   addToCart: state.addToCart,
   removeFromCart: state.removeFromCart,
@@ -314,6 +321,16 @@ export const useCartActions = () => useAppStore((state) => ({
 }));
 
 export const useModals = () => useAppStore((state) => state.modals);
+// Individual selectors for stable function references
+export const useOpenPostModal = () => useAppStore((state) => state.openPostModal);
+export const useClosePostModal = () => useAppStore((state) => state.closePostModal);
+export const useOpenProductQuickView = () => useAppStore((state) => state.openProductQuickView);
+export const useCloseProductQuickView = () => useAppStore((state) => state.closeProductQuickView);
+export const useOpenCartDrawer = () => useAppStore((state) => state.openCartDrawer);
+export const useCloseCartDrawer = () => useAppStore((state) => state.closeCartDrawer);
+export const useCloseAllModals = () => useAppStore((state) => state.closeAllModals);
+
+// Backward compatibility - but this can cause re-renders
 export const useModalActions = () => useAppStore((state) => ({
   openPostModal: state.openPostModal,
   closePostModal: state.closePostModal,

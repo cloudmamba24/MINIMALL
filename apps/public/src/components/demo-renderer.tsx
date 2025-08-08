@@ -9,7 +9,7 @@ import { ContentItem } from './content/content-item';
 import { PostModal } from './modals/post-modal';
 import { ProductQuickView } from './modals/product-quick-view';
 import { CartDrawer } from './modals/cart-drawer';
-import { useModals, useModalActions, useCart } from '@/store/app-store';
+import { useModals, useOpenPostModal, useOpenCartDrawer, useCart } from '@/store/app-store';
 
 interface DemoRendererProps {
   config: SiteConfig;
@@ -19,25 +19,28 @@ interface DemoRendererProps {
 export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
   const { settings } = config;
   const modals = useModals();
-  const { openPostModal, openCartDrawer } = useModalActions();
+  const openPostModal = useOpenPostModal();
+  const openCartDrawer = useOpenCartDrawer();
   const cart = useCart();
   
-  // Create tabs from categories with cart button - memoized to prevent infinite loops
-  const tabs = useMemo(() => [
-    ...config.categories.map(category => ({
+  // Stable memoized tabs creation - avoiding JSX in dependencies
+  const tabs = useMemo(() => {
+    const categoryTabs = config.categories.map(category => ({
       id: category.id,
       label: category.title,
-      content: <CategoryContent category={category} openPostModal={openPostModal} />
-    })),
-    // Add cart tab
-    {
+      content: <CategoryContent key={category.id} category={category} openPostModal={openPostModal} />
+    }));
+    
+    const cartTab = {
       id: 'cart',
       label: cart.totalItems > 0 ? `Cart (${cart.totalItems})` : 'Cart',
-      content: null, // Cart opens drawer instead
+      content: null,
       onClick: openCartDrawer,
       isAction: true,
-    }
-  ], [config.categories, cart.totalItems, openPostModal, openCartDrawer]);
+    };
+    
+    return [...categoryTabs, cartTab];
+  }, [config.categories, cart.totalItems, openPostModal, openCartDrawer]);
 
   return (
     <div className={`min-h-screen bg-black text-white ${className}`}>
