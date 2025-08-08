@@ -1,0 +1,5 @@
+{
+  "installCommand": "npm install",
+  "buildCommand": "turbo run build --filter=@minimall/public",
+  "devCommand": "turbo run dev --filter=@minimall/public"
+}
