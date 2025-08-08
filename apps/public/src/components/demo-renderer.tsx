@@ -1,15 +1,18 @@
 'use client';
 
 import { useMemo, useCallback, memo } from 'react';
+import { motion } from 'framer-motion';
 import { type SiteConfig, type Category } from '@minimall/core';
 import { BrandHeader } from './brand/brand-header';
 import { LinkTabs } from './navigation/link-tabs';
 import { ContentGrid, GridItem } from './layout/content-grid';
 import { ContentItem } from './content/content-item';
-import { PostModal } from './modals/post-modal';
-import { ProductQuickView } from './modals/product-quick-view';
-import { CartDrawer } from './modals/cart-drawer';
-import { useModals, useOpenPostModal, useOpenCartDrawer, useCart } from '@/store/app-store';
+import { EnhancedPostModal } from './modals/enhanced-post-modal';
+import { EnhancedProductQuickView } from './modals/enhanced-product-quick-view';
+import { EnhancedCartDrawer } from './modals/enhanced-cart-drawer';
+import { useModalRouter } from '@/hooks/use-modal-router';
+import { useCart } from '@/store/app-store';
+import { animationTokens } from '@/lib/animation-tokens';
 
 interface DemoRendererProps {
   config: SiteConfig;
@@ -23,15 +26,25 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
   }
   
   const { settings } = config;
-  const modals = useModals();
-  const openPostModal = useOpenPostModal();
-  const openCartDrawer = useOpenCartDrawer();
   const cart = useCart();
   
-  // Stable callback to prevent re-renders
+  // Enhanced modal routing
+  const { openModal: openPostModal } = useModalRouter('post');
+  const { openModal: openProductModal } = useModalRouter('product');
+  const { openModal: openCartModal } = useModalRouter('cart');
+  
+  // Stable callbacks to prevent re-renders
   const handlePostModal = useCallback((postId: string, post: Category) => {
-    openPostModal(postId, post);
+    openPostModal({ id: postId });
   }, [openPostModal]);
+
+  const handleProductModal = useCallback((productId: string) => {
+    openProductModal({ id: productId });
+  }, [openProductModal]);
+
+  const handleCartModal = useCallback(() => {
+    openCartModal({ open: 'true' });
+  }, [openCartModal]);
   
   // Ultra-stable tabs creation using config.id instead of categories array
   const tabs = useMemo(() => {
@@ -45,12 +58,12 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
       id: 'cart',
       label: cart.totalItems > 0 ? `Cart (${cart.totalItems})` : 'Cart',
       content: null as Category | null,
-      onClick: openCartDrawer,
+      onClick: handleCartModal,
       isAction: true,
     };
     
     return [...categoryTabs, cartTab];
-  }, [config.id, cart.totalItems, openCartDrawer]); // Use config.id instead of categories array
+  }, [config.id, cart.totalItems, handleCartModal]); // Use config.id instead of categories array
 
   // Memoize rendered tabs to prevent infinite re-renders
   const renderedTabs = useMemo(() => 
@@ -77,49 +90,61 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
   );
 
   return (
-    <div className={`min-h-screen bg-black text-white ${className}`}>
+    <motion.div 
+      className={`min-h-screen bg-black text-white ${className}`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ 
+        duration: animationTokens.duration.normal / 1000,
+        ease: animationTokens.easing.entrance 
+      }}
+    >
       <div className="container mx-auto px-4 py-8 max-w-lg">
         {/* Brand Header */}
-        <BrandHeader
-          title={settings.brand?.name || 'DEMO.STORE'}
-          {...(settings.brand?.subtitle && { subtitle: settings.brand.subtitle })}
-          {...(settings.brand?.logo && { logo: settings.brand.logo })}
-          {...(settings.brand?.socialLinks && { socialLinks: settings.brand.socialLinks })}
-          {...(settings.brand?.ctaButton && { ctaButton: settings.brand.ctaButton })}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            delay: 0.1,
+            duration: animationTokens.duration.normal / 1000,
+            ease: animationTokens.easing.entrance 
+          }}
+        >
+          <BrandHeader
+            title={settings.brand?.name || 'DEMO.STORE'}
+            {...(settings.brand?.subtitle && { subtitle: settings.brand.subtitle })}
+            {...(settings.brand?.logo && { logo: settings.brand.logo })}
+            {...(settings.brand?.socialLinks && { socialLinks: settings.brand.socialLinks })}
+            {...(settings.brand?.ctaButton && { ctaButton: settings.brand.ctaButton })}
+          />
+        </motion.div>
         
         {/* Tab Navigation & Content */}
-        <LinkTabs tabs={renderedTabs} />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            delay: 0.2,
+            duration: animationTokens.duration.normal / 1000,
+            ease: animationTokens.easing.entrance 
+          }}
+        >
+          <LinkTabs tabs={renderedTabs} />
+        </motion.div>
       </div>
 
-      {/* Modals */}
-      <PostModal 
-        post={modals.postModal.post}
-        {...(settings.animations?.modals && {
-          animationSettings: {
-            fadeIn: settings.animations.modals.fadeIn,
-            backdrop: settings.animations.modals.backdrop
-          }
-        })}
+      {/* Enhanced Modals with URL routing */}
+      <EnhancedPostModal 
+        posts={config.categories.filter(cat => cat.children && cat.children.length > 0)}
+        onProductClick={handleProductModal}
       />
       
-      <ProductQuickView 
-        {...(settings.animations?.modals && {
-          animationSettings: {
-            slideIn: settings.animations.modals.slideIn
-          }
-        })}
-      />
+      <EnhancedProductQuickView />
       
-      <CartDrawer 
+      <EnhancedCartDrawer 
         shopDomain={settings.shopDomain}
-        {...(settings.animations?.modals && {
-          animationSettings: {
-            slideIn: settings.animations.modals.slideIn
-          }
-        })}
       />
-    </div>
+    </motion.div>
   );
 }
 
@@ -164,34 +189,52 @@ const CategoryContent = memo(function CategoryContent({ category, openPostModal 
     );
   }
 
-  // For grid display (instagram, shop)
+  // For grid display (instagram, shop) with staggered animations
   return (
     <ContentGrid>
-      {category.children.map((child) => {
+      {category.children.map((child, index) => {
         const [cardType, cardDetails] = child.card;
         
         return (
-          <GridItem 
+          <motion.div
             key={child.id}
-            onClick={() => {
-              // Handle click action from card details or default to modal
-              if (cardDetails.clickAction?.type === 'modal') {
-                openPostModal(child.id, child);
-              } else if (cardDetails.link) {
-                window.open(cardDetails.link, '_blank');
-              } else {
-                openPostModal(child.id, child);
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{
+              delay: index * (animationTokens.duration.stagger / 1000),
+              duration: animationTokens.duration.normal / 1000,
+              ease: animationTokens.easing.entrance,
+            }}
+            whileHover={{ 
+              scale: 1.05,
+              transition: { 
+                duration: animationTokens.duration.fast / 1000,
+                ease: animationTokens.easing.entrance 
               }
             }}
+            whileTap={{ scale: 0.95 }}
           >
-            <ContentItem
-              type={cardType === 'product' ? 'product' : cardType === 'video' ? 'video' : 'image'}
-              image={cardDetails.image || cardDetails.imageUrl || ''}
-              title={child.title}
-              {...(cardDetails.price && { price: cardDetails.price })}
-              {...(cardDetails.overlay && { overlay: cardDetails.overlay })}
-            />
-          </GridItem>
+            <GridItem 
+              onClick={() => {
+                // Handle click action from card details or default to modal
+                if (cardDetails.clickAction?.type === 'modal') {
+                  openPostModal(child.id, child);
+                } else if (cardDetails.link) {
+                  window.open(cardDetails.link, '_blank');
+                } else {
+                  openPostModal(child.id, child);
+                }
+              }}
+            >
+              <ContentItem
+                type={cardType === 'product' ? 'product' : cardType === 'video' ? 'video' : 'image'}
+                image={cardDetails.image || cardDetails.imageUrl || ''}
+                title={child.title}
+                {...(cardDetails.price && { price: cardDetails.price })}
+                {...(cardDetails.overlay && { overlay: cardDetails.overlay })}
+              />
+            </GridItem>
+          </motion.div>
         );
       })}
     </ContentGrid>

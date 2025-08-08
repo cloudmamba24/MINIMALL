@@ -6,6 +6,8 @@ import type { CartItem, Category, ShopifyProduct } from '@minimall/core';
 export interface UICartItem extends CartItem {
   addedAt: number;
   isNew?: boolean;
+  size?: string;
+  color?: string;
 }
 
 // Modal state types
