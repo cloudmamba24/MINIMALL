@@ -1,3 +1,5 @@
+'use client';
+
 import { type SiteConfig, type Category } from '@minimall/core';
 import { BrandHeader } from './brand/brand-header';
 import { LinkTabs } from './navigation/link-tabs';
