@@ -52,16 +52,38 @@ export default async function SitePage({ params, searchParams }: PageProps) {
     notFound();
   }
 
+  // Handle demo config directly without R2
+  if (configId === 'demo') {
+    const demoConfig = createDefaultSiteConfig('demo-shop.myshopify.com');
+    demoConfig.id = configId;
+    
+    return (
+      <div className="min-h-screen bg-background">
+        {draft && (
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3">
+            <strong>Draft Mode:</strong> Viewing version {draft}
+          </div>
+        )}
+        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 mb-4">
+          <strong>Demo Mode:</strong> This is a sample configuration showcasing platform features
+        </div>
+        <Renderer config={demoConfig} />
+      </div>
+    );
+  }
+
+  // For non-demo configs, try R2 first
   try {
-    // Fetch config from R2
+    console.log(`Attempting to fetch config for: ${configId}${draft ? ` (version: ${draft})` : ''}`);
     const config = await r2Service.getConfig(configId, draft);
+    console.log(`Successfully fetched config for: ${configId}`);
     
     return <Renderer config={config} />;
   } catch (error) {
-    console.error('Failed to fetch config:', error);
+    console.error(`Failed to fetch config for ${configId}:`, error);
     
-    // Show demo config for specific demo ID or in development
-    if (configId === 'demo' || process.env.NODE_ENV === 'development') {
+    // In development, show demo config with error notice
+    if (process.env.NODE_ENV === 'development') {
       const demoConfig = createDefaultSiteConfig('demo-shop.myshopify.com');
       demoConfig.id = configId;
       
@@ -72,22 +94,17 @@ export default async function SitePage({ params, searchParams }: PageProps) {
               <strong>Draft Mode:</strong> Viewing version {draft}
             </div>
           )}
-          {configId === 'demo' && (
-            <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 mb-4">
-              <strong>Demo Mode:</strong> This is a sample configuration showcasing platform features
-            </div>
-          )}
-          {configId !== 'demo' && (
-            <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 mb-4">
-              <strong>Development Mode:</strong> Showing demo configuration since R2 config not found
-            </div>
-          )}
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mb-4">
+            <strong>Development Mode:</strong> Config "{configId}" not found in R2. Showing demo configuration instead.
+            <br />
+            <small>Error: {error instanceof Error ? error.message : 'Unknown error'}</small>
+          </div>
           <Renderer config={demoConfig} />
         </div>
       );
     }
     
-    // Production: show 404 for non-demo configs
+    // Production: show 404 for non-demo configs that aren't found
     notFound();
   }
 }
