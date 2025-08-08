@@ -9,12 +9,21 @@ A high-performance, edge-first link-in-bio platform built specifically for Shopi
 - **📱 Mobile-First Design**: Responsive, app-like experience optimized for mobile
 - **🎨 JSON-Driven Rendering**: Instant config updates without code deployments
 
-## 🛠️ Troubleshooting
+## 🛠️ Troubleshooting & Problem Solving
 
-Having deployment or configuration issues? Check our comprehensive troubleshooting guide:
+### 🚨 Having Issues?
 
-- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Detailed solutions for common issues
-- **Quick Debug**: Run `./scripts/debug-deployment.sh <your-vercel-url>` to test all routes
+1. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Specific solutions for known issues
+2. **[DIAGNOSTIC-METHODOLOGY.md](./DIAGNOSTIC-METHODOLOGY.md)** - Systematic problem-solving framework
+3. **Quick Debug**: `./scripts/debug-deployment.sh <your-vercel-url>`
+
+### 🎯 Problem-Solving Approach
+
+**Before trying random fixes**, follow our diagnostic methodology:
+- Collect evidence systematically
+- Identify failure patterns  
+- Form testable hypotheses
+- Target root causes, not symptoms
 
 ### Common Issues
 - **All routes show 404**: Check [Deployment Issues](./TROUBLESHOOTING.md#deployment-issues) section
