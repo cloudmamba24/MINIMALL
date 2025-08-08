@@ -11,8 +11,11 @@ import {
   useCart, 
   useUpdateQuantity, 
   useRemoveFromCart,
+  useClearCart,
   type UICartItem 
 } from '@/store/app-store';
+import { useShopifyCartIntegration } from '@/lib/shopify-cart-integration';
+import { formatPrice } from '@minimall/core';
 
 interface EnhancedCartDrawerProps {
   shopDomain: string;
@@ -29,8 +32,11 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
   const cart = useCart();
   const updateQuantity = useUpdateQuantity();
   const removeFromCart = useRemoveFromCart();
+  const clearCart = useClearCart();
+  const shopifyCart = useShopifyCartIntegration(shopDomain);
   
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const handleQuantityUpdate = (itemId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -41,19 +47,51 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
   };
 
   const handleCheckout = async () => {
+    if (cart.items.length === 0) return;
+
     setIsCheckingOut(true);
     
-    // Simulate checkout preparation
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Redirect to Shopify checkout
-    const checkoutUrl = `https://${shopDomain}/cart`;
-    window.open(checkoutUrl, '_blank');
-    
-    setIsCheckingOut(false);
+    try {
+      // Get optimized checkout URL from Shopify integration
+      const checkoutUrl = await shopifyCart.getCheckoutUrl(cart.items);
+      
+      if (checkoutUrl) {
+        console.log('Redirecting to checkout:', checkoutUrl);
+        window.open(checkoutUrl, '_blank');
+      } else {
+        console.error('Failed to get checkout URL');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+    } finally {
+      setIsCheckingOut(false);
+    }
   };
 
-  const formatPrice = (price: number) => `$${price.toFixed(2)}`;
+  const handleClearCart = async () => {
+    clearCart();
+    await shopifyCart.clearCart();
+  };
+
+  const handleSyncWithShopify = async () => {
+    if (cart.items.length === 0) return;
+
+    setIsSyncing(true);
+    try {
+      const success = await shopifyCart.syncCart(cart.items);
+      if (success) {
+        console.log('Cart synced with Shopify');
+      } else {
+        console.warn('Failed to sync cart with Shopify');
+      }
+    } catch (error) {
+      console.error('Cart sync error:', error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const formatCartPrice = (priceInCents: number) => formatPrice(priceInCents / 100);
 
   return (
     <SidePanel
@@ -76,14 +114,32 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
           
           <div className="flex items-center justify-between text-sm text-gray-600">
             <span>{cart.totalItems} {cart.totalItems === 1 ? 'item' : 'items'}</span>
-            {cart.totalItems > 0 && (
-              <button 
-                onClick={() => {/* Clear cart functionality */}}
-                className="text-red-600 hover:text-red-700 font-medium"
-              >
-                Clear all
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {cart.totalItems > 0 && (
+                <button 
+                  onClick={handleSyncWithShopify}
+                  disabled={isSyncing}
+                  className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 flex items-center gap-1"
+                >
+                  {isSyncing ? (
+                    <>
+                      <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    'Sync with Shopify'
+                  )}
+                </button>
+              )}
+              {cart.totalItems > 0 && (
+                <button 
+                  onClick={handleClearCart}
+                  className="text-red-600 hover:text-red-700 font-medium"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
           </div>
         </motion.div>
 
@@ -145,7 +201,7 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
             <div className="space-y-2">
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal</span>
-                <span>{formatPrice(cart.totalPrice)}</span>
+                <span>{formatCartPrice(cart.totalPrice)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Shipping</span>
@@ -153,7 +209,7 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
               </div>
               <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
                 <span>Total</span>
-                <span>{formatPrice(cart.totalPrice)}</span>
+                <span>{formatCartPrice(cart.totalPrice)}</span>
               </div>
             </div>
 
@@ -180,7 +236,7 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
                 </>
               ) : (
                 <>
-                  Checkout {formatPrice(cart.totalPrice)}
+                  Checkout {formatCartPrice(cart.totalPrice)}
                   <ArrowRight size={18} />
                 </>
               )}
@@ -274,7 +330,7 @@ function CartItem({ item, index, onQuantityUpdate, onRemove }: CartItemProps) {
         
         {/* Price */}
         <div className="mt-2 font-semibold text-gray-900">
-          ${(item.price * item.quantity).toFixed(2)}
+          {formatPrice(item.price * item.quantity)}
         </div>
       </div>
 

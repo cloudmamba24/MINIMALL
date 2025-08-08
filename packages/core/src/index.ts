@@ -4,8 +4,23 @@ export * from "./types";
 // Export all utilities
 export * from "./utils";
 
+// Export additional Shopify utilities from transformer
+export { 
+  getOptionValues, 
+  findVariantByOptions, 
+  calculateDiscountPercentage,
+  transformProduct,
+  optimizeShopifyImageUrl,
+  formatShopifyPrice,
+  centsToDisplay
+} from "./services/shopify-transformer";
+
 // Export R2 service
 export * from "./r2";
+
+// Export Shopify services
+export * from "./services/shopify-storefront";
+export * from "./services/shopify-transformer";
 
 // Version info
 export const VERSION = "0.1.0";

@@ -1,42 +1,20 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import { Minus, Plus, Heart, Star, ArrowLeft } from 'lucide-react';
+import { Minus, Plus, Heart, Star } from 'lucide-react';
 import Image from 'next/image';
 import { SidePanel } from '@/components/ui/enhanced-modal';
 import { useModalRouter } from '@/hooks/use-modal-router';
-import { animationPresets, animationTokens } from '@/lib/animation-tokens';
+import { animationPresets } from '@/lib/animation-tokens';
 import { useAddToCart } from '@/store/app-store';
-
-// Mock product data - enhanced version
-const mockProducts = {
-  'prod_abc': {
-    id: 'prod_abc',
-    title: 'Essential Tee',
-    price: 29.00,
-    compareAtPrice: 39.00,
-    images: [
-      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop&sat=-100',
-      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop&hue=30',
-    ],
-    description: 'A comfortable and stylish essential tee made from 100% organic cotton. Perfect for everyday wear with a relaxed fit that works for any occasion.',
-    variants: {
-      size: ['XS', 'S', 'M', 'L', 'XL'],
-      color: ['Black', 'White', 'Gray', 'Navy']
-    },
-    inStock: true,
-    rating: 4.5,
-    reviewCount: 124,
-    features: [
-      '100% Organic Cotton',
-      'Pre-shrunk',
-      'Sustainable Production',
-      'Machine Washable'
-    ]
-  },
-} as const;
+import { useShopifyProduct, useShopDomain } from '@/hooks/use-shopify-product';
+import { 
+  getOptionValues, 
+  findVariantByOptions, 
+  calculateDiscountPercentage, 
+  formatPrice 
+} from '@minimall/core';
 
 /**
  * Enhanced Product Quick View
@@ -47,51 +25,120 @@ const mockProducts = {
 export function EnhancedProductQuickView() {
   const { modalState, closeModal } = useModalRouter('product');
   const addToCart = useAddToCart();
+  const shopDomain = useShopDomain();
+  
+  const productId = modalState.data.id;
+  const { product, loading, error } = useShopifyProduct(productId, shopDomain);
   
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState('M');
-  const [selectedColor, setSelectedColor] = useState('Black');
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  const productId = modalState.data.id;
-  const product = productId ? mockProducts[productId as keyof typeof mockProducts] : null;
+  // Initialize selected options when product loads
+  useEffect(() => {
+    if (product && product.variants.length > 0) {
+      const firstVariant = product.variants[0];
+      if (firstVariant) {
+        const options: Record<string, string> = {};
+        firstVariant.selectedOptions.forEach((option: { name: string; value: string }) => {
+          options[option.name] = option.value;
+        });
+        setSelectedOptions(options);
+      }
+    }
+  }, [product]);
+
+  // Find selected variant based on current options
+  const selectedVariant = product && Object.keys(selectedOptions).length > 0
+    ? findVariantByOptions(product, selectedOptions)
+    : product?.variants[0];
 
   const handleAddToCart = async () => {
-    if (!product) return;
+    if (!product || !selectedVariant) return;
     
     setIsAddingToCart(true);
     
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
+    const optionsString = selectedVariant.selectedOptions
+      .map((opt: { name: string; value: string }) => opt.value)
+      .join(' / ');
+    
     addToCart({
-      id: `${product.id}-${selectedSize}-${selectedColor}`,
+      id: `${product.id}-${selectedVariant.id}`,
       productId: product.id,
-      variantId: `${selectedSize}-${selectedColor}`,
+      variantId: selectedVariant.id,
       title: product.title,
-      price: product.price * 100, // Convert to cents
+      price: Math.round(parseFloat(selectedVariant.price.amount) * 100), // Convert to cents
       quantity,
-      image: product.images[0],
+      image: selectedVariant.image?.url || product.images[0]?.url || '',
       variant: {
-        title: `${selectedColor} / ${selectedSize}`,
-        selectedOptions: [
-          { name: 'Color', value: selectedColor },
-          { name: 'Size', value: selectedSize },
-        ],
+        title: optionsString,
+        selectedOptions: selectedVariant.selectedOptions,
       },
-      size: selectedSize,
-      color: selectedColor,
     });
     
     setIsAddingToCart(false);
   };
 
+  const handleOptionChange = (optionName: string, value: string) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [optionName]: value
+    }));
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <SidePanel
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        width="lg"
+        pushContent={true}
+      >
+        <div className="space-y-6 animate-pulse">
+          <div className="aspect-square bg-gray-200 rounded-xl" />
+          <div className="space-y-3">
+            <div className="h-6 bg-gray-200 rounded" />
+            <div className="h-4 bg-gray-200 rounded w-3/4" />
+            <div className="h-8 bg-gray-200 rounded w-1/2" />
+          </div>
+        </div>
+      </SidePanel>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <SidePanel
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        width="lg"
+        pushContent={true}
+      >
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="text-red-500 mb-2">Error loading product</div>
+            <div className="text-sm text-gray-500">{error}</div>
+          </div>
+        </div>
+      </SidePanel>
+    );
+  }
+
   if (!product) return null;
 
-  const discount = product.compareAtPrice ? 
-    Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100) : 0;
+  const currentPrice = selectedVariant?.price?.amount ? parseFloat(selectedVariant.price.amount) : 0;
+  const compareAtPrice = selectedVariant?.compareAtPrice?.amount ? parseFloat(selectedVariant.compareAtPrice.amount) : 0;
+  const discount = compareAtPrice > 0 ? calculateDiscountPercentage(compareAtPrice, currentPrice) : 0;
+  
+  // Get unique option names and values
+  const optionNames = [...new Set(product.variants.flatMap(v => v.selectedOptions.map(o => o.name)))];
 
   return (
     <SidePanel
@@ -115,8 +162,8 @@ export function EnhancedProductQuickView() {
                 {...animationPresets.crossFade}
               >
                 <Image
-                  src={product.images[selectedImage] || product.images[0] || '/placeholder.jpg'}
-                  alt={product.title}
+                  src={product.images[selectedImage]?.url || product.images[0]?.url || '/placeholder.jpg'}
+                  alt={product.images[selectedImage]?.altText || product.title}
                   fill
                   className="object-cover"
                 />
@@ -142,7 +189,7 @@ export function EnhancedProductQuickView() {
             <div className="flex gap-3">
               {product.images.map((image, index) => (
                 <motion.button
-                  key={index}
+                  key={image.id || index}
                   onClick={() => setSelectedImage(index)}
                   className={`
                     relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors
@@ -152,8 +199,8 @@ export function EnhancedProductQuickView() {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Image
-                    src={image}
-                    alt={`${product.title} ${index + 1}`}
+                    src={image.url}
+                    alt={image.altText || `${product.title} ${index + 1}`}
                     fill
                     className="object-cover"
                   />
@@ -176,22 +223,19 @@ export function EnhancedProductQuickView() {
               {product.title}
             </h2>
             
+            {/* Reviews would come from a separate API or be part of product data */}
             <div className="flex items-center gap-2 mb-3">
               <div className="flex items-center">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
                     size={16}
-                    className={
-                      i < Math.floor(product.rating) 
-                        ? 'text-yellow-400 fill-yellow-400' 
-                        : 'text-gray-300'
-                    }
+                    className={i < 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}
                   />
                 ))}
               </div>
               <span className="text-sm text-gray-600">
-                {product.rating} ({product.reviewCount} reviews)
+                4.0 (24 reviews)
               </span>
             </div>
           </div>
@@ -199,12 +243,12 @@ export function EnhancedProductQuickView() {
           {/* Price */}
           <div className="flex items-center gap-3">
             <span className="text-3xl font-bold text-gray-900">
-              ${product.price.toFixed(2)}
+              {formatPrice(currentPrice)}
             </span>
-            {product.compareAtPrice && (
+            {compareAtPrice > 0 && discount > 0 && (
               <>
                 <span className="text-xl text-gray-500 line-through">
-                  ${product.compareAtPrice.toFixed(2)}
+                  {formatPrice(compareAtPrice)}
                 </span>
                 <span className="px-2 py-1 bg-red-100 text-red-700 text-sm font-medium rounded">
                   {discount}% OFF
@@ -218,21 +262,22 @@ export function EnhancedProductQuickView() {
             {product.description}
           </p>
 
-          {/* Features */}
-          <div className="grid grid-cols-2 gap-2">
-            {product.features.map((feature, index) => (
-              <motion.div
-                key={feature}
-                className="flex items-center text-sm text-gray-600"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 + (index * 0.1) }}
-              >
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-2" />
-                {feature}
-              </motion.div>
-            ))}
-          </div>
+          {/* Tags as Features */}
+          {product.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {product.tags.slice(0, 6).map((tag, index) => (
+                <motion.span
+                  key={tag}
+                  className="px-2 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 + (index * 0.1) }}
+                >
+                  {tag}
+                </motion.span>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* Variant Selection */}
@@ -242,57 +287,37 @@ export function EnhancedProductQuickView() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.3 }}
         >
-          {/* Size Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Size: {selectedSize}
-            </label>
-            <div className="flex gap-2">
-              {product.variants.size.map((size) => (
-                <motion.button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`
-                    px-4 py-2 border rounded-lg font-medium transition-colors
-                    ${selectedSize === size
-                      ? 'border-black bg-black text-white'
-                      : 'border-gray-300 text-gray-900 hover:border-gray-400'
-                    }
-                  `}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {size}
-                </motion.button>
-              ))}
-            </div>
-          </div>
-
-          {/* Color Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Color: {selectedColor}
-            </label>
-            <div className="flex gap-2">
-              {product.variants.color.map((color) => (
-                <motion.button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={`
-                    px-4 py-2 border rounded-lg font-medium transition-colors
-                    ${selectedColor === color
-                      ? 'border-black bg-black text-white'
-                      : 'border-gray-300 text-gray-900 hover:border-gray-400'
-                    }
-                  `}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {color}
-                </motion.button>
-              ))}
-            </div>
-          </div>
+          {optionNames.map((optionName) => {
+            const optionValues = getOptionValues(product, optionName);
+            const selectedValue = selectedOptions[optionName];
+            
+            return (
+              <div key={optionName}>
+                <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {optionName}: {selectedValue}
+                </label>
+                <div className="flex gap-2 flex-wrap">
+                  {optionValues.map((value: string) => (
+                    <motion.button
+                      key={value}
+                      onClick={() => handleOptionChange(optionName, value)}
+                      className={`
+                        px-4 py-2 border rounded-lg font-medium transition-colors
+                        ${selectedValue === value
+                          ? 'border-black bg-black text-white'
+                          : 'border-gray-300 text-gray-900 hover:border-gray-400'
+                        }
+                      `}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {value}
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
 
           {/* Quantity Selection */}
           <div>
@@ -333,25 +358,27 @@ export function EnhancedProductQuickView() {
         >
           <motion.button
             onClick={handleAddToCart}
-            disabled={isAddingToCart}
+            disabled={isAddingToCart || !selectedVariant?.availableForSale}
             className={`
               w-full py-4 px-6 rounded-xl font-semibold text-white transition-colors
-              ${isAddingToCart 
+              ${isAddingToCart || !selectedVariant?.availableForSale
                 ? 'bg-gray-400 cursor-not-allowed' 
                 : 'bg-black hover:bg-gray-800'
               }
             `}
-            whileHover={!isAddingToCart ? { scale: 1.02 } : {}}
-            whileTap={!isAddingToCart ? { scale: 0.98 } : {}}
-            animate={isAddingToCart ? animationPresets.addToCart.animate : {}}
+            whileHover={!isAddingToCart && selectedVariant?.availableForSale ? { scale: 1.02 } : {}}
+            whileTap={!isAddingToCart && selectedVariant?.availableForSale ? { scale: 0.98 } : {}}
+            animate={isAddingToCart ? animationPresets.addToCart?.animate : {}}
           >
             {isAddingToCart ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 Adding to Cart...
               </div>
+            ) : !selectedVariant?.availableForSale ? (
+              'Out of Stock'
             ) : (
-              `Add to Cart • $${(product.price * quantity).toFixed(2)}`
+              `Add to Cart • ${formatPrice(currentPrice * quantity)}`
             )}
           </motion.button>
         </motion.div>

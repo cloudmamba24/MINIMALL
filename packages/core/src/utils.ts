@@ -33,7 +33,102 @@ export function generateConfigId(): string {
   return result;
 }
 
-export function createDefaultSiteConfig(shopDomain: string): SiteConfig {
+/**
+ * Create enhanced site config with real Shopify data
+ */
+export async function createEnhancedSiteConfig(
+  shopDomain: string,
+  accessToken?: string
+): Promise<SiteConfig> {
+  // Import Shopify services dynamically to avoid circular dependencies
+  const { createShopifyStorefrontService } = await import('./services/shopify-storefront');
+  const { transformProduct } = await import('./services/shopify-transformer');
+  
+  let realProducts: any[] = [];
+  
+  // Fetch real products if we have access token
+  if (accessToken) {
+    try {
+      const shopifyService = createShopifyStorefrontService(shopDomain, accessToken);
+      
+      // Fetch first 8 products for the demo
+      const searchResult = await shopifyService.searchProducts('*', 8);
+      realProducts = searchResult.products.map(transformProduct);
+      
+      console.log(`Loaded ${realProducts.length} products from Shopify`);
+    } catch (error) {
+      console.warn('Failed to load Shopify products, using mock data:', error);
+    }
+  }
+  
+  // Use real products or fallback to mock
+  const productsToUse = realProducts.length > 0 ? realProducts.slice(0, 4) : [];
+  
+  return createSiteConfigWithProducts(shopDomain, productsToUse);
+}
+
+/**
+ * Create site config with provided products (real or mock)
+ */
+function createSiteConfigWithProducts(shopDomain: string, products: any[]): SiteConfig {
+  // Generate mock products if none provided
+  const mockProducts = [
+    {
+      id: 'product-1',
+      title: 'Essential Tee',
+      handle: 'essential-tee',
+      images: [{ url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop' }],
+      priceRange: { minVariantPrice: { amount: '29.00', currencyCode: 'USD' } },
+    },
+    {
+      id: 'product-2', 
+      title: 'Vintage Jacket',
+      handle: 'vintage-jacket',
+      images: [{ url: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop' }],
+      priceRange: { minVariantPrice: { amount: '89.00', currencyCode: 'USD' } },
+    },
+    {
+      id: 'product-3',
+      title: 'Classic Jeans', 
+      handle: 'classic-jeans',
+      images: [{ url: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop' }],
+      priceRange: { minVariantPrice: { amount: '65.00', currencyCode: 'USD' } },
+    },
+    {
+      id: 'product-4',
+      title: 'Statement Sneakers',
+      handle: 'statement-sneakers', 
+      images: [{ url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop' }],
+      priceRange: { minVariantPrice: { amount: '125.00', currencyCode: 'USD' } },
+    },
+  ];
+  
+  const finalProducts = products.length > 0 ? products : mockProducts;
+  
+  // Create product items for the config
+  const productItems = finalProducts.map((product, index) => ({
+    id: product.id,
+    title: product.title,
+    card: [
+      'product' as const,
+      {
+        link: `https://${shopDomain}/products/${product.handle}`,
+        price: `$${parseFloat(product.priceRange.minVariantPrice.amount).toFixed(2)}`,
+        image: product.images[0]?.url || '',
+      },
+    ],
+    categoryType: ['single' as const, { children: [] }],
+    order: index + 1,
+    visible: true,
+  }));
+
+  return createBaseSiteConfig(shopDomain, productItems, finalProducts[0]);
+}
+
+/**
+ * Internal function to create site config structure
+ */
+function createBaseSiteConfig(shopDomain: string, productItems: any[], featuredProduct?: any): SiteConfig {
   return {
     id: generateConfigId(),
     version: "1.0.0",
@@ -71,9 +166,9 @@ export function createDefaultSiteConfig(shopDomain: string): SiteConfig {
                     },
                     productTags: [
                       {
-                        productId: "prod_abc",
+                        productId: featuredProduct?.id || "prod_abc",
                         position: { x: 0.6, y: 0.4 },
-                        label: "Essential Tee",
+                        label: featuredProduct?.title || "Essential Tee",
                       },
                     ],
                   },
@@ -147,72 +242,7 @@ export function createDefaultSiteConfig(shopDomain: string): SiteConfig {
         categoryType: [
           "products",
           {
-            children: [
-              {
-                id: "product-1",
-                title: "Essential Tee",
-                card: [
-                  "product",
-                  {
-                    link: `https://${shopDomain}/products/essential-tee`,
-                    price: "$29",
-                    image:
-                      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
-                  },
-                ],
-                categoryType: ["single", { children: [] }],
-                order: 1,
-                visible: true,
-              },
-              {
-                id: "product-2",
-                title: "Vintage Jacket",
-                card: [
-                  "product",
-                  {
-                    link: `https://${shopDomain}/products/vintage-jacket`,
-                    price: "$89",
-                    image:
-                      "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop",
-                  },
-                ],
-                categoryType: ["single", { children: [] }],
-                order: 2,
-                visible: true,
-              },
-              {
-                id: "product-3",
-                title: "Classic Jeans",
-                card: [
-                  "product",
-                  {
-                    link: `https://${shopDomain}/products/classic-jeans`,
-                    price: "$65",
-                    image:
-                      "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop",
-                  },
-                ],
-                categoryType: ["single", { children: [] }],
-                order: 3,
-                visible: true,
-              },
-              {
-                id: "product-4",
-                title: "Statement Sneakers",
-                card: [
-                  "product",
-                  {
-                    link: `https://${shopDomain}/products/statement-sneakers`,
-                    price: "$125",
-                    image:
-                      "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop",
-                  },
-                ],
-                categoryType: ["single", { children: [] }],
-                order: 4,
-                visible: true,
-              },
-            ],
+            children: productItems,
             products: [],
             displayType: "grid",
             itemsPerRow: 2,
@@ -341,6 +371,13 @@ export function createDefaultSiteConfig(shopDomain: string): SiteConfig {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+}
+
+/**
+ * Legacy synchronous function for backward compatibility
+ */
+export function createDefaultSiteConfig(shopDomain: string): SiteConfig {
+  return createSiteConfigWithProducts(shopDomain, []);
 }
 
 // Category utilities

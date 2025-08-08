@@ -1,31 +1,16 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
 import { X, Minus, Plus, Star, Heart } from 'lucide-react';
 import { useModals, useCloseProductQuickView, useAddToCart } from '@/store/app-store';
-
-// Mock product data - this would come from Shopify API in production
-const mockProducts = {
-  'prod_abc': {
-    id: 'prod_abc',
-    title: 'Essential Tee',
-    price: 29.00,
-    compareAtPrice: 39.00,
-    images: [
-      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop&sat=-100',
-    ],
-    description: 'A comfortable and stylish essential tee made from 100% organic cotton. Perfect for everyday wear.',
-    variants: {
-      size: ['XS', 'S', 'M', 'L', 'XL'],
-      color: ['Black', 'White', 'Gray', 'Navy']
-    },
-    inStock: true,
-    rating: 4.5,
-    reviews: 127
-  }
-};
+import { useShopifyProduct, useShopDomain } from '@/hooks/use-shopify-product';
+import { 
+  getOptionValues, 
+  findVariantByOptions, 
+  calculateDiscountPercentage, 
+  formatPrice 
+} from '@minimall/core';
 
 interface ProductQuickViewProps {
   animationSettings?: {
@@ -37,272 +22,321 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
   const modals = useModals();
   const closeProductQuickView = useCloseProductQuickView();
   const addToCart = useAddToCart();
+  const shopDomain = useShopDomain();
+
+  const productId = modals.productQuickView.productId;
+  const { product, loading, error } = useShopifyProduct(productId || '', shopDomain);
 
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState('M');
-  const [selectedColor, setSelectedColor] = useState('Black');
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  // Get product data (mock for now)
-  const product = modals.productQuickView.productId 
-    ? mockProducts[modals.productQuickView.productId as keyof typeof mockProducts]
-    : null;
-
-  const slideInDuration = (animationSettings?.slideIn ?? 400) / 1000;
-
-  // Close modal on escape key
+  // Initialize selected options when product loads
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closeProductQuickView();
+    if (product && product.variants.length > 0) {
+      const firstVariant = product.variants[0];
+      if (firstVariant) {
+        const options: Record<string, string> = {};
+        firstVariant.selectedOptions.forEach((option: { name: string; value: string }) => {
+          options[option.name] = option.value;
+        });
+        setSelectedOptions(options);
       }
-    };
-
-    if (modals.productQuickView.isOpen) {
-      document.addEventListener('keydown', handleEscape);
     }
+  }, [product]);
 
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [modals.productQuickView.isOpen, closeProductQuickView]);
+  // Find selected variant based on current options
+  const selectedVariant = product && Object.keys(selectedOptions).length > 0
+    ? findVariantByOptions(product, selectedOptions)
+    : product?.variants[0];
 
   const handleAddToCart = async () => {
-    if (!product) return;
+    if (!product || !selectedVariant) return;
 
     setIsAddingToCart(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Add to cart
-    addToCart({
-      id: `${product.id}_${selectedSize}_${selectedColor}`,
-      productId: product.id,
-      variantId: `${product.id}_${selectedSize}_${selectedColor}`,
-      title: product.title,
-      price: Math.round(product.price * 100), // Convert to cents
-      quantity,
-      ...(product.images[selectedImage] && { image: product.images[selectedImage] }),
-      variant: {
-        title: `${selectedSize} / ${selectedColor}`,
-        selectedOptions: [
-          { name: 'Size', value: selectedSize },
-          { name: 'Color', value: selectedColor }
-        ]
-      }
-    });
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-    setIsAddingToCart(false);
-    
-    // Auto-close after adding to cart
-    setTimeout(() => {
-      closeProductQuickView();
-    }, 1000);
+      const optionsString = selectedVariant.selectedOptions
+        .map((opt: { name: string; value: string }) => opt.value)
+        .join(' / ');
+
+      addToCart({
+        id: `${product.id}-${selectedVariant.id}`,
+        productId: product.id,
+        variantId: selectedVariant.id,
+        title: product.title,
+        price: Math.round(parseFloat(selectedVariant.price.amount) * 100),
+        quantity,
+        image: selectedVariant.image?.url || product.images[0]?.url || '',
+        variant: {
+          title: optionsString,
+          selectedOptions: selectedVariant.selectedOptions,
+        },
+      });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
-  if (!modals.productQuickView.isOpen || !product) return null;
+  const handleOptionChange = (optionName: string, value: string) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [optionName]: value
+    }));
+  };
+
+  if (!modals.productQuickView.isOpen) return null;
+
+  // Loading state
+  if (loading) {
+    return (
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+        >
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="animate-pulse space-y-4">
+              <div className="aspect-square bg-gray-200 rounded" />
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded" />
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
+
+  // Error state
+  if (error || !product) {
+    return (
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+        >
+          <div className="bg-white rounded-lg p-6 w-full max-w-md text-center">
+            <p className="text-red-500 mb-2">Error loading product</p>
+            <p className="text-sm text-gray-500">{error}</p>
+            <button
+              onClick={closeProductQuickView}
+              className="mt-4 px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
+            >
+              Close
+            </button>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
+
+  const currentPrice = selectedVariant?.price?.amount ? parseFloat(selectedVariant.price.amount) : 0;
+  const compareAtPrice = selectedVariant?.compareAtPrice?.amount ? parseFloat(selectedVariant.compareAtPrice.amount) : 0;
+  const discount = compareAtPrice > 0 ? calculateDiscountPercentage(compareAtPrice, currentPrice) : 0;
+  
+  // Get unique option names
+  const optionNames = [...new Set(product.variants.flatMap(v => v.selectedOptions.map(o => o.name)))];
+
+  const slideInDuration = animationSettings?.slideIn || 300;
 
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
-        transition={{ 
-          type: 'spring',
-          stiffness: 300,
-          damping: 30,
-          duration: slideInDuration 
-        }}
-        className="fixed right-0 top-0 h-full w-full max-w-md bg-black text-white z-50 overflow-y-auto border-l border-gray-800"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-800">
-          <h2 className="font-medium">Quick View</h2>
-          <button
-            onClick={closeProductQuickView}
-            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Product Images */}
-        <div className="relative">
-          <img
-            src={product.images[selectedImage]}
-            alt={product.title}
-            className="w-full h-80 object-cover"
-          />
-          
-          {/* Image thumbnails */}
-          {product.images.length > 1 && (
-            <div className="absolute bottom-4 left-4 flex gap-2">
-              {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`w-12 h-12 rounded border-2 overflow-hidden ${
-                    selectedImage === index ? 'border-white' : 'border-gray-600'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${product.title} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Wishlist button */}
-          <button className="absolute top-4 right-4 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors">
-            <Heart className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Product Info */}
-        <div className="p-6 space-y-6">
-          {/* Title and Price */}
-          <div>
-            <h1 className="text-xl font-semibold mb-2">{product.title}</h1>
-            <div className="flex items-center gap-3">
-              <span className="text-2xl font-bold">${product.price.toFixed(2)}</span>
-              {product.compareAtPrice && product.compareAtPrice > product.price && (
-                <span className="text-lg text-gray-400 line-through">
-                  ${product.compareAtPrice.toFixed(2)}
-                </span>
-              )}
-            </div>
-            
-            {/* Rating */}
-            <div className="flex items-center gap-2 mt-2">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-4 h-4 ${
-                      i < Math.floor(product.rating) 
-                        ? 'text-yellow-400 fill-yellow-400' 
-                        : 'text-gray-600'
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="text-sm text-gray-400">
-                {product.rating} ({product.reviews} reviews)
-              </span>
-            </div>
-          </div>
-
-          {/* Stock Status */}
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${product.inStock ? 'bg-green-400' : 'bg-red-400'}`} />
-            <span className="text-sm text-gray-300">
-              {product.inStock ? 'In Stock' : 'Out of Stock'}
-            </span>
-          </div>
-
-          {/* Size Selection */}
-          <div>
-            <h3 className="font-medium mb-3">Size: {selectedSize}</h3>
-            <div className="flex flex-wrap gap-2">
-              {product.variants.size.map((size) => (
-                <button
-                  key={size}
-                  onClick={() => setSelectedSize(size)}
-                  className={`px-4 py-2 border rounded transition-colors ${
-                    selectedSize === size
-                      ? 'border-white bg-white text-black'
-                      : 'border-gray-600 hover:border-gray-400'
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Color Selection */}
-          <div>
-            <h3 className="font-medium mb-3">Color: {selectedColor}</h3>
-            <div className="flex flex-wrap gap-2">
-              {product.variants.color.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => setSelectedColor(color)}
-                  className={`px-4 py-2 border rounded transition-colors ${
-                    selectedColor === color
-                      ? 'border-white bg-white text-black'
-                      : 'border-gray-600 hover:border-gray-400'
-                  }`}
-                >
-                  {color}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Quantity */}
-          <div>
-            <h3 className="font-medium mb-3">Quantity</h3>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1}
-                className="w-10 h-10 border border-gray-600 rounded flex items-center justify-center hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-              <span className="w-12 text-center font-medium">{quantity}</span>
-              <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="w-10 h-10 border border-gray-600 rounded flex items-center justify-center hover:border-gray-400 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Add to Cart Button */}
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={handleAddToCart}
-            disabled={!product.inStock || isAddingToCart}
-            className={`w-full py-4 rounded font-medium transition-all ${
-              isAddingToCart
-                ? 'bg-green-600 text-white'
-                : product.inStock
-                ? 'bg-white text-black hover:bg-gray-100'
-                : 'bg-gray-800 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            {isAddingToCart ? 'Added to Cart ✓' : 
-             !product.inStock ? 'Out of Stock' : 
-             `Add to Cart - $${(product.price * quantity).toFixed(2)}`}
-          </motion.button>
-
-          {/* Description */}
-          <div className="pt-4 border-t border-gray-800">
-            <h3 className="font-medium mb-2">Description</h3>
-            <p className="text-gray-300 text-sm leading-relaxed">
-              {product.description}
-            </p>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Backdrop for mobile */}
-      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
         onClick={closeProductQuickView}
-        className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-      />
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          transition={{ duration: slideInDuration / 1000 }}
+          className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="flex flex-col md:flex-row h-full">
+            {/* Images Section */}
+            <div className="md:w-1/2 relative">
+              <button
+                onClick={closeProductQuickView}
+                className="absolute top-4 right-4 z-10 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors"
+              >
+                <X size={16} />
+              </button>
+
+              {/* Main Image */}
+              <div className="aspect-square relative bg-gray-100">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={selectedImage}
+                    src={product.images[selectedImage]?.url || product.images[0]?.url || '/placeholder.jpg'}
+                    alt={product.images[selectedImage]?.altText || product.title}
+                    className="w-full h-full object-cover"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  />
+                </AnimatePresence>
+
+                {/* Like Button */}
+                <button className="absolute top-4 left-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center">
+                  <Heart size={18} className="text-gray-600" />
+                </button>
+              </div>
+
+              {/* Thumbnail Images */}
+              {product.images.length > 1 && (
+                <div className="flex gap-2 p-4 overflow-x-auto">
+                  {product.images.map((image, index) => (
+                    <button
+                      key={image.id || index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 ${
+                        selectedImage === index ? 'border-black' : 'border-transparent'
+                      }`}
+                    >
+                      <img
+                        src={image.url}
+                        alt={image.altText || `${product.title} ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Product Details */}
+            <div className="md:w-1/2 p-6 overflow-y-auto">
+              <div className="space-y-6">
+                {/* Title and Rating */}
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">{product.title}</h2>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={16}
+                          className={i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-600">4.0 (24 reviews)</span>
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl font-bold">
+                    {formatPrice(currentPrice)}
+                  </span>
+                  {compareAtPrice > 0 && discount > 0 && (
+                    <>
+                      <span className="text-xl text-gray-500 line-through">
+                        {formatPrice(compareAtPrice)}
+                      </span>
+                      <span className="px-2 py-1 bg-red-100 text-red-700 text-sm font-medium rounded">
+                        {discount}% OFF
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* Description */}
+                <p className="text-gray-600">{product.description}</p>
+
+                {/* Options */}
+                <div className="space-y-4">
+                  {optionNames.map((optionName) => {
+                    const optionValues = getOptionValues(product, optionName);
+                    const selectedValue = selectedOptions[optionName];
+                    
+                    return (
+                      <div key={optionName}>
+                        <label className="block text-sm font-medium mb-2">
+                          {optionName}: {selectedValue}
+                        </label>
+                        <div className="flex gap-2 flex-wrap">
+                          {optionValues.map((value: string) => (
+                            <button
+                              key={value}
+                              onClick={() => handleOptionChange(optionName, value)}
+                              className={`px-3 py-2 border rounded font-medium text-sm ${
+                                selectedValue === value
+                                  ? 'border-black bg-black text-white'
+                                  : 'border-gray-300 hover:border-gray-400'
+                              }`}
+                            >
+                              {value}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Quantity */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Quantity</label>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400"
+                      >
+                        <Minus size={16} />
+                      </button>
+                      <span className="w-12 text-center font-medium">{quantity}</span>
+                      <button
+                        onClick={() => setQuantity(quantity + 1)}
+                        className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400"
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Add to Cart */}
+                <button
+                  onClick={handleAddToCart}
+                  disabled={isAddingToCart || !selectedVariant?.availableForSale}
+                  className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
+                    isAddingToCart || !selectedVariant?.availableForSale
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-black hover:bg-gray-800'
+                  }`}
+                >
+                  {isAddingToCart ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Adding to Cart...
+                    </div>
+                  ) : !selectedVariant?.availableForSale ? (
+                    'Out of Stock'
+                  ) : (
+                    `Add to Cart • ${formatPrice(currentPrice * quantity)}`
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
     </AnimatePresence>
   );
 }
