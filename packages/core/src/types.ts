@@ -190,14 +190,14 @@ export interface PerformanceMetrics {
 }
 
 // API Response types
-export interface APIResponse<T = any> {
+export interface APIResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
   timestamp: string;
 }
 
-export interface PaginatedResponse<T = any> extends APIResponse<T> {
+export interface PaginatedResponse<T = unknown> extends APIResponse<T> {
   pagination: {
     page: number;
     limit: number;
@@ -235,7 +235,7 @@ export interface ShopifyWebhookPayload {
   event: string;
   shop_domain: string;
   created_at: string;
-  data: any;
+  data: unknown;
 }
 
 // Image processing types
@@ -265,7 +265,7 @@ export interface AnalyticsEvent {
   userId?: string;
   sessionId: string;
   timestamp: Date;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   userAgent?: string;
   referrer?: string;
   utm?: {
@@ -301,7 +301,7 @@ export interface AnalyticsSummary {
 export interface AppError {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
   timestamp: Date;
   stack?: string;
   userId?: string;
@@ -366,7 +366,7 @@ export interface ProductTag {
 export interface ClickAction {
   type: "modal" | "quickview" | "link" | "cart";
   target?: string; // postId, productId, or URL
-  data?: any; // Additional action data
+  data?: unknown; // Additional action data
 }
 
 export interface HoverEffect {

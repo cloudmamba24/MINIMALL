@@ -213,7 +213,6 @@ class R2Client {
   async generatePresignedUrl(key: string, expiresIn = 3600): Promise<string> {
     const timestamp = new Date().toISOString().replace(/[:-]|\.\d{3}/g, "");
     const dateStamp = timestamp.slice(0, 8);
-    const expiration = Math.floor(Date.now() / 1000) + expiresIn;
 
     const url = new URL(`/${this.config.bucketName}/${key}`, this.config.endpoint);
     url.searchParams.set("X-Amz-Algorithm", "AWS4-HMAC-SHA256");
@@ -268,7 +267,7 @@ export class R2ConfigService {
 
     if (!endpoint || !accessKeyId || !secretAccessKey || !bucketName) {
       throw new Error(
-        `Missing required R2 environment variables. Required: R2_ENDPOINT, R2_ACCESS_KEY, R2_SECRET, R2_BUCKET_NAME`
+        "Missing required R2 environment variables. Required: R2_ENDPOINT, R2_ACCESS_KEY, R2_SECRET, R2_BUCKET_NAME"
       );
     }
 
@@ -318,7 +317,7 @@ export class R2ConfigService {
   async generateUploadUrl(
     shopId: string,
     filename: string,
-    contentType: string,
+    _contentType: string,
     expiresIn = 3600
   ): Promise<{ url: string; key: string }> {
     const key = `uploads/${shopId}/${Date.now()}-${filename}`;
@@ -345,15 +344,15 @@ export function getR2Service(): R2ConfigService {
 
 // Backward compatibility
 export const r2Service = new Proxy({} as R2ConfigService, {
-  get(target, prop) {
+  get(_target, prop) {
     return getR2Service()[prop as keyof R2ConfigService];
-  }
+  },
 });
 
 // Cache utilities for edge functions
 export class EdgeCache {
   private static instance: EdgeCache;
-  private cache = new Map<string, { data: any; expires: number }>();
+  private cache = new Map<string, { data: unknown; expires: number }>();
 
   static getInstance(): EdgeCache {
     if (!EdgeCache.instance) {

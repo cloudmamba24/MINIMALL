@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 
 interface Tab {
   id: string;
@@ -16,11 +16,18 @@ interface LinkTabsProps {
 }
 
 export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
-  // Filter content tabs (exclude action tabs)
-  const contentTabs = tabs.filter(tab => !tab.isAction);
-  const actionTabs = tabs.filter(tab => tab.isAction);
+  // Memoize filtered tabs to prevent re-creation on every render
+  const contentTabs = useMemo(() => tabs.filter(tab => !tab.isAction), [tabs]);
+  const actionTabs = useMemo(() => tabs.filter(tab => tab.isAction), [tabs]);
   
-  const [activeTab, setActiveTab] = useState(contentTabs[0]?.id || '');
+  const [activeTab, setActiveTab] = useState('');
+  
+  // Set initial active tab only once when contentTabs are available
+  useEffect(() => {
+    if (!activeTab && contentTabs.length > 0 && contentTabs[0]) {
+      setActiveTab(contentTabs[0].id);
+    }
+  }, [contentTabs, activeTab]);
 
   const handleTabClick = (tab: Tab) => {
     if (tab.isAction && tab.onClick) {

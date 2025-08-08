@@ -3,19 +3,23 @@ import { AppProvider } from '@shopify/polaris';
 import { Provider as AppBridgeProvider } from '@shopify/app-bridge-react';
 import '@shopify/polaris/build/esm/styles.css';
 import '../styles/globals.css';
-
-// App Bridge configuration
-const appBridgeConfig = {
-  apiKey: process.env.NEXT_PUBLIC_SHOPIFY_API_KEY!,
-  host: typeof window !== 'undefined' 
-    ? new URLSearchParams(window.location.search).get('host') || ''
-    : '',
-  forceRedirect: true,
-};
+import { useState, useEffect } from 'react';
 
 export default function AdminApp({ Component, pageProps }: AppProps) {
-  // Handle the case where we're not in a Shopify iframe yet
-  if (typeof window !== 'undefined' && !appBridgeConfig.host) {
+  const [appBridgeConfig, setAppBridgeConfig] = useState<any>(null);
+
+  useEffect(() => {
+    const host = new URLSearchParams(window.location.search).get('host');
+    if (host) {
+      setAppBridgeConfig({
+        apiKey: process.env.NEXT_PUBLIC_SHOPIFY_API_KEY!,
+        host,
+        forceRedirect: true,
+      });
+    }
+  }, []);
+
+  if (!appBridgeConfig) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

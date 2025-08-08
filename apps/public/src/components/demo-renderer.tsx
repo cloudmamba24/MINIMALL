@@ -28,7 +28,7 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
     openPostModal(postId, post);
   }, [openPostModal]);
   
-  // Stable memoized tabs creation - removing problematic JSX dependencies
+  // Stable memoized tabs creation - avoid JSX in dependencies
   const tabs = useMemo(() => {
     const categoryTabs = config.categories.map(category => ({
       id: category.id,
@@ -47,6 +47,30 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
     return [...categoryTabs, cartTab];
   }, [config.categories, cart.totalItems, openCartDrawer]);
 
+  // Memoize rendered tabs to prevent infinite re-renders
+  const renderedTabs = useMemo(() => 
+    tabs.map(tab => {
+      const renderedTab: any = {
+        id: tab.id,
+        label: tab.label,
+        content: tab.content && typeof tab.content === 'object' && 'children' in tab.content 
+          ? <CategoryContent key={tab.id} category={tab.content} openPostModal={handlePostModal} />
+          : null,
+      };
+      
+      if ('onClick' in tab) {
+        renderedTab.onClick = tab.onClick;
+      }
+      
+      if ('isAction' in tab) {
+        renderedTab.isAction = tab.isAction;
+      }
+      
+      return renderedTab;
+    }), 
+    [tabs, handlePostModal]
+  );
+
   return (
     <div className={`min-h-screen bg-black text-white ${className}`}>
       <div className="container mx-auto px-4 py-8 max-w-lg">
@@ -60,17 +84,7 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
         />
         
         {/* Tab Navigation & Content */}
-        <LinkTabs 
-          tabs={tabs.map(tab => ({
-            id: tab.id,
-            label: tab.label,
-            content: tab.content && typeof tab.content === 'object' && 'children' in tab.content 
-              ? <CategoryContent key={tab.id} category={tab.content} openPostModal={handlePostModal} />
-              : null,
-            ...(('onClick' in tab) && { onClick: tab.onClick }),
-            ...(('isAction' in tab) && { isAction: tab.isAction })
-          }))} 
-        />
+        <LinkTabs tabs={renderedTabs} />
       </div>
 
       {/* Modals */}

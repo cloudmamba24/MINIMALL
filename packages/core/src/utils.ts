@@ -1,3 +1,4 @@
+/// <reference path="./global.d.ts" />
 import type {
   CartItem,
   Category,
@@ -508,7 +509,7 @@ export function measureLCP(): Promise<number> {
 
     new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      const lastEntry = entries[entries.length - 1] as any;
+      const lastEntry = entries[entries.length - 1] as PerformanceEntry;
       resolve(lastEntry.startTime);
     }).observe({ entryTypes: ["largest-contentful-paint"] });
 
@@ -526,7 +527,9 @@ export function measureFID(): Promise<number> {
 
     new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      const lastEntry = entries[entries.length - 1] as any;
+      const lastEntry = entries[entries.length - 1] as PerformanceEntry & {
+        processingStart: number;
+      };
       resolve(lastEntry.processingStart - lastEntry.startTime);
     }).observe({ entryTypes: ["first-input"] });
 
@@ -541,13 +544,14 @@ export function createPerformanceMetrics(configId: string): Partial<PerformanceM
   }
 
   const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
+  const connection = (navigator as Navigator & { connection: NetworkInformation }).connection;
 
   return {
     configId,
     ttfb: navigation ? navigation.responseStart - navigation.requestStart : 0,
     timestamp: new Date(),
     userAgent: navigator.userAgent,
-    connection: (navigator as any).connection?.effectiveType,
+    connection: connection?.effectiveType,
   };
 }
 
@@ -621,7 +625,7 @@ export function sanitizeHtml(html: string): string {
 }
 
 // Debounce utility for performance
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
