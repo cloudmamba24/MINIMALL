@@ -58,7 +58,8 @@ export default function HomePage() {
 
         <div className="mt-8 text-sm text-gray-500">
           <p>
-            Demo: <a href="/g/demo" className="text-blue-600 hover:underline">/g/demo</a>
+            Demo: <a href="/g/demo" className="text-blue-600 hover:underline">/g/demo</a> |{' '}
+            <span className="text-gray-400">v1.0.0</span>
           </p>
         </div>
       </div>
