@@ -22,6 +22,22 @@ export const revalidate = 300; // 5 minutes
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { configId } = await params;
   
+  // Handle demo config directly without R2
+  if (configId === 'demo') {
+    const demoConfig = createDefaultSiteConfig('demo-shop.myshopify.com');
+    return {
+      title: demoConfig.settings.seo?.title || `${demoConfig.settings.shopDomain} - Link in Bio`,
+      description: demoConfig.settings.seo?.description || 'Ultra-fast link-in-bio storefront',
+      keywords: demoConfig.settings.seo?.keywords,
+      robots: 'index, follow',
+      openGraph: {
+        title: demoConfig.settings.seo?.title || `${demoConfig.settings.shopDomain} - Link in Bio`,
+        description: demoConfig.settings.seo?.description || 'Ultra-fast link-in-bio storefront',
+        type: 'website',
+      },
+    };
+  }
+  
   try {
     const config = await r2Service.getConfig(configId);
     
