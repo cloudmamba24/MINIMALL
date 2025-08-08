@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { CartItem, Category } from '@minimall/core';
+import type { CartItem, Category, ShopifyProduct } from '@minimall/core';
 
 // Cart item with UI-specific properties
 export interface UICartItem extends CartItem {
@@ -18,7 +18,7 @@ export interface ModalState {
   productQuickView: {
     isOpen: boolean;
     productId: string | null;
-    product: any | null; // Will be enhanced with Shopify product type
+    product: ShopifyProduct | null;
   };
   cartDrawer: {
     isOpen: boolean;
@@ -47,7 +47,7 @@ export interface AppState {
   modals: ModalState;
   openPostModal: (postId: string, post: Category) => void;
   closePostModal: () => void;
-  openProductQuickView: (productId: string, product?: any) => void;
+  openProductQuickView: (productId: string, product?: ShopifyProduct | null) => void;
   closeProductQuickView: () => void;
   openCartDrawer: () => void;
   closeCartDrawer: () => void;

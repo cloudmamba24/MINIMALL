@@ -30,7 +30,7 @@ export interface CardDetails {
   price?: string;
   overlay?: {
     text: string;
-    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+    position: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center";
   };
   // Enhanced for interactivity
   productTags?: ProductTag[];
@@ -41,7 +41,7 @@ export interface CardDetails {
 export interface CategoryTypeDetails {
   children: Category[];
   products?: Product[];
-  displayType?: 'grid' | 'slider' | 'list';
+  displayType?: "grid" | "slider" | "list";
   itemsPerRow?: number;
 }
 
@@ -85,7 +85,7 @@ export interface Theme {
   textColor?: string;
   accentColor?: string;
   fontFamily?: string;
-  borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  borderRadius?: "none" | "sm" | "md" | "lg" | "xl";
 }
 
 export interface SEOSettings {
@@ -212,7 +212,7 @@ export interface AdminUser {
   email: string;
   name: string;
   shopDomain: string;
-  role: 'owner' | 'admin' | 'editor';
+  role: "owner" | "admin" | "editor";
   permissions: string[];
   createdAt: string;
   updatedAt: string;
@@ -243,8 +243,8 @@ export interface ImageProcessingOptions {
   width?: number;
   height?: number;
   quality?: number;
-  format?: 'webp' | 'avif' | 'jpg' | 'png';
-  fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
+  format?: "webp" | "avif" | "jpg" | "png";
+  fit?: "cover" | "contain" | "fill" | "inside" | "outside";
 }
 
 export interface OptimizedImage {
@@ -279,7 +279,7 @@ export interface AnalyticsEvent {
 
 export interface AnalyticsSummary {
   configId: string;
-  period: 'day' | 'week' | 'month';
+  period: "day" | "week" | "month";
   pageViews: number;
   uniqueVisitors: number;
   bounceRate: number;
@@ -330,47 +330,47 @@ export type RequiredKeys<T, K extends keyof T> = T & Required<Pick<T, K>>;
 export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 // Event types for real-time updates
-export type ConfigEvent = 
-  | { type: 'CONFIG_CREATED'; configId: string; data: SiteConfig }
-  | { type: 'CONFIG_UPDATED'; configId: string; data: Partial<SiteConfig> }
-  | { type: 'CONFIG_PUBLISHED'; configId: string; versionId: string }
-  | { type: 'CONFIG_DELETED'; configId: string };
+export type ConfigEvent =
+  | { type: "CONFIG_CREATED"; configId: string; data: SiteConfig }
+  | { type: "CONFIG_UPDATED"; configId: string; data: Partial<SiteConfig> }
+  | { type: "CONFIG_PUBLISHED"; configId: string; versionId: string }
+  | { type: "CONFIG_DELETED"; configId: string };
 
-export type CartEvent = 
-  | { type: 'ITEM_ADDED'; cartId: string; item: CartItem }
-  | { type: 'ITEM_REMOVED'; cartId: string; itemId: string }
-  | { type: 'ITEM_UPDATED'; cartId: string; itemId: string; updates: Partial<CartItem> }
-  | { type: 'CART_CLEARED'; cartId: string };
+export type CartEvent =
+  | { type: "ITEM_ADDED"; cartId: string; item: CartItem }
+  | { type: "ITEM_REMOVED"; cartId: string; itemId: string }
+  | { type: "ITEM_UPDATED"; cartId: string; itemId: string; updates: Partial<CartItem> }
+  | { type: "CART_CLEARED"; cartId: string };
 
 // Constants
-export const CARD_TYPES = ['image', 'video', 'product', 'grid'] as const;
-export const CATEGORY_TYPES = ['feed', 'products', 'gallery'] as const;
-export const DISPLAY_TYPES = ['grid', 'slider', 'list'] as const;
-export const THEME_RADIUS_OPTIONS = ['none', 'sm', 'md', 'lg', 'xl'] as const;
+export const CARD_TYPES = ["image", "video", "product", "grid"] as const;
+export const CATEGORY_TYPES = ["feed", "products", "gallery"] as const;
+export const DISPLAY_TYPES = ["grid", "slider", "list"] as const;
+export const THEME_RADIUS_OPTIONS = ["none", "sm", "md", "lg", "xl"] as const;
 
-export type CardType = typeof CARD_TYPES[number];
-export type CategoryType = typeof CATEGORY_TYPES[number];
-export type DisplayType = typeof DISPLAY_TYPES[number];
-export type ThemeRadius = typeof THEME_RADIUS_OPTIONS[number];
+export type CardType = (typeof CARD_TYPES)[number];
+export type CategoryType = (typeof CATEGORY_TYPES)[number];
+export type DisplayType = (typeof DISPLAY_TYPES)[number];
+export type ThemeRadius = (typeof THEME_RADIUS_OPTIONS)[number];
 
 // Enhanced interactivity types
 export interface ProductTag {
   productId: string;
   position: {
     x: number; // 0-1 relative position
-    y: number; // 0-1 relative position  
+    y: number; // 0-1 relative position
   };
   label?: string;
 }
 
 export interface ClickAction {
-  type: 'modal' | 'quickview' | 'link' | 'cart';
+  type: "modal" | "quickview" | "link" | "cart";
   target?: string; // postId, productId, or URL
   data?: any; // Additional action data
 }
 
 export interface HoverEffect {
-  type: 'zoom' | 'fade' | 'slide' | 'overlay';
+  type: "zoom" | "fade" | "slide" | "overlay";
   intensity?: number; // 0-1 scale
   duration?: number; // milliseconds
 }

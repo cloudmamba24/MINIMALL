@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { r2Service } from '@minimall/core';
+import { R2ConfigService } from '@minimall/core';
 
 export async function GET() {
   try {
@@ -16,8 +16,14 @@ export async function GET() {
     let error = null;
 
     try {
-      // Try to fetch a non-existent config to test connection
-      await r2Service.getConfig('test-connection-' + Date.now());
+      // Only test connection if all env vars are present
+      if (Object.values(envVars).every(Boolean)) {
+        const r2Service = new R2ConfigService();
+        // Try to fetch a non-existent config to test connection
+        await r2Service.getConfig('test-connection-' + Date.now());
+      } else {
+        connectionTest = 'SKIPPED - Missing environment variables';
+      }
     } catch (testError) {
       if (testError instanceof Error) {
         if (testError.message.includes('Object not found')) {

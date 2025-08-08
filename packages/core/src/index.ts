@@ -1,15 +1,15 @@
 // Export all types
-export * from './types';
+export * from "./types";
 
 // Export all utilities
-export * from './utils';
+export * from "./utils";
 
 // Export R2 service
-export * from './r2';
+export * from "./r2";
 
 // Version info
-export const VERSION = '0.1.0';
-export const PACKAGE_NAME = '@minimall/core';
+export const VERSION = "0.1.0";
+export const PACKAGE_NAME = "@minimall/core";
 
 // Constants
 export const PERFORMANCE_BUDGETS = {
@@ -34,11 +34,11 @@ export const DEFAULT_GRID_SIZES = {
 } as const;
 
 export const SUPPORTED_IMAGE_FORMATS = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/avif',
-  'image/svg+xml',
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+  "image/svg+xml",
 ] as const;
 
 export const MAX_FILE_SIZES = {
