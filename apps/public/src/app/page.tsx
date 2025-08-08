@@ -61,12 +61,20 @@ export default function HomePage() {
             <h3 className="font-semibold text-gray-800 mb-2">Test Links:</h3>
             <div className="space-y-2 text-sm">
               <div>
+                <a href="/test" className="text-purple-600 hover:underline font-mono">/test</a>
+                <span className="text-gray-500 ml-2">- Static routing test</span>
+              </div>
+              <div>
                 <a href="/g/demo" className="text-blue-600 hover:underline font-mono">/g/demo</a>
                 <span className="text-gray-500 ml-2">- Demo configuration (should always work)</span>
               </div>
               <div>
                 <a href="/g/test" className="text-blue-600 hover:underline font-mono">/g/test</a>
                 <span className="text-gray-500 ml-2">- Test R2 connection (will show debug info)</span>
+              </div>
+              <div>
+                <a href="/api/health" className="text-orange-600 hover:underline font-mono">/api/health</a>
+                <span className="text-gray-500 ml-2">- App health check (JSON)</span>
               </div>
               <div>
                 <a href="/api/debug/r2" className="text-green-600 hover:underline font-mono">/api/debug/r2</a>

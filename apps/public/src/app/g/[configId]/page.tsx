@@ -48,7 +48,11 @@ export default async function SitePage({ params, searchParams }: PageProps) {
   const { configId } = await params;
   const { draft } = await searchParams;
 
+  // Debug logging
+  console.log('[SitePage] Route accessed:', { configId, draft, timestamp: new Date().toISOString() });
+
   if (!configId) {
+    console.log('[SitePage] No configId provided, showing 404');
     notFound();
   }
 
