@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import Image from 'next/image';
 import { cn, ShoppingCart, Heart, ExternalLink } from '@minimall/ui';
 import { formatPrice } from '@minimall/core';
@@ -65,7 +65,7 @@ export function ProductCard({
   const [isPending, startTransition] = useTransition();
 
   // Mock product data - replace with real Shopify API call
-  useState(() => {
+  useEffect(() => {
     const mockProduct: ShopifyProduct = {
       id: productId,
       title: 'Sample Product',
@@ -105,11 +105,13 @@ export function ProductCard({
     };
 
     // Simulate API delay
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setProduct(mockProduct);
       setLoading(false);
     }, 100);
-  });
+
+    return () => clearTimeout(timer);
+  }, [productId, variantId]);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();

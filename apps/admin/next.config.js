@@ -50,10 +50,14 @@ const nextConfig = {
               "connect-src 'self' https://*.shopify.com https://*.myshopify.com",
             ].join('; ')
           },
-          // CORS for API routes
+          // CORS for API routes (will be handled dynamically in API routes)
           {
-            key: 'Access-Control-Allow-Origin',
-            value: 'https://*.myshopify.com'
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, PUT, DELETE, OPTIONS'
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization'
           }
         ],
       }

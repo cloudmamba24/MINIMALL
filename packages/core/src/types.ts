@@ -20,7 +20,11 @@ export interface Category {
 }
 
 export interface CardDetails {
-  link?: any;
+  link?: {
+    url: string;
+    target?: '_blank' | '_self';
+    title?: string;
+  } | null;
   shape?: string[];
   imageUrl?: string;
   videoUrl?: string;
