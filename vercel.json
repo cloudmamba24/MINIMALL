@@ -1,5 +1,6 @@
 {
+  "buildCommand": "turbo build --filter=@minimall/public",
   "installCommand": "npm install",
-  "buildCommand": "turbo run build --filter=@minimall/public",
-  "outputDirectory": "apps/public/.next"
+  "outputDirectory": "apps/public/.next",
+  "framework": null
 }
