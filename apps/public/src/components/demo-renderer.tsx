@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { type SiteConfig, type Category } from '@minimall/core';
 import { BrandHeader } from './brand/brand-header';
 import { LinkTabs } from './navigation/link-tabs';
@@ -21,8 +22,8 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
   const { openPostModal, openCartDrawer } = useModalActions();
   const cart = useCart();
   
-  // Create tabs from categories with cart button
-  const tabs = [
+  // Create tabs from categories with cart button - memoized to prevent infinite loops
+  const tabs = useMemo(() => [
     ...config.categories.map(category => ({
       id: category.id,
       label: category.title,
@@ -36,7 +37,7 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
       onClick: openCartDrawer,
       isAction: true,
     }
-  ];
+  ], [config.categories, cart.totalItems, openPostModal, openCartDrawer]);
 
   return (
     <div className={`min-h-screen bg-black text-white ${className}`}>
