@@ -11,9 +11,7 @@
     "lint:fix": "biome check . --apply",
     "type-check": "tsc --noEmit"
   },
-  "files": [
-    "dist/**"
-  ],
+  "files": ["dist/**"],
   "dependencies": {
     "zod": "^3.24.1"
   },

@@ -22,6 +22,10 @@
   },
   "packageManager": "npm@11.5.2",
   "engines": {
-    "node": ">=22.0.0"
+    "node": "20.x"
+  },
+  "dependencies": {
+    "framer-motion": "^12.23.12",
+    "zustand": "^5.0.7"
   }
 }

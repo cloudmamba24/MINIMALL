@@ -20,22 +20,28 @@ export interface Category {
 }
 
 export interface CardDetails {
-  link?: {
-    url: string;
-    target?: '_blank' | '_self';
-    title?: string;
-  } | null;
+  link?: string | null;
   shape?: string[];
+  image?: string;
   imageUrl?: string;
   videoUrl?: string;
   description?: string;
   products?: Product[];
+  price?: string;
+  overlay?: {
+    text: string;
+    position: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center";
+  };
+  // Enhanced for interactivity
+  productTags?: ProductTag[];
+  clickAction?: ClickAction;
+  hoverEffect?: HoverEffect;
 }
 
 export interface CategoryTypeDetails {
   children: Category[];
   products?: Product[];
-  displayType?: 'grid' | 'slider' | 'list';
+  displayType?: "grid" | "slider" | "list";
   itemsPerRow?: number;
 }
 
@@ -50,6 +56,27 @@ export interface Settings {
   shopDomain: string;
   theme: Theme;
   seo?: SEOSettings;
+  brand?: BrandSettings;
+  animations?: AnimationSettings;
+  modals?: ModalSettings;
+}
+
+export interface BrandSettings {
+  name: string;
+  subtitle?: string;
+  logo?: string;
+  socialLinks?: {
+    instagram?: string;
+    twitter?: string;
+    pinterest?: string;
+    tiktok?: string;
+    youtube?: string;
+    website?: string;
+  };
+  ctaButton?: {
+    text: string;
+    url: string;
+  };
 }
 
 export interface Theme {
@@ -58,7 +85,7 @@ export interface Theme {
   textColor?: string;
   accentColor?: string;
   fontFamily?: string;
-  borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  borderRadius?: "none" | "sm" | "md" | "lg" | "xl";
 }
 
 export interface SEOSettings {
@@ -185,7 +212,7 @@ export interface AdminUser {
   email: string;
   name: string;
   shopDomain: string;
-  role: 'owner' | 'admin' | 'editor';
+  role: "owner" | "admin" | "editor";
   permissions: string[];
   createdAt: string;
   updatedAt: string;
@@ -216,8 +243,8 @@ export interface ImageProcessingOptions {
   width?: number;
   height?: number;
   quality?: number;
-  format?: 'webp' | 'avif' | 'jpg' | 'png';
-  fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
+  format?: "webp" | "avif" | "jpg" | "png";
+  fit?: "cover" | "contain" | "fill" | "inside" | "outside";
 }
 
 export interface OptimizedImage {
@@ -252,7 +279,7 @@ export interface AnalyticsEvent {
 
 export interface AnalyticsSummary {
   configId: string;
-  period: 'day' | 'week' | 'month';
+  period: "day" | "week" | "month";
   pageViews: number;
   uniqueVisitors: number;
   bounceRate: number;
@@ -303,25 +330,82 @@ export type RequiredKeys<T, K extends keyof T> = T & Required<Pick<T, K>>;
 export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 // Event types for real-time updates
-export type ConfigEvent = 
-  | { type: 'CONFIG_CREATED'; configId: string; data: SiteConfig }
-  | { type: 'CONFIG_UPDATED'; configId: string; data: Partial<SiteConfig> }
-  | { type: 'CONFIG_PUBLISHED'; configId: string; versionId: string }
-  | { type: 'CONFIG_DELETED'; configId: string };
+export type ConfigEvent =
+  | { type: "CONFIG_CREATED"; configId: string; data: SiteConfig }
+  | { type: "CONFIG_UPDATED"; configId: string; data: Partial<SiteConfig> }
+  | { type: "CONFIG_PUBLISHED"; configId: string; versionId: string }
+  | { type: "CONFIG_DELETED"; configId: string };
 
-export type CartEvent = 
-  | { type: 'ITEM_ADDED'; cartId: string; item: CartItem }
-  | { type: 'ITEM_REMOVED'; cartId: string; itemId: string }
-  | { type: 'ITEM_UPDATED'; cartId: string; itemId: string; updates: Partial<CartItem> }
-  | { type: 'CART_CLEARED'; cartId: string };
+export type CartEvent =
+  | { type: "ITEM_ADDED"; cartId: string; item: CartItem }
+  | { type: "ITEM_REMOVED"; cartId: string; itemId: string }
+  | { type: "ITEM_UPDATED"; cartId: string; itemId: string; updates: Partial<CartItem> }
+  | { type: "CART_CLEARED"; cartId: string };
 
 // Constants
-export const CARD_TYPES = ['image', 'video', 'product', 'grid'] as const;
-export const CATEGORY_TYPES = ['feed', 'products', 'gallery'] as const;
-export const DISPLAY_TYPES = ['grid', 'slider', 'list'] as const;
-export const THEME_RADIUS_OPTIONS = ['none', 'sm', 'md', 'lg', 'xl'] as const;
+export const CARD_TYPES = ["image", "video", "product", "grid"] as const;
+export const CATEGORY_TYPES = ["feed", "products", "gallery"] as const;
+export const DISPLAY_TYPES = ["grid", "slider", "list"] as const;
+export const THEME_RADIUS_OPTIONS = ["none", "sm", "md", "lg", "xl"] as const;
 
-export type CardType = typeof CARD_TYPES[number];
-export type CategoryType = typeof CATEGORY_TYPES[number];
-export type DisplayType = typeof DISPLAY_TYPES[number];
-export type ThemeRadius = typeof THEME_RADIUS_OPTIONS[number];
+export type CardType = (typeof CARD_TYPES)[number];
+export type CategoryType = (typeof CATEGORY_TYPES)[number];
+export type DisplayType = (typeof DISPLAY_TYPES)[number];
+export type ThemeRadius = (typeof THEME_RADIUS_OPTIONS)[number];
+
+// Enhanced interactivity types
+export interface ProductTag {
+  productId: string;
+  position: {
+    x: number; // 0-1 relative position
+    y: number; // 0-1 relative position
+  };
+  label?: string;
+}
+
+export interface ClickAction {
+  type: "modal" | "quickview" | "link" | "cart";
+  target?: string; // postId, productId, or URL
+  data?: any; // Additional action data
+}
+
+export interface HoverEffect {
+  type: "zoom" | "fade" | "slide" | "overlay";
+  intensity?: number; // 0-1 scale
+  duration?: number; // milliseconds
+}
+
+export interface AnimationSettings {
+  transitions: {
+    duration: number; // Default transition duration in ms
+    easing: string; // CSS easing function
+  };
+  modals: {
+    fadeIn: number;
+    slideIn: number;
+    backdrop: {
+      opacity: number;
+      blur: number;
+    };
+  };
+  hover: {
+    scale: number; // Default hover scale
+    duration: number;
+  };
+}
+
+export interface ModalSettings {
+  backdrop: {
+    blur: boolean;
+    opacity: number;
+  };
+  positioning: {
+    centered: boolean;
+    offsetY?: number;
+  };
+  behavior: {
+    closeOnBackdrop: boolean;
+    closeOnEscape: boolean;
+    preventScroll: boolean;
+  };
+}

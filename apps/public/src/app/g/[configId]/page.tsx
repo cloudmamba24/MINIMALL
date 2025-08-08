@@ -21,6 +21,22 @@ export const revalidate = 300; // 5 minutes
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { configId } = await params;
   
+  // Handle demo config directly without R2
+  if (configId === 'demo') {
+    const demoConfig = createDefaultSiteConfig('demo-shop.myshopify.com');
+    return {
+      title: demoConfig.settings.seo?.title || `${demoConfig.settings.shopDomain} - Link in Bio`,
+      description: demoConfig.settings.seo?.description || 'Ultra-fast link-in-bio storefront',
+      keywords: demoConfig.settings.seo?.keywords,
+      robots: 'index, follow',
+      openGraph: {
+        title: demoConfig.settings.seo?.title || `${demoConfig.settings.shopDomain} - Link in Bio`,
+        description: demoConfig.settings.seo?.description || 'Ultra-fast link-in-bio storefront',
+        type: 'website',
+      },
+    };
+  }
+  
   try {
     const config = await r2Service.getConfig(configId);
     
@@ -48,20 +64,44 @@ export default async function SitePage({ params, searchParams }: PageProps) {
   const { configId } = await params;
   const { draft } = await searchParams;
 
+  // Debug logging
+  console.log('[SitePage] Route accessed:', { configId, draft, timestamp: new Date().toISOString() });
+
   if (!configId) {
+    console.log('[SitePage] No configId provided, showing 404');
     notFound();
   }
 
+  // Handle demo config directly without R2 - use interactive DemoRenderer
+  if (configId === 'demo') {
+    const demoConfig = createDefaultSiteConfig('demo-shop.myshopify.com');
+    demoConfig.id = configId;
+    
+    // Import DemoRenderer dynamically to avoid SSR issues
+    const { DemoRenderer } = await import('@/components/demo-renderer');
+    
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 mb-4">
+          <strong>Demo Mode:</strong> This is a sample configuration showcasing platform features
+        </div>
+        <DemoRenderer config={demoConfig} />
+      </div>
+    );
+  }
+
+  // For non-demo configs, try R2 first
   try {
-    // Fetch config from R2
+    console.log(`Attempting to fetch config for: ${configId}${draft ? ` (version: ${draft})` : ''}`);
     const config = await r2Service.getConfig(configId, draft);
+    console.log(`Successfully fetched config for: ${configId}`);
     
     return <Renderer config={config} />;
   } catch (error) {
-    console.error('Failed to fetch config:', error);
+    console.error(`Failed to fetch config for ${configId}:`, error);
     
-    // Show demo config for specific demo ID or in development
-    if (configId === 'demo' || process.env.NODE_ENV === 'development') {
+    // In development, show demo config with error notice
+    if (process.env.NODE_ENV === 'development') {
       const demoConfig = createDefaultSiteConfig('demo-shop.myshopify.com');
       demoConfig.id = configId;
       
@@ -72,22 +112,17 @@ export default async function SitePage({ params, searchParams }: PageProps) {
               <strong>Draft Mode:</strong> Viewing version {draft}
             </div>
           )}
-          {configId === 'demo' && (
-            <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 mb-4">
-              <strong>Demo Mode:</strong> This is a sample configuration showcasing platform features
-            </div>
-          )}
-          {configId !== 'demo' && (
-            <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 mb-4">
-              <strong>Development Mode:</strong> Showing demo configuration since R2 config not found
-            </div>
-          )}
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 mb-4">
+            <strong>Development Mode:</strong> Config "{configId}" not found in R2. Showing demo configuration instead.
+            <br />
+            <small>Error: {error instanceof Error ? error.message : 'Unknown error'}</small>
+          </div>
           <Renderer config={demoConfig} />
         </div>
       );
     }
     
-    // Production: show 404 for non-demo configs
+    // Production: show 404 for non-demo configs that aren't found
     notFound();
   }
 }

@@ -14,7 +14,6 @@ export const metadata: Metadata = {
     default: 'Link in Bio',
   },
   description: 'Ultra-fast link-in-bio storefront',
-  viewport: 'width=device-width, initial-scale=1',
   robots: 'index, follow',
   authors: [{ name: 'Minimall' }],
   creator: 'Minimall',
@@ -39,7 +38,12 @@ export const metadata: Metadata = {
   },
 };
 
-export const runtime = 'edge';
+export function generateViewport() {
+  return {
+    width: 'device-width',
+    initialScale: 1,
+  };
+}
 
 export default function RootLayout({
   children,
