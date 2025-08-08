@@ -23,8 +23,8 @@ interface PageProps {
   }>;
 }
 
-// Edge runtime for global performance
-export const runtime = 'edge';
+// Use Node.js runtime for better compatibility with complex state management
+export const runtime = 'nodejs';
 
 // Enable static generation with ISR
 export const revalidate = 300; // 5 minutes

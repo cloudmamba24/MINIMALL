@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
 import { X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
-import { useModals, useModalActions, useCart, useCartActions } from '@/store/app-store';
+import { useModals, useCloseCartDrawer, useCart, useUpdateQuantity, useRemoveFromCart } from '@/store/app-store';
 
 interface CartDrawerProps {
   shopDomain: string;
@@ -14,9 +14,10 @@ interface CartDrawerProps {
 
 export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
   const modals = useModals();
-  const { closeCartDrawer } = useModalActions();
+  const closeCartDrawer = useCloseCartDrawer();
   const cart = useCart();
-  const { updateQuantity, removeFromCart } = useCartActions();
+  const updateQuantity = useUpdateQuantity();
+  const removeFromCart = useRemoveFromCart();
 
   const slideInDuration = (animationSettings?.slideIn ?? 400) / 1000;
 

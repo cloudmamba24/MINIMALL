@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { X, Minus, Plus, Star, Heart } from 'lucide-react';
-import { useModals, useModalActions, useCartActions } from '@/store/app-store';
+import { useModals, useCloseProductQuickView, useAddToCart } from '@/store/app-store';
 
 // Mock product data - this would come from Shopify API in production
 const mockProducts = {
@@ -35,8 +35,8 @@ interface ProductQuickViewProps {
 
 export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
   const modals = useModals();
-  const { closeProductQuickView } = useModalActions();
-  const { addToCart } = useCartActions();
+  const closeProductQuickView = useCloseProductQuickView();
+  const addToCart = useAddToCart();
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState('M');

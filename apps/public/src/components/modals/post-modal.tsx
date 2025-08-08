@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
 import { X, ShoppingBag } from 'lucide-react';
-import { useModals, useModalActions } from '@/store/app-store';
+import { useModals, useClosePostModal, useOpenProductQuickView } from '@/store/app-store';
 import { ProductTag } from './product-tag';
 import type { Category } from '@minimall/core';
 
@@ -20,7 +20,8 @@ interface PostModalProps {
 
 export function PostModal({ post, animationSettings }: PostModalProps) {
   const modals = useModals();
-  const { closePostModal, openProductQuickView } = useModalActions();
+  const closePostModal = useClosePostModal();
+  const openProductQuickView = useOpenProductQuickView();
 
   // Close modal on escape key
   useEffect(() => {

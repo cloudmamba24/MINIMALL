@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useMemo } from 'react';
 import Image from 'next/image';
 import { cn, ShoppingCart, Heart, ExternalLink } from '@minimall/ui';
 import { formatPrice } from '@minimall/core';
@@ -64,46 +64,49 @@ export function ProductCard({
   const [isLiked, setIsLiked] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  // Mock product data - replace with real Shopify API call
-  useEffect(() => {
-    const mockProduct: ShopifyProduct = {
-      id: productId,
-      title: 'Sample Product',
-      handle: 'sample-product',
-      images: [
-        {
-          id: '1',
-          url: 'https://via.placeholder.com/400x400/ccc/999?text=Product+Image',
-          altText: 'Sample Product',
-        },
-      ],
-      variants: [
-        {
-          id: variantId || 'variant-1',
-          title: 'Default Title',
-          price: {
-            amount: '29.99',
-            currencyCode: 'USD',
-          },
-          compareAtPrice: {
-            amount: '39.99',
-            currencyCode: 'USD',
-          },
-          availableForSale: true,
-        },
-      ],
-      priceRange: {
-        minVariantPrice: {
-          amount: '29.99',
-          currencyCode: 'USD',
-        },
-        maxVariantPrice: {
-          amount: '29.99',
-          currencyCode: 'USD',
-        },
+  // Memoize mock product to prevent recreation on every render
+  const mockProduct = useMemo((): ShopifyProduct => ({
+    id: productId,
+    title: 'Sample Product',
+    handle: 'sample-product',
+    images: [
+      {
+        id: '1',
+        url: 'https://via.placeholder.com/400x400/ccc/999?text=Product+Image',
+        altText: 'Sample Product',
       },
-    };
+    ],
+    variants: [
+      {
+        id: variantId || 'variant-1',
+        title: 'Default Title',
+        price: {
+          amount: '29.99',
+          currencyCode: 'USD',
+        },
+        compareAtPrice: {
+          amount: '39.99',
+          currencyCode: 'USD',
+        },
+        availableForSale: true,
+      },
+    ],
+    priceRange: {
+      minVariantPrice: {
+        amount: '29.99',
+        currencyCode: 'USD',
+      },
+      maxVariantPrice: {
+        amount: '29.99',
+        currencyCode: 'USD',
+      },
+    },
+  }), [productId, variantId]);
 
+  // Load product with stable reference
+  useEffect(() => {
+    setLoading(true);
+    
     // Simulate API delay
     const timer = setTimeout(() => {
       setProduct(mockProduct);
@@ -111,7 +114,7 @@ export function ProductCard({
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [productId, variantId]);
+  }, [mockProduct]);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();

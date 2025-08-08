@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, memo } from 'react';
 import { type SiteConfig, type Category } from '@minimall/core';
 import { BrandHeader } from './brand/brand-header';
 import { LinkTabs } from './navigation/link-tabs';
@@ -17,6 +17,11 @@ interface DemoRendererProps {
 }
 
 export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
+  // Production debugging for infinite loops
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+    console.log('[DemoRenderer] Render with config ID:', config.id, 'timestamp:', Date.now());
+  }
+  
   const { settings } = config;
   const modals = useModals();
   const openPostModal = useOpenPostModal();
@@ -28,12 +33,12 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
     openPostModal(postId, post);
   }, [openPostModal]);
   
-  // Stable memoized tabs creation - avoid JSX in dependencies
+  // Ultra-stable tabs creation using config.id instead of categories array
   const tabs = useMemo(() => {
     const categoryTabs = config.categories.map(category => ({
       id: category.id,
       label: category.title,
-      content: category, // Pass category data instead of JSX
+      content: category,
     }));
     
     const cartTab = {
@@ -45,7 +50,7 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
     };
     
     return [...categoryTabs, cartTab];
-  }, [config.categories, cart.totalItems, openCartDrawer]);
+  }, [config.id, cart.totalItems, openCartDrawer]); // Use config.id instead of categories array
 
   // Memoize rendered tabs to prevent infinite re-renders
   const renderedTabs = useMemo(() => 
@@ -123,7 +128,7 @@ interface CategoryContentProps {
   openPostModal: (postId: string, post: Category) => void;
 }
 
-function CategoryContent({ category, openPostModal }: CategoryContentProps) {
+const CategoryContent = memo(function CategoryContent({ category, openPostModal }: CategoryContentProps) {
   const [, categoryTypeDetails] = category.categoryType;
   
   if (!category.children || category.children.length === 0) {
@@ -191,4 +196,4 @@ function CategoryContent({ category, openPostModal }: CategoryContentProps) {
       })}
     </ContentGrid>
   );
-}
+});

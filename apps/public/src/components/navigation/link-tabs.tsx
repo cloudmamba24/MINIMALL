@@ -16,6 +16,11 @@ interface LinkTabsProps {
 }
 
 export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
+  // Production debugging
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+    console.log('[LinkTabs] Render with tabs count:', tabs.length, 'timestamp:', Date.now());
+  }
+  
   // Memoize filtered tabs to prevent re-creation on every render
   const contentTabs = useMemo(() => tabs.filter(tab => !tab.isAction), [tabs]);
   const actionTabs = useMemo(() => tabs.filter(tab => tab.isAction), [tabs]);
