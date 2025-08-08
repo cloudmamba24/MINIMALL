@@ -1,6 +1,6 @@
 {
-  "buildCommand": "turbo build --filter=@minimall/public",
-  "installCommand": "npm install",
+  "buildCommand": "npx turbo build --filter=@minimall/public",
   "outputDirectory": "apps/public/.next",
-  "framework": null
+  "installCommand": "npm install",
+  "framework": "nextjs"
 }
