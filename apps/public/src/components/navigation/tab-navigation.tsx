@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@minimall/ui';
 import type { Category } from '@minimall/core';
 
@@ -14,9 +14,12 @@ export function TabNavigation({ categories, className, onTabChange }: TabNavigat
   const [activeTab, setActiveTab] = useState<string>('');
   const [isSticky, setIsSticky] = useState(false);
 
-  const visibleCategories = categories
-    .filter(category => category.visible !== false)
-    .sort((a, b) => (a.order || 0) - (b.order || 0));
+  const visibleCategories = useMemo(() => 
+    categories
+      .filter(category => category.visible !== false)
+      .sort((a, b) => (a.order || 0) - (b.order || 0)),
+    [categories]
+  );
 
   // Set initial active tab
   useEffect(() => {
