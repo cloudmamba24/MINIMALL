@@ -8,6 +8,18 @@ A high-performance, edge-first link-in-bio platform built specifically for Shopi
 - **🛒 Native Shopify Integration**: Direct cart and checkout flow integration
 - **📱 Mobile-First Design**: Responsive, app-like experience optimized for mobile
 - **🎨 JSON-Driven Rendering**: Instant config updates without code deployments
+
+## 🛠️ Troubleshooting
+
+Having deployment or configuration issues? Check our comprehensive troubleshooting guide:
+
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Detailed solutions for common issues
+- **Quick Debug**: Run `./scripts/debug-deployment.sh <your-vercel-url>` to test all routes
+
+### Common Issues
+- **All routes show 404**: Check [Deployment Issues](./TROUBLESHOOTING.md#deployment-issues) section
+- **Environment variables not working**: See [Environment Configuration](./TROUBLESHOOTING.md#environment-configuration)
+- **Build warnings**: Check [Build & Runtime Issues](./TROUBLESHOOTING.md#build--runtime-issues)
 - **🌐 Global Edge Distribution**: Powered by Cloudflare R2 and Vercel Edge Runtime
 - **⚙️ Embedded Admin**: Full configuration interface within Shopify admin
 
