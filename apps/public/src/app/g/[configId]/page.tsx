@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { r2Service, createDefaultSiteConfig } from '@minimall/core';
 import { Renderer } from '@/components/renderer';
+import { DemoRenderer } from '@/components/demo-renderer';
 
 interface PageProps {
   params: Promise<{
@@ -61,19 +62,7 @@ export default async function SitePage({ params, searchParams }: PageProps) {
     const demoConfig = createDefaultSiteConfig('demo-shop.myshopify.com');
     demoConfig.id = configId;
     
-    return (
-      <div className="min-h-screen bg-background">
-        {draft && (
-          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3">
-            <strong>Draft Mode:</strong> Viewing version {draft}
-          </div>
-        )}
-        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 mb-4">
-          <strong>Demo Mode:</strong> This is a sample configuration showcasing platform features
-        </div>
-        <Renderer config={demoConfig} />
-      </div>
-    );
+    return <DemoRenderer config={demoConfig} />;
   }
 
   // For non-demo configs, try R2 first

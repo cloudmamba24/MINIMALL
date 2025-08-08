@@ -39,27 +39,111 @@ export function createDefaultSiteConfig(shopDomain: string): SiteConfig {
     categories: [
       {
         id: 'instagram',
-        title: 'Instagram',
+        title: 'INSTAGRAM',
         card: ['grid', {
           link: null,
           shape: ['square'],
         }],
         categoryType: ['feed', {
-          children: [],
+          children: [
+            {
+              id: 'instagram-1',
+              title: 'Latest Post',
+              card: ['image', { 
+                image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=400&fit=crop',
+                clickAction: {
+                  type: 'modal',
+                  target: 'instagram-1'
+                },
+                hoverEffect: {
+                  type: 'zoom',
+                  intensity: 0.05,
+                  duration: 200
+                },
+                productTags: [
+                  {
+                    productId: 'prod_abc',
+                    position: { x: 0.6, y: 0.4 },
+                    label: 'Essential Tee'
+                  }
+                ]
+              }],
+              categoryType: ['single', { children: [] }],
+              order: 1,
+              visible: true,
+            },
+            {
+              id: 'instagram-2', 
+              title: 'Behind the Scenes',
+              card: ['image', { link: 'https://instagram.com/demo', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=400&fit=crop' }],
+              categoryType: ['single', { children: [] }],
+              order: 2,
+              visible: true,
+            },
+            {
+              id: 'instagram-3',
+              title: 'Style Guide',
+              card: ['image', { link: 'https://instagram.com/demo', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=400&fit=crop' }],
+              categoryType: ['single', { children: [] }],
+              order: 3,
+              visible: true,
+            },
+            {
+              id: 'instagram-4',
+              title: 'New Collection',
+              card: ['image', { link: 'https://instagram.com/demo', image: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=400&h=400&fit=crop' }],
+              categoryType: ['single', { children: [] }],
+              order: 4,
+              visible: true,
+            },
+          ],
           displayType: 'grid',
-          itemsPerRow: 3,
+          itemsPerRow: 2,
         }],
         order: 1,
         visible: true,
       },
       {
         id: 'shop',
-        title: 'Shop',
+        title: 'SHOP',
         card: ['product', {
           link: null,
         }],
         categoryType: ['products', {
-          children: [],
+          children: [
+            {
+              id: 'product-1',
+              title: 'Essential Tee',
+              card: ['product', { link: `https://${shopDomain}/products/essential-tee`, price: '$29', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop' }],
+              categoryType: ['single', { children: [] }],
+              order: 1,
+              visible: true,
+            },
+            {
+              id: 'product-2',
+              title: 'Vintage Jacket',
+              card: ['product', { link: `https://${shopDomain}/products/vintage-jacket`, price: '$89', image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop' }],
+              categoryType: ['single', { children: [] }],
+              order: 2,
+              visible: true,
+            },
+            {
+              id: 'product-3',
+              title: 'Classic Jeans',
+              card: ['product', { link: `https://${shopDomain}/products/classic-jeans`, price: '$65', image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop' }],
+              categoryType: ['single', { children: [] }],
+              order: 3,
+              visible: true,
+            },
+            {
+              id: 'product-4',
+              title: 'Statement Sneakers',
+              card: ['product', { link: `https://${shopDomain}/products/statement-sneakers`, price: '$125', image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop' }],
+              categoryType: ['single', { children: [] }],
+              order: 4,
+              visible: true,
+            },
+          ],
           products: [],
           displayType: 'grid',
           itemsPerRow: 2,
@@ -69,13 +153,30 @@ export function createDefaultSiteConfig(shopDomain: string): SiteConfig {
       },
       {
         id: 'lookbook',
-        title: 'Lookbook',
+        title: 'LOOKBOOK',
         card: ['image', {
           link: null,
           shape: ['landscape'],
         }],
         categoryType: ['gallery', {
-          children: [],
+          children: [
+            {
+              id: 'lookbook-1',
+              title: 'Spring Collection',
+              card: ['image', { link: null, image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&h=600&fit=crop', overlay: { text: 'SPRING 2024', position: 'center' } }],
+              categoryType: ['single', { children: [] }],
+              order: 1,
+              visible: true,
+            },
+            {
+              id: 'lookbook-2',
+              title: 'Urban Essentials',
+              card: ['image', { link: null, image: 'https://images.unsplash.com/photo-1506629905587-4b1d7673dab7?w=800&h=600&fit=crop', overlay: { text: 'URBAN', position: 'center' } }],
+              categoryType: ['single', { children: [] }],
+              order: 2,
+              visible: true,
+            },
+          ],
           displayType: 'slider',
         }],
         order: 3,
@@ -85,17 +186,64 @@ export function createDefaultSiteConfig(shopDomain: string): SiteConfig {
     settings: {
       checkoutLink: `https://${shopDomain}/cart`,
       shopDomain,
+      brand: {
+        name: 'DEMO.STORE',
+        subtitle: 'Interactive link in bio tool by maker',
+        socialLinks: {
+          instagram: 'https://instagram.com/demo',
+          twitter: 'https://twitter.com/demo',
+          pinterest: 'https://pinterest.com/demo',
+        },
+        ctaButton: {
+          text: 'Visit Demo.Store',
+          url: `https://${shopDomain}`,
+        },
+      },
       theme: {
-        primaryColor: '#000000',
-        backgroundColor: '#FFFFFF',
-        textColor: '#333333',
-        accentColor: '#6366F1',
+        primaryColor: '#FFFFFF',
+        backgroundColor: '#000000',
+        textColor: '#FFFFFF',
+        accentColor: '#666666',
         fontFamily: 'Inter',
-        borderRadius: 'md',
+        borderRadius: 'sm',
+      },
+      animations: {
+        transitions: {
+          duration: 300,
+          easing: 'cubic-bezier(0.25, 0.8, 0.25, 1)',
+        },
+        modals: {
+          fadeIn: 200,
+          slideIn: 400,
+          backdrop: {
+            opacity: 0.8,
+            blur: 4,
+          },
+        },
+        hover: {
+          scale: 1.05,
+          duration: 200,
+        },
+      },
+      modals: {
+        backdrop: {
+          blur: true,
+          opacity: 0.8,
+        },
+        positioning: {
+          centered: true,
+          offsetY: 0,
+        },
+        behavior: {
+          closeOnBackdrop: true,
+          closeOnEscape: true,
+          preventScroll: true,
+        },
       },
       seo: {
-        title: 'My Link in Bio',
-        description: 'Shop my curated collection',
+        title: 'DEMO.STORE - Link in Bio',
+        description: 'Interactive link in bio for fashion and lifestyle brands',
+        keywords: 'fashion, lifestyle, shopping, demo',
       },
     },
     createdAt: new Date().toISOString(),
