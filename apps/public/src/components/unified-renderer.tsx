@@ -4,6 +4,7 @@ import { type SiteConfig } from '@minimall/core/client';
 import { useRenderMode } from '@/hooks/use-mobile-detection';
 import { Renderer } from './renderer';
 import { InstagramRenderer } from './instagram-renderer';
+import { EnhancedProductQuickView } from './enhanced-product-quick-view';
 
 interface UnifiedRendererProps {
   config: SiteConfig;
@@ -33,11 +34,21 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
   switch (renderMode) {
     case 'instagram-native':
       // Use enhanced InstagramRenderer for mobile Instagram-native experience
-      return <InstagramRenderer config={config} className={className || undefined} />;
+      return (
+        <>
+          <InstagramRenderer config={config} className={className || undefined} />
+          <EnhancedProductQuickView />
+        </>
+      );
       
     case 'flexible':
     default:
       // Use existing Renderer for flexible desktop experience
-      return <Renderer config={config} className={className || undefined} />;
+      return (
+        <>
+          <Renderer config={config} className={className || undefined} />
+          <EnhancedProductQuickView />
+        </>
+      );
   }
 }
