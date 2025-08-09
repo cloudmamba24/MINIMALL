@@ -2,6 +2,7 @@
 
 import { Banner, Button, Card, LegacyStack, Page } from "@shopify/polaris";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 const errorMessages = {
   authentication_failed: "Authentication failed. Please try installing the app again.",
@@ -10,7 +11,7 @@ const errorMessages = {
   invalid_request: "Invalid request. Please check the installation link.",
 };
 
-export default function AuthErrorPage() {
+function AuthErrorContent() {
   const searchParams = useSearchParams();
   const error = searchParams?.get("error") as keyof typeof errorMessages;
 
@@ -46,5 +47,13 @@ export default function AuthErrorPage() {
         </Card>
       </LegacyStack>
     </Page>
+  );
+}
+
+export default function AuthErrorPage() {
+  return (
+    <Suspense fallback={<Page title="Loading..."><Card>Loading...</Card></Page>}>
+      <AuthErrorContent />
+    </Suspense>
   );
 }
