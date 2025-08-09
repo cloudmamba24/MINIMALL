@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { EdgeCache, getR2Service, r2Service } from "./r2";
 import { createMockSiteConfig } from "./test-utils";
 

@@ -12,5 +12,14 @@
     "resolveJsonModule": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "migrations", "drizzle.config.ts", "src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.spec.ts", "src/test-setup.ts"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "migrations",
+    "drizzle.config.ts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.ts",
+    "src/test-setup.ts"
+  ]
 }

@@ -1,19 +1,19 @@
-import { describe, it, expect } from 'vitest';
-import { 
-  configs, 
-  configVersions, 
-  users, 
-  performanceMetrics,
+import { describe, expect, it } from "vitest";
+import {
   analyticsEvents,
-  webhooks,
-  sessions,
+  configVersions,
+  configs,
   featureFlags,
-  schema
-} from './schema';
+  performanceMetrics,
+  schema,
+  sessions,
+  users,
+  webhooks,
+} from "./schema";
 
-describe('Database Schema', () => {
-  describe('Table definitions', () => {
-    it('should export all expected tables', () => {
+describe("Database Schema", () => {
+  describe("Table definitions", () => {
+    it("should export all expected tables", () => {
       expect(configs).toBeDefined();
       expect(configVersions).toBeDefined();
       expect(users).toBeDefined();
@@ -24,7 +24,7 @@ describe('Database Schema', () => {
       expect(featureFlags).toBeDefined();
     });
 
-    it('should export schema object with all tables', () => {
+    it("should export schema object with all tables", () => {
       expect(schema).toBeDefined();
       expect(schema.configs).toBe(configs);
       expect(schema.configVersions).toBe(configVersions);
@@ -37,8 +37,8 @@ describe('Database Schema', () => {
     });
   });
 
-  describe('Table structure validation', () => {
-    it('should have proper primary keys', () => {
+  describe("Table structure validation", () => {
+    it("should have proper primary keys", () => {
       // These tests validate the table structure exists
       // In a real implementation, you'd test with actual database operations
       expect(configs.id).toBeDefined();
@@ -51,7 +51,7 @@ describe('Database Schema', () => {
       expect(featureFlags.id).toBeDefined();
     });
 
-    it('should have proper foreign key relationships', () => {
+    it("should have proper foreign key relationships", () => {
       // Validate foreign key fields exist
       expect(configVersions.configId).toBeDefined();
       expect(performanceMetrics.configId).toBeDefined();
@@ -59,7 +59,7 @@ describe('Database Schema', () => {
       expect(sessions.configId).toBeDefined();
     });
 
-    it('should have proper timestamp fields', () => {
+    it("should have proper timestamp fields", () => {
       // Validate timestamp fields exist
       expect(configs.createdAt).toBeDefined();
       expect(configs.updatedAt).toBeDefined();

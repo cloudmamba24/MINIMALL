@@ -18,9 +18,7 @@
     "db:studio": "drizzle-kit studio",
     "db:migrate": "tsx src/migrate.ts"
   },
-  "files": [
-    "dist/**"
-  ],
+  "files": ["dist/**"],
   "dependencies": {
     "@minimall/core": "*",
     "@neondatabase/serverless": "^1.0.1",

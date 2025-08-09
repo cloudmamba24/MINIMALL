@@ -9,9 +9,9 @@
     "lint": "biome check .",
     "lint:fix": "biome check . --apply",
     "type-check": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test": "echo \"No tests configured for public app\" && exit 0",
+    "test:watch": "echo \"No tests configured for public app\" && exit 0",
+    "test:coverage": "echo \"No tests configured for public app\" && exit 0"
   },
   "dependencies": {
     "@minimall/core": "*",

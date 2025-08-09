@@ -1,13 +1,13 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import * as schema from './schema';
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import * as schema from "./schema";
 
 // Simplified database connection using postgres-js (most stable)
 export function createDatabase(databaseUrl: string) {
   if (!databaseUrl) {
-    throw new Error('DATABASE_URL is required');
+    throw new Error("DATABASE_URL is required");
   }
-  
+
   const client = postgres(databaseUrl);
   return drizzle(client, { schema });
 }
@@ -29,5 +29,5 @@ if (process.env.DATABASE_URL) {
 export { db };
 
 // Export all schema
-export * from './schema';
+export * from "./schema";
 export { schema };
