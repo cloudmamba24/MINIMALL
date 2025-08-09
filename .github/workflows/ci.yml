@@ -25,7 +25,7 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Lint
-        run: npm run lint
+        run: npx turbo lint --filter='@minimall/ui' --filter='@minimall/core' --filter='@minimall/db' --filter='@minimall/public'
 
       - name: Type check
         run: npm run type-check

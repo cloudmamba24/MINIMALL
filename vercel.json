@@ -3,7 +3,7 @@
   "name": "minimall-public",
   "buildCommand": "npx turbo build --filter=@minimall/public",
   "outputDirectory": "apps/public/.next",
-  "installCommand": "npm install",
+  "installCommand": "npm install --workspaces",
   "framework": "nextjs",
   "functions": {
     "apps/public/src/app/**/*.ts": {
