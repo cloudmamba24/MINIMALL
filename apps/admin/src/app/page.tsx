@@ -7,14 +7,7 @@ import { useEffect } from "react";
 export default function AdminHomePage() {
   const router = useRouter();
 
-  // Auto-redirect to analytics dashboard
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      router.push("/analytics");
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [router]);
+  // Remove auto-redirect - let users choose where to go
 
   return (
     <Page
@@ -30,24 +23,79 @@ export default function AdminHomePage() {
                 Configure your Instagram-native link-in-bio experience
               </p>
               
-              <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+              <div style={{ 
+                display: "grid", 
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", 
+                gap: "16px", 
+                marginTop: "24px" 
+              }}>
                 <Button 
                   variant="primary" 
-                  onClick={() => router.push("/analytics")}
+                  size="large"
+                  onClick={() => router.push("/editor/new")}
+                  fullWidth
                 >
-                  View Analytics
+                  🎨 Create New Link-in-Bio Page
                 </Button>
                 
                 <Button 
-                  onClick={() => router.push("/editor/new")}
+                  size="large"
+                  onClick={() => router.push("/editor")}
+                  fullWidth
                 >
-                  Create New Config
+                  📝 Manage Existing Pages
+                </Button>
+                
+                <Button 
+                  size="large"
+                  onClick={() => router.push("/analytics")}
+                  fullWidth
+                >
+                  📊 View Analytics
+                </Button>
+                
+                <Button 
+                  size="large"
+                  onClick={() => router.push("/settings")}
+                  fullWidth
+                >
+                  ⚙️ Settings
                 </Button>
               </div>
               
-              <p style={{ marginTop: "20px", fontSize: "14px", color: "#666" }}>
-                Redirecting to analytics dashboard in 2 seconds...
-              </p>
+              <div style={{ 
+                marginTop: "32px", 
+                padding: "16px", 
+                backgroundColor: "#f6f6f7", 
+                borderRadius: "8px" 
+              }}>
+                <h3 style={{ margin: "0 0 8px 0", fontSize: "16px", fontWeight: "600" }}>
+                  Quick Stats
+                </h3>
+                <div style={{ 
+                  display: "grid", 
+                  gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", 
+                  gap: "16px",
+                  fontSize: "14px"
+                }}>
+                  <div>
+                    <div style={{ fontWeight: "600", color: "#008060" }}>3</div>
+                    <div style={{ color: "#6d7175" }}>Active Pages</div>
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: "600", color: "#008060" }}>1.2k</div>
+                    <div style={{ color: "#6d7175" }}>Total Views</div>
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: "600", color: "#008060" }}>45</div>
+                    <div style={{ color: "#6d7175" }}>Conversions</div>
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: "600", color: "#008060" }}>$2,340</div>
+                    <div style={{ color: "#6d7175" }}>Revenue</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </Card>
         </Layout.Section>
