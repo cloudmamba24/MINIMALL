@@ -16,5 +16,5 @@
     ]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "**/*.test.*", "**/test-*", "src/test-setup.ts", "src/test-utils.tsx"]
+  "exclude": ["node_modules", "**/*.test.*", "**/test-*", "src/test-setup.ts", "src/test-utils.tsx", "**/*.stories.*", "**/*.story.*"]
 }

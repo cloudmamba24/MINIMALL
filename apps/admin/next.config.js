@@ -4,6 +4,9 @@ const nextConfig = {
   experimental: {
     // Enable optimizations compatible with Pages Router
     optimizeCss: true,
+    // Force Node.js runtime for API routes that use crypto
+    // (required for Shopify authentication)
+    serverComponentsExternalPackages: ['crypto'],
   },
 
   // External packages that should not be bundled (removed core and db from transpilePackages)
