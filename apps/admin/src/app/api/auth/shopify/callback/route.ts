@@ -97,9 +97,10 @@ export async function GET(request: NextRequest) {
     // Set session cookie
     response.cookies.set("shopify_session", sessionToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true, // Always secure in production
       sameSite: "none", // Required for embedded apps
       maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: "/", // Ensure cookie is available for all paths
     });
 
     // Clear OAuth cookies
