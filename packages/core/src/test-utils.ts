@@ -1,92 +1,100 @@
-import { vi } from 'vitest';
-import { type SiteConfig, type ShopifyProduct } from './types';
+import { vi } from "vitest";
+import type { ShopifyProduct, SiteConfig } from "./types";
 
 /**
  * Mock data factory for testing
  */
 export const createMockSiteConfig = (overrides: Partial<SiteConfig> = {}): SiteConfig => ({
-  id: 'test-config',
-  version: '1.0.0',
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
+  id: "test-config",
+  version: "1.0.0",
+  createdAt: "2024-01-01T00:00:00Z",
+  updatedAt: "2024-01-01T00:00:00Z",
   categories: [
     {
-      id: 'instagram',
-      title: 'Instagram',
-      card: ['image', {
-        imageUrl: 'https://example.com/image.jpg',
-        link: 'https://instagram.com/test'
-      }],
-      categoryType: ['feed', {
-        displayType: 'grid',
-        itemsPerRow: 3,
-        children: []
-      }],
+      id: "instagram",
+      title: "Instagram",
+      card: [
+        "image",
+        {
+          imageUrl: "https://example.com/image.jpg",
+          link: "https://instagram.com/test",
+        },
+      ],
+      categoryType: [
+        "feed",
+        {
+          displayType: "grid",
+          itemsPerRow: 3,
+          children: [],
+        },
+      ],
       visible: true,
-      order: 1
-    }
+      order: 1,
+    },
   ],
   settings: {
-    checkoutLink: 'https://test.myshopify.com/cart',
-    shopDomain: 'test.myshopify.com',
+    checkoutLink: "https://test.myshopify.com/cart",
+    shopDomain: "test.myshopify.com",
     theme: {
-      primaryColor: '#000000',
-      backgroundColor: '#FFFFFF',
-      textColor: '#333333',
-      accentColor: '#FF0000',
-      fontFamily: 'Inter',
-      borderRadius: 'md'
+      primaryColor: "#000000",
+      backgroundColor: "#FFFFFF",
+      textColor: "#333333",
+      accentColor: "#FF0000",
+      fontFamily: "Inter",
+      borderRadius: "md",
     },
     brand: {
-      name: 'Test Store',
-      subtitle: 'Test Description'
+      name: "Test Store",
+      subtitle: "Test Description",
     },
     seo: {
-      title: 'Test Store',
-      description: 'Test store description'
-    }
+      title: "Test Store",
+      description: "Test store description",
+    },
   },
-  ...overrides
+  ...overrides,
 });
 
 /**
  * Mock Shopify product factory
  */
-export const createMockShopifyProduct = (overrides: Partial<ShopifyProduct> = {}): ShopifyProduct => ({
-  id: 'gid://shopify/Product/123',
-  title: 'Test Product',
-  handle: 'test-product',
-  description: 'Test product description',
+export const createMockShopifyProduct = (
+  overrides: Partial<ShopifyProduct> = {}
+): ShopifyProduct => ({
+  id: "gid://shopify/Product/123",
+  title: "Test Product",
+  handle: "test-product",
+  description: "Test product description",
   images: [
     {
-      id: 'gid://shopify/ProductImage/123',
-      url: 'https://cdn.shopify.com/test-image.jpg',
-      altText: 'Test Image',
+      id: "gid://shopify/ProductImage/123",
+      url: "https://cdn.shopify.com/test-image.jpg",
+      altText: "Test Image",
       width: 500,
-      height: 500
-    }
+      height: 500,
+    },
   ],
   variants: [
     {
-      id: 'gid://shopify/ProductVariant/123',
-      title: 'Default Title',
-      price: { amount: '29.99', currencyCode: 'USD' },
+      id: "gid://shopify/ProductVariant/123",
+      title: "Default Title",
+      price: { amount: "29.99", currencyCode: "USD" },
       availableForSale: true,
       selectedOptions: [],
-      requiresShipping: true
-    }
+      requiresShipping: true,
+    },
   ],
   priceRange: {
-    minVariantPrice: { amount: '29.99', currencyCode: 'USD' },
-    maxVariantPrice: { amount: '29.99', currencyCode: 'USD' }
+    minVariantPrice: { amount: "29.99", currencyCode: "USD" },
+    maxVariantPrice: { amount: "29.99", currencyCode: "USD" },
   },
-  tags: ['test', 'product'],
-  productType: 'Test Type',
-  vendor: 'Test Vendor',
+  tags: ["test", "product"],
+  productType: "Test Type",
+  vendor: "Test Vendor",
   availableForSale: true,
-  createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
-  ...overrides
+  createdAt: "2024-01-01T00:00:00Z",
+  updatedAt: "2024-01-01T00:00:00Z",
+  ...overrides,
 });
 
 /**
@@ -107,8 +115,8 @@ export const createMockShopifyService = () => ({
   getProducts: vi.fn().mockResolvedValue([createMockShopifyProduct()]),
   searchProducts: vi.fn().mockResolvedValue([createMockShopifyProduct()]),
   createCart: vi.fn().mockResolvedValue({
-    id: 'test-cart-id',
-    checkoutUrl: 'https://test.myshopify.com/cart/test-checkout-url'
+    id: "test-cart-id",
+    checkoutUrl: "https://test.myshopify.com/cart/test-checkout-url",
   }),
   addToCart: vi.fn().mockResolvedValue(undefined),
   updateCartItem: vi.fn().mockResolvedValue(undefined),

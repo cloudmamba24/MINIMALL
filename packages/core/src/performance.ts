@@ -1,7 +1,7 @@
-import React from 'react';
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
-import * as Sentry from '@sentry/react';
-import type { PerformanceMetrics } from './types';
+import * as Sentry from "@sentry/react";
+import React from "react";
+import { getCLS, getFCP, getFID, getLCP, getTTFB } from "web-vitals";
+import type { PerformanceMetrics } from "./types";
 
 // Web Vitals thresholds (in milliseconds)
 export const WEB_VITALS_THRESHOLDS = {
@@ -15,7 +15,7 @@ export const WEB_VITALS_THRESHOLDS = {
 interface VitalMetric {
   name: string;
   value: number;
-  rating: 'good' | 'needs-improvement' | 'poor';
+  rating: "good" | "needs-improvement" | "poor";
   delta: number;
   id: string;
   navigationType: string;
@@ -24,13 +24,13 @@ interface VitalMetric {
 /**
  * Get performance rating based on thresholds
  */
-function getPerformanceRating(name: string, value: number): 'good' | 'needs-improvement' | 'poor' {
+function getPerformanceRating(name: string, value: number): "good" | "needs-improvement" | "poor" {
   const thresholds = WEB_VITALS_THRESHOLDS[name as keyof typeof WEB_VITALS_THRESHOLDS];
-  if (!thresholds) return 'good';
-  
-  if (value <= thresholds.good) return 'good';
-  if (value <= thresholds.poor) return 'needs-improvement';
-  return 'poor';
+  if (!thresholds) return "good";
+
+  if (value <= thresholds.good) return "good";
+  if (value <= thresholds.poor) return "needs-improvement";
+  return "poor";
 }
 
 /**
@@ -58,22 +58,22 @@ async function reportWebVital(metric: VitalMetric, configId?: string) {
     });
 
     // Send to internal analytics
-    fetch('/api/analytics/performance', {
-      method: 'POST',
+    fetch("/api/analytics/performance", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body,
       keepalive: true, // Ensure the request completes even if the page is unloaded
     }).catch((error) => {
-      console.warn('Failed to report web vital:', error);
+      console.warn("Failed to report web vital:", error);
     });
 
     // Also send to Sentry for monitoring
     Sentry.addBreadcrumb({
-      category: 'web-vital',
+      category: "web-vital",
       message: `${metric.name}: ${Math.round(metric.value)}ms (${metric.rating})`,
-      level: metric.rating === 'poor' ? 'warning' : 'info',
+      level: metric.rating === "poor" ? "warning" : "info",
       data: {
         name: metric.name,
         value: metric.value,
@@ -83,14 +83,14 @@ async function reportWebVital(metric: VitalMetric, configId?: string) {
     });
 
     // Send poor ratings as performance issues to Sentry
-    if (metric.rating === 'poor') {
+    if (metric.rating === "poor") {
       Sentry.captureMessage(
         `Poor Web Vital: ${metric.name} = ${Math.round(metric.value)}ms`,
-        'warning'
+        "warning"
       );
     }
   } catch (error) {
-    console.warn('Failed to report web vital:', error);
+    console.warn("Failed to report web vital:", error);
   }
 }
 
@@ -98,14 +98,14 @@ async function reportWebVital(metric: VitalMetric, configId?: string) {
  * Initialize Web Vitals monitoring
  */
 export function initPerformanceMonitoring(configId?: string) {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   // Collect and report Core Web Vitals
   getCLS((metric) => {
     reportWebVital(
       {
         ...metric,
-        rating: getPerformanceRating('CLS', metric.value),
+        rating: getPerformanceRating("CLS", metric.value),
       },
       configId
     );
@@ -115,7 +115,7 @@ export function initPerformanceMonitoring(configId?: string) {
     reportWebVital(
       {
         ...metric,
-        rating: getPerformanceRating('FID', metric.value),
+        rating: getPerformanceRating("FID", metric.value),
       },
       configId
     );
@@ -125,7 +125,7 @@ export function initPerformanceMonitoring(configId?: string) {
     reportWebVital(
       {
         ...metric,
-        rating: getPerformanceRating('FCP', metric.value),
+        rating: getPerformanceRating("FCP", metric.value),
       },
       configId
     );
@@ -135,7 +135,7 @@ export function initPerformanceMonitoring(configId?: string) {
     reportWebVital(
       {
         ...metric,
-        rating: getPerformanceRating('LCP', metric.value),
+        rating: getPerformanceRating("LCP", metric.value),
       },
       configId
     );
@@ -145,7 +145,7 @@ export function initPerformanceMonitoring(configId?: string) {
     reportWebVital(
       {
         ...metric,
-        rating: getPerformanceRating('TTFB', metric.value),
+        rating: getPerformanceRating("TTFB", metric.value),
       },
       configId
     );
@@ -198,10 +198,10 @@ export class PerformanceTracker {
 
   private async reportCustomMetric(name: string, duration: number) {
     try {
-      await fetch('/api/analytics/custom-metrics', {
-        method: 'POST',
+      await fetch("/api/analytics/custom-metrics", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name,
@@ -212,7 +212,7 @@ export class PerformanceTracker {
         keepalive: true,
       });
     } catch (error) {
-      console.warn('Failed to report custom metric:', error);
+      console.warn("Failed to report custom metric:", error);
     }
   }
 }
@@ -229,10 +229,10 @@ export function usePerformanceTracking() {
   const trackComponentMount = (componentName: string) => {
     React.useEffect(() => {
       const mountTime = performance.now();
-      
+
       return () => {
         const duration = performance.now() - mountTime;
-        tracker['reportCustomMetric'](`component-${componentName}-mount`, duration);
+        (tracker as any).reportCustomMetric(`component-${componentName}-mount`, duration);
       };
     }, [componentName]);
   };
@@ -255,8 +255,8 @@ export function usePerformanceTracking() {
 export function validatePerformanceBudgets(metrics: Partial<PerformanceMetrics>) {
   const budgets = {
     LCP: 1500, // 1.5s
-    FID: 120,  // 120ms
-    CLS: 0.1,  // 0.1
+    FID: 120, // 120ms
+    CLS: 0.1, // 0.1
     TTFB: 200, // 200ms
   };
 
@@ -279,10 +279,7 @@ export function validatePerformanceBudgets(metrics: Partial<PerformanceMetrics>)
   }
 
   if (violations.length > 0) {
-    Sentry.captureMessage(
-      `Performance Budget Violations: ${violations.join(', ')}`,
-      'warning'
-    );
+    Sentry.captureMessage(`Performance Budget Violations: ${violations.join(", ")}`, "warning");
   }
 
   return violations;
@@ -292,9 +289,9 @@ export function validatePerformanceBudgets(metrics: Partial<PerformanceMetrics>)
  * Resource timing analysis
  */
 export function analyzeResourceTiming() {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
-  const resources = performance.getEntriesByType('resource');
+  const resources = performance.getEntriesByType("resource");
   const analysis = {
     totalResources: resources.length,
     slowResources: [],
@@ -304,7 +301,7 @@ export function analyzeResourceTiming() {
 
   for (const resource of resources) {
     const entry = resource as PerformanceResourceTiming;
-    
+
     // Identify slow resources (>2s)
     if (entry.duration > 2000) {
       (analysis.slowResources as Array<{ name: string; duration: number }>).push({
@@ -333,10 +330,10 @@ export function analyzeResourceTiming() {
   // Report analysis to Sentry if issues found
   if (analysis.slowResources.length > 0 || analysis.largeResources.length > 0) {
     Sentry.addBreadcrumb({
-      category: 'performance',
-      message: 'Resource timing analysis completed',
+      category: "performance",
+      message: "Resource timing analysis completed",
       data: analysis,
-      level: 'info',
+      level: "info",
     });
   }
 

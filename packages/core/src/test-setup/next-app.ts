@@ -1,5 +1,5 @@
 // Next.js App Router mocks (for public app)
-vi.mock('next/navigation', () => ({
+vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
@@ -9,14 +9,14 @@ vi.mock('next/navigation', () => ({
     prefetch: vi.fn(),
   }),
   useSearchParams: () => new URLSearchParams(),
-  usePathname: () => '/test',
+  usePathname: () => "/test",
   useParams: () => ({}),
   notFound: vi.fn(),
   redirect: vi.fn(),
 }));
 
 // Mock next/headers
-vi.mock('next/headers', () => ({
+vi.mock("next/headers", () => ({
   headers: () => new Map(),
   cookies: () => ({
     get: vi.fn(),
@@ -26,21 +26,21 @@ vi.mock('next/headers', () => ({
 }));
 
 // Mock Server Actions
-vi.mock('server-only', () => ({}));
+vi.mock("server-only", () => ({}));
 
 // Mock next/link
-vi.mock('next/link', () => {
+vi.mock("next/link", () => {
   return {
     __esModule: true,
-    default: ({ children, href, ...props }: any) => 
-      React.createElement('a', { href, ...props }, children),
+    default: ({ children, href, ...props }: any) =>
+      React.createElement("a", { href, ...props }, children),
   };
 });
 
 // Mock next/image
-vi.mock('next/image', () => {
+vi.mock("next/image", () => {
   return {
     __esModule: true,
-    default: (props: any) => React.createElement('img', props),
+    default: (props: any) => React.createElement("img", props),
   };
 });

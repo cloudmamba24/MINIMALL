@@ -1,18 +1,18 @@
 /**
  * Shopify GraphQL Response Transformer
- * 
+ *
  * Converts Shopify GraphQL responses to our internal type system.
  * Handles data normalization and type safety.
  */
 
-import type { 
-  ShopifyProduct, 
-  ShopifyVariant, 
-  ShopifyImage, 
-  MoneyV2, 
+import type {
+  CartItem,
+  MoneyV2,
   SelectedOption,
-  CartItem 
-} from '../types';
+  ShopifyImage,
+  ShopifyProduct,
+  ShopifyVariant,
+} from "../types";
 
 /**
  * Transform GraphQL MoneyV2 to our MoneyV2 type
@@ -31,7 +31,7 @@ export function transformImage(graphqlImage: any): ShopifyImage {
   return {
     id: graphqlImage.id,
     url: graphqlImage.url,
-    altText: graphqlImage.altText || '',
+    altText: graphqlImage.altText || "",
     width: graphqlImage.width,
     height: graphqlImage.height,
   };
@@ -64,23 +64,23 @@ export function transformVariant(graphqlVariant: any): ShopifyVariant {
   if (graphqlVariant.compareAtPrice) {
     variant.compareAtPrice = transformMoney(graphqlVariant.compareAtPrice);
   }
-  
+
   if (graphqlVariant.image) {
     variant.image = transformImage(graphqlVariant.image);
   }
-  
+
   if (graphqlVariant.sku) {
     variant.sku = graphqlVariant.sku;
   }
-  
+
   if (graphqlVariant.barcode) {
     variant.barcode = graphqlVariant.barcode;
   }
-  
+
   if (graphqlVariant.weight) {
     variant.weight = graphqlVariant.weight;
   }
-  
+
   if (graphqlVariant.weightUnit) {
     variant.weightUnit = graphqlVariant.weightUnit;
   }
@@ -96,7 +96,7 @@ export function transformProduct(graphqlProduct: any): ShopifyProduct {
     id: extractId(graphqlProduct.id),
     title: graphqlProduct.title,
     handle: graphqlProduct.handle,
-    description: graphqlProduct.description || '',
+    description: graphqlProduct.description || "",
     images: graphqlProduct.images?.nodes?.map(transformImage) || [],
     variants: graphqlProduct.variants?.nodes?.map(transformVariant) || [],
     priceRange: {
@@ -104,8 +104,8 @@ export function transformProduct(graphqlProduct: any): ShopifyProduct {
       maxVariantPrice: transformMoney(graphqlProduct.priceRange.maxVariantPrice),
     },
     tags: graphqlProduct.tags || [],
-    productType: graphqlProduct.productType || '',
-    vendor: graphqlProduct.vendor || '',
+    productType: graphqlProduct.productType || "",
+    vendor: graphqlProduct.vendor || "",
     availableForSale: graphqlProduct.availableForSale,
     createdAt: graphqlProduct.createdAt,
     updatedAt: graphqlProduct.updatedAt,
@@ -118,13 +118,13 @@ export function transformProduct(graphqlProduct: any): ShopifyProduct {
 export function transformCartLine(graphqlLine: any): CartItem {
   const variant = graphqlLine.merchandise;
   const product = variant.product;
-  
+
   return {
     id: extractId(graphqlLine.id),
     productId: extractId(product.id),
     variantId: extractId(variant.id),
     title: product.title,
-    price: Math.round(parseFloat(variant.price.amount) * 100), // Convert to cents
+    price: Math.round(Number.parseFloat(variant.price.amount) * 100), // Convert to cents
     quantity: graphqlLine.quantity,
     image: variant.image?.url,
     variant: {
@@ -139,9 +139,9 @@ export function transformCartLine(graphqlLine: any): CartItem {
  * Example: "gid://shopify/Product/123" -> "123"
  */
 export function extractId(globalId: string): string {
-  if (!globalId) return '';
-  const parts = globalId.split('/');
-  return parts[parts.length - 1] || '';
+  if (!globalId) return "";
+  const parts = globalId.split("/");
+  return parts[parts.length - 1] || "";
 }
 
 /**
@@ -156,14 +156,14 @@ export function toGlobalId(type: string, id: string): string {
  * Format price for display
  */
 export function formatShopifyPrice(
-  amount: string | number, 
-  currencyCode: string = 'USD',
-  locale: string = 'en-US'
+  amount: string | number,
+  currencyCode = "USD",
+  locale = "en-US"
 ): string {
-  const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-  
+  const numericAmount = typeof amount === "string" ? Number.parseFloat(amount) : amount;
+
   return new Intl.NumberFormat(locale, {
-    style: 'currency',
+    style: "currency",
     currency: currencyCode,
   }).format(numericAmount);
 }
@@ -171,7 +171,7 @@ export function formatShopifyPrice(
 /**
  * Convert cents to dollar amount for display
  */
-export function centsToDisplay(cents: number, currencyCode: string = 'USD'): string {
+export function centsToDisplay(cents: number, currencyCode = "USD"): string {
   return formatShopifyPrice(cents / 100, currencyCode);
 }
 
@@ -179,25 +179,25 @@ export function centsToDisplay(cents: number, currencyCode: string = 'USD'): str
  * Convert Shopify image URL to optimized version
  */
 export function optimizeShopifyImageUrl(
-  url: string, 
+  url: string,
   options: {
     width?: number;
     height?: number;
-    crop?: 'top' | 'center' | 'bottom' | 'left' | 'right';
+    crop?: "top" | "center" | "bottom" | "left" | "right";
     scale?: number;
   } = {}
 ): string {
-  if (!url) return '';
-  
+  if (!url) return "";
+
   // Remove existing size parameters
-  const baseUrl = url.split('?')[0] || url;
+  const baseUrl = url.split("?")[0] || url;
   const params = new URLSearchParams();
-  
-  if (options.width) params.set('width', options.width.toString());
-  if (options.height) params.set('height', options.height.toString());
-  if (options.crop) params.set('crop', options.crop);
-  if (options.scale) params.set('scale', options.scale.toString());
-  
+
+  if (options.width) params.set("width", options.width.toString());
+  if (options.height) params.set("height", options.height.toString());
+  if (options.crop) params.set("crop", options.crop);
+  if (options.scale) params.set("scale", options.scale.toString());
+
   const queryString = params.toString();
   return queryString ? `${baseUrl}?${queryString}` : baseUrl;
 }
@@ -209,29 +209,24 @@ export function findVariantByOptions(
   product: ShopifyProduct,
   selectedOptions: { [optionName: string]: string }
 ): ShopifyVariant | undefined {
-  return product.variants.find(variant => {
-    return variant.selectedOptions.every(option => 
-      selectedOptions[option.name] === option.value
-    );
+  return product.variants.find((variant) => {
+    return variant.selectedOptions.every((option) => selectedOptions[option.name] === option.value);
   });
 }
 
 /**
  * Get all option values for a specific option name
  */
-export function getOptionValues(
-  product: ShopifyProduct,
-  optionName: string
-): string[] {
+export function getOptionValues(product: ShopifyProduct, optionName: string): string[] {
   const values = new Set<string>();
-  
-  product.variants.forEach(variant => {
-    const option = variant.selectedOptions.find(opt => opt.name === optionName);
+
+  product.variants.forEach((variant) => {
+    const option = variant.selectedOptions.find((opt) => opt.name === optionName);
     if (option) {
       values.add(option.value);
     }
   });
-  
+
   return Array.from(values);
 }
 
@@ -247,8 +242,8 @@ export function hasMultipleVariants(product: ShopifyProduct): boolean {
  */
 export function getCheapestVariant(product: ShopifyProduct): ShopifyVariant | undefined {
   return product.variants
-    .filter(variant => variant.availableForSale)
-    .sort((a, b) => parseFloat(a.price.amount) - parseFloat(b.price.amount))[0];
+    .filter((variant) => variant.availableForSale)
+    .sort((a, b) => Number.parseFloat(a.price.amount) - Number.parseFloat(b.price.amount))[0];
 }
 
 /**
@@ -258,10 +253,11 @@ export function calculateDiscountPercentage(
   originalPrice: string | number,
   salePrice: string | number
 ): number {
-  const original = typeof originalPrice === 'string' ? parseFloat(originalPrice) : originalPrice;
-  const sale = typeof salePrice === 'string' ? parseFloat(salePrice) : salePrice;
-  
+  const original =
+    typeof originalPrice === "string" ? Number.parseFloat(originalPrice) : originalPrice;
+  const sale = typeof salePrice === "string" ? Number.parseFloat(salePrice) : salePrice;
+
   if (original <= sale) return 0;
-  
+
   return Math.round(((original - sale) / original) * 100);
 }

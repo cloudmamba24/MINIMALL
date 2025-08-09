@@ -41,83 +41,93 @@ export async function createEnhancedSiteConfig(
   accessToken?: string
 ): Promise<SiteConfig> {
   // Import Shopify services dynamically to avoid circular dependencies
-  const { createShopifyStorefrontService } = await import('./services/shopify-storefront');
-  const { transformProduct } = await import('./services/shopify-transformer');
-  
-  let realProducts: any[] = [];
-  
+  const { createShopifyStorefrontService } = await import("./services/shopify-storefront");
+  const { transformProduct } = await import("./services/shopify-transformer");
+
+  let realProducts: unknown[] = [];
+
   // Fetch real products if we have access token
   if (accessToken) {
     try {
       const shopifyService = createShopifyStorefrontService(shopDomain, accessToken);
-      
+
       // Fetch first 8 products for the demo
-      const searchResult = await shopifyService.searchProducts('*', 8);
-      realProducts = searchResult.products.map(transformProduct);
-      
+      const searchResult = await shopifyService.searchProducts("*", 8);
+      realProducts = searchResult.products.map(transformProduct) as unknown[];
+
       console.log(`Loaded ${realProducts.length} products from Shopify`);
     } catch (error) {
-      console.warn('Failed to load Shopify products, using mock data:', error);
+      console.warn("Failed to load Shopify products, using mock data:", error);
     }
   }
-  
+
   // Use real products or fallback to mock
-  const productsToUse = realProducts.length > 0 ? realProducts.slice(0, 4) : [];
-  
+  const productsToUse = realProducts.length > 0 ? realProducts.slice(0, 4) : [] as unknown[];
+
   return createSiteConfigWithProducts(shopDomain, productsToUse);
 }
 
 /**
  * Create site config with provided products (real or mock)
  */
-function createSiteConfigWithProducts(shopDomain: string, products: any[]): SiteConfig {
+function createSiteConfigWithProducts(shopDomain: string, products: unknown[]): SiteConfig {
   // Generate mock products if none provided
   const mockProducts = [
     {
-      id: 'product-1',
-      title: 'Essential Tee',
-      handle: 'essential-tee',
-      images: [{ url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop' }],
-      priceRange: { minVariantPrice: { amount: '29.00', currencyCode: 'USD' } },
+      id: "product-1",
+      title: "Essential Tee",
+      handle: "essential-tee",
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+        },
+      ],
+      priceRange: { minVariantPrice: { amount: "29.00", currencyCode: "USD" } },
     },
     {
-      id: 'product-2', 
-      title: 'Vintage Jacket',
-      handle: 'vintage-jacket',
-      images: [{ url: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop' }],
-      priceRange: { minVariantPrice: { amount: '89.00', currencyCode: 'USD' } },
+      id: "product-2",
+      title: "Vintage Jacket",
+      handle: "vintage-jacket",
+      images: [
+        { url: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop" },
+      ],
+      priceRange: { minVariantPrice: { amount: "89.00", currencyCode: "USD" } },
     },
     {
-      id: 'product-3',
-      title: 'Classic Jeans', 
-      handle: 'classic-jeans',
-      images: [{ url: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop' }],
-      priceRange: { minVariantPrice: { amount: '65.00', currencyCode: 'USD' } },
+      id: "product-3",
+      title: "Classic Jeans",
+      handle: "classic-jeans",
+      images: [
+        { url: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop" },
+      ],
+      priceRange: { minVariantPrice: { amount: "65.00", currencyCode: "USD" } },
     },
     {
-      id: 'product-4',
-      title: 'Statement Sneakers',
-      handle: 'statement-sneakers', 
-      images: [{ url: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop' }],
-      priceRange: { minVariantPrice: { amount: '125.00', currencyCode: 'USD' } },
+      id: "product-4",
+      title: "Statement Sneakers",
+      handle: "statement-sneakers",
+      images: [
+        { url: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop" },
+      ],
+      priceRange: { minVariantPrice: { amount: "125.00", currencyCode: "USD" } },
     },
   ];
-  
-  const finalProducts = products.length > 0 ? products : mockProducts;
-  
+
+  const finalProducts = (products.length > 0 ? products : mockProducts) as any[];
+
   // Create product items for the config
   const productItems = finalProducts.map((product, index) => ({
     id: product.id,
     title: product.title,
     card: [
-      'product' as const,
+      "product" as const,
       {
         link: `https://${shopDomain}/products/${product.handle}`,
-        price: `$${parseFloat(product.priceRange.minVariantPrice.amount).toFixed(2)}`,
-        image: product.images[0]?.url || '',
+        price: `$${Number.parseFloat(product.priceRange.minVariantPrice.amount).toFixed(2)}`,
+        image: product.images[0]?.url || "",
       },
     ],
-    categoryType: ['single' as const, { children: [] }],
+    categoryType: ["single" as const, { children: [] }],
     order: index + 1,
     visible: true,
   }));
@@ -128,7 +138,11 @@ function createSiteConfigWithProducts(shopDomain: string, products: any[]): Site
 /**
  * Internal function to create site config structure
  */
-function createBaseSiteConfig(shopDomain: string, productItems: any[], featuredProduct?: any): SiteConfig {
+function createBaseSiteConfig(
+  shopDomain: string,
+  productItems: unknown[],
+  featuredProduct?: unknown
+): SiteConfig {
   return {
     id: generateConfigId(),
     version: "1.0.0",
@@ -166,9 +180,9 @@ function createBaseSiteConfig(shopDomain: string, productItems: any[], featuredP
                     },
                     productTags: [
                       {
-                        productId: featuredProduct?.id || "prod_abc",
+                        productId: (featuredProduct as any)?.id || "prod_abc",
                         position: { x: 0.6, y: 0.4 },
-                        label: featuredProduct?.title || "Essential Tee",
+                        label: (featuredProduct as any)?.title || "Essential Tee",
                       },
                     ],
                   },
@@ -242,7 +256,7 @@ function createBaseSiteConfig(shopDomain: string, productItems: any[], featuredP
         categoryType: [
           "products",
           {
-            children: productItems,
+            children: productItems as any,
             products: [],
             displayType: "grid",
             itemsPerRow: 2,
@@ -581,7 +595,7 @@ export function createPerformanceMetrics(configId: string): Partial<PerformanceM
   }
 
   const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
-  const connection = (navigator as Navigator & { connection: NetworkInformation }).connection;
+  const connection = (navigator as any).connection;
 
   return {
     configId,

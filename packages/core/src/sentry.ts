@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/nextjs';
+import * as Sentry from "@sentry/nextjs";
 
 export interface SentryConfig {
   dsn?: string;
@@ -20,7 +20,7 @@ export function createSentryConfig(config: SentryConfig & { component: string })
   const {
     dsn = process.env.NEXT_PUBLIC_SENTRY_DSN,
     environment = process.env.NODE_ENV,
-    tracesSampleRate = environment === 'production' ? 0.1 : 1.0,
+    tracesSampleRate = environment === "production" ? 0.1 : 1.0,
     enableInDevelopment = false,
     enableReplays = true,
     replaysSessionSampleRate = 0.1,
@@ -35,29 +35,31 @@ export function createSentryConfig(config: SentryConfig & { component: string })
     dsn,
     environment,
     tracesSampleRate,
-    debug: environment === 'development',
-    
+    debug: environment === "development",
+
     beforeSend: (event: any) => {
       // Don't send events in development unless explicitly enabled
-      if (environment === 'development' && !enableInDevelopment) {
+      if (environment === "development" && !enableInDevelopment) {
         return null;
       }
-      
+
       // Apply custom beforeSend logic
       if (beforeSend) {
         return beforeSend(event);
       }
-      
+
       return event;
     },
 
     integrations: [
-      ...(enableReplays ? [
-        Sentry.replayIntegration({
-          maskAllText: false,
-          blockAllMedia: false,
-        }),
-      ] : []),
+      ...(enableReplays
+        ? [
+            Sentry.replayIntegration({
+              maskAllText: false,
+              blockAllMedia: false,
+            }),
+          ]
+        : []),
       ...integrations,
     ],
 
@@ -82,7 +84,7 @@ export function createSentryConfig(config: SentryConfig & { component: string })
  */
 export function createClientConfig(overrides: Partial<SentryConfig> = {}) {
   return createSentryConfig({
-    component: 'client',
+    component: "client",
     enableReplays: true,
     ...overrides,
   });
@@ -93,7 +95,7 @@ export function createClientConfig(overrides: Partial<SentryConfig> = {}) {
  */
 export function createServerConfig(overrides: Partial<SentryConfig> = {}) {
   return createSentryConfig({
-    component: 'server',
+    component: "server",
     enableReplays: false,
     ...overrides,
   });
@@ -104,7 +106,7 @@ export function createServerConfig(overrides: Partial<SentryConfig> = {}) {
  */
 export function createEdgeConfig(overrides: Partial<SentryConfig> = {}) {
   return createSentryConfig({
-    component: 'edge',
+    component: "edge",
     enableReplays: false,
     tracesSampleRate: 0.1, // Lower sample rate for edge
     ...overrides,

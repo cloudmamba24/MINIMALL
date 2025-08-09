@@ -1,5 +1,5 @@
 // Next.js Pages Router mocks (for admin app)
-vi.mock('next/router', () => ({
+vi.mock("next/router", () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
@@ -7,9 +7,9 @@ vi.mock('next/router', () => ({
     forward: vi.fn(),
     reload: vi.fn(),
     query: {},
-    pathname: '/admin',
-    route: '/admin',
-    asPath: '/admin',
+    pathname: "/admin",
+    route: "/admin",
+    asPath: "/admin",
     events: {
       on: vi.fn(),
       off: vi.fn(),
@@ -24,7 +24,7 @@ vi.mock('next/router', () => ({
 }));
 
 // Mock next/head
-vi.mock('next/head', () => {
+vi.mock("next/head", () => {
   return {
     __esModule: true,
     default: ({ children }: { children: React.ReactNode }) => children,
@@ -32,18 +32,18 @@ vi.mock('next/head', () => {
 });
 
 // Mock next/link
-vi.mock('next/link', () => {
+vi.mock("next/link", () => {
   return {
     __esModule: true,
-    default: ({ children, href, ...props }: any) => 
-      React.createElement('a', { href, ...props }, children),
+    default: ({ children, href, ...props }: any) =>
+      React.createElement("a", { href, ...props }, children),
   };
 });
 
 // Mock next/image
-vi.mock('next/image', () => {
+vi.mock("next/image", () => {
   return {
     __esModule: true,
-    default: (props: any) => React.createElement('img', props),
+    default: (props: any) => React.createElement("img", props),
   };
 });

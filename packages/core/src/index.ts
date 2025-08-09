@@ -5,14 +5,14 @@ export * from "./types";
 export * from "./utils";
 
 // Export additional Shopify utilities from transformer
-export { 
-  getOptionValues, 
-  findVariantByOptions, 
+export {
+  getOptionValues,
+  findVariantByOptions,
   calculateDiscountPercentage,
   transformProduct,
   optimizeShopifyImageUrl,
   formatShopifyPrice,
-  centsToDisplay
+  centsToDisplay,
 } from "./services/shopify-transformer";
 
 // Export R2 service

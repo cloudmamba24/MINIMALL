@@ -1,6 +1,6 @@
 /**
  * Shopify Storefront API Service
- * 
+ *
  * Handles all customer-facing operations: product fetching, cart management, checkout.
  * Uses GraphQL for efficient data fetching with proper error handling and caching.
  */
@@ -37,9 +37,9 @@ export class ShopifyStorefrontService {
    * Execute GraphQL query with error handling and retries
    */
   private async query<T = any>(
-    query: string, 
+    query: string,
     variables?: Record<string, any>,
-    retries: number = 3
+    retries = 3
   ): Promise<T> {
     const requestBody = {
       query: query.trim(),
@@ -49,10 +49,10 @@ export class ShopifyStorefrontService {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         const response = await fetch(this.endpoint, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'X-Shopify-Storefront-Access-Token': this.accessToken,
+            "Content-Type": "application/json",
+            "X-Shopify-Storefront-Access-Token": this.accessToken,
           },
           body: JSON.stringify(requestBody),
         });
@@ -64,33 +64,33 @@ export class ShopifyStorefrontService {
         const result: GraphQLResponse<T> = await response.json();
 
         if (result.errors?.length) {
-          throw new Error(`GraphQL Error: ${result.errors.map(e => e.message).join(', ')}`);
+          throw new Error(`GraphQL Error: ${result.errors.map((e) => e.message).join(", ")}`);
         }
 
         if (!result.data) {
-          throw new Error('No data returned from GraphQL query');
+          throw new Error("No data returned from GraphQL query");
         }
 
         return result.data;
       } catch (error) {
         console.error(`Shopify API attempt ${attempt}/${retries} failed:`, error);
-        
+
         if (attempt === retries) {
           throw error;
         }
-        
+
         // Exponential backoff
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        await new Promise((resolve) => setTimeout(resolve, 2 ** attempt * 1000));
       }
     }
 
-    throw new Error('All retry attempts failed');
+    throw new Error("All retry attempts failed");
   }
 
   /**
    * Get products by IDs
    */
-  async getProducts(productIds: string[], first: number = 20): Promise<any[]> {
+  async getProducts(productIds: string[], first = 20): Promise<any[]> {
     const query = `
       query getProducts($ids: [ID!]!, $first: Int!) {
         nodes(ids: $ids) {
@@ -161,7 +161,7 @@ export class ShopifyStorefrontService {
     `;
 
     const variables = {
-      ids: productIds.map(id => `gid://shopify/Product/${id}`),
+      ids: productIds.map((id) => `gid://shopify/Product/${id}`),
       first,
     };
 
@@ -172,8 +172,9 @@ export class ShopifyStorefrontService {
   /**
    * Get single product by handle or ID
    */
-  async getProduct(identifier: string, isId: boolean = false): Promise<any> {
-    const query = isId ? `
+  async getProduct(identifier: string, isId = false): Promise<any> {
+    const query = isId
+      ? `
       query getProductById($id: ID!) {
         product(id: $id) {
           id
@@ -238,7 +239,8 @@ export class ShopifyStorefrontService {
           }
         }
       }
-    ` : `
+    `
+      : `
       query getProductByHandle($handle: String!) {
         productByHandle(handle: $handle) {
           id
@@ -305,9 +307,7 @@ export class ShopifyStorefrontService {
       }
     `;
 
-    const variables = isId 
-      ? { id: `gid://shopify/Product/${identifier}` }
-      : { handle: identifier };
+    const variables = isId ? { id: `gid://shopify/Product/${identifier}` } : { handle: identifier };
 
     const result = await this.query(query, variables);
     return isId ? result.product : result.productByHandle;
@@ -317,8 +317,8 @@ export class ShopifyStorefrontService {
    * Search products
    */
   async searchProducts(
-    query: string, 
-    first: number = 20, 
+    query: string,
+    first = 20,
     after?: string
   ): Promise<{ products: any[]; hasNextPage: boolean; endCursor?: string }> {
     const searchQuery = `
@@ -371,8 +371,8 @@ export class ShopifyStorefrontService {
    * Get products from a collection
    */
   async getCollectionProducts(
-    handle: string, 
-    first: number = 20, 
+    handle: string,
+    first = 20,
     after?: string
   ): Promise<{ products: any[]; hasNextPage: boolean; endCursor?: string }> {
     const query = `
@@ -508,7 +508,7 @@ export class ShopifyStorefrontService {
 
     const input: any = {};
     if (lines?.length) {
-      input.lines = lines.map(line => ({
+      input.lines = lines.map((line) => ({
         merchandiseId: `gid://shopify/ProductVariant/${line.merchandiseId}`,
         quantity: line.quantity,
       }));
@@ -517,7 +517,9 @@ export class ShopifyStorefrontService {
     const result = await this.query(query, { input });
 
     if (result.cartCreate.userErrors?.length) {
-      throw new Error(`Cart creation failed: ${result.cartCreate.userErrors.map((e: any) => e.message).join(', ')}`);
+      throw new Error(
+        `Cart creation failed: ${result.cartCreate.userErrors.map((e: any) => e.message).join(", ")}`
+      );
     }
 
     return result.cartCreate.cart;
@@ -527,7 +529,7 @@ export class ShopifyStorefrontService {
    * Add items to cart
    */
   async addToCart(
-    cartId: string, 
+    cartId: string,
     lines: Array<{ merchandiseId: string; quantity: number }>
   ): Promise<any> {
     const query = `
@@ -572,7 +574,7 @@ export class ShopifyStorefrontService {
 
     const variables = {
       cartId,
-      lines: lines.map(line => ({
+      lines: lines.map((line) => ({
         merchandiseId: `gid://shopify/ProductVariant/${line.merchandiseId}`,
         quantity: line.quantity,
       })),
@@ -581,7 +583,9 @@ export class ShopifyStorefrontService {
     const result = await this.query(query, variables);
 
     if (result.cartLinesAdd.userErrors?.length) {
-      throw new Error(`Add to cart failed: ${result.cartLinesAdd.userErrors.map((e: any) => e.message).join(', ')}`);
+      throw new Error(
+        `Add to cart failed: ${result.cartLinesAdd.userErrors.map((e: any) => e.message).join(", ")}`
+      );
     }
 
     return result.cartLinesAdd.cart;
@@ -590,10 +594,7 @@ export class ShopifyStorefrontService {
   /**
    * Update cart line quantities
    */
-  async updateCart(
-    cartId: string, 
-    lines: Array<{ id: string; quantity: number }>
-  ): Promise<any> {
+  async updateCart(cartId: string, lines: Array<{ id: string; quantity: number }>): Promise<any> {
     const query = `
       mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
         cartLinesUpdate(cartId: $cartId, lines: $lines) {
@@ -637,7 +638,9 @@ export class ShopifyStorefrontService {
     const result = await this.query(query, { cartId, lines });
 
     if (result.cartLinesUpdate.userErrors?.length) {
-      throw new Error(`Cart update failed: ${result.cartLinesUpdate.userErrors.map((e: any) => e.message).join(', ')}`);
+      throw new Error(
+        `Cart update failed: ${result.cartLinesUpdate.userErrors.map((e: any) => e.message).join(", ")}`
+      );
     }
 
     return result.cartLinesUpdate.cart;
@@ -690,7 +693,9 @@ export class ShopifyStorefrontService {
     const result = await this.query(query, { cartId, lineIds });
 
     if (result.cartLinesRemove.userErrors?.length) {
-      throw new Error(`Remove from cart failed: ${result.cartLinesRemove.userErrors.map((e: any) => e.message).join(', ')}`);
+      throw new Error(
+        `Remove from cart failed: ${result.cartLinesRemove.userErrors.map((e: any) => e.message).join(", ")}`
+      );
     }
 
     return result.cartLinesRemove.cart;

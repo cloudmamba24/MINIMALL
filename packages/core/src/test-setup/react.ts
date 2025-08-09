@@ -1,12 +1,12 @@
-import '@testing-library/jest-dom';
-import * as matchers from '@testing-library/jest-dom/matchers';
+import "@testing-library/jest-dom";
+import * as matchers from "@testing-library/jest-dom/matchers";
 
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);
 
 // Mock React Server Components
-vi.mock('react', async () => {
-  const actual = await vi.importActual('react');
+vi.mock("react", async () => {
+  const actual = await vi.importActual("react");
   return {
     ...actual,
     cache: (fn: any) => fn,
@@ -25,7 +25,7 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   unobserve: vi.fn(),
   disconnect: vi.fn(),
   root: null,
-  rootMargin: '',
+  rootMargin: "",
   thresholds: [],
 }));
 
@@ -39,15 +39,15 @@ global.performance = {
 };
 
 // Mock navigation APIs
-Object.defineProperty(window, 'location', {
+Object.defineProperty(window, "location", {
   value: {
-    href: 'http://localhost:3000',
-    origin: 'http://localhost:3000',
-    protocol: 'http:',
-    host: 'localhost:3000',
-    pathname: '/',
-    search: '',
-    hash: '',
+    href: "http://localhost:3000",
+    origin: "http://localhost:3000",
+    protocol: "http:",
+    host: "localhost:3000",
+    pathname: "/",
+    search: "",
+    hash: "",
     reload: vi.fn(),
   },
   writable: true,
