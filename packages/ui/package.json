@@ -9,7 +9,10 @@
     "dev": "tsc --watch",
     "lint": "biome check .",
     "lint:fix": "biome check . --apply",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "files": [
     "dist/**"

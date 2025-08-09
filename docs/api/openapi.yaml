@@ -1,0 +1,1072 @@
+openapi: 3.0.3
+info:
+  title: MINIMALL API
+  description: |
+    Ultra-fast link-in-bio platform API for Shopify merchants.
+    
+    ## Overview
+    MINIMALL provides a comprehensive API for managing link-in-bio site configurations, 
+    assets, analytics, and user interactions. The API is built with Next.js API routes
+    and follows RESTful principles.
+    
+    ## Authentication
+    Currently, the API uses shop-based authentication. Authentication improvements
+    are planned for future releases.
+    
+    ## Rate Limiting
+    API requests are subject to reasonable rate limits to ensure service stability.
+    
+    ## Error Handling
+    All endpoints return consistent error responses with appropriate HTTP status codes
+    and detailed error messages.
+  version: 1.0.0
+  contact:
+    name: MINIMALL API Support
+    email: api-support@minimall.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3001
+    description: Admin API (Development)
+  - url: http://localhost:3000
+    description: Public API (Development)
+  - url: https://admin.minimall.com
+    description: Admin API (Production)
+  - url: https://api.minimall.com
+    description: Public API (Production)
+
+paths:
+  # Configuration Management
+  /api/configs/{configId}:
+    get:
+      tags:
+        - Configurations
+      summary: Get configuration
+      description: Retrieve a site configuration by ID
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          description: Unique identifier for the site configuration
+          schema:
+            type: string
+            example: "demo-shop-config"
+      responses:
+        '200':
+          description: Configuration retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  config:
+                    $ref: '#/components/schemas/SiteConfig'
+                  source:
+                    type: string
+                    enum: [r2, database]
+                    example: "r2"
+        '404':
+          description: Configuration not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    put:
+      tags:
+        - Configurations
+      summary: Update configuration
+      description: Update an existing site configuration
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SiteConfig'
+      responses:
+        '200':
+          description: Configuration updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  config:
+                    $ref: '#/components/schemas/SiteConfig'
+                  message:
+                    type: string
+                    example: "Configuration updated successfully"
+        '400':
+          description: Invalid configuration data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    delete:
+      tags:
+        - Configurations
+      summary: Delete configuration
+      description: Delete a site configuration
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Configuration deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Configuration deleted successfully"
+        '404':
+          description: Configuration not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/configs/{configId}/publish:
+    post:
+      tags:
+        - Configurations
+      summary: Publish configuration
+      description: Publish a draft configuration to production
+      parameters:
+        - name: configId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Configuration published successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Configuration published successfully"
+                  version:
+                    type: string
+                    example: "v1704067200000"
+                  publishedAt:
+                    type: string
+                    format: date-time
+        '404':
+          description: No draft version found to publish
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Asset Management
+  /api/assets:
+    get:
+      tags:
+        - Assets
+      summary: List assets
+      description: Retrieve a list of uploaded assets
+      parameters:
+        - name: folder
+          in: query
+          description: Filter assets by folder
+          schema:
+            type: string
+            default: "uploads"
+        - name: type
+          in: query
+          description: Filter assets by type
+          schema:
+            type: string
+            enum: [all, image, video, document]
+            default: "all"
+        - name: limit
+          in: query
+          description: Maximum number of assets to return
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+      responses:
+        '200':
+          description: Assets retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  assets:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AssetFile'
+                  total:
+                    type: integer
+                    example: 25
+        '503':
+          description: R2 service not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/assets/upload:
+    post:
+      tags:
+        - Assets
+      summary: Upload asset
+      description: Upload a new asset file to cloud storage
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file to upload
+                folder:
+                  type: string
+                  description: Destination folder
+                  default: "uploads"
+      responses:
+        '200':
+          description: File uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  asset:
+                    $ref: '#/components/schemas/AssetFile'
+                  message:
+                    type: string
+                    example: "File uploaded successfully"
+        '400':
+          description: Invalid file or missing file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: R2 service not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/assets/{id}:
+    put:
+      tags:
+        - Assets
+      summary: Update asset metadata
+      description: Update metadata for an existing asset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Asset display name
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: Asset tags for organization
+      responses:
+        '200':
+          description: Asset updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  asset:
+                    $ref: '#/components/schemas/AssetFile'
+                  message:
+                    type: string
+                    example: "Asset updated successfully"
+        '400':
+          description: Asset ID is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: R2 service not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    delete:
+      tags:
+        - Assets
+      summary: Delete asset
+      description: Delete an asset from cloud storage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Asset deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Asset deleted successfully"
+        '400':
+          description: Asset ID is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: R2 service not configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Analytics
+  /api/analytics/data:
+    get:
+      tags:
+        - Analytics
+      summary: Get analytics data
+      description: Retrieve analytics data for performance monitoring and insights
+      parameters:
+        - name: configId
+          in: query
+          description: Filter by configuration ID
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          description: Start date for data range
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          description: End date for data range
+          schema:
+            type: string
+            format: date-time
+        - name: timeframe
+          in: query
+          description: Predefined timeframe
+          schema:
+            type: string
+            enum: ['1h', '24h', '7d', '30d']
+            default: '24h'
+      responses:
+        '200':
+          description: Analytics data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsData'
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '503':
+          description: Database not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/analytics/performance:
+    post:
+      tags:
+        - Analytics
+      summary: Record performance metric
+      description: Submit Web Vitals and performance metrics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PerformanceMetric'
+      responses:
+        '200':
+          description: Performance metric recorded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid metric data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/analytics/events:
+    post:
+      tags:
+        - Analytics
+      summary: Record analytics event
+      description: Submit custom analytics events and user interactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyticsEvent'
+      responses:
+        '200':
+          description: Analytics event recorded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid event data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    SiteConfig:
+      type: object
+      required:
+        - id
+        - shop
+        - slug
+        - settings
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the site configuration
+          example: "demo-shop-config"
+        shop:
+          type: string
+          description: Shopify shop domain
+          example: "demo-shop.myshopify.com"
+        slug:
+          type: string
+          description: URL slug for the site
+          example: "demo-shop"
+        content:
+          type: array
+          description: Array of content items for the site
+          items:
+            $ref: '#/components/schemas/ContentItem'
+        settings:
+          type: object
+          required:
+            - shopDomain
+          properties:
+            shopDomain:
+              type: string
+              example: "demo-shop.myshopify.com"
+            theme:
+              type: object
+              properties:
+                primaryColor:
+                  type: string
+                  example: "#2563eb"
+                backgroundColor:
+                  type: string
+                  example: "#ffffff"
+                textColor:
+                  type: string
+                  example: "#1f2937"
+            seo:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Demo Shop - Link in Bio"
+                description:
+                  type: string
+                  example: "Check out our amazing products!"
+                keywords:
+                  type: string
+                  example: "shop, products, fashion"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-01T00:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-01T00:00:00Z"
+
+    ContentItem:
+      type: object
+      required:
+        - id
+        - type
+        - position
+        - isVisible
+      properties:
+        id:
+          type: string
+          example: "image-123"
+        type:
+          type: string
+          enum: [image, video, product, text, link, social]
+          example: "image"
+        title:
+          type: string
+          example: "Hero Image"
+        position:
+          type: integer
+          minimum: 1
+          example: 1
+        isVisible:
+          type: boolean
+          example: true
+        description:
+          type: string
+          example: "Main promotional image"
+      discriminator:
+        propertyName: type
+        mapping:
+          image: '#/components/schemas/ImageContent'
+          video: '#/components/schemas/VideoContent'
+          product: '#/components/schemas/ProductContent'
+          text: '#/components/schemas/TextContent'
+          link: '#/components/schemas/LinkContent'
+          social: '#/components/schemas/SocialContent'
+
+    ImageContent:
+      allOf:
+        - $ref: '#/components/schemas/ContentItem'
+        - type: object
+          properties:
+            src:
+              type: string
+              format: uri
+              example: "https://cdn.shopify.com/s/files/1/example/image.jpg"
+            alt:
+              type: string
+              example: "Product showcase image"
+            width:
+              type: integer
+              example: 400
+            height:
+              type: integer
+              example: 300
+
+    VideoContent:
+      allOf:
+        - $ref: '#/components/schemas/ContentItem'
+        - type: object
+          properties:
+            src:
+              type: string
+              format: uri
+              example: "https://example.com/video.mp4"
+            thumbnail:
+              type: string
+              format: uri
+              example: "https://example.com/thumb.jpg"
+            autoplay:
+              type: boolean
+              example: false
+
+    ProductContent:
+      allOf:
+        - $ref: '#/components/schemas/ContentItem'
+        - type: object
+          properties:
+            productId:
+              type: string
+              example: "gid://shopify/Product/123456789"
+            handle:
+              type: string
+              example: "sample-product"
+            showPrice:
+              type: boolean
+              example: true
+            showDescription:
+              type: boolean
+              example: true
+
+    TextContent:
+      allOf:
+        - $ref: '#/components/schemas/ContentItem'
+        - type: object
+          properties:
+            content:
+              type: string
+              example: "Welcome to our store!"
+            style:
+              type: object
+              properties:
+                fontSize:
+                  type: integer
+                  example: 16
+                color:
+                  type: string
+                  example: "#000000"
+                textAlign:
+                  type: string
+                  enum: [left, center, right]
+                  example: "center"
+
+    LinkContent:
+      allOf:
+        - $ref: '#/components/schemas/ContentItem'
+        - type: object
+          properties:
+            href:
+              type: string
+              format: uri
+              example: "https://shop.example.com"
+            target:
+              type: string
+              enum: [_blank, _self]
+              example: "_blank"
+            style:
+              type: object
+              properties:
+                buttonStyle:
+                  type: string
+                  enum: [primary, secondary, outline]
+                  example: "primary"
+
+    SocialContent:
+      allOf:
+        - $ref: '#/components/schemas/ContentItem'
+        - type: object
+          properties:
+            platform:
+              type: string
+              enum: [instagram, tiktok, twitter, facebook, youtube]
+              example: "instagram"
+            username:
+              type: string
+              example: "@shopexample"
+            showFollowers:
+              type: boolean
+              example: true
+
+    AssetFile:
+      type: object
+      required:
+        - id
+        - name
+        - originalName
+        - type
+        - mimeType
+        - size
+        - url
+        - uploadedAt
+      properties:
+        id:
+          type: string
+          example: "uploads/1704067200-abc123.jpg"
+        name:
+          type: string
+          example: "Product Image"
+        originalName:
+          type: string
+          example: "product-showcase.jpg"
+        type:
+          type: string
+          enum: [image, video, document]
+          example: "image"
+        mimeType:
+          type: string
+          example: "image/jpeg"
+        size:
+          type: integer
+          example: 245760
+        url:
+          type: string
+          format: uri
+          example: "https://r2.example.com/uploads/1704067200-abc123.jpg"
+        thumbnailUrl:
+          type: string
+          format: uri
+          example: "https://r2.example.com/uploads/thumbs/1704067200-abc123.jpg"
+        width:
+          type: integer
+          example: 800
+        height:
+          type: integer
+          example: 600
+        folder:
+          type: string
+          example: "uploads"
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["product", "hero", "main"]
+        uploadedAt:
+          type: string
+          format: date-time
+          example: "2024-01-01T00:00:00Z"
+        lastModified:
+          type: string
+          format: date-time
+          example: "2024-01-01T00:00:00Z"
+
+    PerformanceMetric:
+      type: object
+      required:
+        - metric
+        - value
+        - rating
+        - delta
+        - id
+        - navigationType
+        - timestamp
+        - url
+      properties:
+        configId:
+          type: string
+          example: "demo-shop-config"
+        metric:
+          type: string
+          enum: [LCP, FID, CLS, FCP, TTFB]
+          example: "LCP"
+        value:
+          type: number
+          example: 2500
+        rating:
+          type: string
+          enum: [good, needs-improvement, poor]
+          example: "good"
+        delta:
+          type: number
+          example: 100
+        id:
+          type: string
+          example: "v3-1704067200-123"
+        navigationType:
+          type: string
+          example: "navigate"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-01T00:00:00Z"
+        url:
+          type: string
+          format: uri
+          example: "https://example.com/g/demo-shop"
+        userAgent:
+          type: string
+          example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        connection:
+          type: string
+          example: "4g"
+        viewport:
+          type: object
+          properties:
+            width:
+              type: integer
+              example: 1920
+            height:
+              type: integer
+              example: 1080
+
+    AnalyticsEvent:
+      type: object
+      required:
+        - event
+        - sessionId
+      properties:
+        event:
+          type: string
+          example: "button_click"
+        configId:
+          type: string
+          example: "demo-shop-config"
+        userId:
+          type: string
+          example: "user_123"
+        sessionId:
+          type: string
+          example: "session_1704067200"
+        properties:
+          type: object
+          additionalProperties: true
+          example: 
+            button_text: "Shop Now"
+            section: "hero"
+        userAgent:
+          type: string
+          example: "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)"
+        referrer:
+          type: string
+          format: uri
+          example: "https://instagram.com"
+        utmSource:
+          type: string
+          example: "instagram"
+        utmMedium:
+          type: string
+          example: "social"
+        utmCampaign:
+          type: string
+          example: "summer_sale"
+        utmTerm:
+          type: string
+          example: "fashion"
+        utmContent:
+          type: string
+          example: "story_link"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2024-01-01T00:00:00Z"
+
+    AnalyticsData:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            timeframe:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  format: date-time
+                endDate:
+                  type: string
+                  format: date-time
+                duration:
+                  type: string
+                  example: "24h"
+            performance:
+              type: object
+              properties:
+                metrics:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PerformanceMetric'
+                aggregates:
+                  type: object
+                  properties:
+                    avgLcp:
+                      type: number
+                      example: 2200
+                    avgFid:
+                      type: number
+                      example: 85
+                    avgCls:
+                      type: number
+                      example: 0.05
+                    avgTtfb:
+                      type: number
+                      example: 450
+                    totalMetrics:
+                      type: integer
+                      example: 150
+            analytics:
+              type: object
+              properties:
+                events:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AnalyticsEvent'
+                eventCounts:
+                  type: object
+                  additionalProperties:
+                    type: integer
+                  example:
+                    page_view: 450
+                    button_click: 127
+                    product_view: 89
+                uniqueSessions:
+                  type: integer
+                  example: 245
+                totalEvents:
+                  type: integer
+                  example: 666
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "Configuration not found"
+
+    ValidationError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "Invalid configuration data"
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                example: "invalid_type"
+              expected:
+                type: string
+                example: "string"
+              received:
+                type: string
+                example: "number"
+              path:
+                type: array
+                items:
+                  type: string
+                example: ["settings", "shopDomain"]
+              message:
+                type: string
+                example: "Expected string, received number"
+
+tags:
+  - name: Configurations
+    description: Site configuration management
+  - name: Assets
+    description: File upload and asset management
+  - name: Analytics
+    description: Performance monitoring and user analytics

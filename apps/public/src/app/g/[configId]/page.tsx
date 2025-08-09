@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { r2Service, createDefaultSiteConfig, createEnhancedSiteConfig, edgeCache, type SiteConfig } from '@minimall/core';
 import { Renderer } from '@/components/renderer';
+import { PreviewWrapper } from '@/components/preview-wrapper';
 
 // Create enhanced demo config with real Shopify data when possible
 let STABLE_DEMO_CONFIG: any = null;
@@ -89,6 +90,7 @@ interface PageProps {
   }>;
   searchParams: Promise<{
     draft?: string;
+    preview?: string;
   }>;
 }
 
@@ -128,7 +130,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
 
 export default async function SitePage({ params, searchParams }: PageProps) {
   const { configId } = await params;
-  const { draft } = await searchParams;
+  const { draft, preview } = await searchParams;
 
   // Debug logging
   console.log('[SitePage] Route accessed:', { configId, draft, timestamp: new Date().toISOString() });
@@ -142,6 +144,11 @@ export default async function SitePage({ params, searchParams }: PageProps) {
     // Use unified config loading with edge caching
     const config = await loadConfigWithCache(configId, draft);
     console.log(`Successfully loaded config for: ${configId}${draft ? ` (draft: ${draft})` : ''}`);
+
+    // Handle preview mode
+    if (preview === 'true') {
+      return <PreviewWrapper initialConfig={config} isPreview={true} />;
+    }
 
     // Special handling for demo config to use enhanced DemoRenderer
     if (configId === 'demo') {

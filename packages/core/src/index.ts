@@ -22,6 +22,13 @@ export * from "./r2";
 export * from "./services/shopify-storefront";
 export * from "./services/shopify-transformer";
 
+// Export performance and analytics
+export * from "./performance";
+export * from "./rum";
+
+// Export Sentry configuration utilities
+export * from "./sentry";
+
 // Version info
 export const VERSION = "0.1.0";
 export const PACKAGE_NAME = "@minimall/core";

@@ -11,6 +11,6 @@
     "incremental": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "migrations", "drizzle.config.ts", "**/*.test.ts", "**/*.test.tsx"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "migrations", "drizzle.config.ts", "src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.spec.ts", "src/test-setup.ts"]
 }

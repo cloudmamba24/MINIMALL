@@ -8,22 +8,33 @@
     "start": "next start -p 3001",
     "lint": "biome check .",
     "lint:fix": "biome check . --apply",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@minimall/core": "*",
     "@minimall/db": "*",
     "@minimall/ui": "*",
-    "next": "^15.1.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "@shopify/polaris": "^13.9.5",
+    "@sentry/nextjs": "^10.3.0",
+    "@sentry/react": "^10.3.0",
     "@shopify/app-bridge": "^3.7.10",
     "@shopify/app-bridge-react": "^3.7.10",
+    "@shopify/polaris": "^13.9.5",
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "typescript": "^5.7.2"
+    "next": "^15.1.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-dropzone": "^14.3.8",
+    "recharts": "^3.1.2",
+    "typescript": "^5.7.2",
+    "web-vitals": "^3.5.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4"
