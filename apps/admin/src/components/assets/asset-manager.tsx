@@ -126,6 +126,8 @@ export function AssetManager({
     for (let i = 0; i < acceptedFiles.length; i++) {
       const file = acceptedFiles[i];
       
+      if (!file) continue;
+      
       try {
         // Create form data
         const formData = new FormData();
@@ -278,10 +280,10 @@ export function AssetManager({
           <div className="text-center">
             <UploadIcon className="mx-auto h-12 w-12 text-gray-400" />
             <div className="mt-4">
-              <Text variant="bodyLg">
+              <Text variant="bodyLg" as="p">
                 {isDragActive ? 'Drop files here...' : 'Drag & drop files here, or click to select'}
               </Text>
-              <Text variant="bodySm" color="subdued">
+              <Text variant="bodySm" tone="subdued" as="p">
                 Supports: {acceptedTypes.join(', ')} • Max size: {formatFileSize(maxFileSize)}
               </Text>
             </div>
@@ -292,7 +294,7 @@ export function AssetManager({
         {fileRejections.length > 0 && (
           <div className="mt-4">
             <Banner tone="warning">
-              <Text variant="bodySm">
+              <Text variant="bodySm" as="p">
                 Some files were rejected: {fileRejections.map(r => r.file.name).join(', ')}
               </Text>
             </Banner>
@@ -304,13 +306,13 @@ export function AssetManager({
           <div className="mt-4 space-y-2">
             {uploading.map((upload, index) => (
               <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                <Text variant="bodySm">{upload.file.name}</Text>
+                <Text variant="bodySm" as="span">{upload.file.name}</Text>
                 {upload.status === 'uploading' && <Spinner size="small" />}
                 {upload.status === 'completed' && (
                   <Badge tone="success">Completed</Badge>
                 )}
                 {upload.status === 'error' && (
-                  <Badge tone="critical">Error: {upload.error}</Badge>
+                  <Badge tone="critical">{`Error: ${upload.error || 'Upload failed'}`}</Badge>
                 )}
               </div>
             ))}
@@ -368,7 +370,7 @@ export function AssetManager({
         {loading ? (
           <div className="p-8 text-center">
             <Spinner size="large" />
-            <Text variant="bodyLg">Loading assets...</Text>
+            <Text variant="bodyLg" as="p">Loading assets...</Text>
           </div>
         ) : filteredAssets.length === 0 ? (
           <EmptyState
@@ -406,24 +408,14 @@ export function AssetManager({
                 {/* Overlay with actions */}
                 <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
                   <ButtonGroup>
-                    <Button size="slim" onClick={(e) => {
-                      e.stopPropagation();
-                      setEditingAsset(asset);
-                    }}>
-                      <EditIcon />
-                    </Button>
-                    <Button size="slim" tone="critical" onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteAsset(asset.id);
-                    }}>
-                      <DeleteIcon />
-                    </Button>
+                    <Button size="slim" onClick={() => setEditingAsset(asset)} icon={EditIcon} />
+                    <Button size="slim" tone="critical" onClick={() => handleDeleteAsset(asset.id)} icon={DeleteIcon} />
                   </ButtonGroup>
                 </div>
 
                 <div className="p-2">
-                  <Text variant="bodySm" truncate>{asset.originalName}</Text>
-                  <Text variant="caption" color="subdued">{formatFileSize(asset.size)}</Text>
+                  <Text variant="bodySm" truncate as="p">{asset.originalName}</Text>
+                  <Text variant="bodySm" tone="subdued" as="p">{formatFileSize(asset.size)}</Text>
                 </div>
               </div>
             ))}
@@ -449,10 +441,10 @@ export function AssetManager({
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <Text variant="bodyMd">{originalName}</Text>
+                      <Text variant="bodyMd" as="h3">{originalName}</Text>
                       <div className="flex gap-2 mt-1">
                         <Badge>{type}</Badge>
-                        <Text variant="caption" color="subdued">
+                        <Text variant="bodySm" tone="subdued" as="span">
                           {formatFileSize(size)} • {new Date(uploadedAt).toLocaleDateString()}
                         </Text>
                       </div>
@@ -497,18 +489,21 @@ export function AssetManager({
                 label="Name"
                 value={editingAsset.name}
                 onChange={(value) => setEditingAsset({ ...editingAsset, name: value })}
+                autoComplete="off"
               />
               <TextField
                 label="Alt text (for images)"
                 value=""
                 onChange={() => {}}
                 helpText="Describe this image for accessibility"
+                autoComplete="off"
               />
               <TextField
                 label="Tags"
                 value={editingAsset.tags?.join(', ') || ''}
                 onChange={() => {}}
                 helpText="Separate tags with commas"
+                autoComplete="off"
               />
             </LegacyStack>
           </Modal.Section>

@@ -59,7 +59,7 @@
   },
   "packageManager": "npm@11.5.2",
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   },
   "dependencies": {
     "framer-motion": "^12.23.12",
@@ -68,6 +68,8 @@
     "prettier": "^3.0.0"
   },
   "overrides": {
-    "react-is": "^18.3.1"
+    "react-is": "^18.3.1",
+    "prismjs": "^1.30.0",
+    "esbuild": "^0.25.0"
   }
 }

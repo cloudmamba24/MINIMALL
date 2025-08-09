@@ -10,47 +10,42 @@ const mockTheme = {};
 // Sample configuration data
 const sampleConfig: SiteConfig = {
   id: 'sample-config',
-  shop: 'demo-shop.myshopify.com',
-  slug: 'sample-store',
-  content: [
+  version: '1.0.0',
+  categories: [
     {
-      id: 'image-1',
-      type: 'image',
-      title: 'Hero Image',
-      position: 1,
-      isVisible: true,
-      src: 'https://cdn.shopify.com/s/files/1/0262/4071/2726/files/sample-image.jpg',
-      alt: 'Sample product image',
-      width: 400,
-      height: 300,
+      id: 'featured-products',
+      title: 'Featured Products',
+      card: ['product-card', {
+        description: 'Check out our featured items',
+        products: [
+          { id: '1', productId: 'gid://shopify/Product/123456789' }
+        ]
+      }],
+      categoryType: ['grid', { 
+        children: [],
+        displayType: 'grid' as const,
+        itemsPerRow: 2
+      }],
+      order: 1,
+      visible: true
     },
     {
-      id: 'product-1',
-      type: 'product',
-      title: 'Featured Product',
-      position: 2,
-      isVisible: true,
-      productId: 'gid://shopify/Product/123456789',
-      handle: 'sample-product',
-      showPrice: true,
-      showDescription: true,
-    },
-    {
-      id: 'text-1',
-      type: 'text',
-      title: 'Welcome Message',
-      position: 3,
-      isVisible: true,
-      content: 'Welcome to our amazing store! Check out our latest products.',
-      style: {
-        fontSize: 18,
-        color: '#333333',
-        textAlign: 'center',
-      },
-    },
+      id: 'hero-section',
+      title: 'Hero Section',
+      card: ['image-card', {
+        image: 'https://cdn.shopify.com/s/files/1/0262/4071/2726/files/sample-image.jpg',
+        description: 'Welcome to our store'
+      }],
+      categoryType: ['hero', { 
+        children: []
+      }],
+      order: 0,
+      visible: true
+    }
   ],
   settings: {
     shopDomain: 'demo-shop.myshopify.com',
+    checkoutLink: '/checkout',
     theme: {
       primaryColor: '#2563eb',
       backgroundColor: '#ffffff',
@@ -63,11 +58,16 @@ const sampleConfig: SiteConfig = {
 
 const emptyConfig: SiteConfig = {
   id: 'empty-config',
-  shop: 'empty-shop.myshopify.com',
-  slug: 'empty-store',
-  content: [],
+  version: '1.0.0',
+  categories: [],
   settings: {
     shopDomain: 'empty-shop.myshopify.com',
+    checkoutLink: '/checkout',
+    theme: {
+      primaryColor: '#000000',
+      backgroundColor: '#ffffff',
+      textColor: '#000000',
+    },
   },
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
@@ -115,10 +115,10 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     config: sampleConfig,
-    onConfigChange: (config) => {
+    onConfigChange: (config: SiteConfig) => {
       console.log('Config changed:', config);
     },
-    onPreview: (config) => {
+    onPreview: (config: SiteConfig) => {
       console.log('Preview requested:', config);
     },
   },
@@ -127,10 +127,10 @@ export const Default: Story = {
 export const EmptyState: Story = {
   args: {
     config: emptyConfig,
-    onConfigChange: (config) => {
+    onConfigChange: (config: SiteConfig) => {
       console.log('Config changed:', config);
     },
-    onPreview: (config) => {
+    onPreview: (config: SiteConfig) => {
       console.log('Preview requested:', config);
     },
   },
@@ -183,10 +183,10 @@ export const WithManyItems: Story = {
         },
       ],
     },
-    onConfigChange: (config) => {
+    onConfigChange: (config: SiteConfig) => {
       console.log('Config changed:', config);
     },
-    onPreview: (config) => {
+    onPreview: (config: SiteConfig) => {
       console.log('Preview requested:', config);
     },
   },

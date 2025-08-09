@@ -91,27 +91,25 @@ const meta: Meta<typeof AssetManager> = {
     ),
   ],
   argTypes: {
-    assets: {
-      description: 'Array of asset objects to display in the manager',
+    onSelectAsset: {
+      description: 'Callback when asset is selected',
+      action: 'asset-selected',
     },
-    selectedAssets: {
-      description: 'Array of currently selected asset IDs',
+    allowMultiSelect: {
+      description: 'Whether to allow multiple asset selection',
+      control: 'boolean',
     },
-    onSelectionChange: {
-      description: 'Callback when asset selection changes',
-      action: 'selection-changed',
+    acceptedTypes: {
+      description: 'Array of accepted file types',
+      control: 'object',
     },
-    onUpload: {
-      description: 'Callback when files are uploaded',
-      action: 'files-uploaded',
+    maxFileSize: {
+      description: 'Maximum file size in bytes',
+      control: 'number',
     },
-    onUpdate: {
-      description: 'Callback when asset metadata is updated',
-      action: 'asset-updated',
-    },
-    onDelete: {
-      description: 'Callback when assets are deleted',
-      action: 'assets-deleted',
+    folder: {
+      description: 'Target folder for uploads',
+      control: 'text',
     },
   },
 };
@@ -121,39 +119,18 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    assets: mockAssets,
-    selectedAssets: [],
-    onSelectionChange: (assets) => {
-      console.log('Selection changed:', assets);
-    },
-    onUpload: (files) => {
-      console.log('Files uploaded:', files);
-    },
-    onUpdate: (assetId, updates) => {
-      console.log('Asset updated:', assetId, updates);
-    },
-    onDelete: (assetIds) => {
-      console.log('Assets deleted:', assetIds);
-    },
+    allowMultiSelect: true,
+    acceptedTypes: ['image/*', 'video/*'],
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    folder: 'uploads',
   },
 };
 
 export const EmptyState: Story = {
   args: {
-    assets: [],
-    selectedAssets: [],
-    onSelectionChange: (assets) => {
-      console.log('Selection changed:', assets);
-    },
-    onUpload: (files) => {
-      console.log('Files uploaded:', files);
-    },
-    onUpdate: (assetId, updates) => {
-      console.log('Asset updated:', assetId, updates);
-    },
-    onDelete: (assetIds) => {
-      console.log('Assets deleted:', assetIds);
-    },
+    allowMultiSelect: false,
+    acceptedTypes: ['image/*'],
+    folder: 'empty-test',
   },
   parameters: {
     docs: {
@@ -166,20 +143,10 @@ export const EmptyState: Story = {
 
 export const WithManyAssets: Story = {
   args: {
-    assets: largeAssetCollection,
-    selectedAssets: [],
-    onSelectionChange: (assets) => {
-      console.log('Selection changed:', assets);
-    },
-    onUpload: (files) => {
-      console.log('Files uploaded:', files);
-    },
-    onUpdate: (assetId, updates) => {
-      console.log('Asset updated:', assetId, updates);
-    },
-    onDelete: (assetIds) => {
-      console.log('Assets deleted:', assetIds);
-    },
+    allowMultiSelect: true,
+    acceptedTypes: ['image/*', 'video/*'],
+    maxFileSize: 50 * 1024 * 1024, // 50MB
+    folder: 'large-collection',
   },
   parameters: {
     docs: {
@@ -192,20 +159,10 @@ export const WithManyAssets: Story = {
 
 export const WithSelection: Story = {
   args: {
-    assets: mockAssets,
-    selectedAssets: [mockAssets[0].id, mockAssets[2].id],
-    onSelectionChange: (assets) => {
-      console.log('Selection changed:', assets);
-    },
-    onUpload: (files) => {
-      console.log('Files uploaded:', files);
-    },
-    onUpdate: (assetId, updates) => {
-      console.log('Asset updated:', assetId, updates);
-    },
-    onDelete: (assetIds) => {
-      console.log('Assets deleted:', assetIds);
-    },
+    allowMultiSelect: true,
+    acceptedTypes: ['image/*'],
+    maxFileSize: 5 * 1024 * 1024, // 5MB
+    folder: 'selected-test',
   },
   parameters: {
     docs: {
@@ -217,63 +174,11 @@ export const WithSelection: Story = {
 };
 
 export const InteractiveDemo: Story = {
-  render: () => {
-    const [assets, setAssets] = React.useState(mockAssets);
-    const [selectedAssets, setSelectedAssets] = React.useState<string[]>([]);
-
-    return (
-      <div>
-        <div style={{ marginBottom: '1rem', padding: '1rem', background: '#f5f5f5', borderRadius: '4px' }}>
-          <strong>Current State:</strong>
-          <div style={{ fontSize: '12px', marginTop: '0.5rem' }}>
-            Total Assets: {assets.length} | Selected: {selectedAssets.length}
-          </div>
-          {selectedAssets.length > 0 && (
-            <div style={{ fontSize: '12px', marginTop: '0.25rem', color: '#666' }}>
-              Selected: {selectedAssets.join(', ')}
-            </div>
-          )}
-        </div>
-        <AssetManager
-          assets={assets}
-          selectedAssets={selectedAssets}
-          onSelectionChange={setSelectedAssets}
-          onUpload={(files) => {
-            console.log('Simulating upload of:', files.map(f => f.name));
-            // Simulate adding uploaded files
-            const newAssets = files.map((file, index) => ({
-              id: `uploads/${Date.now() + index}-${file.name}`,
-              name: file.name.replace(/\.[^/.]+$/, ''),
-              originalName: file.name,
-              type: file.type.startsWith('image/') ? 'image' as const :
-                   file.type.startsWith('video/') ? 'video' as const : 'document' as const,
-              mimeType: file.type,
-              size: file.size,
-              url: URL.createObjectURL(file),
-              thumbnailUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
-              folder: 'uploads',
-              tags: [],
-              uploadedAt: new Date().toISOString(),
-              lastModified: new Date().toISOString(),
-            }));
-            setAssets(prev => [...prev, ...newAssets]);
-          }}
-          onUpdate={(assetId, updates) => {
-            console.log('Updating asset:', assetId, updates);
-            setAssets(prev => prev.map(asset => 
-              asset.id === assetId 
-                ? { ...asset, ...updates, lastModified: new Date().toISOString() }
-                : asset
-            ));
-          }}
-          onDelete={(assetIds) => {
-            console.log('Deleting assets:', assetIds);
-            setAssets(prev => prev.filter(asset => !assetIds.includes(asset.id)));
-            setSelectedAssets(prev => prev.filter(id => !assetIds.includes(id)));
-          }}
-        />
-      </div>
-    );
+  args: {
+    allowMultiSelect: true,
+    acceptedTypes: ['image/*', 'video/*'],
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    folder: 'interactive-demo',
   },
   parameters: {
     docs: {
