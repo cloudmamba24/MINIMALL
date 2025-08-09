@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { and, eq } from "drizzle-orm";
-import * as Sentry from "@sentry/core";
+import * as Sentry from "@sentry/nextjs";
 
 export interface WebhookPayload {
 	id: string | number;

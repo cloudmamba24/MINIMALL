@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getShopifyAuth } from '@minimall/core/auth/shopify-auth';
+import { getShopifyAuth } from '@minimall/core';
 
 // Define public routes that don't require authentication
 const publicRoutes = [

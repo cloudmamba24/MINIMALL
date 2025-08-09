@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getShopifyAuth } from '@minimall/core/auth/shopify-auth';
+import { getShopifyAuth } from '@minimall/core';
 import { createDatabase } from '@minimall/db';
 import * as Sentry from '@sentry/nextjs';
 

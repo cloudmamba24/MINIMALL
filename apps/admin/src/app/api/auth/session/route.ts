@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getShopifyAuth } from '@minimall/core/auth/shopify-auth';
+import { getShopifyAuth } from '@minimall/core';
 
 // GET /api/auth/session - Get current session info
 export async function GET(request: NextRequest) {
