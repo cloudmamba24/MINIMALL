@@ -1,13 +1,19 @@
 {
   "$schema": "https://vercel.com/schema/vercel.json",
-  "name": "minimall-admin",
-  "buildCommand": "npx turbo build --filter=@minimall/admin",
-  "outputDirectory": "apps/admin/.next",
+  "name": "minimall-public",
+  "buildCommand": "npx turbo build --filter=@minimall/public",
+  "outputDirectory": "apps/public/.next",
   "installCommand": "npm ci",
+  "framework": "nextjs",
+  "functions": {
+    "apps/public/src/app/**/*.ts": {
+      "runtime": "nodejs22.x"
+    }
+  },
   "rewrites": [
     {
-      "source": "/admin/:path*",
-      "destination": "/admin/:path*"
+      "source": "/g/:path*",
+      "destination": "/g/:path*"
     },
     {
       "source": "/api/:path*",
@@ -28,20 +34,16 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization, X-Shopify-Topic, X-Shopify-Shop-Domain, X-Shopify-Webhook-Id"
+          "value": "Content-Type, Authorization"
         }
       ]
     },
     {
-      "source": "/(.*)",
+      "source": "/g/(.*)",
       "headers": [
         {
-          "key": "X-Frame-Options",
-          "value": "ALLOWALL"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "frame-ancestors 'self' https://*.myshopify.com https://admin.shopify.com;"
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=300"
         }
       ]
     }

@@ -29,6 +29,9 @@ export function ShopifyAppProvider({ children }: ShopifyAppProviderProps) {
     host:
       new URLSearchParams(typeof window !== "undefined" ? window.location.search : "").get(
         "host"
+      ) || 
+      new URLSearchParams(typeof window !== "undefined" ? window.location.search : "").get(
+        "shop"
       ) || "",
     forceRedirect: true,
   };
