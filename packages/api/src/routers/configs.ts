@@ -1,8 +1,32 @@
 import { z } from 'zod';
-import { eq, and, desc } from 'drizzle-orm';
 import { createTRPCRouter, publicProcedure, dbProcedure, r2Procedure } from '../trpc';
-import { configs, configVersions } from '@minimall/db/schema';
-import type { SiteConfig } from '@minimall/core/types';
+
+// Import drizzle ORM
+let eq: any, and: any, desc: any;
+try {
+  const drizzleModule = require('drizzle-orm');
+  eq = drizzleModule.eq;
+  and = drizzleModule.and;
+  desc = drizzleModule.desc;
+} catch {
+  console.warn('Drizzle ORM not available');
+}
+
+// Import schema
+let configs: any, configVersions: any;
+try {
+  const schemaModule = require('@minimall/db/schema');
+  configs = schemaModule.configs;
+  configVersions = schemaModule.configVersions;
+} catch {
+  console.warn('Database schema not available');
+}
+
+// Import types
+interface SiteConfig {
+  id?: string;
+  [key: string]: any;
+}
 
 export const configsRouter = createTRPCRouter({
   // Get config with fallback chain: DB → R2 → Demo

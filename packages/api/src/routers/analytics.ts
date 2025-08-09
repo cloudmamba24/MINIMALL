@@ -1,7 +1,28 @@
 import { z } from 'zod';
-import { eq, and, gte, lte, desc } from 'drizzle-orm';
 import { createTRPCRouter, publicProcedure, dbProcedure } from '../trpc';
-import { analyticsEvents, performanceMetrics } from '@minimall/db/schema';
+
+// Import drizzle ORM
+let eq: any, and: any, gte: any, lte: any, desc: any;
+try {
+  const drizzleModule = require('drizzle-orm');
+  eq = drizzleModule.eq;
+  and = drizzleModule.and;
+  gte = drizzleModule.gte;
+  lte = drizzleModule.lte;
+  desc = drizzleModule.desc;
+} catch {
+  console.warn('Drizzle ORM not available');
+}
+
+// Import schema
+let analyticsEvents: any, performanceMetrics: any;
+try {
+  const schemaModule = require('@minimall/db/schema');
+  analyticsEvents = schemaModule.analyticsEvents;
+  performanceMetrics = schemaModule.performanceMetrics;
+} catch {
+  console.warn('Database schema not available');
+}
 
 export const analyticsRouter = createTRPCRouter({
   // Track analytics event

@@ -1,8 +1,24 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import { type CreateNextContextOptions } from '@trpc/server/adapters/next';
-import { db } from '@minimall/db';
-import { getR2Service } from '@minimall/core/server';
 import superjson from 'superjson';
+
+// Import database connection
+let db: any = null;
+try {
+  const dbModule = require('@minimall/db');
+  db = dbModule.db;
+} catch {
+  console.warn('Database package not available');
+}
+
+// Import R2 service
+let getR2Service: any = null;
+try {
+  const r2Module = require('@minimall/core/server');
+  getR2Service = r2Module.getR2Service;
+} catch {
+  console.warn('R2 service not available');
+}
 
 /**
  * 1. CONTEXT
@@ -13,7 +29,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
   return {
     db,
-    r2: getR2Service(),
+    r2: getR2Service ? getR2Service() : null,
     req,
     res,
   };

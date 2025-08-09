@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createShopifyClient } from '../../../lib/shopify-client';
+import { createShopifyClient } from '../../../../lib/shopify-client';
 
 export async function GET(
   request: NextRequest,
@@ -21,7 +21,7 @@ export async function GET(
     
     if (!client) {
       // Return mock product if no Shopify credentials
-      const { getMockProduct } = await import('../../../lib/shopify-client');
+      const { getMockProduct } = await import('../../../../lib/shopify-client');
       const mockProduct = getMockProduct(productId);
       
       if (mockProduct) {

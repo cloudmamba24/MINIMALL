@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createShopifyClient } from '../../lib/shopify-client';
+import { createShopifyClient } from '../../../lib/shopify-client';
 
 // POST /api/shopify/cart - Create new cart
 export async function POST(request: NextRequest) {

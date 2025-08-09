@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createShopifyClient } from '../../../lib/shopify-client';
+import { createShopifyClient } from '../../../../lib/shopify-client';
 
 // GET /api/shopify/cart/[cartId] - Get cart
 export async function GET(

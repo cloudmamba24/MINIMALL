@@ -1,7 +1,7 @@
 'use client';
 
 import { type SiteConfig } from '@minimall/core/client';
-import { useRenderMode } from '@/hooks/use-mobile-detection';
+import { useRenderMode } from '../hooks/use-mobile-detection';
 import { Renderer } from './renderer';
 import { InstagramRenderer } from './instagram-renderer';
 import { EnhancedProductQuickView } from './enhanced-product-quick-view';
