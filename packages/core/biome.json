@@ -20,6 +20,10 @@
 	"files": {
 		"ignore": [
 			"dist/**",
+			"src/**/*.js",
+			"src/**/*.d.ts",
+			"src/**/*.js.map",
+			"src/**/*.d.ts.map",
 			"src/services/**",
 			"src/test-setup/**",
 			"src/sentry.ts",
