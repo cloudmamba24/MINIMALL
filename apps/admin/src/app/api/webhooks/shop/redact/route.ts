@@ -2,6 +2,9 @@ import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 import { getWebhookHandler } from "../../../../../lib/webhook-handler";
 
+// Force Node.js runtime for crypto operations
+export const runtime = 'nodejs';
+
 // POST /api/webhooks/shop/redact - Handle GDPR shop data redaction webhook
 export async function POST(request: NextRequest) {
   try {

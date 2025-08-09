@@ -3,6 +3,9 @@ import { createDatabase } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
+// Force Node.js runtime for crypto operations
+export const runtime = 'nodejs';
+
 // GET /api/auth/shopify/callback - Handle OAuth callback from Shopify
 export async function GET(request: NextRequest) {
   try {

@@ -1,6 +1,9 @@
 import { getShopifyAuth } from "@minimall/core";
 import { type NextRequest, NextResponse } from "next/server";
 
+// Force Node.js runtime for crypto operations
+export const runtime = 'nodejs';
+
 // GET /api/auth/session - Get current session info
 export async function GET(request: NextRequest) {
   try {

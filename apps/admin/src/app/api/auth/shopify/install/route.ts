@@ -2,6 +2,9 @@ import { getShopifyAuth } from "@minimall/core";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
+// Force Node.js runtime for crypto operations
+export const runtime = 'nodejs';
+
 // GET /api/auth/shopify/install - Start Shopify OAuth flow
 export async function GET(request: NextRequest) {
   try {
