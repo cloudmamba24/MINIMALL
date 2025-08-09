@@ -135,8 +135,8 @@ const nextConfig = {
   // Transpile packages - only include packages that are actually used in public app
   transpilePackages: ['@minimall/core', '@minimall/ui'],
   
-  // Output configuration for edge
-  output: 'standalone',
+  // Remove output configuration - let Vercel handle it
+  // output: 'standalone',
 };
 
 module.exports = nextConfig;
