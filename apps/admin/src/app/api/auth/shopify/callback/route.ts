@@ -17,7 +17,17 @@ export async function GET(request: NextRequest) {
 
     // Verify required parameters
     if (!code || !state || !shop || !hmac) {
-      return NextResponse.json({ error: "Missing required OAuth parameters" }, { status: 400 });
+      console.error("Missing OAuth parameters:", { 
+        code: !!code, 
+        state: !!state, 
+        shop: !!shop, 
+        hmac: !!hmac,
+        allParams: Object.fromEntries(url.searchParams.entries())
+      });
+      
+      const errorUrl = new URL("/admin/auth/error", process.env.NEXT_PUBLIC_APP_URL);
+      errorUrl.searchParams.set("error", !shop ? "no_shop_provided" : "authentication_failed");
+      return NextResponse.redirect(errorUrl.toString());
     }
 
     const shopifyAuth = getShopifyAuth();
@@ -47,28 +57,36 @@ export async function GET(request: NextRequest) {
     // Exchange code for access token
     const session = await shopifyAuth.exchangeCodeForToken(shop, code);
 
-    // Store session in database (create or update user)
-    const db = createDatabase(process.env.DATABASE_URL!);
-    const { users } = await import("@minimall/db");
+    // Store session in database (create or update user) - skip if no DATABASE_URL
+    if (process.env.DATABASE_URL) {
+      try {
+        const db = createDatabase(process.env.DATABASE_URL);
+        const { users } = await import("@minimall/db");
 
-    await db
-      .insert(users)
-      .values({
-        email: session.onlineAccessInfo?.associated_user?.email || `admin@${shop}`,
-        name: session.onlineAccessInfo
-          ? `${session.onlineAccessInfo.associated_user.first_name} ${session.onlineAccessInfo.associated_user.last_name}`.trim()
-          : "Admin",
-        shopDomain: shop,
-        role: session.onlineAccessInfo?.associated_user?.account_owner ? "owner" : "editor",
-        permissions: JSON.stringify([]),
-      })
-      .onConflictDoUpdate({
-        target: users.email,
-        set: {
-          shopDomain: shop,
-          updatedAt: new Date(),
-        },
-      });
+        await db
+          .insert(users)
+          .values({
+            email: session.onlineAccessInfo?.associated_user?.email || `admin@${shop}`,
+            name: session.onlineAccessInfo
+              ? `${session.onlineAccessInfo.associated_user.first_name} ${session.onlineAccessInfo.associated_user.last_name}`.trim()
+              : "Admin",
+            shopDomain: shop,
+            role: session.onlineAccessInfo?.associated_user?.account_owner ? "owner" : "editor",
+            permissions: JSON.stringify([]),
+          })
+          .onConflictDoUpdate({
+            target: users.email,
+            set: {
+              shopDomain: shop,
+              updatedAt: new Date(),
+            },
+          });
+      } catch (dbError) {
+        console.error("Database error (continuing without storage):", dbError);
+      }
+    } else {
+      console.warn("DATABASE_URL not configured - skipping user storage");
+    }
 
     // Create session token
     const sessionToken = shopifyAuth.createSessionToken(session);
