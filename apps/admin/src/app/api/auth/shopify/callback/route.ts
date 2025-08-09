@@ -98,28 +98,23 @@ export async function GET(request: NextRequest) {
     
     const response = NextResponse.redirect(redirectUrl.toString());
 
-    // Set multiple cookie variations to handle different browser restrictions
-    const cookieOptions = [
-      {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none" as const,
-        maxAge: 60 * 60 * 24 * 30,
-        path: "/",
-      },
-      // Fallback for browsers that don't support sameSite=none
-      {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax" as const,
-        maxAge: 60 * 60 * 24 * 30,
-        path: "/",
-      }
-    ];
-
-    // Set session cookie with multiple attempts
-    response.cookies.set("shopify_session", sessionToken, cookieOptions[0]);
-    response.cookies.set("shopify_session_fallback", sessionToken, cookieOptions[1]);
+    // Set session cookie with primary strategy
+    response.cookies.set("shopify_session", sessionToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/",
+    });
+    
+    // Set fallback cookie for browsers that don't support sameSite=none
+    response.cookies.set("shopify_session_fallback", sessionToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/",
+    });
 
     // Clear OAuth cookies
     response.cookies.delete("oauth_state");
