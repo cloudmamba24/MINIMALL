@@ -8,7 +8,7 @@ import { ThemeProvider } from './theme/theme-provider';
 
 interface RendererProps {
   config: SiteConfig;
-  className?: string;
+  className?: string | undefined;
 }
 
 export async function Renderer({ config, className }: RendererProps) {

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { r2Service, createDefaultSiteConfig, createEnhancedSiteConfig, edgeCache, type SiteConfig } from '@minimall/core/server';
-import { Renderer } from '@/components/renderer';
+import { UnifiedRenderer } from '@/components/unified-renderer';
 import { PreviewWrapper } from '@/components/preview-wrapper';
 
 // Create enhanced demo config with real Shopify data when possible
@@ -150,10 +150,8 @@ export default async function SitePage({ params, searchParams }: PageProps) {
       return <PreviewWrapper initialConfig={config} isPreview={true} />;
     }
 
-    // Special handling for demo config to use enhanced DemoRenderer
+    // Special handling for demo config to show data source status
     if (configId === 'demo') {
-      const { DemoRenderer } = await import('@/components/demo-renderer');
-      
       const hasRealData = config.categories.some((cat: any) => 
         cat.categoryType[1]?.children?.some((item: any) => 
           item.card[1]?.image?.includes('cdn.shopify.com')
@@ -169,7 +167,7 @@ export default async function SitePage({ params, searchParams }: PageProps) {
               ' This is a sample configuration showcasing platform features'
             }
           </div>
-          <DemoRenderer config={config} />
+          <UnifiedRenderer config={config} />
         </div>
       );
     }
@@ -199,7 +197,7 @@ export default async function SitePage({ params, searchParams }: PageProps) {
           </div>
         )}
         
-        <Renderer config={config} />
+        <UnifiedRenderer config={config} />
       </div>
     );
     

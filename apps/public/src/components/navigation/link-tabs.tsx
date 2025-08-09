@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useTabGestures } from '@/hooks/use-gesture-handler';
 
 interface Tab {
   id: string;
@@ -34,6 +35,25 @@ export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
     }
   }, [contentTabs, activeTab]);
 
+  // Gesture navigation between tabs
+  const navigateToNextTab = useCallback(() => {
+    const currentIndex = contentTabs.findIndex(tab => tab.id === activeTab);
+    const nextIndex = (currentIndex + 1) % contentTabs.length;
+    if (contentTabs[nextIndex]) {
+      setActiveTab(contentTabs[nextIndex].id);
+    }
+  }, [contentTabs, activeTab]);
+
+  const navigateToPrevTab = useCallback(() => {
+    const currentIndex = contentTabs.findIndex(tab => tab.id === activeTab);
+    const prevIndex = currentIndex <= 0 ? contentTabs.length - 1 : currentIndex - 1;
+    if (contentTabs[prevIndex]) {
+      setActiveTab(contentTabs[prevIndex].id);
+    }
+  }, [contentTabs, activeTab]);
+
+  const { gestureProps } = useTabGestures(navigateToNextTab, navigateToPrevTab);
+
   const handleTabClick = (tab: Tab) => {
     if (tab.isAction && tab.onClick) {
       tab.onClick();
@@ -43,7 +63,7 @@ export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
   };
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full ${className}`} {...gestureProps}>
       {/* Tab Navigation */}
       <div className="flex justify-center mb-8">
         <div className="flex space-x-8">
@@ -65,6 +85,15 @@ export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
           ))}
         </div>
       </div>
+
+      {/* Gesture hint */}
+      {contentTabs.length > 1 && (
+        <div className="text-center mb-4">
+          <p className="text-xs text-gray-500">
+            Swipe left or right to navigate between tabs
+          </p>
+        </div>
+      )}
 
       {/* Tab Content */}
       <div className="transition-opacity duration-300">

@@ -126,6 +126,35 @@ export function generateViewport() {
 **Analysis**: Only `/g/[configId]` should use edge runtime (for R2 calls)
 **Solution**: Removed edge runtime from layout.tsx to enable static generation for other pages
 
+### Node.js Crypto Import Compatibility Issue
+**Date**: 2025-01-09  
+**Status**: ✅ RESOLVED
+
+#### **Problem**
+- `import crypto from "node:crypto"` caused webpack build failures in Next.js
+- Vercel edge SSR loader couldn't handle Node.js protocol imports
+- Lint rules enforced `node:crypto` but this broke client-side builds
+
+#### **Root Cause**
+Next.js edge runtime and webpack don't support `node:` protocol imports for crypto module in client-side code.
+
+#### **Solution**
+1. **Changed import syntax**: `"node:crypto"` → `"crypto"`
+2. **Created separate client/server exports** in core package
+3. **Updated lint configuration**: Added `"useNodejsImportProtocol": "off"` to resolve conflicts
+
+#### **Files Fixed**
+- `packages/core/src/auth/shopify-auth.ts` - Changed crypto import
+- `apps/admin/src/lib/webhook-handler.ts` - Changed crypto import  
+- `packages/core/biome.json` - Disabled Node.js import protocol rule
+- `packages/core/src/client.ts` - Created client-safe exports
+- `packages/core/src/server.ts` - Created server-safe exports
+
+#### **Verification**
+✅ All packages build successfully  
+✅ Vercel deployment completes without errors  
+✅ No lint warnings remain
+
 ---
 
 ## Common Fixes

@@ -45,6 +45,25 @@ console.log(`Successfully published config ${configId} to R2`);
 - ✅ TypeScript strict mode compliance
 - ✅ Asset manager component fully functional
 
+### 4. Node.js Crypto Import Compatibility Fix
+**Date:** 2025-01-09  
+**Files:** `packages/core/src/auth/shopify-auth.ts`, `apps/admin/src/lib/webhook-handler.ts`
+**Changes:**
+- Fixed `node:crypto` import compatibility for Next.js builds
+- Changed `import crypto from "node:crypto"` to `import crypto from "crypto"`
+- Created client/server export separation in core package
+- Disabled conflicting lint rule: `"useNodejsImportProtocol": "off"`
+
+```typescript
+// Before (breaking builds)
+import crypto from "node:crypto";
+
+// After (compatible)  
+import crypto from "crypto";
+```
+
+**Impact:** Resolved Vercel deployment failures and webpack build errors
+
 ## ⚠️ **Issues Requiring Further Work**
 
 ### 1. Visual Editor Component Schema Mismatch
