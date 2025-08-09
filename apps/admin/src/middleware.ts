@@ -37,13 +37,19 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const sessionToken = request.cookies.get("shopify_session")?.value;
+    // Try multiple cookie sources due to browser restrictions in embedded apps
+    const sessionToken = request.cookies.get("shopify_session")?.value || 
+                         request.cookies.get("shopify_session_fallback")?.value;
     let session = null;
 
     if (sessionToken) {
       const shopifyAuth = getShopifyAuth();
       session = shopifyAuth.verifySessionToken(sessionToken);
     }
+
+    // For embedded apps, also check if we have shop in URL but no valid session
+    const shop = request.nextUrl.searchParams.get("shop");
+    const host = request.nextUrl.searchParams.get("host");
 
     // Handle protected API routes
     if (isProtectedApiRoute(pathname)) {

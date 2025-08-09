@@ -91,17 +91,35 @@ export async function GET(request: NextRequest) {
     // Create session token
     const sessionToken = shopifyAuth.createSessionToken(session);
 
-    // Create response with redirect to admin app
-    const response = NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/admin`);
+    // Create response with redirect to admin app with session in URL for embedded apps
+    const redirectUrl = new URL(`${process.env.NEXT_PUBLIC_APP_URL}/admin`);
+    redirectUrl.searchParams.set("shop", shop);
+    redirectUrl.searchParams.set("host", Buffer.from(`${shop}/admin`).toString('base64'));
+    
+    const response = NextResponse.redirect(redirectUrl.toString());
 
-    // Set session cookie
-    response.cookies.set("shopify_session", sessionToken, {
-      httpOnly: true,
-      secure: true, // Always secure in production
-      sameSite: "none", // Required for embedded apps
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: "/", // Ensure cookie is available for all paths
-    });
+    // Set multiple cookie variations to handle different browser restrictions
+    const cookieOptions = [
+      {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none" as const,
+        maxAge: 60 * 60 * 24 * 30,
+        path: "/",
+      },
+      // Fallback for browsers that don't support sameSite=none
+      {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax" as const,
+        maxAge: 60 * 60 * 24 * 30,
+        path: "/",
+      }
+    ];
+
+    // Set session cookie with multiple attempts
+    response.cookies.set("shopify_session", sessionToken, cookieOptions[0]);
+    response.cookies.set("shopify_session_fallback", sessionToken, cookieOptions[1]);
 
     // Clear OAuth cookies
     response.cookies.delete("oauth_state");

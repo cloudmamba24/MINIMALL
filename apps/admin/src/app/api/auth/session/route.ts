@@ -7,9 +7,20 @@ export const runtime = 'nodejs';
 // GET /api/auth/session - Get current session info
 export async function GET(request: NextRequest) {
   try {
-    const sessionToken = request.cookies.get("shopify_session")?.value;
+    // Try multiple cookie sources for embedded app compatibility
+    const sessionToken = request.cookies.get("shopify_session")?.value || 
+                         request.cookies.get("shopify_session_fallback")?.value;
 
     if (!sessionToken) {
+      // For embedded apps, also check URL parameters
+      const shop = request.nextUrl.searchParams.get("shop");
+      if (shop) {
+        return NextResponse.json({ 
+          authenticated: false, 
+          shop,
+          requiresAuth: true 
+        }, { status: 401 });
+      }
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 
@@ -36,5 +47,6 @@ export async function GET(request: NextRequest) {
 export async function DELETE() {
   const response = NextResponse.json({ success: true });
   response.cookies.delete("shopify_session");
+  response.cookies.delete("shopify_session_fallback");
   return response;
 }
