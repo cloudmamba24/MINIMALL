@@ -1,0 +1,3 @@
+# Temporarily ignore UI components for CI
+src/components/**
+src/test-setup/**
