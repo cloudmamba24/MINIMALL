@@ -1,23 +1,30 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "suspicious": {
-        "noExplicitAny": "off"
-      }
-    }
-  },
-  "formatter": {
-    "enabled": true
-  },
-  "files": {
-    "ignore": [
-      "src/services/**",
-      "src/test-setup/**",
-      "src/sentry.ts",
-      "src/performance.ts",
-      "src/rum.ts"
-    ]
-  }
+	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"suspicious": {
+				"noExplicitAny": "off"
+			},
+			"style": {
+				"useDefaultParameterLast": "off"
+			},
+			"complexity": {
+				"noForEach": "off"
+			}
+		}
+	},
+	"formatter": {
+		"enabled": true
+	},
+	"files": {
+		"ignore": [
+			"dist/**",
+			"src/services/**",
+			"src/test-setup/**",
+			"src/sentry.ts",
+			"src/performance.ts",
+			"src/rum.ts"
+		]
+	}
 }
