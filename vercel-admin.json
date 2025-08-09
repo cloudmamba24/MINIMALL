@@ -1,15 +1,10 @@
 {
   "$schema": "https://vercel.com/schema/vercel.json",
   "name": "minimall-admin",
-  "buildCommand": "npx turbo build --filter=@minimall/admin",
+  "buildCommand": "npx turbo build --filter=@minimall/admin --force",
   "outputDirectory": "apps/admin/.next",
   "installCommand": "npm ci",
   "framework": "nextjs",
-  "functions": {
-    "apps/admin/src/app/api/**/*.ts": {
-      "runtime": "nodejs22.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/admin/:path*",

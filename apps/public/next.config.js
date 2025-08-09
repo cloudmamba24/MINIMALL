@@ -132,8 +132,8 @@ const nextConfig = {
   // Enable static optimization
   trailingSlash: false,
   
-  // Transpile packages
-  transpilePackages: ['@minimall/core', '@minimall/ui', '@minimall/db'],
+  // Transpile packages - only include packages that are actually used in public app
+  transpilePackages: ['@minimall/core', '@minimall/ui'],
   
   // Output configuration for edge
   output: 'standalone',

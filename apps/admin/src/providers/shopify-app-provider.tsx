@@ -13,26 +13,48 @@ export function ShopifyAppProvider({ children }: ShopifyAppProviderProps) {
   // Get API key from environment variables
   const apiKey = process.env.NEXT_PUBLIC_SHOPIFY_API_KEY;
 
+  // In development or when API key is missing, render without App Bridge
   if (!apiKey) {
-    console.error("NEXT_PUBLIC_SHOPIFY_API_KEY environment variable is required");
+    console.warn("NEXT_PUBLIC_SHOPIFY_API_KEY not found - running in development mode");
     return (
-      <div style={{ padding: "20px", textAlign: "center" }}>
-        <h2>Configuration Error</h2>
-        <p>Shopify API key is not configured. Please check your environment variables.</p>
-      </div>
+      <AppProvider
+        i18n={{
+          Polaris: {
+            Common: {
+              checkbox: "checkbox",
+              undo: "Undo",
+              cancel: "Cancel",
+              clear: "Clear",
+              close: "Close",
+              submit: "Submit",
+              more: "More",
+            },
+            ResourceList: {
+              sortingLabel: "Sort by",
+              defaultItemSingular: "item",
+              defaultItemPlural: "items",
+              showing: "Showing",
+              of: "of",
+            },
+          },
+        }}
+      >
+        {children}
+      </AppProvider>
     );
   }
+
+  // Get host parameter more safely
+  const searchParams = typeof window !== "undefined" 
+    ? new URLSearchParams(window.location.search)
+    : new URLSearchParams();
+  
+  const host = searchParams.get("host") || searchParams.get("shop") || "";
 
   // App Bridge configuration
   const config = {
     apiKey,
-    host:
-      new URLSearchParams(typeof window !== "undefined" ? window.location.search : "").get(
-        "host"
-      ) || 
-      new URLSearchParams(typeof window !== "undefined" ? window.location.search : "").get(
-        "shop"
-      ) || "",
+    host,
     forceRedirect: true,
   };
 
