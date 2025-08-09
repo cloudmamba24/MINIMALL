@@ -78,7 +78,10 @@ export const WithFooter: Story = {
 				</p>
 			</CardContent>
 			<CardFooter>
-				<button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+				<button
+					type="button"
+					className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+				>
 					Add to Cart
 				</button>
 			</CardFooter>
@@ -111,10 +114,16 @@ export const Complete: Story = {
 			<CardFooter className="flex justify-between">
 				<span className="text-lg font-bold text-green-600">$29.99</span>
 				<div className="flex space-x-2">
-					<button className="bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300 transition-colors">
+					<button
+						type="button"
+						className="bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300 transition-colors"
+					>
 						Save
 					</button>
-					<button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
+					<button
+						type="button"
+						className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+					>
 						Buy Now
 					</button>
 				</div>

@@ -14,7 +14,7 @@ export function formatBytes(bytes: number, decimals = 2) {
 
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-	return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+	return `${Number.parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
 }
 
 export function generateId() {
@@ -37,7 +37,9 @@ export function throttle<T extends (...args: any[]) => any>(
 		if (!inThrottle) {
 			func.apply(this, args);
 			inThrottle = true;
-			setTimeout(() => (inThrottle = false), limit);
+			setTimeout(() => {
+				inThrottle = false;
+			}, limit);
 		}
 	};
 }
@@ -48,5 +50,5 @@ export function capitalize(str: string) {
 
 export function truncate(str: string, length: number) {
 	if (str.length <= length) return str;
-	return str.substring(0, length) + "...";
+	return `${str.substring(0, length)}...`;
 }

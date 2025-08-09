@@ -24,6 +24,8 @@ const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
+					role="img"
+					aria-label="Error"
 				>
 					<path
 						strokeLinecap="round"
@@ -55,6 +57,7 @@ const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({
 				</div>
 				<div className="mt-5">
 					<button
+						type="button"
 						onClick={resetError}
 						className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm"
 					>
@@ -137,13 +140,17 @@ export const PageErrorFallback: React.FC<ErrorFallbackProps> = ({
 
 			<div className="flex gap-4 justify-center">
 				<button
+					type="button"
 					onClick={resetError}
 					className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium"
 				>
 					Try again
 				</button>
 				<button
-					onClick={() => (window.location.href = "/")}
+					type="button"
+					onClick={() => {
+						window.location.href = "/";
+					}}
 					className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-4 py-2 rounded-md font-medium"
 				>
 					Go home
@@ -165,6 +172,8 @@ export const ComponentErrorFallback: React.FC<ErrorFallbackProps> = ({
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
+					role="img"
+					aria-label="Error"
 				>
 					<path
 						strokeLinecap="round"
@@ -187,6 +196,7 @@ export const ComponentErrorFallback: React.FC<ErrorFallbackProps> = ({
 					</p>
 				)}
 				<button
+					type="button"
 					onClick={resetError}
 					className="text-xs underline text-destructive hover:no-underline mt-2"
 				>
