@@ -1,6 +1,69 @@
 {
+  "$schema": "https://vercel.com/schema/vercel.json",
+  "name": "minimall-public",
   "buildCommand": "npx turbo build --filter=@minimall/public",
   "outputDirectory": "apps/public/.next",
   "installCommand": "npm install",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "functions": {
+    "apps/public/src/app/**/*.ts": {
+      "runtime": "nodejs22.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/g/:path*",
+      "destination": "/g/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    },
+    {
+      "source": "/g/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=300"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_APP_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "R2_ENDPOINT": "@r2_endpoint",
+      "R2_ACCESS_KEY": "@r2_access_key", 
+      "R2_SECRET": "@r2_secret",
+      "R2_BUCKET_NAME": "@r2_bucket_name",
+      "NEXT_PUBLIC_BASE_URL": "@public_app_url",
+      "DATABASE_URL": "@database_url",
+      "SHOPIFY_STOREFRONT_ACCESS_TOKEN": "@shopify_storefront_access_token",
+      "NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN": "@shopify_storefront_access_token",
+      "SENTRY_DSN": "@sentry_dsn",
+      "NEXT_PUBLIC_SENTRY_DSN": "@sentry_dsn"
+    }
+  }
 }

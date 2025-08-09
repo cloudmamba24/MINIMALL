@@ -1,0 +1,79 @@
+{
+  "$schema": "https://vercel.com/schema/vercel.json",
+  "name": "minimall-admin",
+  "buildCommand": "npx turbo build --filter=@minimall/admin",
+  "outputDirectory": "apps/admin/.next",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "functions": {
+    "apps/admin/src/app/**/*.ts": {
+      "runtime": "nodejs22.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/admin/:path*",
+      "destination": "/admin/:path*"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Shopify-Topic, X-Shopify-Shop-Domain, X-Shopify-Webhook-Id"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "ALLOWALL"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors 'self' https://*.myshopify.com https://admin.shopify.com;"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_APP_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "SHOPIFY_API_KEY": "@shopify_api_key",
+      "SHOPIFY_API_SECRET": "@shopify_api_secret",
+      "SHOPIFY_SCOPES": "@shopify_scopes",
+      "DATABASE_URL": "@database_url",
+      "NEXTAUTH_SECRET": "@nextauth_secret",
+      "NEXTAUTH_URL": "@admin_app_url",
+      "NEXT_PUBLIC_APP_URL": "@admin_app_url",
+      "NEXT_PUBLIC_SHOPIFY_API_KEY": "@shopify_api_key",
+      "JWT_SECRET": "@jwt_secret",
+      "SHOPIFY_WEBHOOK_SECRET": "@shopify_webhook_secret",
+      "R2_ENDPOINT": "@r2_endpoint",
+      "R2_ACCESS_KEY": "@r2_access_key",
+      "R2_SECRET": "@r2_secret",
+      "R2_BUCKET_NAME": "@r2_bucket_name",
+      "SENTRY_DSN": "@sentry_dsn",
+      "NEXT_PUBLIC_SENTRY_DSN": "@sentry_dsn"
+    }
+  }
+}
