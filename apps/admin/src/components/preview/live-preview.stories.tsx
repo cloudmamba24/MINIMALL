@@ -7,59 +7,55 @@ import type { SiteConfig } from '@minimall/core';
 // Sample configuration for preview
 const sampleConfig: SiteConfig = {
   id: 'preview-config',
-  shop: 'preview-shop.myshopify.com',
-  slug: 'preview-store',
-  content: [
+  version: '1.0.0',
+  categories: [
     {
       id: 'hero-image',
-      type: 'image',
       title: 'Hero Banner',
-      position: 1,
-      isVisible: true,
-      src: 'https://picsum.photos/800/400?random=1',
-      alt: 'Beautiful storefront banner',
-      width: 800,
-      height: 400,
+      card: ['image', {
+        image: 'https://picsum.photos/800/400?random=1',
+        description: 'Beautiful storefront banner'
+      }],
+      categoryType: ['hero', { children: [] }],
+      order: 1,
+      visible: true
     },
     {
       id: 'welcome-text',
-      type: 'text',
       title: 'Welcome Message',
-      position: 2,
-      isVisible: true,
-      content: 'Welcome to our amazing store! Discover our latest collection.',
-      style: {
-        fontSize: 24,
-        color: '#1f2937',
-        textAlign: 'center',
-      },
+      card: ['text', {
+        description: 'Welcome to our amazing store! Discover our latest collection.'
+      }],
+      categoryType: ['text', { children: [] }],
+      order: 2,
+      visible: true
     },
     {
       id: 'featured-product',
-      type: 'product',
       title: 'Featured Item',
-      position: 3,
-      isVisible: true,
-      productId: 'gid://shopify/Product/123456789',
-      handle: 'featured-product',
-      showPrice: true,
-      showDescription: true,
+      card: ['product', {
+        description: 'Check out this amazing product',
+        products: [{ id: '1', productId: 'gid://shopify/Product/123456789' }]
+      }],
+      categoryType: ['products', { children: [] }],
+      order: 3,
+      visible: true
     },
     {
       id: 'shop-button',
-      type: 'link',
       title: 'Shop Now',
-      position: 4,
-      isVisible: true,
-      href: 'https://shop.example.com',
-      target: '_blank',
-      style: {
-        buttonStyle: 'primary',
-      },
+      card: ['link', {
+        description: 'Visit our store',
+        link: 'https://shop.example.com'
+      }],
+      categoryType: ['action', { children: [] }],
+      order: 4,
+      visible: true
     },
   ],
   settings: {
     shopDomain: 'preview-shop.myshopify.com',
+    checkoutLink: '/checkout',
     theme: {
       primaryColor: '#2563eb',
       backgroundColor: '#ffffff',
@@ -76,25 +72,27 @@ const sampleConfig: SiteConfig = {
 
 const minimalConfig: SiteConfig = {
   id: 'minimal-config',
-  shop: 'minimal-shop.myshopify.com',
-  slug: 'minimal-store',
-  content: [
+  version: '1.0.0',
+  categories: [
     {
       id: 'simple-text',
-      type: 'text',
       title: 'Simple Message',
-      position: 1,
-      isVisible: true,
-      content: 'Coming Soon!',
-      style: {
-        fontSize: 32,
-        color: '#374151',
-        textAlign: 'center',
-      },
+      card: ['text', {
+        description: 'Coming Soon!'
+      }],
+      categoryType: ['text', { children: [] }],
+      order: 1,
+      visible: true
     },
   ],
   settings: {
     shopDomain: 'minimal-shop.myshopify.com',
+    checkoutLink: '/checkout',
+    theme: {
+      primaryColor: '#000000',
+      backgroundColor: '#ffffff',
+      textColor: '#374151',
+    },
   },
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
@@ -125,18 +123,17 @@ const meta: Meta<typeof LivePreview> = {
     config: {
       description: 'Site configuration object to preview',
     },
-    selectedViewport: {
-      control: 'select',
-      options: ['mobile', 'tablet', 'desktop'],
-      description: 'Currently selected viewport size',
+    isLoading: {
+      control: 'boolean',
+      description: 'Whether the preview is in loading state',
     },
-    onViewportChange: {
-      description: 'Callback when viewport selection changes',
-      action: 'viewport-changed',
+    error: {
+      control: 'text',
+      description: 'Error message to display',
     },
     onRefresh: {
-      description: 'Callback when preview refresh is requested',
-      action: 'preview-refreshed',
+      description: 'Callback when refresh button is clicked',
+      action: 'refresh-clicked',
     },
   },
 };
@@ -147,10 +144,6 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     config: sampleConfig,
-    selectedViewport: 'desktop',
-    onViewportChange: (viewport) => {
-      console.log('Viewport changed:', viewport);
-    },
     onRefresh: () => {
       console.log('Preview refreshed');
     },
@@ -160,10 +153,6 @@ export const Default: Story = {
 export const MobileView: Story = {
   args: {
     config: sampleConfig,
-    selectedViewport: 'mobile',
-    onViewportChange: (viewport) => {
-      console.log('Viewport changed:', viewport);
-    },
     onRefresh: () => {
       console.log('Preview refreshed');
     },
@@ -180,10 +169,6 @@ export const MobileView: Story = {
 export const TabletView: Story = {
   args: {
     config: sampleConfig,
-    selectedViewport: 'tablet',
-    onViewportChange: (viewport) => {
-      console.log('Viewport changed:', viewport);
-    },
     onRefresh: () => {
       console.log('Preview refreshed');
     },
@@ -200,10 +185,6 @@ export const TabletView: Story = {
 export const MinimalConfig: Story = {
   args: {
     config: minimalConfig,
-    selectedViewport: 'desktop',
-    onViewportChange: (viewport) => {
-      console.log('Viewport changed:', viewport);
-    },
     onRefresh: () => {
       console.log('Preview refreshed');
     },
@@ -263,8 +244,6 @@ export const InteractiveViewports: Story = {
         </div>
         <LivePreview
           config={sampleConfig}
-          selectedViewport={viewport}
-          onViewportChange={setViewport}
           onRefresh={() => {
             setRefreshCount(prev => prev + 1);
             console.log('Preview refreshed');

@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, RenderOptions, RenderResult } from '@testing-library/react';
+import { vi } from 'vitest';
 
 // Mock Shopify App Bridge context
 interface MockAppBridgeContext {
@@ -42,7 +43,7 @@ export const renderWithProviders = (
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <MockPolarisProvider>
-      <MockAppBridgeProvider context={appBridgeContext}>
+      <MockAppBridgeProvider {...(appBridgeContext && { context: appBridgeContext })}>
         {children}
       </MockAppBridgeProvider>
     </MockPolarisProvider>

@@ -147,39 +147,46 @@ export const WithManyItems: Story = {
   args: {
     config: {
       ...sampleConfig,
-      content: [
-        ...sampleConfig.content!,
+      categories: [
+        ...sampleConfig.categories,
         {
-          id: 'video-1',
-          type: 'video',
+          id: 'video-content',
           title: 'Product Video',
-          position: 4,
-          isVisible: true,
-          src: 'https://example.com/video.mp4',
-          thumbnail: 'https://example.com/thumb.jpg',
-          autoplay: false,
+          card: ['video', {
+            description: 'Watch our product in action',
+            videoUrl: 'https://example.com/video.mp4',
+            image: 'https://example.com/thumb.jpg'
+          }],
+          categoryType: ['media', { 
+            children: []
+          }],
+          order: 2,
+          visible: true
         },
         {
-          id: 'link-1',
-          type: 'link',
+          id: 'cta-links',
           title: 'Shop Now',
-          position: 5,
-          isVisible: true,
-          href: 'https://shop.example.com',
-          target: '_blank',
-          style: {
-            buttonStyle: 'primary',
-          },
+          card: ['link', {
+            description: 'Visit our main store',
+            link: 'https://shop.example.com'
+          }],
+          categoryType: ['action', { 
+            children: []
+          }],
+          order: 3,
+          visible: true
         },
         {
-          id: 'social-1',
-          type: 'social',
+          id: 'social-media',
           title: 'Follow Us',
-          position: 6,
-          isVisible: true,
-          platform: 'instagram',
-          username: '@shopexample',
-          showFollowers: true,
+          card: ['social', {
+            description: 'Connect with us on social media @shopexample'
+          }],
+          categoryType: ['social', { 
+            children: []
+          }],
+          order: 4,
+          visible: true
         },
       ],
     },
@@ -209,7 +216,7 @@ export const Interactive: Story = {
           <strong>Current Config:</strong>
           <pre style={{ fontSize: '12px', marginTop: '0.5rem' }}>
             {JSON.stringify({ 
-              contentCount: config.content?.length || 0,
+              categoryCount: config.categories?.length || 0,
               lastUpdate: new Date().toLocaleTimeString()
             }, null, 2)}
           </pre>

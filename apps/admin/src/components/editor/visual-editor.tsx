@@ -21,7 +21,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Card, Button, LegacyStack, Text, Icon, Badge, ButtonGroup } from '@shopify/polaris';
 import { PlusIcon, DragHandleIcon, EditIcon, DeleteIcon, DuplicateIcon } from '@shopify/polaris-icons';
-import type { SiteConfig, ContentItem } from '@minimall/core';
+import type { SiteConfig, Category, CardDetails } from '@minimall/core';
 
 interface VisualEditorProps {
   config: SiteConfig;
@@ -29,11 +29,88 @@ interface VisualEditorProps {
   onPreview?: (config: SiteConfig) => void;
 }
 
+// Legacy ContentItem interface for backward compatibility
+interface ContentItem {
+  id: string;
+  type: 'image' | 'video' | 'product' | 'text' | 'link' | 'social';
+  title?: string | undefined;
+  description?: string | undefined;
+  position: number;
+  isVisible: boolean;
+  // Image specific
+  src?: string | undefined;
+  alt?: string | undefined;
+  width?: number;
+  height?: number;
+  // Video specific
+  thumbnail?: string | undefined;
+  autoplay?: boolean;
+  // Product specific
+  productId?: string | undefined;
+  handle?: string | undefined;
+  showPrice?: boolean;
+  showDescription?: boolean;
+  // Text specific
+  content?: string | undefined;
+  style?: {
+    fontSize?: number;
+    color?: string;
+    textAlign?: 'left' | 'center' | 'right';
+  } | undefined;
+  // Link specific
+  href?: string | undefined;
+  target?: string | undefined;
+  // Social specific
+  platform?: 'instagram' | 'twitter' | 'tiktok' | 'youtube' | undefined;
+  username?: string | undefined;
+  showFollowers?: boolean;
+}
+
 interface DragItem {
   id: string;
   type: ContentItem['type'];
   item: ContentItem;
 }
+
+// Helper functions to convert between Category and ContentItem
+const categoryToContentItem = (category: Category): ContentItem => {
+  const [cardType, cardDetails] = category.card;
+  
+  return {
+    id: category.id,
+    type: cardType as ContentItem['type'],
+    title: category.title,
+    description: cardDetails.description || undefined,
+    position: category.order || 0,
+    isVisible: category.visible !== false,
+    // Map card details to content item properties
+    ...(cardDetails.image && { src: cardDetails.image }),
+    ...(cardDetails.imageUrl && { src: cardDetails.imageUrl }),
+    ...(cardDetails.videoUrl && { src: cardDetails.videoUrl }),
+    ...(cardDetails.link && { href: cardDetails.link }),
+    ...(cardDetails.products && cardDetails.products.length > 0 && { 
+      productId: cardDetails.products[0]?.productId 
+    }),
+  };
+};
+
+const contentItemToCategory = (item: ContentItem): Category => {
+  const cardDetails: Partial<CardDetails> = {
+    ...(item.description && { description: item.description }),
+    ...(item.src && { image: item.src }),
+    ...(item.href && { link: item.href }),
+    ...(item.productId && { products: [{ id: item.id, productId: item.productId }] }),
+  };
+
+  return {
+    id: item.id,
+    title: item.title || `${item.type} item`,
+    card: [item.type, cardDetails as CardDetails],
+    categoryType: [item.type, { children: [] }],
+    order: item.position,
+    visible: item.isVisible,
+  };
+};
 
 // Component types for the content palette
 const COMPONENT_TYPES = [
@@ -74,43 +151,43 @@ function SortableItem({ item, onEdit, onDelete, onDuplicate }: {
           <img src={item.src} alt={item.alt || ''} className="w-16 h-16 object-cover rounded" />
         ) : (
           <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" color="subdued">No image</Text>
+            <Text variant="bodySm" tone="subdued" as="span">No image</Text>
           </div>
         );
       case 'video':
         return (
           <div className="w-16 h-16 bg-blue-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" color="subdued">Video</Text>
+            <Text variant="bodySm" tone="subdued" as="span">Video</Text>
           </div>
         );
       case 'product':
         return (
           <div className="w-16 h-16 bg-green-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" color="subdued">Product</Text>
+            <Text variant="bodySm" tone="subdued" as="span">Product</Text>
           </div>
         );
       case 'text':
         return (
           <div className="w-16 h-16 bg-purple-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" color="subdued">Text</Text>
+            <Text variant="bodySm" tone="subdued" as="span">Text</Text>
           </div>
         );
       case 'link':
         return (
           <div className="w-16 h-16 bg-orange-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" color="subdued">Link</Text>
+            <Text variant="bodySm" tone="subdued" as="span">Link</Text>
           </div>
         );
       case 'social':
         return (
           <div className="w-16 h-16 bg-pink-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" color="subdued">Social</Text>
+            <Text variant="bodySm" tone="subdued" as="span">Social</Text>
           </div>
         );
       default:
         return (
           <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" color="subdued">Item</Text>
+            <Text variant="bodySm" tone="subdued" as="span">Item</Text>
           </div>
         );
     }
@@ -132,26 +209,20 @@ function SortableItem({ item, onEdit, onDelete, onDuplicate }: {
           <div className="flex-1">
             <LegacyStack>
               <div className="flex items-center gap-2">
-                <Text variant="headingMd">{item.title || `${item.type} item`}</Text>
+                <Text variant="headingMd" as="h3">{item.title || `${item.type} item`}</Text>
                 <Badge tone="info">{item.type}</Badge>
               </div>
               {item.description && (
-                <Text variant="bodySm" color="subdued">{item.description}</Text>
+                <Text variant="bodySm" tone="subdued" as="span">{item.description}</Text>
               )}
             </LegacyStack>
           </div>
 
           {/* Action buttons */}
           <ButtonGroup>
-            <Button size="slim" onClick={() => onEdit(item)}>
-              <Icon source={EditIcon} />
-            </Button>
-            <Button size="slim" onClick={() => onDuplicate(item)}>
-              <Icon source={DuplicateIcon} />
-            </Button>
-            <Button size="slim" tone="critical" onClick={() => onDelete(item.id)}>
-              <Icon source={DeleteIcon} />
-            </Button>
+            <Button size="slim" onClick={() => onEdit(item)} icon={EditIcon} />
+            <Button size="slim" onClick={() => onDuplicate(item)} icon={DuplicateIcon} />
+            <Button size="slim" tone="critical" onClick={() => onDelete(item.id)} icon={DeleteIcon} />
           </ButtonGroup>
         </div>
       </Card>
@@ -164,9 +235,10 @@ function ComponentPalette({ onAddComponent }: {
   onAddComponent: (type: ContentItem['type']) => void;
 }) {
   return (
-    <Card title="Add Components">
+    <Card>
       <div className="p-4">
-        <div className="grid grid-cols-2 gap-2">
+        <Text variant="headingMd" as="h2">Add Components</Text>
+        <div className="grid grid-cols-2 gap-2 mt-4">
           {COMPONENT_TYPES.map((component) => (
             <Button
               key={component.type}
@@ -203,15 +275,21 @@ export function VisualEditor({ config, onConfigChange, onPreview }: VisualEditor
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const items = config.content || [];
-      const oldIndex = items.findIndex(item => item.id === active.id);
-      const newIndex = items.findIndex(item => item.id === over.id);
+      const categories = config.categories || [];
+      const oldIndex = categories.findIndex(category => category.id === active.id);
+      const newIndex = categories.findIndex(category => category.id === over.id);
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        const newContent = arrayMove(items, oldIndex, newIndex);
+        const newCategories = arrayMove(categories, oldIndex, newIndex);
+        // Update order property for each category
+        const updatedCategories = newCategories.map((category, index) => ({
+          ...category,
+          order: index,
+        }));
+        
         const updatedConfig = {
           ...config,
-          content: newContent,
+          categories: updatedCategories,
         };
         onConfigChange(updatedConfig);
         onPreview?.(updatedConfig);
@@ -222,54 +300,24 @@ export function VisualEditor({ config, onConfigChange, onPreview }: VisualEditor
   }, [config, onConfigChange, onPreview]);
 
   const addComponent = useCallback((type: ContentItem['type']) => {
-    const newItem: ContentItem = {
+    const newCategory: Category = {
       id: `${type}-${Date.now()}`,
-      type,
       title: `New ${type}`,
-      position: (config.content?.length || 0) + 1,
-      isVisible: true,
-      ...(type === 'image' && {
-        src: '',
-        alt: '',
-        width: 400,
-        height: 300,
-      }),
-      ...(type === 'video' && {
-        src: '',
-        thumbnail: '',
-        autoplay: false,
-      }),
-      ...(type === 'product' && {
-        productId: '',
-        handle: '',
-        showPrice: true,
-        showDescription: true,
-      }),
-      ...(type === 'text' && {
-        content: 'Add your text here...',
-        style: {
-          fontSize: 16,
-          color: '#000000',
-          textAlign: 'left' as const,
-        },
-      }),
-      ...(type === 'link' && {
-        href: '',
-        target: '_blank',
-        style: {
-          buttonStyle: 'primary' as const,
-        },
-      }),
-      ...(type === 'social' && {
-        platform: 'instagram' as const,
-        username: '',
-        showFollowers: false,
-      }),
+      card: [type, {
+        description: `A new ${type} component`,
+        ...(type === 'image' && { image: '' }),
+        ...(type === 'video' && { videoUrl: '' }),
+        ...(type === 'product' && { products: [] }),
+        ...(type === 'link' && { link: '' }),
+      }],
+      categoryType: [type, { children: [] }],
+      order: (config.categories?.length || 0),
+      visible: true,
     };
 
     const updatedConfig = {
       ...config,
-      content: [...(config.content || []), newItem],
+      categories: [...(config.categories || []), newCategory],
     };
     
     onConfigChange(updatedConfig);
@@ -283,30 +331,34 @@ export function VisualEditor({ config, onConfigChange, onPreview }: VisualEditor
   const deleteItem = useCallback((id: string) => {
     const updatedConfig = {
       ...config,
-      content: (config.content || []).filter(item => item.id !== id),
+      categories: (config.categories || []).filter(category => category.id !== id),
     };
     onConfigChange(updatedConfig);
     onPreview?.(updatedConfig);
   }, [config, onConfigChange, onPreview]);
 
   const duplicateItem = useCallback((item: ContentItem) => {
-    const duplicatedItem: ContentItem = {
-      ...item,
+    // Convert ContentItem to Category for duplication
+    const originalCategory = contentItemToCategory(item);
+    const duplicatedCategory: Category = {
+      ...originalCategory,
       id: `${item.type}-${Date.now()}`,
       title: `${item.title} (Copy)`,
-      position: (config.content?.length || 0) + 1,
+      order: (config.categories?.length || 0),
     };
 
     const updatedConfig = {
       ...config,
-      content: [...(config.content || []), duplicatedItem],
+      categories: [...(config.categories || []), duplicatedCategory],
     };
     
     onConfigChange(updatedConfig);
     onPreview?.(updatedConfig);
   }, [config, onConfigChange, onPreview]);
 
-  const items = config.content || [];
+  // Convert categories to content items for the UI
+  const categories = config.categories || [];
+  const items = categories.map(categoryToContentItem);
   const activeItem = activeId ? items.find(item => item.id === activeId) : null;
 
   return (
@@ -315,11 +367,12 @@ export function VisualEditor({ config, onConfigChange, onPreview }: VisualEditor
       <ComponentPalette onAddComponent={addComponent} />
 
       {/* Content list */}
-      <Card title="Page Content">
+      <Card>
         <div className="p-4">
+          <Text variant="headingMd" as="h2">Page Content</Text>
           {items.length === 0 ? (
             <div className="text-center py-8">
-              <Text variant="bodyLg" color="subdued">
+              <Text variant="bodyLg" tone="subdued" as="p">
                 No content added yet. Use the components above to get started!
               </Text>
             </div>

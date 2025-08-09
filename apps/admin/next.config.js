@@ -87,6 +87,18 @@ const nextConfig = {
       };
     }
     
+    // Suppress OpenTelemetry/Prisma instrumentation warnings
+    config.ignoreWarnings = [
+      {
+        module: /@opentelemetry\/instrumentation/,
+        message: /Critical dependency: the request of a dependency is an expression/,
+      },
+      {
+        module: /@prisma\/instrumentation/,
+        message: /Critical dependency: the request of a dependency is an expression/,
+      },
+    ];
+    
     return config;
   },
 

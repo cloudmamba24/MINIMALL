@@ -135,9 +135,10 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
 
   if (!config || !config.id) {
     return (
-      <Card title="Live Preview">
+      <Card>
         <div className="p-8 text-center">
-          <Text variant="bodyLg" color="subdued">
+          <Text variant="headingMd" as="h2">Live Preview</Text>
+          <Text variant="bodyLg" tone="subdued" as="p">
             No configuration selected for preview
           </Text>
         </div>
@@ -150,15 +151,15 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
       <div className="p-4 border-b">
         <div className="flex items-center justify-between">
           <div>
-            <Text variant="headingMd">Live Preview</Text>
-            <Text variant="bodySm" color="subdued">
-              {config.slug} • {dimensions.label}
+            <Text variant="headingMd" as="h2">Live Preview</Text>
+            <Text variant="bodySm" tone="subdued" as="span">
+              {config.id} • {dimensions.label}
             </Text>
           </div>
           
           <div className="flex items-center gap-2">
             {/* Viewport selector */}
-            <ButtonGroup segmented>
+            <ButtonGroup variant="segmented">
               <Button
                 pressed={viewport === 'mobile'}
                 onClick={() => setViewport('mobile')}
@@ -206,7 +207,7 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
             <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-10">
               <div className="text-center">
                 <Spinner size="large" />
-                <Text variant="bodyMd">
+                <Text variant="bodyMd" as="p">
                   {isLoading ? 'Loading configuration...' : 'Loading preview...'}
                 </Text>
               </div>
@@ -233,7 +234,7 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
                 onLoad={handleIframeLoad}
                 onError={handleIframeError}
                 className="border-0"
-                title={`Preview of ${config.slug}`}
+                title={`Preview of ${config.id}`}
                 sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
               />
             )}
@@ -248,7 +249,7 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
 
         {/* Preview tips */}
         <div className="mt-4 text-center">
-          <Text variant="bodySm" color="subdued">
+          <Text variant="bodySm" tone="subdued" as="p">
             Changes are automatically reflected in the preview. Use the refresh button if updates don't appear.
           </Text>
         </div>
