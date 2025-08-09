@@ -4,7 +4,6 @@
   "buildCommand": "npx turbo build --filter=@minimall/admin",
   "outputDirectory": "apps/admin/.next",
   "installCommand": "npm ci",
-  "framework": "nextjs",
   "functions": {
     "apps/admin/src/app/api/**/*.ts": {
       "runtime": "nodejs22.x"
