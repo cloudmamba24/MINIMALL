@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ShopifyAppProvider } from '../providers/shopify-app-provider';
 import '../styles/globals.css';
 
 export const metadata: Metadata = {
@@ -13,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <ShopifyAppProvider>
+          {children}
+        </ShopifyAppProvider>
+      </body>
     </html>
   );
 }

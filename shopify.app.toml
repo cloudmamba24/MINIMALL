@@ -1,0 +1,49 @@
+# Learn more about configuring your Shopify app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "MINIMALL"
+client_id = "${SHOPIFY_API_KEY}"
+application_url = "${NEXT_PUBLIC_APP_URL}/admin"
+embedded = true
+
+[access_scopes]
+# Scopes your app will request during the OAuth process
+scopes = "read_products,write_products,read_themes,write_themes,read_customers,read_orders"
+
+[auth]
+redirect_urls = [
+  "${NEXT_PUBLIC_APP_URL}/api/auth/shopify/callback",
+  "${NEXT_PUBLIC_APP_URL}/admin/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-01"
+
+# App lifecycle webhooks (required)
+[webhooks.app_uninstalled]
+endpoint = "${NEXT_PUBLIC_APP_URL}/api/webhooks/app/uninstalled"
+
+[webhooks.app_subscriptions_update]
+endpoint = "${NEXT_PUBLIC_APP_URL}/api/webhooks/app/subscriptions/update"
+
+# Product webhooks for syncing
+[webhooks.products_create]
+endpoint = "${NEXT_PUBLIC_APP_URL}/api/webhooks/products/create"
+
+[webhooks.products_update] 
+endpoint = "${NEXT_PUBLIC_APP_URL}/api/webhooks/products/update"
+
+[webhooks.products_delete]
+endpoint = "${NEXT_PUBLIC_APP_URL}/api/webhooks/products/delete"
+
+# GDPR compliance webhooks (mandatory)
+[webhooks.customers_data_request]
+endpoint = "${NEXT_PUBLIC_APP_URL}/api/webhooks/customers/data_request"
+
+[webhooks.customers_redact]
+endpoint = "${NEXT_PUBLIC_APP_URL}/api/webhooks/customers/redact"
+
+[webhooks.shop_redact]
+endpoint = "${NEXT_PUBLIC_APP_URL}/api/webhooks/shop/redact"
+
+[pos]
+embedded = false
