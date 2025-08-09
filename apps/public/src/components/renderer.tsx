@@ -11,7 +11,7 @@ interface RendererProps {
   className?: string | undefined;
 }
 
-export async function Renderer({ config, className }: RendererProps) {
+export function Renderer({ config, className }: RendererProps) {
   return (
     <ThemeProvider theme={config.settings.theme}>
       <div className={cn("min-h-screen bg-background", className)}>
