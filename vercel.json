@@ -5,11 +5,6 @@
   "outputDirectory": "apps/public/.next",
   "installCommand": "npm ci",
   "framework": "nextjs",
-  "functions": {
-    "apps/public/src/app/**/*.ts": {
-      "runtime": "nodejs22.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/g/:path*",
