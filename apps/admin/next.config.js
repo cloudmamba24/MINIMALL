@@ -106,8 +106,8 @@ const nextConfig = {
   // Static optimization
   trailingSlash: false,
 
-  // Build output
-  output: "standalone",
+  // Remove output configuration - let Vercel handle it
+  // output: "standalone",
 
   // Development configuration
   ...(process.env.NODE_ENV === "development" && {
