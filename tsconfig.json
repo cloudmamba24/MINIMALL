@@ -23,13 +23,7 @@
       {
         "name": "next"
       }
-    ],
-    "baseUrl": ".",
-    "paths": {
-      "@minimall/core": ["./packages/core/src"],
-      "@minimall/ui": ["./packages/ui/src"],
-      "@minimall/db": ["./packages/db/src"]
-    }
+    ]
   },
   "include": [
     "next-env.d.ts",

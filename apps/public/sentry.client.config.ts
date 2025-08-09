@@ -5,11 +5,12 @@ Sentry.init(createClientConfig({
   tags: { app: 'public' },
   enableInDevelopment: !!process.env.SENTRY_ENABLE_DEV,
   integrations: [
-    Sentry.replayIntegration({
-      // Mask all text content, input values, etc.
-      maskAllText: true,
-      maskAllInputs: true,
-      blockAllMedia: true,
-    }),
+    // Replay integration temporarily disabled due to compatibility issues
+    // Will be re-enabled once Sentry version is updated
+    // Sentry.replayIntegration({
+    //   maskAllText: true,
+    //   maskAllInputs: true, 
+    //   blockAllMedia: true,
+    // }),
   ],
 }));

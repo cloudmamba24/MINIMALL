@@ -12,8 +12,11 @@ export function createDatabase(databaseUrl: string) {
   return drizzle(client, { schema });
 }
 
+// Export types
+export type Database = ReturnType<typeof createDatabase>;
+
 // Export the database instance (only if DATABASE_URL is provided)
-let db: ReturnType<typeof createDatabase> | null = null;
+let db: Database | null = null;
 if (process.env.DATABASE_URL) {
   try {
     db = createDatabase(process.env.DATABASE_URL);
@@ -28,6 +31,3 @@ export { db };
 // Export all schema
 export * from './schema';
 export { schema };
-
-// Export types
-export type Database = ReturnType<typeof createDatabase>;

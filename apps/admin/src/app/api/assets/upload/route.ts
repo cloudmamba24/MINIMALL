@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { r2Service } from '@repo/core';
+import { r2Service } from '@minimall/core';
 import * as Sentry from '@sentry/nextjs';
 
 // POST /api/assets/upload - Upload file to R2

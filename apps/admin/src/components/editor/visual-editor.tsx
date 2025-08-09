@@ -19,7 +19,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Card, Button, Stack, Text, Icon, Badge, ButtonGroup } from '@shopify/polaris';
+import { Card, Button, LegacyStack, Text, Icon, Badge, ButtonGroup } from '@shopify/polaris';
 import { PlusIcon, DragHandleIcon, EditIcon, DeleteIcon, DuplicateIcon } from '@shopify/polaris-icons';
 import type { SiteConfig, ContentItem } from '@minimall/core';
 
@@ -130,7 +130,7 @@ function SortableItem({ item, onEdit, onDelete, onDuplicate }: {
 
           {/* Item details */}
           <div className="flex-1">
-            <Stack>
+            <LegacyStack>
               <div className="flex items-center gap-2">
                 <Text variant="headingMd">{item.title || `${item.type} item`}</Text>
                 <Badge tone="info">{item.type}</Badge>
@@ -138,7 +138,7 @@ function SortableItem({ item, onEdit, onDelete, onDuplicate }: {
               {item.description && (
                 <Text variant="bodySm" color="subdued">{item.description}</Text>
               )}
-            </Stack>
+            </LegacyStack>
           </div>
 
           {/* Action buttons */}

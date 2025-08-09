@@ -171,25 +171,9 @@ const meta: Meta<typeof AnalyticsDashboard> = {
     ),
   ],
   argTypes: {
-    data: {
-      description: 'Analytics data object containing performance metrics and user events',
-    },
     configId: {
       description: 'Configuration ID to filter analytics data',
       control: 'text',
-    },
-    timeframe: {
-      control: 'select',
-      options: ['1h', '24h', '7d', '30d'],
-      description: 'Time period for analytics data',
-    },
-    onTimeframeChange: {
-      description: 'Callback when timeframe selection changes',
-      action: 'timeframe-changed',
-    },
-    onRefresh: {
-      description: 'Callback when data refresh is requested',
-      action: 'data-refreshed',
     },
   },
 };
@@ -199,29 +183,13 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    data: mockAnalyticsData,
     configId: 'demo-config',
-    timeframe: '7d',
-    onTimeframeChange: (timeframe) => {
-      console.log('Timeframe changed:', timeframe);
-    },
-    onRefresh: () => {
-      console.log('Analytics data refreshed');
-    },
   },
 };
 
 export const EmptyState: Story = {
   args: {
-    data: emptyAnalyticsData,
     configId: 'empty-config',
-    timeframe: '7d',
-    onTimeframeChange: (timeframe) => {
-      console.log('Timeframe changed:', timeframe);
-    },
-    onRefresh: () => {
-      console.log('Analytics data refreshed');
-    },
   },
   parameters: {
     docs: {
@@ -234,15 +202,7 @@ export const EmptyState: Story = {
 
 export const HighTraffic: Story = {
   args: {
-    data: highTrafficData,
     configId: 'busy-config',
-    timeframe: '30d',
-    onTimeframeChange: (timeframe) => {
-      console.log('Timeframe changed:', timeframe);
-    },
-    onRefresh: () => {
-      console.log('Analytics data refreshed');
-    },
   },
   parameters: {
     docs: {
@@ -255,16 +215,7 @@ export const HighTraffic: Story = {
 
 export const LoadingState: Story = {
   args: {
-    data: null,
     configId: 'loading-config',
-    timeframe: '7d',
-    loading: true,
-    onTimeframeChange: (timeframe) => {
-      console.log('Timeframe changed:', timeframe);
-    },
-    onRefresh: () => {
-      console.log('Analytics data refreshed');
-    },
   },
   parameters: {
     docs: {
@@ -277,16 +228,7 @@ export const LoadingState: Story = {
 
 export const ErrorState: Story = {
   args: {
-    data: null,
     configId: 'error-config',
-    timeframe: '7d',
-    error: 'Failed to load analytics data. Please try again.',
-    onTimeframeChange: (timeframe) => {
-      console.log('Timeframe changed:', timeframe);
-    },
-    onRefresh: () => {
-      console.log('Analytics data refreshed');
-    },
   },
   parameters: {
     docs: {
@@ -403,12 +345,7 @@ export const InteractiveDashboard: Story = {
           </div>
         </div>
         <AnalyticsDashboard
-          data={loading ? null : data}
           configId="interactive-config"
-          timeframe={timeframe}
-          loading={loading}
-          onTimeframeChange={handleTimeframeChange}
-          onRefresh={handleRefresh}
         />
       </div>
     );

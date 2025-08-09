@@ -52,14 +52,15 @@ export function createSentryConfig(config: SentryConfig & { component: string })
     },
 
     integrations: [
-      ...(enableReplays
-        ? [
-            Sentry.replayIntegration({
-              maskAllText: false,
-              blockAllMedia: false,
-            }),
-          ]
-        : []),
+      // Replay integration temporarily disabled for compatibility
+      // ...(enableReplays
+      //   ? [
+      //       Sentry.replayIntegration({
+      //         maskAllText: false,
+      //         blockAllMedia: false,
+      //       }),
+      //     ]
+      //   : []),
       ...integrations,
     ],
 
@@ -82,33 +83,57 @@ export function createSentryConfig(config: SentryConfig & { component: string })
 /**
  * Client-side Sentry configuration factory
  */
-export function createClientConfig(overrides: Partial<SentryConfig> = {}) {
-  return createSentryConfig({
+export function createClientConfig(overrides: Partial<SentryConfig> = {}): SentryConfig {
+  const baseConfig = createSentryConfig({
     component: "client",
     enableReplays: true,
     ...overrides,
   });
+  
+  // Ensure DSN is provided for client-side configuration
+  if (!baseConfig.dsn) {
+    console.warn('Sentry DSN not provided. Sentry will be disabled.');
+    return { ...baseConfig, dsn: '', beforeSend: () => null } as SentryConfig;
+  }
+  
+  return { ...baseConfig, dsn: baseConfig.dsn } as SentryConfig;
 }
 
 /**
  * Server-side Sentry configuration factory
  */
-export function createServerConfig(overrides: Partial<SentryConfig> = {}) {
-  return createSentryConfig({
+export function createServerConfig(overrides: Partial<SentryConfig> = {}): SentryConfig {
+  const baseConfig = createSentryConfig({
     component: "server",
     enableReplays: false,
     ...overrides,
   });
+  
+  // Ensure DSN is provided for server-side configuration
+  if (!baseConfig.dsn) {
+    console.warn('Sentry DSN not provided. Sentry will be disabled.');
+    return { ...baseConfig, dsn: '', beforeSend: () => null } as SentryConfig;
+  }
+  
+  return { ...baseConfig, dsn: baseConfig.dsn } as SentryConfig;
 }
 
 /**
  * Edge runtime Sentry configuration factory
  */
-export function createEdgeConfig(overrides: Partial<SentryConfig> = {}) {
-  return createSentryConfig({
+export function createEdgeConfig(overrides: Partial<SentryConfig> = {}): SentryConfig {
+  const baseConfig = createSentryConfig({
     component: "edge",
     enableReplays: false,
     tracesSampleRate: 0.1, // Lower sample rate for edge
     ...overrides,
   });
+  
+  // Ensure DSN is provided for edge runtime configuration
+  if (!baseConfig.dsn) {
+    console.warn('Sentry DSN not provided. Sentry will be disabled.');
+    return { ...baseConfig, dsn: '', beforeSend: () => null } as SentryConfig;
+  }
+  
+  return { ...baseConfig, dsn: baseConfig.dsn } as SentryConfig;
 }

@@ -7,7 +7,7 @@ import {
   Button, 
   TextField, 
   Select, 
-  Stack, 
+  LegacyStack, 
   Text, 
   Banner, 
   Spinner,
@@ -24,14 +24,14 @@ import {
 import { 
   UploadIcon, 
   ImageIcon, 
-  VideoIcon, 
+  PlayIcon, 
   DeleteIcon, 
   EditIcon,
   SearchIcon,
   FilterIcon,
   FolderIcon,
-  GridIcon,
-  ListIcon
+  LayoutColumns2Icon,
+  ListBulletedIcon
 } from '@shopify/polaris-icons';
 
 interface AssetFile {
@@ -255,7 +255,7 @@ export function AssetManager({
   const getAssetIcon = (asset: AssetFile) => {
     switch (asset.type) {
       case 'image': return ImageIcon;
-      case 'video': return VideoIcon;
+      case 'video': return PlayIcon;
       default: return FolderIcon;
     }
   };
@@ -351,12 +351,12 @@ export function AssetManager({
               <Button
                 pressed={viewMode === 'grid'}
                 onClick={() => setViewMode('grid')}
-                icon={GridIcon}
+                icon={LayoutColumns2Icon}
               />
               <Button
                 pressed={viewMode === 'list'}
                 onClick={() => setViewMode('list')}
-                icon={ListIcon}
+                icon={ListBulletedIcon}
               />
             </ButtonGroup>
           </div>
@@ -492,7 +492,7 @@ export function AssetManager({
           }]}
         >
           <Modal.Section>
-            <Stack>
+            <LegacyStack>
               <TextField
                 label="Name"
                 value={editingAsset.name}
@@ -510,7 +510,7 @@ export function AssetManager({
                 onChange={() => {}}
                 helpText="Separate tags with commas"
               />
-            </Stack>
+            </LegacyStack>
           </Modal.Section>
         </Modal>
       )}

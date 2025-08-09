@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import * as Sentry from '@sentry/nextjs';
-import { db, analyticsEvents } from '@repo/db';
+import { db, analyticsEvents } from '@minimall/db';
 
 const analyticsEventSchema = z.object({
   event: z.string(),

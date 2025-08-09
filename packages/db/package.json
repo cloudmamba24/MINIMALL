@@ -25,7 +25,7 @@
     "@minimall/core": "*",
     "@neondatabase/serverless": "^1.0.1",
     "@planetscale/database": "^1.19.0",
-    "drizzle-orm": "^0.33.0",
+    "drizzle-orm": "^0.44.4",
     "postgres": "^3.4.5"
   },
   "devDependencies": {

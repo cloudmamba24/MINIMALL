@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { r2Service } from '@repo/core';
+import { r2Service } from '@minimall/core';
 import * as Sentry from '@sentry/nextjs';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // DELETE /api/assets/[id] - Delete an asset
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!r2Service) {
       return NextResponse.json(
@@ -57,7 +57,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 // PUT /api/assets/[id] - Update asset metadata
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     if (!r2Service) {

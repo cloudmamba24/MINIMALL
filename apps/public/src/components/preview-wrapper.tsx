@@ -17,12 +17,12 @@ export function PreviewWrapper({ initialConfig, isPreview = false }: PreviewWrap
   useEffect(() => {
     if (!isPreview) return;
 
+    // Verify origin - should be from admin app
+    const adminUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3001' 
+      : window.location.origin.replace(':3000', ':3001');
+
     const handleMessage = (event: MessageEvent) => {
-      // Verify origin - should be from admin app
-      const adminUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3001' 
-        : window.location.origin.replace(':3000', ':3001');
-      
       if (event.origin !== adminUrl) return;
 
       switch (event.data.type) {
@@ -33,7 +33,7 @@ export function PreviewWrapper({ initialConfig, isPreview = false }: PreviewWrap
             setLastUpdate(event.data.timestamp);
             
             // Send confirmation back to admin
-            event.source?.postMessage({
+            (event.source as Window)?.postMessage({
               type: 'CONFIG_APPLIED',
               timestamp: event.data.timestamp,
             }, adminUrl);

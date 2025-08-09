@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import * as Sentry from '@sentry/nextjs';
-import { db, performanceMetrics, analyticsEvents } from '@repo/db';
+import { db, performanceMetrics, analyticsEvents } from '@minimall/db';
 import { desc, eq, and, gte, sql } from 'drizzle-orm';
 
 const analyticsRequestSchema = z.object({
@@ -56,19 +56,19 @@ export async function GET(request: NextRequest) {
     const endDate = params.endDate ? new Date(params.endDate) : now;
 
     // Build base conditions
-    const baseConditions = [];
+    const baseConditions: any[] = [];
     if (params.configId) {
-      baseConditions.push(eq(performanceMetrics.configId, params.configId));
+      baseConditions.push(eq(performanceMetrics.configId as any, params.configId));
     }
-    baseConditions.push(gte(performanceMetrics.timestamp, startDate));
-    baseConditions.push(gte(performanceMetrics.timestamp, endDate));
+    baseConditions.push(gte(performanceMetrics.timestamp as any, startDate));
+    baseConditions.push(gte(performanceMetrics.timestamp as any, endDate));
 
-    const analyticsConditions = [];
+    const analyticsConditions: any[] = [];
     if (params.configId) {
-      analyticsConditions.push(eq(analyticsEvents.configId, params.configId));
+      analyticsConditions.push(eq(analyticsEvents.configId as any, params.configId));
     }
-    analyticsConditions.push(gte(analyticsEvents.timestamp, startDate));
-    analyticsConditions.push(gte(analyticsEvents.timestamp, endDate));
+    analyticsConditions.push(gte(analyticsEvents.timestamp as any, startDate));
+    analyticsConditions.push(gte(analyticsEvents.timestamp as any, endDate));
 
     // Fetch performance metrics
     const performanceData = await db
@@ -87,8 +87,8 @@ export async function GET(request: NextRequest) {
         viewportHeight: performanceMetrics.viewportHeight,
       })
       .from(performanceMetrics)
-      .where(baseConditions.length > 0 ? and(...baseConditions) : undefined)
-      .orderBy(desc(performanceMetrics.timestamp))
+      .where(baseConditions.length > 0 ? and(...baseConditions) as any : undefined)
+      .orderBy(desc(performanceMetrics.timestamp as any) as any)
       .limit(1000);
 
     // Fetch analytics events
@@ -107,8 +107,8 @@ export async function GET(request: NextRequest) {
         utmCampaign: analyticsEvents.utmCampaign,
       })
       .from(analyticsEvents)
-      .where(analyticsConditions.length > 0 ? and(...analyticsConditions) : undefined)
-      .orderBy(desc(analyticsEvents.timestamp))
+      .where(analyticsConditions.length > 0 ? and(...analyticsConditions) as any : undefined)
+      .orderBy(desc(analyticsEvents.timestamp) as any)
       .limit(1000);
 
     // Calculate aggregated metrics

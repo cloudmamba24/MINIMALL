@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import * as Sentry from '@sentry/nextjs';
-import { db, analyticsEvents } from '@repo/db';
+import { db, analyticsEvents } from '@minimall/db';
 
 const customMetricSchema = z.object({
   name: z.string(),
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const data = customMetricSchema.parse(body);
 
     // Add Sentry context
-    Sentry.withScope((scope) => {
+    await Sentry.withScope(async (scope) => {
       scope.setTag('custom_metric', data.name);
       scope.setContext('custom_metric', {
         name: data.name,

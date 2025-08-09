@@ -1,8 +1,38 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shopify/polaris';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+
+// Temporary Card components to avoid build issues
+const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}>
+    {children}
+  </div>
+);
+
+const CardHeader = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <div className={`flex flex-col space-y-1.5 p-6 ${className}`}>
+    {children}
+  </div>
+);
+
+const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`}>
+    {children}
+  </h3>
+);
+
+const CardContent = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <div className={`p-6 pt-0 ${className}`}>
+    {children}
+  </div>
+);
+
+const CardDescription = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+  <p className={`text-sm text-muted-foreground ${className}`}>
+    {children}
+  </p>
+);
 
 interface PerformanceMetric {
   id: number;
@@ -305,7 +335,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ event, percent }) => `${event} ${(percent * 100).toFixed(0)}%`}
+                    label={({ event, percent }) => `${event} ${percent ? (percent * 100).toFixed(0) : 0}%`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="count"

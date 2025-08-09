@@ -373,6 +373,37 @@ export class R2ConfigService {
 		return { url, key };
 	}
 
+	async deleteObject(key: string): Promise<void> {
+		await this.client.deleteObject(key);
+	}
+
+	async listObjects(prefix?: string): Promise<any[]> {
+		// For now, return an empty array as R2 list objects would require 
+		// implementing the S3 ListObjectsV2 API call
+		// This is a placeholder implementation
+		console.warn('listObjects not implemented - returning empty array');
+		return [];
+	}
+
+	async putObject(key: string, body: string | ArrayBuffer | Buffer, options: any = {}): Promise<any> {
+		const contentType = options.contentType || 'application/octet-stream';
+		let bodyString: string;
+		
+		if (typeof body === 'string') {
+			bodyString = body;
+		} else if (body instanceof Buffer) {
+			bodyString = body.toString('base64');
+		} else {
+			bodyString = new TextDecoder().decode(body);
+		}
+		
+		return await this.client.putObject(key, bodyString, contentType);
+	}
+
+	getObjectUrl(key: string): string {
+		return this.getPublicUrl(key);
+	}
+
 	getPublicUrl(key: string): string {
 		return `${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET_NAME}/${key}`;
 	}

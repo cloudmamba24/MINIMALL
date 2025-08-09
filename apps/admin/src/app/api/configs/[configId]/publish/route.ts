@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { r2Service } from '@repo/core';
-import { db, configs, configVersions } from '@repo/db';
+import { r2Service, type SiteConfig } from '@minimall/core';
+import { db, configs, configVersions } from '@minimall/db';
 import { eq, and, desc } from 'drizzle-orm';
 import * as Sentry from '@sentry/nextjs';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     configId: string;
-  };
+  }>;
 }
 
 // POST /api/configs/[configId]/publish - Publish configuration
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
-    const { configId } = params;
+    const { configId } = await params;
 
     if (!configId) {
       return NextResponse.json(
@@ -50,6 +50,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     const versionToPublish = currentVersion[0];
+    if (!versionToPublish) {
+      return NextResponse.json(
+        { error: 'No draft version found to publish' },
+        { status: 404 }
+      );
+    }
 
     // Mark the version as published
     await db
@@ -88,8 +94,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Publish to R2 for production serving
     if (r2Service) {
       try {
-        const config = versionToPublish.data;
-        await r2Service.putConfig(configId, config);
+        const config = versionToPublish.data as SiteConfig;
+        await r2Service.saveConfig(configId, config);
         
         console.log(`Successfully published config ${configId} to R2`);
       } catch (r2Error) {

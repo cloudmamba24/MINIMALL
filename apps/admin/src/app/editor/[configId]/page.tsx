@@ -12,7 +12,8 @@ import {
   Loading,
   Banner,
   Tabs,
-  Stack,
+  LegacyStack,
+  Text,
 } from '@shopify/polaris';
 import { SaveIcon, RefreshIcon, ViewIcon, SettingsIcon, ImageIcon } from '@shopify/polaris-icons';
 import { VisualEditor } from '@/components/editor/visual-editor';
@@ -196,7 +197,7 @@ export default function EditorPage({ params }: EditorPageProps) {
   return (
     <Frame>
       <Page
-        title={`Editing: ${config.slug}`}
+        title={`Editing: ${config.id}`}
         subtitle={`Configuration ID: ${configId}`}
         primaryAction={{
           content: saving ? 'Saving...' : 'Save Changes',
@@ -257,34 +258,49 @@ export default function EditorPage({ params }: EditorPageProps) {
                 
                 {activeTab === 2 && (
                   <div className="space-y-4">
-                    <Card title="Configuration Settings">
+                    <Card>
                       <div className="p-4">
-                        <Stack>
-                          <div>
-                            <strong>Shop Domain:</strong> {config.shop}
-                          </div>
-                          <div>
-                            <strong>Slug:</strong> {config.slug}
-                          </div>
-                          <div>
-                            <strong>Created:</strong> {new Date(config.createdAt).toLocaleDateString()}
-                          </div>
-                          <div>
-                            <strong>Last Updated:</strong> {new Date(config.updatedAt).toLocaleDateString()}
-                          </div>
-                        </Stack>
+                        <Text as="h3" variant="headingMd" fontWeight="bold" tone="base">
+                          Configuration Settings
+                        </Text>
+                        <div className="mt-4">
+                          <LegacyStack>
+                            <div>
+                              <strong>Shop Domain:</strong> {config.settings?.shopDomain || 'N/A'}
+                            </div>
+                            <div>
+                              <strong>Config ID:</strong> {config.id}
+                            </div>
+                            <div>
+                              <strong>Created:</strong> {new Date(config.createdAt).toLocaleDateString()}
+                            </div>
+                            <div>
+                              <strong>Last Updated:</strong> {new Date(config.updatedAt).toLocaleDateString()}
+                            </div>
+                          </LegacyStack>
+                        </div>
                       </div>
                     </Card>
                     
-                    <Card title="SEO Settings">
+                    <Card>
                       <div className="p-4">
-                        <p>SEO configuration options will be added here.</p>
+                        <Text as="h3" variant="headingMd" fontWeight="bold" tone="base">
+                          SEO Settings
+                        </Text>
+                        <div className="mt-4">
+                          <p>SEO configuration options will be added here.</p>
+                        </div>
                       </div>
                     </Card>
                     
-                    <Card title="Theme Settings">
+                    <Card>
                       <div className="p-4">
-                        <p>Theme customization options will be added here.</p>
+                        <Text as="h3" variant="headingMd" fontWeight="bold" tone="base">
+                          Theme Settings
+                        </Text>
+                        <div className="mt-4">
+                          <p>Theme customization options will be added here.</p>
+                        </div>
                       </div>
                     </Card>
                   </div>
@@ -312,7 +328,7 @@ export default function EditorPage({ params }: EditorPageProps) {
         {toast && (
           <Toast
             content={toast.content}
-            error={toast.error}
+            {...(toast.error !== undefined && { error: toast.error })}
             onDismiss={() => setToast(null)}
           />
         )}

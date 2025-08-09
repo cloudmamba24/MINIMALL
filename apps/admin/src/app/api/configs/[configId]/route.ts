@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { r2Service, type SiteConfig } from '@repo/core';
-import { db, configs, configVersions } from '@repo/db';
+import { r2Service, type SiteConfig } from '@minimall/core';
+import { db, configs, configVersions } from '@minimall/db';
 import { eq, desc } from 'drizzle-orm';
 import * as Sentry from '@sentry/nextjs';
 import { z } from 'zod';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     configId: string;
-  };
+  }>;
 }
 
 // GET /api/configs/[configId] - Get configuration
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { configId } = params;
+    const { configId } = await params;
 
     if (!configId) {
       return NextResponse.json(
@@ -68,7 +68,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           );
         }
 
-        const config: SiteConfig = latestVersion[0].data as SiteConfig;
+        const versionData = latestVersion[0];
+        if (!versionData) {
+          return NextResponse.json(
+            { error: 'No version data found for configuration' },
+            { status: 404 }
+          );
+        }
+
+        const config: SiteConfig = versionData.data as SiteConfig;
         
         return NextResponse.json({
           success: true,
@@ -100,7 +108,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT /api/configs/[configId] - Update configuration
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { configId } = params;
+    const { configId } = await params;
     const config: SiteConfig = await request.json();
 
     if (!configId) {
@@ -171,7 +179,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Save to R2 for production serving
     if (r2Service) {
       try {
-        await r2Service.putConfig(configId, validatedConfig);
+        await r2Service.saveConfig(configId, validatedConfig as unknown as SiteConfig);
       } catch (r2Error) {
         console.error('Failed to save to R2:', r2Error);
         // This is more critical, but we'll still return success for the editor
@@ -218,7 +226,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/configs/[configId] - Delete configuration
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { configId } = params;
+    const { configId } = await params;
 
     if (!configId) {
       return NextResponse.json(

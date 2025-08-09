@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, configs } from '@repo/db';
-import { r2Service } from '@repo/core';
+import { db, configs } from '@minimall/db';
+import { r2Service } from '@minimall/core';
 import { eq } from 'drizzle-orm';
 
 interface AssetFile {

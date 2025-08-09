@@ -39,7 +39,7 @@ export const renderWithAppContext = (
   const { appContext, ...renderOptions } = options;
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <MockAppProvider context={appContext}>
+    <MockAppProvider context={appContext ?? defaultMockContext}>
       {children}
     </MockAppProvider>
   );

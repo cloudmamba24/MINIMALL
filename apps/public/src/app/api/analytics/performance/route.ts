@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import * as Sentry from '@sentry/nextjs';
-import { db, performanceMetrics } from '@repo/db';
+import { db, performanceMetrics } from '@minimall/db';
 
 const performanceMetricSchema = z.object({
   configId: z.string().optional(),
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const data = performanceMetricSchema.parse(body);
 
     // Add Sentry context
-    Sentry.withScope((scope) => {
+    await Sentry.withScope(async (scope) => {
       scope.setTag('metric_type', data.metric);
       scope.setTag('metric_rating', data.rating);
       scope.setContext('performance_metric', {

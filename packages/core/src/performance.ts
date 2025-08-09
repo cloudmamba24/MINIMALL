@@ -1,5 +1,5 @@
-import * as Sentry from "@sentry/react";
-import React from "react";
+// import * as Sentry from "@sentry/react";
+// import React from "react";
 import { getCLS, getFCP, getFID, getLCP, getTTFB } from "web-vitals";
 import type { PerformanceMetrics } from "./types";
 
@@ -69,24 +69,17 @@ async function reportWebVital(metric: VitalMetric, configId?: string) {
       console.warn("Failed to report web vital:", error);
     });
 
-    // Also send to Sentry for monitoring
-    Sentry.addBreadcrumb({
-      category: "web-vital",
-      message: `${metric.name}: ${Math.round(metric.value)}ms (${metric.rating})`,
-      level: metric.rating === "poor" ? "warning" : "info",
-      data: {
-        name: metric.name,
-        value: metric.value,
-        rating: metric.rating,
-        configId,
-      },
-    });
-
-    // Send poor ratings as performance issues to Sentry
+    // Optional: Send to external monitoring service (Sentry integration disabled)
+    // For production, integrate with your preferred monitoring service
     if (metric.rating === "poor") {
-      Sentry.captureMessage(
-        `Poor Web Vital: ${metric.name} = ${Math.round(metric.value)}ms`,
-        "warning"
+      console.warn(
+        `Poor Web Vital detected: ${metric.name} = ${Math.round(metric.value)}ms (${metric.rating})`,
+        {
+          name: metric.name,
+          value: metric.value,
+          rating: metric.rating,
+          configId,
+        }
       );
     }
   } catch (error) {
@@ -221,20 +214,20 @@ export class PerformanceTracker {
 export const performanceTracker = new PerformanceTracker();
 
 /**
- * React hook for performance tracking
+ * Performance tracking utilities (React hook functionality moved to separate React package)
+ * For React integration, use the React-specific performance package
  */
-export function usePerformanceTracking() {
+export function createPerformanceTracker() {
   const tracker = performanceTracker;
 
   const trackComponentMount = (componentName: string) => {
-    React.useEffect(() => {
-      const mountTime = performance.now();
-
-      return () => {
-        const duration = performance.now() - mountTime;
-        (tracker as any).reportCustomMetric(`component-${componentName}-mount`, duration);
-      };
-    }, [componentName]);
+    // Component mount tracking would require React hooks
+    // This is a placeholder for non-React environments
+    console.log(`Component tracking initialized for: ${componentName}`);
+    return () => {
+      // Cleanup function placeholder
+      console.log(`Component tracking cleanup for: ${componentName}`);
+    };
   };
 
   const trackAsyncOperation = async <T>(name: string, operation: () => Promise<T>): Promise<T> => {
@@ -279,7 +272,7 @@ export function validatePerformanceBudgets(metrics: Partial<PerformanceMetrics>)
   }
 
   if (violations.length > 0) {
-    Sentry.captureMessage(`Performance Budget Violations: ${violations.join(", ")}`, "warning");
+    console.warn(`Performance Budget Violations: ${violations.join(", ")}`);
   }
 
   return violations;
@@ -327,13 +320,12 @@ export function analyzeResourceTiming() {
     }
   }
 
-  // Report analysis to Sentry if issues found
+  // Report analysis if issues found
   if (analysis.slowResources.length > 0 || analysis.largeResources.length > 0) {
-    Sentry.addBreadcrumb({
+    console.log("Resource timing analysis completed", {
       category: "performance",
       message: "Resource timing analysis completed",
       data: analysis,
-      level: "info",
     });
   }
 
