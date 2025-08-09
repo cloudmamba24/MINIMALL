@@ -9,10 +9,10 @@ import {
   createShopifyStorefrontService, 
   transformProduct,
   type ShopifyProduct 
-} from '@minimall/core';
+} from '@minimall/core/client';
 
 // Re-export for components
-export type { ShopifyProduct } from '@minimall/core';
+export type { ShopifyProduct } from '@minimall/core/client';
 
 // Cache for Shopify service instances per domain
 const serviceCache = new Map<string, ReturnType<typeof createShopifyStorefrontService>>();

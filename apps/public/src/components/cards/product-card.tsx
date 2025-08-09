@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition, useMemo } from 'react';
 import Image from 'next/image';
 import { cn, ShoppingCart, Heart, ExternalLink } from '@minimall/ui';
-import { formatPrice } from '@minimall/core';
+import { formatPrice } from '@minimall/core/client';
 
 // Mock Shopify product type - in real implementation, this would come from Shopify API
 interface ShopifyProduct {

@@ -1,10 +1,10 @@
-import type { Metadata } from 'next';
-import { ShopifyAppProvider } from '../providers/shopify-app-provider';
-import '../styles/globals.css';
+import type { Metadata } from "next";
+import { ShopifyAppProvider } from "../providers/shopify-app-provider";
+import "../styles/globals.css";
 
 export const metadata: Metadata = {
-  title: 'MiniMall Admin',
-  description: 'Admin dashboard for MiniMall link-in-bio platform',
+  title: "MiniMall Admin",
+  description: "Admin dashboard for MiniMall link-in-bio platform",
 };
 
 export default function RootLayout({
@@ -15,9 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ShopifyAppProvider>
-          {children}
-        </ShopifyAppProvider>
+        <ShopifyAppProvider>{children}</ShopifyAppProvider>
       </body>
     </html>
   );

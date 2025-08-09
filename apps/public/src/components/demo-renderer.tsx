@@ -2,7 +2,7 @@
 
 import { useMemo, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
-import { type SiteConfig, type Category } from '@minimall/core';
+import { type SiteConfig, type Category } from '@minimall/core/client';
 import { BrandHeader } from './brand/brand-header';
 import { LinkTabs } from './navigation/link-tabs';
 import { ContentGrid, GridItem } from './layout/content-grid';

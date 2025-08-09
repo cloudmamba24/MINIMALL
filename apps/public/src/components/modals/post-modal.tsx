@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { X, ShoppingBag } from 'lucide-react';
 import { useModals, useClosePostModal, useOpenProductQuickView } from '@/store/app-store';
 import { ProductTag } from './product-tag';
-import type { Category } from '@minimall/core';
+import type { Category } from '@minimall/core/client';
 
 interface PostModalProps {
   post?: Category | null;

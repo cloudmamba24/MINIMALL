@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { R2ConfigService } from '@minimall/core';
+import { R2ConfigService } from '@minimall/core/server';
 
 export async function GET() {
   try {

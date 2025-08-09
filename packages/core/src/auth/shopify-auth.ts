@@ -1,4 +1,4 @@
-import crypto from "node:crypto";
+import crypto from "crypto";
 import type { NextRequest } from "next/server";
 
 export interface ShopifySession {

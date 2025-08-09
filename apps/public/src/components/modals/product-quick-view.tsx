@@ -10,7 +10,7 @@ import {
   findVariantByOptions, 
   calculateDiscountPercentage, 
   formatPrice 
-} from '@minimall/core';
+} from '@minimall/core/client';
 
 interface ProductQuickViewProps {
   animationSettings?: {

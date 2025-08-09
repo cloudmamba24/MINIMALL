@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, RenderOptions, RenderResult } from '@testing-library/react';
-import { type SiteConfig } from '@minimall/core';
+import { type SiteConfig } from '@minimall/core/client';
 
 // Mock app context for testing
 interface MockAppContext {

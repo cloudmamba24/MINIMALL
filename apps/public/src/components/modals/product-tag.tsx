@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
-import type { ProductTag as ProductTagType } from '@minimall/core';
+import type { ProductTag as ProductTagType } from '@minimall/core/client';
 
 interface ProductTagProps {
   tag: ProductTagType;

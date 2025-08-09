@@ -1,37 +1,56 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import type React from "react";
+import { useEffect, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 // Temporary Card components to avoid build issues
-const Card = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
+const Card = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <div className={`rounded-lg border bg-card text-card-foreground shadow-sm ${className}`}>
     {children}
   </div>
 );
 
-const CardHeader = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <div className={`flex flex-col space-y-1.5 p-6 ${className}`}>
-    {children}
-  </div>
+const CardHeader = ({
+  children,
+  className = "",
+}: { children: React.ReactNode; className?: string }) => (
+  <div className={`flex flex-col space-y-1.5 p-6 ${className}`}>{children}</div>
 );
 
-const CardTitle = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`}>
-    {children}
-  </h3>
+const CardTitle = ({
+  children,
+  className = "",
+}: { children: React.ReactNode; className?: string }) => (
+  <h3 className={`text-2xl font-semibold leading-none tracking-tight ${className}`}>{children}</h3>
 );
 
-const CardContent = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <div className={`p-6 pt-0 ${className}`}>
-    {children}
-  </div>
+const CardContent = ({
+  children,
+  className = "",
+}: { children: React.ReactNode; className?: string }) => (
+  <div className={`p-6 pt-0 ${className}`}>{children}</div>
 );
 
-const CardDescription = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-  <p className={`text-sm text-muted-foreground ${className}`}>
-    {children}
-  </p>
+const CardDescription = ({
+  children,
+  className = "",
+}: { children: React.ReactNode; className?: string }) => (
+  <p className={`text-sm text-muted-foreground ${className}`}>{children}</p>
 );
 
 interface PerformanceMetric {
@@ -95,7 +114,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [timeframe, setTimeframe] = useState<'1h' | '24h' | '7d' | '30d'>('24h');
+  const [timeframe, setTimeframe] = useState<"1h" | "24h" | "7d" | "30d">("24h");
 
   const fetchAnalyticsData = async () => {
     try {
@@ -109,14 +128,14 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || 'Failed to fetch analytics data');
+        throw new Error(result.error || "Failed to fetch analytics data");
       }
 
       setData(result.data);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-      console.error('Failed to fetch analytics:', err);
+      setError(err instanceof Error ? err.message : "Unknown error");
+      console.error("Failed to fetch analytics:", err);
     } finally {
       setLoading(false);
     }
@@ -169,7 +188,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
   // Prepare chart data
   const performanceChartData = data.performance.metrics
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-    .map(metric => ({
+    .map((metric) => ({
       time: new Date(metric.timestamp).toLocaleTimeString(),
       LCP: metric.lcp,
       FID: metric.fid,
@@ -182,7 +201,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
     count,
   }));
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
   return (
     <div className="space-y-6">
@@ -195,14 +214,14 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
           </p>
         </div>
         <div className="flex gap-2">
-          {(['1h', '24h', '7d', '30d'] as const).map(period => (
+          {(["1h", "24h", "7d", "30d"] as const).map((period) => (
             <button
               key={period}
               onClick={() => setTimeframe(period)}
               className={`px-3 py-1 rounded text-sm ${
                 timeframe === period
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
               {period}
@@ -222,8 +241,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              {data.performance.aggregates.avgLcp <= 2500 ? '✅ Good' : 
-               data.performance.aggregates.avgLcp <= 4000 ? '⚠️ Needs improvement' : '❌ Poor'}
+              {data.performance.aggregates.avgLcp <= 2500
+                ? "✅ Good"
+                : data.performance.aggregates.avgLcp <= 4000
+                  ? "⚠️ Needs improvement"
+                  : "❌ Poor"}
             </p>
           </CardContent>
         </Card>
@@ -237,8 +259,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              {data.performance.aggregates.avgFid <= 100 ? '✅ Good' : 
-               data.performance.aggregates.avgFid <= 300 ? '⚠️ Needs improvement' : '❌ Poor'}
+              {data.performance.aggregates.avgFid <= 100
+                ? "✅ Good"
+                : data.performance.aggregates.avgFid <= 300
+                  ? "⚠️ Needs improvement"
+                  : "❌ Poor"}
             </p>
           </CardContent>
         </Card>
@@ -252,8 +277,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
-              {data.performance.aggregates.avgCls <= 0.1 ? '✅ Good' : 
-               data.performance.aggregates.avgCls <= 0.25 ? '⚠️ Needs improvement' : '❌ Poor'}
+              {data.performance.aggregates.avgCls <= 0.1
+                ? "✅ Good"
+                : data.performance.aggregates.avgCls <= 0.25
+                  ? "⚠️ Needs improvement"
+                  : "❌ Poor"}
             </p>
           </CardContent>
         </Card>
@@ -261,9 +289,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Total Sessions</CardDescription>
-            <CardTitle className="text-2xl">
-              {data.analytics.uniqueSessions}
-            </CardTitle>
+            <CardTitle className="text-2xl">{data.analytics.uniqueSessions}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-xs text-muted-foreground">
@@ -277,12 +303,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
       <Card>
         <CardHeader>
           <CardTitle>Performance Metrics Over Time</CardTitle>
-          <CardDescription>
-            Core Web Vitals metrics for the selected time period
-          </CardDescription>
+          <CardDescription>Core Web Vitals metrics for the selected time period</CardDescription>
         </CardHeader>
         <CardContent>
-          <div style={{ width: '100%', height: 300 }}>
+          <div style={{ width: "100%", height: 300 }}>
             <ResponsiveContainer>
               <LineChart data={performanceChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -307,7 +331,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
             <CardDescription>Distribution of analytics events</CardDescription>
           </CardHeader>
           <CardContent>
-            <div style={{ width: '100%', height: 250 }}>
+            <div style={{ width: "100%", height: 250 }}>
               <ResponsiveContainer>
                 <BarChart data={eventChartData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -327,7 +351,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
             <CardDescription>Proportional view of events</CardDescription>
           </CardHeader>
           <CardContent>
-            <div style={{ width: '100%', height: 250 }}>
+            <div style={{ width: "100%", height: 250 }}>
               <ResponsiveContainer>
                 <PieChart>
                   <Pie
@@ -335,7 +359,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ event, percent }) => `${event} ${percent ? (percent * 100).toFixed(0) : 0}%`}
+                    label={({ event, percent }) =>
+                      `${event} ${percent ? (percent * 100).toFixed(0) : 0}%`
+                    }
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="count"
@@ -371,7 +397,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
                 </tr>
               </thead>
               <tbody>
-                {data.analytics.events.slice(0, 10).map(event => (
+                {data.analytics.events.slice(0, 10).map((event) => (
                   <tr key={event.id} className="border-b hover:bg-gray-50">
                     <td className="p-2 font-medium">{event.event}</td>
                     <td className="p-2 text-gray-600">{event.configId}</td>

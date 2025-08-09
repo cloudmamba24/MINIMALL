@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@minimall/ui';
-import type { Category } from '@minimall/core';
+import type { Category } from '@minimall/core/client';
 
 interface TabNavigationProps {
   categories: Category[];

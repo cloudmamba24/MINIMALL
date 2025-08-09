@@ -12,15 +12,15 @@
   .admin-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
-  
+
   .config-builder {
     @apply bg-white rounded-lg shadow-sm border;
   }
-  
+
   .drag-handle {
     @apply cursor-grab active:cursor-grabbing;
   }
-  
+
   .preview-frame {
     @apply border-2 border-gray-200 rounded-lg overflow-hidden;
   }
@@ -47,7 +47,7 @@
   .Polaris-Layout__Section {
     margin-bottom: 1rem;
   }
-  
+
   .preview-frame {
     height: 400px;
   }

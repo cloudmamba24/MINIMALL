@@ -14,7 +14,7 @@ import {
   findVariantByOptions, 
   calculateDiscountPercentage, 
   formatPrice 
-} from '@minimall/core';
+} from '@minimall/core/client';
 
 /**
  * Enhanced Product Quick View

@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
-import { createClientConfig } from '@minimall/core/src/sentry';
+import { createClientConfig } from '@minimall/core/client';
 
 Sentry.init(createClientConfig({
   tags: { app: 'public' },

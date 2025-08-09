@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { CartItem, Category, ShopifyProduct } from '@minimall/core';
+import type { CartItem, Category, ShopifyProduct } from '@minimall/core/client';
 
 // Cart item with UI-specific properties
 export interface UICartItem extends CartItem {

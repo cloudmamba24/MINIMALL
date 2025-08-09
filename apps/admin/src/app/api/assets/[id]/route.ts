@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { r2Service } from '@minimall/core';
-import * as Sentry from '@sentry/nextjs';
+import { r2Service } from "@minimall/core";
+import * as Sentry from "@sentry/nextjs";
+import { type NextRequest, NextResponse } from "next/server";
 
 interface RouteParams {
   params: Promise<{
@@ -14,17 +14,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
 
     if (!r2Service) {
-      return NextResponse.json(
-        { error: 'R2 service not configured' },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: "R2 service not configured" }, { status: 503 });
     }
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'Asset ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Asset ID is required" }, { status: 400 });
     }
 
     // Delete from R2
@@ -32,25 +26,21 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     // Add Sentry context
     Sentry.addBreadcrumb({
-      category: 'asset-delete',
+      category: "asset-delete",
       message: `Deleted asset: ${id}`,
       data: { assetId: id },
-      level: 'info',
+      level: "info",
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Asset deleted successfully',
+      message: "Asset deleted successfully",
     });
-
   } catch (error) {
-    console.error('Failed to delete asset:', error);
+    console.error("Failed to delete asset:", error);
     Sentry.captureException(error);
-    
-    return NextResponse.json(
-      { error: 'Failed to delete asset' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "Failed to delete asset" }, { status: 500 });
   }
 }
 
@@ -61,17 +51,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
 
     if (!r2Service) {
-      return NextResponse.json(
-        { error: 'R2 service not configured' },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: "R2 service not configured" }, { status: 503 });
     }
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'Asset ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Asset ID is required" }, { status: 400 });
     }
 
     // Update metadata (this would typically be stored in a database)
@@ -84,25 +68,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // Add Sentry context
     Sentry.addBreadcrumb({
-      category: 'asset-update',
+      category: "asset-update",
       message: `Updated asset: ${id}`,
       data: { assetId: id, updates: Object.keys(body) },
-      level: 'info',
+      level: "info",
     });
 
     return NextResponse.json({
       success: true,
       asset: updatedAsset,
-      message: 'Asset updated successfully',
+      message: "Asset updated successfully",
     });
-
   } catch (error) {
-    console.error('Failed to update asset:', error);
+    console.error("Failed to update asset:", error);
     Sentry.captureException(error);
-    
-    return NextResponse.json(
-      { error: 'Failed to update asset' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "Failed to update asset" }, { status: 500 });
   }
 }

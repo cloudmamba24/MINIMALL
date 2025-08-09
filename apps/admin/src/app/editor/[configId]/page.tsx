@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback, use } from 'react';
-import { 
-  Page, 
-  Layout, 
-  Card, 
-  Button, 
-  ButtonGroup,
-  Toast,
-  Frame,
-  Loading,
+import { AnalyticsDashboard } from "@/components/analytics-dashboard";
+import { AssetManager } from "@/components/assets/asset-manager";
+import { VisualEditor } from "@/components/editor/visual-editor";
+import { LivePreview } from "@/components/preview/live-preview";
+import type { SiteConfig } from "@minimall/core";
+import {
   Banner,
-  Tabs,
+  Button,
+  ButtonGroup,
+  Card,
+  Frame,
+  Layout,
   LegacyStack,
+  Loading,
+  Page,
+  Tabs,
   Text,
-} from '@shopify/polaris';
-import { SaveIcon, RefreshIcon, ViewIcon, SettingsIcon, ImageIcon } from '@shopify/polaris-icons';
-import { VisualEditor } from '@/components/editor/visual-editor';
-import { LivePreview } from '@/components/preview/live-preview';
-import { AssetManager } from '@/components/assets/asset-manager';
-import { AnalyticsDashboard } from '@/components/analytics-dashboard';
-import type { SiteConfig } from '@minimall/core';
+  Toast,
+} from "@shopify/polaris";
+import { ImageIcon, RefreshIcon, SaveIcon, SettingsIcon, ViewIcon } from "@shopify/polaris-icons";
+import React, { useState, useEffect, useCallback, use } from "react";
 
 interface EditorPageProps {
   params: Promise<{
@@ -42,10 +42,10 @@ export default function EditorPage({ params }: EditorPageProps) {
   } | null>(null);
 
   const tabs = [
-    { id: 'editor', content: 'Visual Editor', panelID: 'editor-panel' },
-    { id: 'assets', content: 'Assets', panelID: 'assets-panel' },
-    { id: 'settings', content: 'Settings', panelID: 'settings-panel' },
-    { id: 'analytics', content: 'Analytics', panelID: 'analytics-panel' },
+    { id: "editor", content: "Visual Editor", panelID: "editor-panel" },
+    { id: "assets", content: "Assets", panelID: "assets-panel" },
+    { id: "settings", content: "Settings", panelID: "settings-panel" },
+    { id: "analytics", content: "Analytics", panelID: "analytics-panel" },
   ];
 
   // Load configuration on mount
@@ -58,12 +58,12 @@ export default function EditorPage({ params }: EditorPageProps) {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
   const loadConfig = async () => {
@@ -80,7 +80,7 @@ export default function EditorPage({ params }: EditorPageProps) {
       setConfig(data.config);
       setHasUnsavedChanges(false);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to load configuration';
+      const message = error instanceof Error ? error.message : "Failed to load configuration";
       setError(message);
       setToast({ content: message, error: true });
     } finally {
@@ -95,9 +95,9 @@ export default function EditorPage({ params }: EditorPageProps) {
       setSaving(true);
 
       const response = await fetch(`/api/configs/${configId}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(config),
       });
@@ -107,9 +107,9 @@ export default function EditorPage({ params }: EditorPageProps) {
       }
 
       setHasUnsavedChanges(false);
-      setToast({ content: 'Configuration saved successfully!' });
+      setToast({ content: "Configuration saved successfully!" });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to save configuration';
+      const message = error instanceof Error ? error.message : "Failed to save configuration";
       setToast({ content: message, error: true });
     } finally {
       setSaving(false);
@@ -128,11 +128,12 @@ export default function EditorPage({ params }: EditorPageProps) {
 
   const openLivePreview = useCallback(() => {
     if (config) {
-      const baseUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000' 
-        : window.location.origin.replace(':3001', ':3000');
-      
-      window.open(`${baseUrl}/g/${configId}?preview=true&timestamp=${Date.now()}`, '_blank');
+      const baseUrl =
+        process.env.NODE_ENV === "development"
+          ? "http://localhost:3000"
+          : window.location.origin.replace(":3001", ":3000");
+
+      window.open(`${baseUrl}/g/${configId}?preview=true&timestamp=${Date.now()}`, "_blank");
     }
   }, [config, configId]);
 
@@ -143,9 +144,9 @@ export default function EditorPage({ params }: EditorPageProps) {
       setSaving(true);
 
       const response = await fetch(`/api/configs/${configId}/publish`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
@@ -153,9 +154,9 @@ export default function EditorPage({ params }: EditorPageProps) {
         throw new Error(`Failed to publish configuration: ${response.statusText}`);
       }
 
-      setToast({ content: 'Configuration published successfully!' });
+      setToast({ content: "Configuration published successfully!" });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to publish configuration';
+      const message = error instanceof Error ? error.message : "Failed to publish configuration";
       setToast({ content: message, error: true });
     } finally {
       setSaving(false);
@@ -173,19 +174,12 @@ export default function EditorPage({ params }: EditorPageProps) {
   if (error || !config) {
     return (
       <Frame>
-        <Page
-          title="Editor Error"
-          subtitle="Failed to load configuration"
-        >
+        <Page title="Editor Error" subtitle="Failed to load configuration">
           <Layout>
             <Layout.Section>
-              <Banner tone="critical">
-                {error || 'Configuration not found'}
-              </Banner>
+              <Banner tone="critical">{error || "Configuration not found"}</Banner>
               <div className="mt-4">
-                <Button onClick={() => window.history.back()}>
-                  Go Back
-                </Button>
+                <Button onClick={() => window.history.back()}>Go Back</Button>
               </div>
             </Layout.Section>
           </Layout>
@@ -200,7 +194,7 @@ export default function EditorPage({ params }: EditorPageProps) {
         title={`Editing: ${config.id}`}
         subtitle={`Configuration ID: ${configId}`}
         primaryAction={{
-          content: saving ? 'Saving...' : 'Save Changes',
+          content: saving ? "Saving..." : "Save Changes",
           onAction: saveConfig,
           disabled: saving || !hasUnsavedChanges,
           loading: saving,
@@ -208,17 +202,17 @@ export default function EditorPage({ params }: EditorPageProps) {
         }}
         secondaryActions={[
           {
-            content: 'Publish',
+            content: "Publish",
             onAction: publishConfig,
             disabled: saving || hasUnsavedChanges,
           },
           {
-            content: 'Open Preview',
+            content: "Open Preview",
             onAction: openLivePreview,
             icon: ViewIcon,
           },
           {
-            content: 'Refresh',
+            content: "Refresh",
             onAction: loadConfig,
             icon: RefreshIcon,
           },
@@ -237,7 +231,7 @@ export default function EditorPage({ params }: EditorPageProps) {
           <Layout.Section>
             <Card>
               <Tabs tabs={tabs} selected={activeTab} onSelect={setActiveTab} />
-              
+
               <div className="p-6">
                 {activeTab === 0 && (
                   <VisualEditor
@@ -246,7 +240,7 @@ export default function EditorPage({ params }: EditorPageProps) {
                     onPreview={handlePreview}
                   />
                 )}
-                
+
                 {activeTab === 1 && (
                   <AssetManager
                     onSelectAsset={(asset) => {
@@ -255,7 +249,7 @@ export default function EditorPage({ params }: EditorPageProps) {
                     folder={`configs/${configId}/assets`}
                   />
                 )}
-                
+
                 {activeTab === 2 && (
                   <div className="space-y-4">
                     <Card>
@@ -266,22 +260,24 @@ export default function EditorPage({ params }: EditorPageProps) {
                         <div className="mt-4">
                           <LegacyStack>
                             <div>
-                              <strong>Shop Domain:</strong> {config.settings?.shopDomain || 'N/A'}
+                              <strong>Shop Domain:</strong> {config.settings?.shopDomain || "N/A"}
                             </div>
                             <div>
                               <strong>Config ID:</strong> {config.id}
                             </div>
                             <div>
-                              <strong>Created:</strong> {new Date(config.createdAt).toLocaleDateString()}
+                              <strong>Created:</strong>{" "}
+                              {new Date(config.createdAt).toLocaleDateString()}
                             </div>
                             <div>
-                              <strong>Last Updated:</strong> {new Date(config.updatedAt).toLocaleDateString()}
+                              <strong>Last Updated:</strong>{" "}
+                              {new Date(config.updatedAt).toLocaleDateString()}
                             </div>
                           </LegacyStack>
                         </div>
                       </div>
                     </Card>
-                    
+
                     <Card>
                       <div className="p-4">
                         <Text as="h3" variant="headingMd" fontWeight="bold" tone="base">
@@ -292,7 +288,7 @@ export default function EditorPage({ params }: EditorPageProps) {
                         </div>
                       </div>
                     </Card>
-                    
+
                     <Card>
                       <div className="p-4">
                         <Text as="h3" variant="headingMd" fontWeight="bold" tone="base">
@@ -305,22 +301,15 @@ export default function EditorPage({ params }: EditorPageProps) {
                     </Card>
                   </div>
                 )}
-                
-                {activeTab === 3 && (
-                  <AnalyticsDashboard configId={configId} />
-                )}
+
+                {activeTab === 3 && <AnalyticsDashboard configId={configId} />}
               </div>
             </Card>
           </Layout.Section>
 
           {/* Live preview sidebar */}
           <Layout.Section variant="oneThird">
-            <LivePreview
-              config={config}
-              isLoading={loading}
-              error={error}
-              onRefresh={loadConfig}
-            />
+            <LivePreview config={config} isLoading={loading} error={error} onRefresh={loadConfig} />
           </Layout.Section>
         </Layout>
 

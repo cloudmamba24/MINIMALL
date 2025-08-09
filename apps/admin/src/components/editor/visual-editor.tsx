@@ -1,27 +1,33 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback } from 'react';
 import {
   DndContext,
-  DragEndEvent,
+  type DragEndEvent,
   DragOverEvent,
-  DragStartEvent,
+  DragOverlay,
+  type DragStartEvent,
   PointerSensor,
+  closestCenter,
   useSensor,
   useSensors,
-  closestCenter,
-  DragOverlay,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   SortableContext,
+  arrayMove,
   useSortable,
   verticalListSortingStrategy,
-  arrayMove,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Card, Button, LegacyStack, Text, Icon, Badge, ButtonGroup } from '@shopify/polaris';
-import { PlusIcon, DragHandleIcon, EditIcon, DeleteIcon, DuplicateIcon } from '@shopify/polaris-icons';
-import type { SiteConfig, Category, CardDetails } from '@minimall/core';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import type { CardDetails, Category, SiteConfig } from "@minimall/core";
+import { Badge, Button, ButtonGroup, Card, Icon, LegacyStack, Text } from "@shopify/polaris";
+import {
+  DeleteIcon,
+  DragHandleIcon,
+  DuplicateIcon,
+  EditIcon,
+  PlusIcon,
+} from "@shopify/polaris-icons";
+import React, { useState, useCallback } from "react";
 
 interface VisualEditorProps {
   config: SiteConfig;
@@ -32,7 +38,7 @@ interface VisualEditorProps {
 // Legacy ContentItem interface for backward compatibility
 interface ContentItem {
   id: string;
-  type: 'image' | 'video' | 'product' | 'text' | 'link' | 'social';
+  type: "image" | "video" | "product" | "text" | "link" | "social";
   title?: string | undefined;
   description?: string | undefined;
   position: number;
@@ -52,33 +58,35 @@ interface ContentItem {
   showDescription?: boolean;
   // Text specific
   content?: string | undefined;
-  style?: {
-    fontSize?: number;
-    color?: string;
-    textAlign?: 'left' | 'center' | 'right';
-  } | undefined;
+  style?:
+    | {
+        fontSize?: number;
+        color?: string;
+        textAlign?: "left" | "center" | "right";
+      }
+    | undefined;
   // Link specific
   href?: string | undefined;
   target?: string | undefined;
   // Social specific
-  platform?: 'instagram' | 'twitter' | 'tiktok' | 'youtube' | undefined;
+  platform?: "instagram" | "twitter" | "tiktok" | "youtube" | undefined;
   username?: string | undefined;
   showFollowers?: boolean;
 }
 
 interface DragItem {
   id: string;
-  type: ContentItem['type'];
+  type: ContentItem["type"];
   item: ContentItem;
 }
 
 // Helper functions to convert between Category and ContentItem
 const categoryToContentItem = (category: Category): ContentItem => {
   const [cardType, cardDetails] = category.card;
-  
+
   return {
     id: category.id,
-    type: cardType as ContentItem['type'],
+    type: cardType as ContentItem["type"],
     title: category.title,
     description: cardDetails.description || undefined,
     position: category.order || 0,
@@ -88,9 +96,10 @@ const categoryToContentItem = (category: Category): ContentItem => {
     ...(cardDetails.imageUrl && { src: cardDetails.imageUrl }),
     ...(cardDetails.videoUrl && { src: cardDetails.videoUrl }),
     ...(cardDetails.link && { href: cardDetails.link }),
-    ...(cardDetails.products && cardDetails.products.length > 0 && { 
-      productId: cardDetails.products[0]?.productId 
-    }),
+    ...(cardDetails.products &&
+      cardDetails.products.length > 0 && {
+        productId: cardDetails.products[0]?.productId,
+      }),
   };
 };
 
@@ -114,29 +123,29 @@ const contentItemToCategory = (item: ContentItem): Category => {
 
 // Component types for the content palette
 const COMPONENT_TYPES = [
-  { type: 'image' as const, label: 'Image', description: 'Add photos, artwork, or graphics' },
-  { type: 'video' as const, label: 'Video', description: 'Embed videos or clips' },
-  { type: 'product' as const, label: 'Product', description: 'Showcase products from your shop' },
-  { type: 'text' as const, label: 'Text', description: 'Add headings, descriptions, or links' },
-  { type: 'link' as const, label: 'Link', description: 'External links and CTAs' },
-  { type: 'social' as const, label: 'Social', description: 'Social media links and feeds' },
+  { type: "image" as const, label: "Image", description: "Add photos, artwork, or graphics" },
+  { type: "video" as const, label: "Video", description: "Embed videos or clips" },
+  { type: "product" as const, label: "Product", description: "Showcase products from your shop" },
+  { type: "text" as const, label: "Text", description: "Add headings, descriptions, or links" },
+  { type: "link" as const, label: "Link", description: "External links and CTAs" },
+  { type: "social" as const, label: "Social", description: "Social media links and feeds" },
 ] as const;
 
 // Sortable item component
-function SortableItem({ item, onEdit, onDelete, onDuplicate }: {
+function SortableItem({
+  item,
+  onEdit,
+  onDelete,
+  onDuplicate,
+}: {
   item: ContentItem;
   onEdit: (item: ContentItem) => void;
   onDelete: (id: string) => void;
   onDuplicate: (item: ContentItem) => void;
 }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: item.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -146,48 +155,62 @@ function SortableItem({ item, onEdit, onDelete, onDuplicate }: {
 
   const getItemPreview = (item: ContentItem) => {
     switch (item.type) {
-      case 'image':
+      case "image":
         return item.src ? (
-          <img src={item.src} alt={item.alt || ''} className="w-16 h-16 object-cover rounded" />
+          <img src={item.src} alt={item.alt || ""} className="w-16 h-16 object-cover rounded" />
         ) : (
           <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" tone="subdued" as="span">No image</Text>
+            <Text variant="bodySm" tone="subdued" as="span">
+              No image
+            </Text>
           </div>
         );
-      case 'video':
+      case "video":
         return (
           <div className="w-16 h-16 bg-blue-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" tone="subdued" as="span">Video</Text>
+            <Text variant="bodySm" tone="subdued" as="span">
+              Video
+            </Text>
           </div>
         );
-      case 'product':
+      case "product":
         return (
           <div className="w-16 h-16 bg-green-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" tone="subdued" as="span">Product</Text>
+            <Text variant="bodySm" tone="subdued" as="span">
+              Product
+            </Text>
           </div>
         );
-      case 'text':
+      case "text":
         return (
           <div className="w-16 h-16 bg-purple-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" tone="subdued" as="span">Text</Text>
+            <Text variant="bodySm" tone="subdued" as="span">
+              Text
+            </Text>
           </div>
         );
-      case 'link':
+      case "link":
         return (
           <div className="w-16 h-16 bg-orange-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" tone="subdued" as="span">Link</Text>
+            <Text variant="bodySm" tone="subdued" as="span">
+              Link
+            </Text>
           </div>
         );
-      case 'social':
+      case "social":
         return (
           <div className="w-16 h-16 bg-pink-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" tone="subdued" as="span">Social</Text>
+            <Text variant="bodySm" tone="subdued" as="span">
+              Social
+            </Text>
           </div>
         );
       default:
         return (
           <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center">
-            <Text variant="bodySm" tone="subdued" as="span">Item</Text>
+            <Text variant="bodySm" tone="subdued" as="span">
+              Item
+            </Text>
           </div>
         );
     }
@@ -209,11 +232,15 @@ function SortableItem({ item, onEdit, onDelete, onDuplicate }: {
           <div className="flex-1">
             <LegacyStack>
               <div className="flex items-center gap-2">
-                <Text variant="headingMd" as="h3">{item.title || `${item.type} item`}</Text>
+                <Text variant="headingMd" as="h3">
+                  {item.title || `${item.type} item`}
+                </Text>
                 <Badge tone="info">{item.type}</Badge>
               </div>
               {item.description && (
-                <Text variant="bodySm" tone="subdued" as="span">{item.description}</Text>
+                <Text variant="bodySm" tone="subdued" as="span">
+                  {item.description}
+                </Text>
               )}
             </LegacyStack>
           </div>
@@ -222,7 +249,12 @@ function SortableItem({ item, onEdit, onDelete, onDuplicate }: {
           <ButtonGroup>
             <Button size="slim" onClick={() => onEdit(item)} icon={EditIcon} />
             <Button size="slim" onClick={() => onDuplicate(item)} icon={DuplicateIcon} />
-            <Button size="slim" tone="critical" onClick={() => onDelete(item.id)} icon={DeleteIcon} />
+            <Button
+              size="slim"
+              tone="critical"
+              onClick={() => onDelete(item.id)}
+              icon={DeleteIcon}
+            />
           </ButtonGroup>
         </div>
       </Card>
@@ -231,13 +263,17 @@ function SortableItem({ item, onEdit, onDelete, onDuplicate }: {
 }
 
 // Component palette for adding new items
-function ComponentPalette({ onAddComponent }: {
-  onAddComponent: (type: ContentItem['type']) => void;
+function ComponentPalette({
+  onAddComponent,
+}: {
+  onAddComponent: (type: ContentItem["type"]) => void;
 }) {
   return (
     <Card>
       <div className="p-4">
-        <Text variant="headingMd" as="h2">Add Components</Text>
+        <Text variant="headingMd" as="h2">
+          Add Components
+        </Text>
         <div className="grid grid-cols-2 gap-2 mt-4">
           {COMPONENT_TYPES.map((component) => (
             <Button
@@ -271,95 +307,110 @@ export function VisualEditor({ config, onConfigChange, onPreview }: VisualEditor
     setActiveId(event.active.id as string);
   }, []);
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
 
-    if (over && active.id !== over.id) {
-      const categories = config.categories || [];
-      const oldIndex = categories.findIndex(category => category.id === active.id);
-      const newIndex = categories.findIndex(category => category.id === over.id);
+      if (over && active.id !== over.id) {
+        const categories = config.categories || [];
+        const oldIndex = categories.findIndex((category) => category.id === active.id);
+        const newIndex = categories.findIndex((category) => category.id === over.id);
 
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newCategories = arrayMove(categories, oldIndex, newIndex);
-        // Update order property for each category
-        const updatedCategories = newCategories.map((category, index) => ({
-          ...category,
-          order: index,
-        }));
-        
-        const updatedConfig = {
-          ...config,
-          categories: updatedCategories,
-        };
-        onConfigChange(updatedConfig);
-        onPreview?.(updatedConfig);
+        if (oldIndex !== -1 && newIndex !== -1) {
+          const newCategories = arrayMove(categories, oldIndex, newIndex);
+          // Update order property for each category
+          const updatedCategories = newCategories.map((category, index) => ({
+            ...category,
+            order: index,
+          }));
+
+          const updatedConfig = {
+            ...config,
+            categories: updatedCategories,
+          };
+          onConfigChange(updatedConfig);
+          onPreview?.(updatedConfig);
+        }
       }
-    }
 
-    setActiveId(null);
-  }, [config, onConfigChange, onPreview]);
+      setActiveId(null);
+    },
+    [config, onConfigChange, onPreview]
+  );
 
-  const addComponent = useCallback((type: ContentItem['type']) => {
-    const newCategory: Category = {
-      id: `${type}-${Date.now()}`,
-      title: `New ${type}`,
-      card: [type, {
-        description: `A new ${type} component`,
-        ...(type === 'image' && { image: '' }),
-        ...(type === 'video' && { videoUrl: '' }),
-        ...(type === 'product' && { products: [] }),
-        ...(type === 'link' && { link: '' }),
-      }],
-      categoryType: [type, { children: [] }],
-      order: (config.categories?.length || 0),
-      visible: true,
-    };
+  const addComponent = useCallback(
+    (type: ContentItem["type"]) => {
+      const newCategory: Category = {
+        id: `${type}-${Date.now()}`,
+        title: `New ${type}`,
+        card: [
+          type,
+          {
+            description: `A new ${type} component`,
+            ...(type === "image" && { image: "" }),
+            ...(type === "video" && { videoUrl: "" }),
+            ...(type === "product" && { products: [] }),
+            ...(type === "link" && { link: "" }),
+          },
+        ],
+        categoryType: [type, { children: [] }],
+        order: config.categories?.length || 0,
+        visible: true,
+      };
 
-    const updatedConfig = {
-      ...config,
-      categories: [...(config.categories || []), newCategory],
-    };
-    
-    onConfigChange(updatedConfig);
-    onPreview?.(updatedConfig);
-  }, [config, onConfigChange, onPreview]);
+      const updatedConfig = {
+        ...config,
+        categories: [...(config.categories || []), newCategory],
+      };
+
+      onConfigChange(updatedConfig);
+      onPreview?.(updatedConfig);
+    },
+    [config, onConfigChange, onPreview]
+  );
 
   const editItem = useCallback((item: ContentItem) => {
     setEditingItem(item);
   }, []);
 
-  const deleteItem = useCallback((id: string) => {
-    const updatedConfig = {
-      ...config,
-      categories: (config.categories || []).filter(category => category.id !== id),
-    };
-    onConfigChange(updatedConfig);
-    onPreview?.(updatedConfig);
-  }, [config, onConfigChange, onPreview]);
+  const deleteItem = useCallback(
+    (id: string) => {
+      const updatedConfig = {
+        ...config,
+        categories: (config.categories || []).filter((category) => category.id !== id),
+      };
+      onConfigChange(updatedConfig);
+      onPreview?.(updatedConfig);
+    },
+    [config, onConfigChange, onPreview]
+  );
 
-  const duplicateItem = useCallback((item: ContentItem) => {
-    // Convert ContentItem to Category for duplication
-    const originalCategory = contentItemToCategory(item);
-    const duplicatedCategory: Category = {
-      ...originalCategory,
-      id: `${item.type}-${Date.now()}`,
-      title: `${item.title} (Copy)`,
-      order: (config.categories?.length || 0),
-    };
+  const duplicateItem = useCallback(
+    (item: ContentItem) => {
+      // Convert ContentItem to Category for duplication
+      const originalCategory = contentItemToCategory(item);
+      const duplicatedCategory: Category = {
+        ...originalCategory,
+        id: `${item.type}-${Date.now()}`,
+        title: `${item.title} (Copy)`,
+        order: config.categories?.length || 0,
+      };
 
-    const updatedConfig = {
-      ...config,
-      categories: [...(config.categories || []), duplicatedCategory],
-    };
-    
-    onConfigChange(updatedConfig);
-    onPreview?.(updatedConfig);
-  }, [config, onConfigChange, onPreview]);
+      const updatedConfig = {
+        ...config,
+        categories: [...(config.categories || []), duplicatedCategory],
+      };
+
+      onConfigChange(updatedConfig);
+      onPreview?.(updatedConfig);
+    },
+    [config, onConfigChange, onPreview]
+  );
 
   // Convert categories to content items for the UI
   const categories = config.categories || [];
   const items = categories.map(categoryToContentItem);
-  const activeItem = activeId ? items.find(item => item.id === activeId) : null;
+  const activeItem = activeId ? items.find((item) => item.id === activeId) : null;
 
   return (
     <div className="space-y-4">
@@ -369,7 +420,9 @@ export function VisualEditor({ config, onConfigChange, onPreview }: VisualEditor
       {/* Content list */}
       <Card>
         <div className="p-4">
-          <Text variant="headingMd" as="h2">Page Content</Text>
+          <Text variant="headingMd" as="h2">
+            Page Content
+          </Text>
           {items.length === 0 ? (
             <div className="text-center py-8">
               <Text variant="bodyLg" tone="subdued" as="p">
@@ -383,7 +436,10 @@ export function VisualEditor({ config, onConfigChange, onPreview }: VisualEditor
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
             >
-              <SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
+              <SortableContext
+                items={items.map((item) => item.id)}
+                strategy={verticalListSortingStrategy}
+              >
                 <div className="space-y-2">
                   {items.map((item) => (
                     <SortableItem

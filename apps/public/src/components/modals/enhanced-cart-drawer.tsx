@@ -15,7 +15,7 @@ import {
   type UICartItem 
 } from '@/store/app-store';
 import { useShopifyCartIntegration } from '@/lib/shopify-cart-integration';
-import { formatPrice } from '@minimall/core';
+import { formatPrice } from '@minimall/core/client';
 
 interface EnhancedCartDrawerProps {
   shopDomain: string;

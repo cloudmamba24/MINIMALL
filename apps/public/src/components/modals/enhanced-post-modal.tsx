@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { EnhancedModal } from '@/components/ui/enhanced-modal';
 import { useModalCarousel } from '@/hooks/use-modal-router';
 import { animationPresets, animationTokens } from '@/lib/animation-tokens';
-import type { Category } from '@minimall/core';
+import type { Category } from '@minimall/core/client';
 
 interface EnhancedPostModalProps {
   posts: Category[];

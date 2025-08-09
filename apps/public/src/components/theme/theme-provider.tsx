@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import type { Theme } from '@minimall/core';
+import type { Theme } from '@minimall/core/client';
 
 interface ThemeProviderProps {
   theme: Theme;

@@ -1,4 +1,4 @@
-import { type SiteConfig, type Category, type CardDetails } from '@minimall/core';
+import { type SiteConfig, type Category, type CardDetails } from '@minimall/core/client';
 import { cn } from '@minimall/ui';
 import { ImageCard } from './cards/image-card';
 import { VideoCard } from './cards/video-card';

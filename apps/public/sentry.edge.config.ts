@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
-import { createEdgeConfig } from '@minimall/core/src/sentry';
+import { createEdgeConfig } from '@minimall/core/server';
 
 Sentry.init(createEdgeConfig({
   tags: { app: 'public' },

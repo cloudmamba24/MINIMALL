@@ -1,9 +1,15 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Card, Button, ButtonGroup, Select, Spinner, Text, Banner } from '@shopify/polaris';
-import { RefreshIcon, ExternalIcon, MobileIcon, DesktopIcon, TabletIcon } from '@shopify/polaris-icons';
-import type { SiteConfig } from '@minimall/core';
+import type { SiteConfig } from "@minimall/core";
+import { Banner, Button, ButtonGroup, Card, Select, Spinner, Text } from "@shopify/polaris";
+import {
+  DesktopIcon,
+  ExternalIcon,
+  MobileIcon,
+  RefreshIcon,
+  TabletIcon,
+} from "@shopify/polaris-icons";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 interface LivePreviewProps {
   config: SiteConfig;
@@ -12,7 +18,7 @@ interface LivePreviewProps {
   onRefresh?: () => void;
 }
 
-type ViewportSize = 'mobile' | 'tablet' | 'desktop';
+type ViewportSize = "mobile" | "tablet" | "desktop";
 
 interface ViewportDimensions {
   width: number;
@@ -21,14 +27,19 @@ interface ViewportDimensions {
 }
 
 const VIEWPORT_SIZES: Record<ViewportSize, ViewportDimensions> = {
-  mobile: { width: 375, height: 812, label: 'iPhone 13 Pro' },
-  tablet: { width: 768, height: 1024, label: 'iPad' },
-  desktop: { width: 1200, height: 800, label: 'Desktop' },
+  mobile: { width: 375, height: 812, label: "iPhone 13 Pro" },
+  tablet: { width: 768, height: 1024, label: "iPad" },
+  desktop: { width: 1200, height: 800, label: "Desktop" },
 };
 
-export function LivePreview({ config, isLoading = false, error = null, onRefresh }: LivePreviewProps) {
-  const [viewport, setViewport] = useState<ViewportSize>('desktop');
-  const [previewUrl, setPreviewUrl] = useState<string>('');
+export function LivePreview({
+  config,
+  isLoading = false,
+  error = null,
+  onRefresh,
+}: LivePreviewProps) {
+  const [viewport, setViewport] = useState<ViewportSize>("desktop");
+  const [previewUrl, setPreviewUrl] = useState<string>("");
   const [iframeLoading, setIframeLoading] = useState(true);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -37,10 +48,11 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
   // Generate preview URL based on config
   useEffect(() => {
     if (config && config.id) {
-      const baseUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000' 
-        : window.location.origin.replace(':3001', ':3000'); // Admin is on 3001, public on 3000
-      
+      const baseUrl =
+        process.env.NODE_ENV === "development"
+          ? "http://localhost:3000"
+          : window.location.origin.replace(":3001", ":3000"); // Admin is on 3001, public on 3000
+
       setPreviewUrl(`${baseUrl}/g/${config.id}?preview=true&timestamp=${Date.now()}`);
     }
   }, [config]);
@@ -53,7 +65,7 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
 
   const handleIframeError = useCallback(() => {
     setIframeLoading(false);
-    setPreviewError('Failed to load preview');
+    setPreviewError("Failed to load preview");
   }, []);
 
   // Send config updates to iframe via postMessage
@@ -71,13 +83,16 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
     // Send config with a small delay to ensure iframe is ready
     messageTimeoutRef.current = setTimeout(() => {
       try {
-        iframe.contentWindow?.postMessage({
-          type: 'CONFIG_UPDATE',
-          config,
-          timestamp: Date.now(),
-        }, targetOrigin);
+        iframe.contentWindow?.postMessage(
+          {
+            type: "CONFIG_UPDATE",
+            config,
+            timestamp: Date.now(),
+          },
+          targetOrigin
+        );
       } catch (error) {
-        console.warn('Failed to send message to iframe:', error);
+        console.warn("Failed to send message to iframe:", error);
       }
     }, 100);
 
@@ -92,27 +107,27 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       const targetOrigin = previewUrl ? new URL(previewUrl).origin : window.location.origin;
-      
+
       if (event.origin !== targetOrigin) return;
 
       switch (event.data.type) {
-        case 'PREVIEW_READY':
+        case "PREVIEW_READY":
           setIframeLoading(false);
           setPreviewError(null);
           break;
-        case 'PREVIEW_ERROR':
+        case "PREVIEW_ERROR":
           setIframeLoading(false);
-          setPreviewError(event.data.error || 'Preview error occurred');
+          setPreviewError(event.data.error || "Preview error occurred");
           break;
-        case 'CONFIG_APPLIED':
+        case "CONFIG_APPLIED":
           // Config was successfully applied in preview
           // Config successfully applied in preview iframe
           break;
       }
     };
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, [previewUrl]);
 
   const refreshPreview = useCallback(() => {
@@ -126,7 +141,7 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
 
   const openInNewTab = useCallback(() => {
     if (previewUrl) {
-      window.open(previewUrl, '_blank');
+      window.open(previewUrl, "_blank");
     }
   }, [previewUrl]);
 
@@ -137,7 +152,9 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
     return (
       <Card>
         <div className="p-8 text-center">
-          <Text variant="headingMd" as="h2">Live Preview</Text>
+          <Text variant="headingMd" as="h2">
+            Live Preview
+          </Text>
           <Text variant="bodyLg" tone="subdued" as="p">
             No configuration selected for preview
           </Text>
@@ -151,28 +168,30 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
       <div className="p-4 border-b">
         <div className="flex items-center justify-between">
           <div>
-            <Text variant="headingMd" as="h2">Live Preview</Text>
+            <Text variant="headingMd" as="h2">
+              Live Preview
+            </Text>
             <Text variant="bodySm" tone="subdued" as="span">
               {config.id} • {dimensions.label}
             </Text>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {/* Viewport selector */}
             <ButtonGroup variant="segmented">
               <Button
-                pressed={viewport === 'mobile'}
-                onClick={() => setViewport('mobile')}
+                pressed={viewport === "mobile"}
+                onClick={() => setViewport("mobile")}
                 icon={MobileIcon}
               />
               <Button
-                pressed={viewport === 'tablet'}
-                onClick={() => setViewport('tablet')}
+                pressed={viewport === "tablet"}
+                onClick={() => setViewport("tablet")}
                 icon={TabletIcon}
               />
               <Button
-                pressed={viewport === 'desktop'}
-                onClick={() => setViewport('desktop')}
+                pressed={viewport === "desktop"}
+                onClick={() => setViewport("desktop")}
                 icon={DesktopIcon}
               />
             </ButtonGroup>
@@ -193,36 +212,37 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
       {/* Error banner */}
       {(error || previewError) && (
         <div className="p-4">
-          <Banner tone="critical">
-            {error || previewError}
-          </Banner>
+          <Banner tone="critical">{error || previewError}</Banner>
         </div>
       )}
 
       {/* Preview container */}
       <div className="p-4">
-        <div className="relative bg-gray-100 rounded-lg overflow-hidden" style={{ minHeight: '400px' }}>
+        <div
+          className="relative bg-gray-100 rounded-lg overflow-hidden"
+          style={{ minHeight: "400px" }}
+        >
           {/* Loading overlay */}
           {(isLoading || iframeLoading) && (
             <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-10">
               <div className="text-center">
                 <Spinner size="large" />
                 <Text variant="bodyMd" as="p">
-                  {isLoading ? 'Loading configuration...' : 'Loading preview...'}
+                  {isLoading ? "Loading configuration..." : "Loading preview..."}
                 </Text>
               </div>
             </div>
           )}
 
           {/* Preview iframe */}
-          <div 
+          <div
             className="mx-auto bg-white shadow-lg rounded-lg overflow-hidden"
             style={{
               width: dimensions.width * scale,
               height: dimensions.height * scale,
               transform: `scale(${scale})`,
-              transformOrigin: 'top center',
-              transition: 'all 0.3s ease',
+              transformOrigin: "top center",
+              transition: "all 0.3s ease",
             }}
           >
             {previewUrl && (
@@ -250,7 +270,8 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
         {/* Preview tips */}
         <div className="mt-4 text-center">
           <Text variant="bodySm" tone="subdued" as="p">
-            Changes are automatically reflected in the preview. Use the refresh button if updates don't appear.
+            Changes are automatically reflected in the preview. Use the refresh button if updates
+            don't appear.
           </Text>
         </div>
       </div>

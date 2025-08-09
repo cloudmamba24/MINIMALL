@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import type { SiteConfig } from '@minimall/core';
+import type { SiteConfig } from '@minimall/core/client';
 
 interface SiteConfigContextValue {
   config: SiteConfig;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createShopifyClient, getMockProduct, type ShopifyProduct } from '@/lib/shopify-client';
-import { transformProduct, type ShopifyProduct as CoreShopifyProduct } from '@minimall/core';
+import { transformProduct, type ShopifyProduct as CoreShopifyProduct } from '@minimall/core/client';
 
 interface UseShopifyProductResult {
   product: ShopifyProduct | null;

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import type { SiteConfig } from '@minimall/core';
+import type { SiteConfig } from '@minimall/core/client';
 import { Renderer } from './renderer';
 
 interface PreviewWrapperProps {

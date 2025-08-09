@@ -1,45 +1,45 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import React from 'react';
-import { AnalyticsDashboard } from './analytics-dashboard';
-import { AppProvider } from '@shopify/polaris';
+import { AppProvider } from "@shopify/polaris";
+import type { Meta, StoryObj } from "@storybook/react";
+import React from "react";
+import { AnalyticsDashboard } from "./analytics-dashboard";
 
 // Mock analytics data
 const mockAnalyticsData = {
   success: true,
   data: {
     timeframe: {
-      startDate: '2024-01-01T00:00:00Z',
-      endDate: '2024-01-07T23:59:59Z',
-      duration: '7d',
+      startDate: "2024-01-01T00:00:00Z",
+      endDate: "2024-01-07T23:59:59Z",
+      duration: "7d",
     },
     performance: {
       metrics: [
         {
-          configId: 'demo-config',
-          metric: 'LCP' as const,
+          configId: "demo-config",
+          metric: "LCP" as const,
           value: 1800,
-          rating: 'good' as const,
+          rating: "good" as const,
           delta: 150,
-          id: 'lcp-1',
-          navigationType: 'navigate',
-          timestamp: '2024-01-01T12:00:00Z',
-          url: 'https://example.com/g/demo-shop',
-          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          connection: '4g',
+          id: "lcp-1",
+          navigationType: "navigate",
+          timestamp: "2024-01-01T12:00:00Z",
+          url: "https://example.com/g/demo-shop",
+          userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          connection: "4g",
           viewport: { width: 1920, height: 1080 },
         },
         {
-          configId: 'demo-config',
-          metric: 'FID' as const,
+          configId: "demo-config",
+          metric: "FID" as const,
           value: 75,
-          rating: 'good' as const,
+          rating: "good" as const,
           delta: 25,
-          id: 'fid-1',
-          navigationType: 'navigate',
-          timestamp: '2024-01-01T12:05:00Z',
-          url: 'https://example.com/g/demo-shop',
-          userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)',
-          connection: '4g',
+          id: "fid-1",
+          navigationType: "navigate",
+          timestamp: "2024-01-01T12:05:00Z",
+          url: "https://example.com/g/demo-shop",
+          userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
+          connection: "4g",
           viewport: { width: 375, height: 812 },
         },
       ],
@@ -54,25 +54,25 @@ const mockAnalyticsData = {
     analytics: {
       events: [
         {
-          event: 'page_view',
-          configId: 'demo-config',
-          sessionId: 'session_123',
-          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-          referrer: 'https://instagram.com',
-          utmSource: 'instagram',
-          utmMedium: 'social',
-          utmCampaign: 'summer_sale',
-          timestamp: '2024-01-01T10:00:00Z',
+          event: "page_view",
+          configId: "demo-config",
+          sessionId: "session_123",
+          userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+          referrer: "https://instagram.com",
+          utmSource: "instagram",
+          utmMedium: "social",
+          utmCampaign: "summer_sale",
+          timestamp: "2024-01-01T10:00:00Z",
         },
         {
-          event: 'button_click',
-          configId: 'demo-config',
-          sessionId: 'session_123',
+          event: "button_click",
+          configId: "demo-config",
+          sessionId: "session_123",
           properties: {
-            button_text: 'Shop Now',
-            section: 'hero',
+            button_text: "Shop Now",
+            section: "hero",
           },
-          timestamp: '2024-01-01T10:02:00Z',
+          timestamp: "2024-01-01T10:02:00Z",
         },
       ],
       eventCounts: {
@@ -91,9 +91,9 @@ const emptyAnalyticsData = {
   success: true,
   data: {
     timeframe: {
-      startDate: '2024-01-01T00:00:00Z',
-      endDate: '2024-01-07T23:59:59Z',
-      duration: '7d',
+      startDate: "2024-01-01T00:00:00Z",
+      endDate: "2024-01-07T23:59:59Z",
+      duration: "7d",
     },
     performance: {
       metrics: [],
@@ -118,9 +118,9 @@ const highTrafficData = {
   success: true,
   data: {
     timeframe: {
-      startDate: '2024-01-01T00:00:00Z',
-      endDate: '2024-01-31T23:59:59Z',
-      duration: '30d',
+      startDate: "2024-01-01T00:00:00Z",
+      endDate: "2024-01-31T23:59:59Z",
+      duration: "30d",
     },
     performance: {
       metrics: [],
@@ -150,21 +150,22 @@ const highTrafficData = {
 };
 
 const meta: Meta<typeof AnalyticsDashboard> = {
-  title: 'Admin/Analytics Dashboard',
+  title: "Admin/Analytics Dashboard",
   component: AnalyticsDashboard,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     docs: {
       description: {
-        component: 'Comprehensive analytics dashboard displaying performance metrics, user interactions, and site insights. Integrates with Sentry for error monitoring and provides real-time Web Vitals tracking.',
+        component:
+          "Comprehensive analytics dashboard displaying performance metrics, user interactions, and site insights. Integrates with Sentry for error monitoring and provides real-time Web Vitals tracking.",
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   decorators: [
     (Story) => (
       <AppProvider i18n={{}}>
-        <div style={{ padding: '1rem', minHeight: '600px' }}>
+        <div style={{ padding: "1rem", minHeight: "600px" }}>
           <Story />
         </div>
       </AppProvider>
@@ -172,8 +173,8 @@ const meta: Meta<typeof AnalyticsDashboard> = {
   ],
   argTypes: {
     configId: {
-      description: 'Configuration ID to filter analytics data',
-      control: 'text',
+      description: "Configuration ID to filter analytics data",
+      control: "text",
     },
   },
 };
@@ -183,18 +184,19 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    configId: 'demo-config',
+    configId: "demo-config",
   },
 };
 
 export const EmptyState: Story = {
   args: {
-    configId: 'empty-config',
+    configId: "empty-config",
   },
   parameters: {
     docs: {
       description: {
-        story: 'Dashboard in empty state with no analytics data, showing placeholder content and empty state messaging.',
+        story:
+          "Dashboard in empty state with no analytics data, showing placeholder content and empty state messaging.",
       },
     },
   },
@@ -202,12 +204,13 @@ export const EmptyState: Story = {
 
 export const HighTraffic: Story = {
   args: {
-    configId: 'busy-config',
+    configId: "busy-config",
   },
   parameters: {
     docs: {
       description: {
-        story: 'Dashboard displaying high-traffic analytics with large numbers and multiple event types.',
+        story:
+          "Dashboard displaying high-traffic analytics with large numbers and multiple event types.",
       },
     },
   },
@@ -215,12 +218,13 @@ export const HighTraffic: Story = {
 
 export const LoadingState: Story = {
   args: {
-    configId: 'loading-config',
+    configId: "loading-config",
   },
   parameters: {
     docs: {
       description: {
-        story: 'Dashboard in loading state showing skeleton loaders and placeholders while data is being fetched.',
+        story:
+          "Dashboard in loading state showing skeleton loaders and placeholders while data is being fetched.",
       },
     },
   },
@@ -228,12 +232,12 @@ export const LoadingState: Story = {
 
 export const ErrorState: Story = {
   args: {
-    configId: 'error-config',
+    configId: "error-config",
   },
   parameters: {
     docs: {
       description: {
-        story: 'Dashboard in error state displaying error messages and retry options.',
+        story: "Dashboard in error state displaying error messages and retry options.",
       },
     },
   },
@@ -241,14 +245,14 @@ export const ErrorState: Story = {
 
 export const InteractiveDashboard: Story = {
   render: () => {
-    const [timeframe, setTimeframe] = React.useState<'1h' | '24h' | '7d' | '30d'>('7d');
+    const [timeframe, setTimeframe] = React.useState<"1h" | "24h" | "7d" | "30d">("7d");
     const [data, setData] = React.useState(mockAnalyticsData);
     const [loading, setLoading] = React.useState(false);
 
-    const handleTimeframeChange = (newTimeframe: '1h' | '24h' | '7d' | '30d') => {
+    const handleTimeframeChange = (newTimeframe: "1h" | "24h" | "7d" | "30d") => {
       setTimeframe(newTimeframe);
       setLoading(true);
-      
+
       // Simulate API call
       setTimeout(() => {
         // Update data based on timeframe
@@ -263,8 +267,22 @@ export const InteractiveDashboard: Story = {
             analytics: {
               ...mockAnalyticsData.data.analytics,
               // Simulate different traffic levels based on timeframe
-              totalEvents: newTimeframe === '1h' ? 25 : newTimeframe === '24h' ? 120 : newTimeframe === '7d' ? 869 : 3200,
-              uniqueSessions: newTimeframe === '1h' ? 15 : newTimeframe === '24h' ? 85 : newTimeframe === '7d' ? 245 : 890,
+              totalEvents:
+                newTimeframe === "1h"
+                  ? 25
+                  : newTimeframe === "24h"
+                    ? 120
+                    : newTimeframe === "7d"
+                      ? 869
+                      : 3200,
+              uniqueSessions:
+                newTimeframe === "1h"
+                  ? 15
+                  : newTimeframe === "24h"
+                    ? 85
+                    : newTimeframe === "7d"
+                      ? 245
+                      : 890,
             },
           },
         };
@@ -293,32 +311,34 @@ export const InteractiveDashboard: Story = {
 
     return (
       <div>
-        <div style={{ 
-          marginBottom: '1rem', 
-          padding: '1rem', 
-          background: '#f5f5f5', 
-          borderRadius: '4px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '1rem'
-        }}>
+        <div
+          style={{
+            marginBottom: "1rem",
+            padding: "1rem",
+            background: "#f5f5f5",
+            borderRadius: "4px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "1rem",
+          }}
+        >
           <div>
             <strong>Dashboard Controls:</strong>
-            <div style={{ fontSize: '12px', marginTop: '0.25rem' }}>
-              Current Timeframe: {timeframe} | Status: {loading ? 'Loading...' : 'Ready'}
+            <div style={{ fontSize: "12px", marginTop: "0.25rem" }}>
+              Current Timeframe: {timeframe} | Status: {loading ? "Loading..." : "Ready"}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
             <select
               value={timeframe}
               onChange={(e) => handleTimeframeChange(e.target.value as any)}
               style={{
-                padding: '0.5rem',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                fontSize: '12px'
+                padding: "0.5rem",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+                fontSize: "12px",
               }}
             >
               <option value="1h">Last Hour</option>
@@ -330,30 +350,29 @@ export const InteractiveDashboard: Story = {
               onClick={handleRefresh}
               disabled={loading}
               style={{
-                padding: '0.5rem 1rem',
-                border: '1px solid #2563eb',
-                borderRadius: '4px',
-                background: '#2563eb',
-                color: 'white',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                fontSize: '12px',
-                opacity: loading ? 0.7 : 1
+                padding: "0.5rem 1rem",
+                border: "1px solid #2563eb",
+                borderRadius: "4px",
+                background: "#2563eb",
+                color: "white",
+                cursor: loading ? "not-allowed" : "pointer",
+                fontSize: "12px",
+                opacity: loading ? 0.7 : 1,
               }}
             >
-              {loading ? '...' : 'Refresh'}
+              {loading ? "..." : "Refresh"}
             </button>
           </div>
         </div>
-        <AnalyticsDashboard
-          configId="interactive-config"
-        />
+        <AnalyticsDashboard configId="interactive-config" />
       </div>
     );
   },
   parameters: {
     docs: {
       description: {
-        story: 'Fully interactive dashboard with working timeframe switching, refresh functionality, and simulated data loading.',
+        story:
+          "Fully interactive dashboard with working timeframe switching, refresh functionality, and simulated data loading.",
       },
     },
   },
@@ -362,30 +381,58 @@ export const InteractiveDashboard: Story = {
 export const DashboardFeatures: Story = {
   render: () => (
     <AppProvider i18n={{}}>
-      <div style={{ padding: '1rem' }}>
+      <div style={{ padding: "1rem" }}>
         <h3>Analytics Dashboard Features</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
-          <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f8f9fa' }}>
-            <h4 style={{ margin: '0 0 0.5rem 0', color: '#2563eb' }}>📊 Performance Metrics</h4>
-            <ul style={{ margin: 0, paddingLeft: '1rem', fontSize: '14px' }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gap: "1rem",
+            marginTop: "1rem",
+          }}
+        >
+          <div
+            style={{
+              padding: "1rem",
+              border: "1px solid #ddd",
+              borderRadius: "8px",
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            <h4 style={{ margin: "0 0 0.5rem 0", color: "#2563eb" }}>📊 Performance Metrics</h4>
+            <ul style={{ margin: 0, paddingLeft: "1rem", fontSize: "14px" }}>
               <li>Core Web Vitals (LCP, FID, CLS)</li>
               <li>Time to First Byte (TTFB)</li>
               <li>Real User Monitoring (RUM)</li>
               <li>Performance scoring</li>
             </ul>
           </div>
-          <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f8f9fa' }}>
-            <h4 style={{ margin: '0 0 0.5rem 0', color: '#059669' }}>📈 User Analytics</h4>
-            <ul style={{ margin: 0, paddingLeft: '1rem', fontSize: '14px' }}>
+          <div
+            style={{
+              padding: "1rem",
+              border: "1px solid #ddd",
+              borderRadius: "8px",
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            <h4 style={{ margin: "0 0 0.5rem 0", color: "#059669" }}>📈 User Analytics</h4>
+            <ul style={{ margin: 0, paddingLeft: "1rem", fontSize: "14px" }}>
               <li>Page views and sessions</li>
               <li>User interactions tracking</li>
               <li>UTM campaign analysis</li>
               <li>Referrer insights</li>
             </ul>
           </div>
-          <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f8f9fa' }}>
-            <h4 style={{ margin: '0 0 0.5rem 0', color: '#dc2626' }}>🔧 Technical Features</h4>
-            <ul style={{ margin: 0, paddingLeft: '1rem', fontSize: '14px' }}>
+          <div
+            style={{
+              padding: "1rem",
+              border: "1px solid #ddd",
+              borderRadius: "8px",
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            <h4 style={{ margin: "0 0 0.5rem 0", color: "#dc2626" }}>🔧 Technical Features</h4>
+            <ul style={{ margin: 0, paddingLeft: "1rem", fontSize: "14px" }}>
               <li>Sentry integration</li>
               <li>Real-time data updates</li>
               <li>Multiple timeframe views</li>
@@ -393,12 +440,21 @@ export const DashboardFeatures: Story = {
             </ul>
           </div>
         </div>
-        <div style={{ marginTop: '2rem', padding: '1rem', background: '#fffbf0', border: '1px solid #f59e0b', borderRadius: '8px' }}>
-          <h4 style={{ margin: '0 0 0.5rem 0', color: '#92400e' }}>🎯 Business Insights</h4>
-          <p style={{ margin: 0, fontSize: '14px', color: '#92400e' }}>
-            The analytics dashboard provides actionable insights for Shopify merchants including conversion tracking, 
-            performance optimization recommendations, and user behavior analysis to improve their link-in-bio effectiveness 
-            and drive more sales through their MINIMALL sites.
+        <div
+          style={{
+            marginTop: "2rem",
+            padding: "1rem",
+            background: "#fffbf0",
+            border: "1px solid #f59e0b",
+            borderRadius: "8px",
+          }}
+        >
+          <h4 style={{ margin: "0 0 0.5rem 0", color: "#92400e" }}>🎯 Business Insights</h4>
+          <p style={{ margin: 0, fontSize: "14px", color: "#92400e" }}>
+            The analytics dashboard provides actionable insights for Shopify merchants including
+            conversion tracking, performance optimization recommendations, and user behavior
+            analysis to improve their link-in-bio effectiveness and drive more sales through their
+            MINIMALL sites.
           </p>
         </div>
       </div>
@@ -407,7 +463,8 @@ export const DashboardFeatures: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Comprehensive overview of the Analytics Dashboard\'s capabilities and business value.',
+        story:
+          "Comprehensive overview of the Analytics Dashboard's capabilities and business value.",
       },
     },
   },

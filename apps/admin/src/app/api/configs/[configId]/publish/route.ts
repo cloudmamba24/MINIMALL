@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { r2Service, type SiteConfig } from '@minimall/core';
-import { db, configs, configVersions } from '@minimall/db';
-import { eq, and, desc } from 'drizzle-orm';
-import * as Sentry from '@sentry/nextjs';
+import { type SiteConfig, r2Service } from "@minimall/core";
+import { configVersions, configs, db } from "@minimall/db";
+import * as Sentry from "@sentry/nextjs";
+import { and, desc, eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 
 interface RouteParams {
   params: Promise<{
@@ -16,45 +16,28 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { configId } = await params;
 
     if (!configId) {
-      return NextResponse.json(
-        { error: 'Configuration ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Configuration ID is required" }, { status: 400 });
     }
 
     if (!db) {
-      return NextResponse.json(
-        { error: 'Database not available' },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: "Database not available" }, { status: 503 });
     }
 
     // Get the current draft version
     const currentVersion = await db
       .select()
       .from(configVersions)
-      .where(
-        and(
-          eq(configVersions.configId, configId),
-          eq(configVersions.isPublished, false)
-        )
-      )
+      .where(and(eq(configVersions.configId, configId), eq(configVersions.isPublished, false)))
       .orderBy(desc(configVersions.createdAt))
       .limit(1);
 
     if (currentVersion.length === 0) {
-      return NextResponse.json(
-        { error: 'No draft version found to publish' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "No draft version found to publish" }, { status: 404 });
     }
 
     const versionToPublish = currentVersion[0];
     if (!versionToPublish) {
-      return NextResponse.json(
-        { error: 'No draft version found to publish' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "No draft version found to publish" }, { status: 404 });
     }
 
     // Mark the version as published
@@ -76,7 +59,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .where(
         and(
           eq(configVersions.configId, configId),
-          eq(configVersions.isPublished, true),
+          eq(configVersions.isPublished, true)
           // Don't unpublish the version we just published
           // Note: This is a bit of a race condition, but acceptable for now
         )
@@ -96,11 +79,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       try {
         const config = versionToPublish.data as SiteConfig;
         await r2Service.saveConfig(configId, config);
-        
+
         // Config successfully published to R2
       } catch (r2Error) {
-        console.error('Failed to publish to R2:', r2Error);
-        
+        console.error("Failed to publish to R2:", r2Error);
+
         // Rollback database changes if R2 publish fails
         await db
           .update(configVersions)
@@ -111,7 +94,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           .where(eq(configVersions.id, versionToPublish.id));
 
         return NextResponse.json(
-          { error: 'Failed to publish to production storage' },
+          { error: "Failed to publish to production storage" },
           { status: 500 }
         );
       }
@@ -119,30 +102,26 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     // Add Sentry context
     Sentry.addBreadcrumb({
-      category: 'config-publish',
+      category: "config-publish",
       message: `Published configuration: ${configId}`,
       data: {
         configId,
         versionId: versionToPublish.id,
         version: versionToPublish.version,
       },
-      level: 'info',
+      level: "info",
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Configuration published successfully',
+      message: "Configuration published successfully",
       version: versionToPublish.version,
       publishedAt: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('Failed to publish configuration:', error);
+    console.error("Failed to publish configuration:", error);
     Sentry.captureException(error);
-    
-    return NextResponse.json(
-      { error: 'Failed to publish configuration' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "Failed to publish configuration" }, { status: 500 });
   }
 }

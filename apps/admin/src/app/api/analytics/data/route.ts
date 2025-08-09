@@ -1,51 +1,48 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import * as Sentry from '@sentry/nextjs';
-import { db, performanceMetrics, analyticsEvents } from '@minimall/db';
-import { desc, eq, and, gte, sql } from 'drizzle-orm';
+import { analyticsEvents, db, performanceMetrics } from "@minimall/db";
+import * as Sentry from "@sentry/nextjs";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 const analyticsRequestSchema = z.object({
   configId: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-  timeframe: z.enum(['1h', '24h', '7d', '30d']).optional().default('24h'),
+  timeframe: z.enum(["1h", "24h", "7d", "30d"]).optional().default("24h"),
 });
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const params = analyticsRequestSchema.parse({
-      configId: searchParams.get('configId') || undefined,
-      startDate: searchParams.get('startDate') || undefined,
-      endDate: searchParams.get('endDate') || undefined,
-      timeframe: searchParams.get('timeframe') || '24h',
+      configId: searchParams.get("configId") || undefined,
+      startDate: searchParams.get("startDate") || undefined,
+      endDate: searchParams.get("endDate") || undefined,
+      timeframe: searchParams.get("timeframe") || "24h",
     });
 
     if (!db) {
-      return NextResponse.json(
-        { error: 'Database not available' },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: "Database not available" }, { status: 503 });
     }
 
     // Calculate date range
     const now = new Date();
     let startDate: Date;
-    
+
     if (params.startDate) {
       startDate = new Date(params.startDate);
     } else {
       switch (params.timeframe) {
-        case '1h':
+        case "1h":
           startDate = new Date(now.getTime() - 60 * 60 * 1000);
           break;
-        case '24h':
+        case "24h":
           startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
           break;
-        case '7d':
+        case "7d":
           startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
           break;
-        case '30d':
+        case "30d":
           startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
           break;
         default:
@@ -113,20 +110,32 @@ export async function GET(request: NextRequest) {
 
     // Calculate aggregated metrics
     const performanceAggregates = {
-      avgLcp: performanceData.filter(m => m.lcp).reduce((sum, m) => sum + (m.lcp || 0), 0) / performanceData.filter(m => m.lcp).length || 0,
-      avgFid: performanceData.filter(m => m.fid).reduce((sum, m) => sum + (m.fid || 0), 0) / performanceData.filter(m => m.fid).length || 0,
-      avgCls: performanceData.filter(m => m.cls).reduce((sum, m) => sum + (m.cls || 0), 0) / performanceData.filter(m => m.cls).length / 1000 || 0, // Convert back from integer
-      avgTtfb: performanceData.filter(m => m.ttfb).reduce((sum, m) => sum + (m.ttfb || 0), 0) / performanceData.filter(m => m.ttfb).length || 0,
+      avgLcp:
+        performanceData.filter((m) => m.lcp).reduce((sum, m) => sum + (m.lcp || 0), 0) /
+          performanceData.filter((m) => m.lcp).length || 0,
+      avgFid:
+        performanceData.filter((m) => m.fid).reduce((sum, m) => sum + (m.fid || 0), 0) /
+          performanceData.filter((m) => m.fid).length || 0,
+      avgCls:
+        performanceData.filter((m) => m.cls).reduce((sum, m) => sum + (m.cls || 0), 0) /
+          performanceData.filter((m) => m.cls).length /
+          1000 || 0, // Convert back from integer
+      avgTtfb:
+        performanceData.filter((m) => m.ttfb).reduce((sum, m) => sum + (m.ttfb || 0), 0) /
+          performanceData.filter((m) => m.ttfb).length || 0,
       totalMetrics: performanceData.length,
     };
 
     // Calculate event aggregates
-    const eventCounts = eventsData.reduce((acc, event) => {
-      acc[event.event] = (acc[event.event] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const eventCounts = eventsData.reduce(
+      (acc, event) => {
+        acc[event.event] = (acc[event.event] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
-    const uniqueSessions = new Set(eventsData.map(e => e.sessionId)).size;
+    const uniqueSessions = new Set(eventsData.map((e) => e.sessionId)).size;
 
     return NextResponse.json({
       success: true,
@@ -148,22 +157,18 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-
   } catch (error) {
-    console.error('Failed to fetch analytics data:', error);
+    console.error("Failed to fetch analytics data:", error);
     Sentry.captureException(error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid query parameters', details: error.errors },
+        { error: "Invalid query parameters", details: error.errors },
         { status: 400 }
       );
     }
-    
-    return NextResponse.json(
-      { error: 'Failed to fetch analytics data' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "Failed to fetch analytics data" }, { status: 500 });
   }
 }
 
@@ -171,9 +176,9 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
     },
   });
 }
