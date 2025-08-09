@@ -3,3 +3,5 @@ src/services/shopify-storefront.ts
 src/services/shopify-transformer.ts
 src/test-setup/**
 src/sentry.ts
+src/performance.ts
+src/rum.ts
