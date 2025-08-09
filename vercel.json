@@ -52,18 +52,4 @@
     "NODE_ENV": "production",
     "NEXT_PUBLIC_APP_ENV": "production"
   },
-  "build": {
-    "env": {
-      "R2_ENDPOINT": "@r2_endpoint",
-      "R2_ACCESS_KEY": "@r2_access_key", 
-      "R2_SECRET": "@r2_secret",
-      "R2_BUCKET_NAME": "@r2_bucket_name",
-      "NEXT_PUBLIC_BASE_URL": "@public_app_url",
-      "DATABASE_URL": "@database_url",
-      "SHOPIFY_STOREFRONT_ACCESS_TOKEN": "@shopify_storefront_access_token",
-      "NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN": "@shopify_storefront_access_token",
-      "SENTRY_DSN": "@sentry_dsn",
-      "NEXT_PUBLIC_SENTRY_DSN": "@sentry_dsn"
-    }
-  }
 }
