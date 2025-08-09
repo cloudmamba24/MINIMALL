@@ -1,73 +1,92 @@
-# MINIMALL Documentation
+# 📖 MINIMALL Documentation
 
-This directory contains all documentation, reference materials, and development resources for the MINIMALL project.
+Welcome to the MINIMALL platform documentation. This directory contains all the guides, references, and resources you need to understand, deploy, and maintain the platform.
 
-## 📁 Directory Structure
+## 🚀 Quick Start
 
-```
-docs/
-├── assets/           # Reference images and media files
-├── reference/        # Development context and reference materials
-└── README.md        # This file
-```
+If you're new to MINIMALL or want to get up and running quickly:
 
-## 📋 Root Documentation Files
+👉 **[Deployment Quick Start Guide](./deployment/quick-start/)**
 
-Located in the project root (`/`):
+## 📂 Documentation Structure
 
-### Issue-Specific Fixes
-- **`BUILD-SYSTEM-OVERHAUL.md`** - Comprehensive build system resolution
-- **`TROUBLESHOOTING.md`** - Deployment and runtime issues  
-- **`REACT_ERROR_185_FIX.md`** - React infinite loop resolution
+### 🚀 [Deployment](./deployment/)
+Everything you need to deploy MINIMALL to production.
 
-### Process Documentation
-- **`README.md`** - Main project overview and setup instructions
-- **`DIAGNOSTIC-METHODOLOGY.md`** - Root cause analysis framework
-- **`CHANGELOG.md`** - Complete project change history
-- **`DEVELOPMENT.md`** - Development journal and technical decisions
-- **`DEPLOYMENT.md`** - Deployment guides and configuration
+- **[Quick Start](./deployment/quick-start/)** - Get deployed in 60 minutes
+  - [Deployment Guide](./deployment/quick-start/DEPLOYMENT-GUIDE.md) - Complete step-by-step instructions
+  - [Quick Start Checklist](./deployment/quick-start/QUICK-START-CHECKLIST.md) - Streamlined checklist
+  - [Environment Template](./deployment/quick-start/ENVIRONMENT-TEMPLATE.env) - All required variables
 
-## 📁 Technical References (docs/)
+### 🛠️ [Development](./development/)
+Resources for local development and contributing.
 
-- **`BUILD-SYSTEM-TECHNICAL-REFERENCE.md`** - Detailed file-by-file technical fixes
-- **`dev-tools.md`** - Development tools and workflows
-- **`api/openapi.yaml`** - API specification
+- [Development Guide](./development/DEVELOPMENT.md) - Local setup and development workflow
+- [Safe Improvements](./development/SAFE-IMPROVEMENTS.md) - Guidelines for making changes
 
-## 🎯 Quick Reference
+### 🔧 [Troubleshooting](./troubleshooting/)
+Solutions for common issues and debugging guides.
 
-### For Developers
-- Start with `/README.md` for project setup
-- Use `/BUILD-SYSTEM-OVERHAUL.md` for build issues
-- Check `/TROUBLESHOOTING.md` for deployment problems
-- See `/DIAGNOSTIC-METHODOLOGY.md` for systematic debugging
+- [Troubleshooting Guide](./troubleshooting/TROUBLESHOOTING.md) - Common issues and solutions
+- [Diagnostic Methodology](./troubleshooting/DIAGNOSTIC-METHODOLOGY.md) - Systematic debugging approach
 
-### For Deployment Issues
-- **404 errors**: [`/TROUBLESHOOTING.md`](../TROUBLESHOOTING.md#deployment-issues)
-- **Build failures**: [`/BUILD-SYSTEM-OVERHAUL.md`](../BUILD-SYSTEM-OVERHAUL.md)
-- **Infinite loops**: [`/REACT_ERROR_185_FIX.md`](../REACT_ERROR_185_FIX.md)
+### 🔨 [Fixes](./fixes/)
+Historical documentation of major fixes and improvements.
 
-### For Technical Deep Dives
-- **Detailed fixes**: [`BUILD-SYSTEM-TECHNICAL-REFERENCE.md`](./BUILD-SYSTEM-TECHNICAL-REFERENCE.md)  
-- **Development tools**: [`dev-tools.md`](./dev-tools.md)
-- **API reference**: [`api/openapi.yaml`](./api/openapi.yaml)
+- [Build System Overhaul](./fixes/BUILD-SYSTEM-OVERHAUL.md) - Major build system improvements
+- [Comprehensive Fix Plan](./fixes/COMPREHENSIVE-FIX-PLAN.md) - Systematic issue resolution
+- [Deployment Warning Fixes](./fixes/DEPLOYMENT-WARNING-FIXES.md) - Deployment issue resolutions
+- [React Error 185 Fix](./fixes/REACT_ERROR_185_FIX.md) - Specific React error resolution
 
-## 📝 Documentation Standards
+### 📝 [Changelog](./changelog/)
+Version history and release notes.
 
-All documentation follows these conventions:
-- **Markdown format** for consistency
-- **Clear headings** for navigation
-- **Code examples** with syntax highlighting  
-- **Emojis** for section identification
-- **Chronological entries** in development journal
+- [Changelog](./changelog/CHANGELOG.md) - Complete version history
 
-## 🔄 Recent Changes
+### 📚 [Reference](./reference/)
+Technical references and specifications.
 
-See `/DEVELOPMENT.md` for the latest:
-- Phase 2 completion (Analytics & Error Monitoring)
-- Codebase cleanup and organization
-- Shared configuration implementation
-- Testing infrastructure improvements
+- [Build System Technical Reference](./BUILD-SYSTEM-TECHNICAL-REFERENCE.md) - Build system details
+- [API Documentation](./api/) - API specifications
+- [Context Files](./reference/ContextFiles/) - Project context and requirements
+
+### 🎨 [Assets](./assets/)
+Screenshots, diagrams, and visual resources.
+
+- [Reference Media](./assets/Reference%20Media/) - Screenshots and visual references
+
+## 🗂️ Related Directories
+
+### [Stories](../stories/)
+Storybook stories and component documentation.
+
+### [Scripts](../scripts/)
+Utility scripts for development and maintenance.
+
+## 📖 How to Use This Documentation
+
+1. **New to MINIMALL?** Start with [Deployment Quick Start](./deployment/quick-start/)
+2. **Setting up locally?** Check [Development Guide](./development/DEVELOPMENT.md)
+3. **Having issues?** Try [Troubleshooting](./troubleshooting/TROUBLESHOOTING.md)
+4. **Need technical details?** Browse [Reference](./reference/) materials
+
+## 🤝 Contributing to Documentation
+
+When adding new documentation:
+
+1. **Place files in appropriate folders** based on their purpose
+2. **Update this README** to include new content
+3. **Follow existing naming conventions** (UPPERCASE for markdown files)
+4. **Include proper headers and navigation** in your documents
+
+## 📋 Documentation Standards
+
+- **Use clear, descriptive titles**
+- **Include table of contents for long documents**
+- **Provide step-by-step instructions where applicable**
+- **Include code examples and screenshots when helpful**
+- **Keep information current and accurate**
 
 ---
 
-*Last updated: 2025-01-09*
+**Need help?** Start with the [Quick Start Guide](./deployment/quick-start/QUICK-START-CHECKLIST.md) or browse the specific section that matches your needs.
