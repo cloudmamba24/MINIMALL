@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getWebhookHandler } from '@minimall/core/webhooks/webhook-handler';
+import { getWebhookHandler } from '../../../../lib/webhook-handler';
 import * as Sentry from '@sentry/nextjs';
 
 // POST /api/webhooks/customers/data_request - Handle GDPR customer data request webhook

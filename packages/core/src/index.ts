@@ -21,9 +21,6 @@ export * from "./r2";
 // Export authentication
 export * from "./auth/shopify-auth";
 
-// Export webhooks
-export * from "./webhooks/webhook-handler";
-
 // Export Shopify services
 export * from "./services/shopify-storefront";
 export * from "./services/shopify-transformer";
