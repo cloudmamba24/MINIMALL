@@ -1,10 +1,12 @@
 {
   "$schema": "https://vercel.com/schema/vercel.json",
   "name": "minimall-public",
-  "rootDirectory": "apps/public",
+  "buildCommand": "npx turbo build --filter=@minimall/public",
+  "outputDirectory": "apps/public/.next",
+  "installCommand": "npm ci",
   "framework": "nextjs",
   "functions": {
-    "src/app/**/*.ts": {
+    "apps/public/src/app/**/*.ts": {
       "runtime": "nodejs22.x"
     }
   },
