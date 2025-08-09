@@ -1,8 +1,12 @@
 import { z } from 'zod';
-import { createTRPCRouter, publicProcedure, dbProcedure } from '../trpc';
+import { createTRPCRouter, dbProcedure, publicProcedure } from '../trpc';
 
 // Import drizzle ORM
-let eq: any, and: any, gte: any, lte: any, desc: any;
+let eq: any;
+let and: any;
+let gte: any;
+let lte: any;
+let desc: any;
 try {
   const drizzleModule = require('drizzle-orm');
   eq = drizzleModule.eq;
@@ -15,7 +19,8 @@ try {
 }
 
 // Import schema
-let analyticsEvents: any, performanceMetrics: any;
+let analyticsEvents: any;
+let performanceMetrics: any;
 try {
   const schemaModule = require('@minimall/db/schema');
   analyticsEvents = schemaModule.analyticsEvents;
@@ -27,24 +32,37 @@ try {
 export const analyticsRouter = createTRPCRouter({
   // Track analytics event
   track: publicProcedure
-    .input(z.object({
-      event: z.string(),
-      configId: z.string(),
-      userId: z.string().optional(),
-      sessionId: z.string(),
-      properties: z.record(z.any()).default({}),
-      userAgent: z.string().optional(),
-      referrer: z.string().optional(),
-      utm: z.object({
-        source: z.string().optional(),
-        medium: z.string().optional(),
-        campaign: z.string().optional(),
-        term: z.string().optional(),
-        content: z.string().optional(),
-      }).optional(),
-    }))
+    .input(
+      z.object({
+        event: z.string(),
+        configId: z.string(),
+        userId: z.string().optional(),
+        sessionId: z.string(),
+        properties: z.record(z.any()).default({}),
+        userAgent: z.string().optional(),
+        referrer: z.string().optional(),
+        utm: z
+          .object({
+            source: z.string().optional(),
+            medium: z.string().optional(),
+            campaign: z.string().optional(),
+            term: z.string().optional(),
+            content: z.string().optional(),
+          })
+          .optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      const { event, configId, userId, sessionId, properties, userAgent, referrer, utm } = input;
+      const {
+        event,
+        configId,
+        userId,
+        sessionId,
+        properties,
+        userAgent,
+        referrer,
+        utm,
+      } = input;
 
       // If no database, just log the event
       if (!ctx.db) {
@@ -77,26 +95,45 @@ export const analyticsRouter = createTRPCRouter({
 
   // Track performance metrics
   trackPerformance: publicProcedure
-    .input(z.object({
-      configId: z.string(),
-      lcp: z.number().optional(),
-      fid: z.number().optional(),
-      cls: z.number().optional(),
-      ttfb: z.number().optional(),
-      loadTime: z.number().optional(),
-      userAgent: z.string().optional(),
-      connection: z.string().optional(),
-      viewport: z.object({
-        width: z.number(),
-        height: z.number(),
-      }).optional(),
-    }))
+    .input(
+      z.object({
+        configId: z.string(),
+        lcp: z.number().optional(),
+        fid: z.number().optional(),
+        cls: z.number().optional(),
+        ttfb: z.number().optional(),
+        loadTime: z.number().optional(),
+        userAgent: z.string().optional(),
+        connection: z.string().optional(),
+        viewport: z
+          .object({
+            width: z.number(),
+            height: z.number(),
+          })
+          .optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      const { configId, lcp, fid, cls, ttfb, loadTime, userAgent, connection, viewport } = input;
+      const {
+        configId,
+        lcp,
+        fid,
+        cls,
+        ttfb,
+        loadTime,
+        userAgent,
+        connection,
+        viewport,
+      } = input;
 
       // If no database, just log the metrics
       if (!ctx.db) {
-        console.log('Performance metrics (no DB):', { configId, lcp, fid, cls });
+        console.log('Performance metrics (no DB):', {
+          configId,
+          lcp,
+          fid,
+          cls,
+        });
         return { success: true, stored: false };
       }
 
@@ -123,20 +160,24 @@ export const analyticsRouter = createTRPCRouter({
 
   // Get analytics data
   getEvents: dbProcedure
-    .input(z.object({
-      configId: z.string(),
-      event: z.string().optional(),
-      dateRange: z.object({
-        from: z.date(),
-        to: z.date(),
-      }).optional(),
-      limit: z.number().min(1).max(1000).default(100),
-      offset: z.number().min(0).default(0),
-    }))
+    .input(
+      z.object({
+        configId: z.string(),
+        event: z.string().optional(),
+        dateRange: z
+          .object({
+            from: z.date(),
+            to: z.date(),
+          })
+          .optional(),
+        limit: z.number().min(1).max(1000).default(100),
+        offset: z.number().min(0).default(0),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const { configId, event, dateRange, limit, offset } = input;
 
-      let whereConditions = [eq(analyticsEvents.configId, configId)];
+      const whereConditions = [eq(analyticsEvents.configId, configId)];
 
       if (event) {
         whereConditions.push(eq(analyticsEvents.event, event));
@@ -161,18 +202,22 @@ export const analyticsRouter = createTRPCRouter({
 
   // Get performance metrics
   getPerformance: dbProcedure
-    .input(z.object({
-      configId: z.string(),
-      dateRange: z.object({
-        from: z.date(),
-        to: z.date(),
-      }).optional(),
-      limit: z.number().min(1).max(1000).default(100),
-    }))
+    .input(
+      z.object({
+        configId: z.string(),
+        dateRange: z
+          .object({
+            from: z.date(),
+            to: z.date(),
+          })
+          .optional(),
+        limit: z.number().min(1).max(1000).default(100),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const { configId, dateRange, limit } = input;
 
-      let whereConditions = [eq(performanceMetrics.configId, configId)];
+      const whereConditions = [eq(performanceMetrics.configId, configId)];
 
       if (dateRange) {
         whereConditions.push(
@@ -192,18 +237,30 @@ export const analyticsRouter = createTRPCRouter({
 
   // Get analytics summary
   getSummary: dbProcedure
-    .input(z.object({
-      configId: z.string(),
-      dateRange: z.object({
-        from: z.date(),
-        to: z.date(),
-      }).optional(),
-    }))
-    .query(async ({ ctx, input }) => {
+    .input(
+      z.object({
+        configId: z.string(),
+        dateRange: z
+          .object({
+            from: z.date(),
+            to: z.date(),
+          })
+          .optional(),
+      })
+    )
+    .query(async ({ input }) => {
       const { configId, dateRange } = input;
 
       // This would typically use raw SQL for aggregations
       // For now, return a basic summary structure
+      // TODO: Use configId and dateRange for actual aggregations
+      console.log(
+        'Getting summary for config:',
+        configId,
+        'with date range:',
+        dateRange
+      );
+
       return {
         totalEvents: 0,
         uniqueUsers: 0,

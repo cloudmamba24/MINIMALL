@@ -1,6 +1,6 @@
-import { createTRPCRouter } from './trpc';
-import { configsRouter } from './routers/configs';
 import { analyticsRouter } from './routers/analytics';
+import { configsRouter } from './routers/configs';
+import { createTRPCRouter } from './trpc';
 
 /**
  * This is the primary router for your server.

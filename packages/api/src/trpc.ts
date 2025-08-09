@@ -1,5 +1,5 @@
-import { initTRPC, TRPCError } from '@trpc/server';
-import { type CreateNextContextOptions } from '@trpc/server/adapters/next';
+import { TRPCError, initTRPC } from '@trpc/server';
+import type { CreateNextContextOptions } from '@trpc/server/adapters/next';
 import superjson from 'superjson';
 
 // Import database connection
@@ -87,7 +87,7 @@ export const dbProcedure = t.procedure.use(async ({ ctx, next }) => {
 });
 
 /**
- * R2-required procedure  
+ * R2-required procedure
  */
 export const r2Procedure = t.procedure.use(async ({ ctx, next }) => {
   try {
@@ -101,7 +101,7 @@ export const r2Procedure = t.procedure.use(async ({ ctx, next }) => {
         r2: ctx.r2,
       },
     });
-  } catch (error) {
+  } catch (_error) {
     throw new TRPCError({
       code: 'PRECONDITION_FAILED',
       message: 'R2 storage not configured',

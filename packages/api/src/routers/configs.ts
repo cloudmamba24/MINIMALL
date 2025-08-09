@@ -1,8 +1,15 @@
 import { z } from 'zod';
-import { createTRPCRouter, publicProcedure, dbProcedure, r2Procedure } from '../trpc';
+import {
+  createTRPCRouter,
+  dbProcedure,
+  publicProcedure,
+  r2Procedure,
+} from '../trpc';
 
 // Import drizzle ORM
-let eq: any, and: any, desc: any;
+let eq: any;
+let and: any;
+let desc: any;
 try {
   const drizzleModule = require('drizzle-orm');
   eq = drizzleModule.eq;
@@ -13,7 +20,8 @@ try {
 }
 
 // Import schema
-let configs: any, configVersions: any;
+let configs: any;
+let configVersions: any;
 try {
   const schemaModule = require('@minimall/db/schema');
   configs = schemaModule.configs;
@@ -31,10 +39,12 @@ interface SiteConfig {
 export const configsRouter = createTRPCRouter({
   // Get config with fallback chain: DB → R2 → Demo
   get: publicProcedure
-    .input(z.object({
-      configId: z.string(),
-      version: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        configId: z.string(),
+        version: z.string().optional(),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const { configId, version } = input;
 
@@ -45,15 +55,19 @@ export const configsRouter = createTRPCRouter({
             where: eq(configs.id, configId),
             with: {
               currentVersion: true,
-              versions: version ? {
-                where: eq(configVersions.version, version),
-                limit: 1,
-              } : undefined,
+              versions: version
+                ? {
+                    where: eq(configVersions.version, version),
+                    limit: 1,
+                  }
+                : undefined,
             },
           });
 
           if (config?.currentVersion || config?.versions?.[0]) {
-            const versionData = version ? config.versions?.[0] : config.currentVersion;
+            const versionData = version
+              ? config.versions?.[0]
+              : config.currentVersion;
             return versionData?.data as SiteConfig;
           }
         } catch (error) {
@@ -70,17 +84,29 @@ export const configsRouter = createTRPCRouter({
       }
 
       // Final fallback to demo data
-      const demoConfig = await import('@minimall/core/demo-data').then(m => m.demoSiteConfig);
-      return demoConfig;
+      return {
+        id: configId,
+        title: 'Demo Configuration',
+        description: 'Demo configuration when database and R2 are unavailable',
+        tabs: [],
+        theme: {
+          colors: {
+            primary: '#000000',
+            background: '#ffffff',
+          },
+        },
+      };
     }),
 
   // Save config to both DB and R2
   save: dbProcedure
-    .input(z.object({
-      configId: z.string(),
-      config: z.any(), // SiteConfig schema would be defined in types
-      shop: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        configId: z.string(),
+        config: z.any(), // SiteConfig schema would be defined in types
+        shop: z.string().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const { configId, config, shop = 'demo' } = input;
 
@@ -98,17 +124,21 @@ export const configsRouter = createTRPCRouter({
       }
 
       // Create new version
-      const newVersion = await ctx.db.insert(configVersions).values({
-        configId,
-        version: `v${Date.now()}`,
-        data: config,
-        isPublished: true,
-        createdBy: 'admin',
-        publishedAt: new Date(),
-      }).returning();
+      const newVersion = await ctx.db
+        .insert(configVersions)
+        .values({
+          configId,
+          version: `v${Date.now()}`,
+          data: config,
+          isPublished: true,
+          createdBy: 'admin',
+          publishedAt: new Date(),
+        })
+        .returning();
 
       // Update current version reference
-      await ctx.db.update(configs)
+      await ctx.db
+        .update(configs)
         .set({ currentVersionId: newVersion[0].id })
         .where(eq(configs.id, configId));
 
@@ -125,11 +155,13 @@ export const configsRouter = createTRPCRouter({
 
   // List all configs for a shop
   list: dbProcedure
-    .input(z.object({
-      shop: z.string(),
-      limit: z.number().min(1).max(100).default(10),
-      offset: z.number().min(0).default(0),
-    }))
+    .input(
+      z.object({
+        shop: z.string(),
+        limit: z.number().min(1).max(100).default(10),
+        offset: z.number().min(0).default(0),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const { shop, limit, offset } = input;
 
@@ -154,10 +186,12 @@ export const configsRouter = createTRPCRouter({
 
   // Get config versions
   versions: dbProcedure
-    .input(z.object({
-      configId: z.string(),
-      limit: z.number().min(1).max(50).default(10),
-    }))
+    .input(
+      z.object({
+        configId: z.string(),
+        limit: z.number().min(1).max(50).default(10),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const { configId, limit } = input;
 
@@ -180,39 +214,49 @@ export const configsRouter = createTRPCRouter({
 
   // Publish a specific version
   publish: dbProcedure
-    .input(z.object({
-      configId: z.string(),
-      versionId: z.string(),
-    }))
+    .input(
+      z.object({
+        configId: z.string(),
+        versionId: z.string(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const { configId, versionId } = input;
 
       // Unpublish all other versions
-      await ctx.db.update(configVersions)
+      await ctx.db
+        .update(configVersions)
         .set({ isPublished: false })
         .where(eq(configVersions.configId, configId));
 
       // Publish the selected version
-      const publishedVersion = await ctx.db.update(configVersions)
-        .set({ 
+      const publishedVersion = await ctx.db
+        .update(configVersions)
+        .set({
           isPublished: true,
           publishedAt: new Date(),
         })
-        .where(and(
-          eq(configVersions.id, versionId),
-          eq(configVersions.configId, configId)
-        ))
+        .where(
+          and(
+            eq(configVersions.id, versionId),
+            eq(configVersions.configId, configId)
+          )
+        )
         .returning();
 
       if (publishedVersion[0]) {
         // Update current version reference
-        await ctx.db.update(configs)
+        await ctx.db
+          .update(configs)
           .set({ currentVersionId: versionId })
           .where(eq(configs.id, configId));
 
         // Update R2 backup
         try {
-          await ctx.r2.saveConfig(configId, publishedVersion[0].data as SiteConfig);
+          await ctx.r2.saveConfig(
+            configId,
+            publishedVersion[0].data as SiteConfig
+          );
         } catch (r2Error) {
           console.warn('R2 backup update failed:', r2Error);
         }
