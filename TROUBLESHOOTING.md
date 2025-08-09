@@ -6,6 +6,11 @@
 - [Build & Runtime Issues](#build--runtime-issues)
 - [Common Fixes](#common-fixes)
 
+## Related Documentation
+- **[BUILD-SYSTEM-OVERHAUL.md](./BUILD-SYSTEM-OVERHAUL.md)** - For comprehensive build system fixes
+- **[REACT_ERROR_185_FIX.md](./REACT_ERROR_185_FIX.md)** - For React infinite loop issues
+- **[DIAGNOSTIC-METHODOLOGY.md](./DIAGNOSTIC-METHODOLOGY.md)** - For systematic problem diagnosis
+
 ---
 
 ## Deployment Issues

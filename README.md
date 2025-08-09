@@ -9,15 +9,23 @@ A high-performance, edge-first link-in-bio platform built specifically for Shopi
 - **📱 Mobile-First Design**: Responsive, app-like experience optimized for mobile
 - **🎨 JSON-Driven Rendering**: Instant config updates without code deployments
 
-## 🛠️ Troubleshooting & Problem Solving
+## 🛠️ Documentation & Troubleshooting
 
-### 🚨 Having Issues?
+### 📚 Issue-Specific Fixes
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Deployment and runtime issues  
+- **[BUILD-SYSTEM-OVERHAUL.md](./BUILD-SYSTEM-OVERHAUL.md)** - Comprehensive build system fixes
+- **[REACT_ERROR_185_FIX.md](./REACT_ERROR_185_FIX.md)** - React infinite loop resolution
 
-1. **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Specific solutions for known issues
-2. **[DIAGNOSTIC-METHODOLOGY.md](./DIAGNOSTIC-METHODOLOGY.md)** - Systematic problem-solving framework
-3. **Quick Debug**: `./scripts/debug-deployment.sh <your-vercel-url>`
+### 🎯 Systematic Problem Solving
+- **[DIAGNOSTIC-METHODOLOGY.md](./DIAGNOSTIC-METHODOLOGY.md)** - Root cause analysis framework
+- **Quick Debug**: `./scripts/debug-deployment.sh <your-vercel-url>`
 
-### 🎯 Problem-Solving Approach
+### 📖 Technical References
+- **[CHANGELOG.md](./CHANGELOG.md)** - Complete project change history
+- **[docs/BUILD-SYSTEM-TECHNICAL-REFERENCE.md](./docs/BUILD-SYSTEM-TECHNICAL-REFERENCE.md)** - Detailed technical fixes
+- **[docs/dev-tools.md](./docs/dev-tools.md)** - Development tools and workflows
+
+### 🚨 Problem-Solving Approach
 
 **Before trying random fixes**, follow our diagnostic methodology:
 - Collect evidence systematically
@@ -25,9 +33,10 @@ A high-performance, edge-first link-in-bio platform built specifically for Shopi
 - Form testable hypotheses
 - Target root causes, not symptoms
 
-### Common Issues
-- **All routes show 404**: Check [Deployment Issues](./TROUBLESHOOTING.md#deployment-issues) section
-- **Environment variables not working**: See [Environment Configuration](./TROUBLESHOOTING.md#environment-configuration)
+### Common Issues Quick Links
+- **All routes show 404**: [Deployment Issues](./TROUBLESHOOTING.md#deployment-issues)
+- **Build failures**: [Build System Overhaul](./BUILD-SYSTEM-OVERHAUL.md)
+- **Infinite React loops**: [React Error 185 Fix](./REACT_ERROR_185_FIX.md)
 - **Build warnings**: Check [Build & Runtime Issues](./TROUBLESHOOTING.md#build--runtime-issues)
 - **🌐 Global Edge Distribution**: Powered by Cloudflare R2 and Vercel Edge Runtime
 - **⚙️ Embedded Admin**: Full configuration interface within Shopify admin

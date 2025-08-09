@@ -15,27 +15,41 @@ docs/
 
 Located in the project root (`/`):
 
+### Issue-Specific Fixes
+- **`BUILD-SYSTEM-OVERHAUL.md`** - Comprehensive build system resolution
+- **`TROUBLESHOOTING.md`** - Deployment and runtime issues  
+- **`REACT_ERROR_185_FIX.md`** - React infinite loop resolution
+
+### Process Documentation
 - **`README.md`** - Main project overview and setup instructions
-- **`DEVELOPMENT.md`** - Development journal and technical decisions log  
+- **`DIAGNOSTIC-METHODOLOGY.md`** - Root cause analysis framework
+- **`CHANGELOG.md`** - Complete project change history
+- **`DEVELOPMENT.md`** - Development journal and technical decisions
 - **`DEPLOYMENT.md`** - Deployment guides and configuration
-- **`TROUBLESHOOTING.md`** - Common issues and solutions
-- **`REACT_ERROR_185_FIX.md`** - Specific error resolution documentation
-- **`DIAGNOSTIC-METHODOLOGY.md`** - Debugging approaches and methodologies
+
+## 📁 Technical References (docs/)
+
+- **`BUILD-SYSTEM-TECHNICAL-REFERENCE.md`** - Detailed file-by-file technical fixes
+- **`dev-tools.md`** - Development tools and workflows
+- **`api/openapi.yaml`** - API specification
 
 ## 🎯 Quick Reference
 
 ### For Developers
 - Start with `/README.md` for project setup
-- Check `/DEVELOPMENT.md` for recent changes and decisions
-- Use `/TROUBLESHOOTING.md` for common issues
+- Use `/BUILD-SYSTEM-OVERHAUL.md` for build issues
+- Check `/TROUBLESHOOTING.md` for deployment problems
+- See `/DIAGNOSTIC-METHODOLOGY.md` for systematic debugging
 
-### For Deployment
-- Follow `/DEPLOYMENT.md` for deployment instructions
-- Reference `assets/` for UI/UX screenshots and designs
+### For Deployment Issues
+- **404 errors**: [`/TROUBLESHOOTING.md`](../TROUBLESHOOTING.md#deployment-issues)
+- **Build failures**: [`/BUILD-SYSTEM-OVERHAUL.md`](../BUILD-SYSTEM-OVERHAUL.md)
+- **Infinite loops**: [`/REACT_ERROR_185_FIX.md`](../REACT_ERROR_185_FIX.md)
 
-### For Context
-- Check `reference/ContextFiles/` for original requirements and context
-- Review development history in `/DEVELOPMENT.md`
+### For Technical Deep Dives
+- **Detailed fixes**: [`BUILD-SYSTEM-TECHNICAL-REFERENCE.md`](./BUILD-SYSTEM-TECHNICAL-REFERENCE.md)  
+- **Development tools**: [`dev-tools.md`](./dev-tools.md)
+- **API reference**: [`api/openapi.yaml`](./api/openapi.yaml)
 
 ## 📝 Documentation Standards
 
