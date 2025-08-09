@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import { createDatabase } from "@minimall/db";
 import { and, eq } from "drizzle-orm";
 import * as Sentry from "@sentry/core";
 
@@ -91,8 +90,8 @@ export class WebhookHandler {
 		context: WebhookContext,
 		rawBody: string,
 	): Promise<void> {
+		const { createDatabase, webhooks } = await import("@minimall/db");
 		const db = createDatabase(process.env.DATABASE_URL!);
-		const { webhooks } = await import("@minimall/db");
 
 		await db.insert(webhooks).values({
 			shopDomain: context.shop,
@@ -105,8 +104,8 @@ export class WebhookHandler {
 	}
 
 	private async markWebhookProcessed(context: WebhookContext): Promise<void> {
+		const { createDatabase, webhooks } = await import("@minimall/db");
 		const db = createDatabase(process.env.DATABASE_URL!);
-		const { webhooks } = await import("@minimall/db");
 
 		await db
 			.update(webhooks)
@@ -156,8 +155,8 @@ export class WebhookHandler {
 
 	private async handleAppUninstall(context: WebhookContext): Promise<void> {
 		const { shop } = context;
+		const { createDatabase, users, configs, featureFlags } = await import("@minimall/db");
 		const db = createDatabase(process.env.DATABASE_URL!);
-		const { users, configs, featureFlags } = await import("@minimall/db");
 
 		try {
 			// Clean up shop data (be careful with cascade deletions)
@@ -262,8 +261,8 @@ export class WebhookHandler {
 		// - Remove all remaining shop data
 		// - Clean up any backup or cached data
 
+		const { createDatabase, webhooks, analyticsEvents, configs } = await import("@minimall/db");
 		const db = createDatabase(process.env.DATABASE_URL!);
-		const { webhooks, analyticsEvents, configs } = await import("@minimall/db");
 
 		try {
 			// Remove all remaining data for this shop
