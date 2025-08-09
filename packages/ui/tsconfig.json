@@ -18,6 +18,8 @@
 		"src/**/*.test.ts",
 		"src/**/*.test.tsx",
 		"src/**/*.spec.ts",
+		"src/**/*.stories.ts",
+		"src/**/*.stories.tsx",
 		"src/test-setup.ts",
 		"src/test-utils.tsx"
 	],

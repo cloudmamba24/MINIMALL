@@ -12,6 +12,7 @@
         "R2_BUCKET_NAME",
         "NEXT_PUBLIC_BASE_URL",
         "NODE_ENV",
+        "NEXT_PUBLIC_APP_ENV",
         "SHOPIFY_API_KEY",
         "SHOPIFY_API_SECRET", 
         "SHOPIFY_SCOPES",
