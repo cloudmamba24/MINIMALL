@@ -97,7 +97,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         const config = versionToPublish.data as SiteConfig;
         await r2Service.saveConfig(configId, config);
         
-        console.log(`Successfully published config ${configId} to R2`);
+        // Config successfully published to R2
       } catch (r2Error) {
         console.error('Failed to publish to R2:', r2Error);
         

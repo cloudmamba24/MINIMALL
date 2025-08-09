@@ -33,7 +33,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           source: 'r2',
         });
       } catch (error) {
-        console.log(`R2 config not found for ${configId}, checking database...`);
+        // R2 config not found, checking database fallback
       }
     }
 

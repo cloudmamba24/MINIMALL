@@ -106,7 +106,7 @@ export function LivePreview({ config, isLoading = false, error = null, onRefresh
           break;
         case 'CONFIG_APPLIED':
           // Config was successfully applied in preview
-          console.log('Config applied in preview:', event.data.timestamp);
+          // Config successfully applied in preview iframe
           break;
       }
     };
