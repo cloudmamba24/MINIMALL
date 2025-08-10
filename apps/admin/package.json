@@ -20,6 +20,7 @@
     "@minimall/core": "*",
     "@minimall/db": "*",
     "@minimall/ui": "*",
+    "drizzle-orm": "^0.44.4",
     "@sentry/nextjs": "^10.3.0",
     "@sentry/react": "^10.3.0",
     "@shopify/app-bridge": "^3.7.10",

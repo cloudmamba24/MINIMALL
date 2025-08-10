@@ -17,28 +17,23 @@ export const demoSiteConfig: SiteConfig = {
     }
   ],
   settings: {
+    checkoutLink: '',
+    shopDomain: 'demo.myshopify.com',
     theme: {
-      colors: {
-        primary: '#000000',
-        background: '#ffffff',
-        text: '#333333'
-      },
-      fonts: {
-        primary: 'Inter, sans-serif'
-      }
-    },
-    layout: {
-      style: 'modern',
-      spacing: 'comfortable'
-    },
-    branding: {
-      title: 'Demo Site',
-      description: 'Demo configuration when database is unavailable',
-      logo: null
+      primaryColor: '#000000',
+      backgroundColor: '#ffffff',
+      textColor: '#333333',
+      accentColor: '#0066cc',
+      fontFamily: 'Inter, sans-serif',
+      borderRadius: 'md'
     },
     seo: {
       title: 'Demo Site',
-      description: 'Demo configuration'
+      description: 'Demo configuration when database is unavailable'
+    },
+    brand: {
+      name: 'Demo Site',
+      subtitle: 'Demo configuration when database is unavailable'
     }
   },
   createdAt: new Date().toISOString(),

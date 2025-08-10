@@ -4,6 +4,12 @@ export * from "./types";
 // Export all utilities
 export * from "./utils";
 
+// Export environment validation
+export * from "./env-validation";
+
+// Export error boundary
+export * from "./error-boundary";
+
 // Export additional Shopify utilities from transformer
 export {
 	getOptionValues,

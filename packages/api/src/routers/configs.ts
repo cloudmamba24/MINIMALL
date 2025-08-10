@@ -8,13 +8,38 @@ import {
 
 // Import drizzle ORM and schema dynamically
 import { eq, and, desc } from 'drizzle-orm';
-import { configs, configVersions } from '@minimall/db';
+import { configs, configVersions, type ConfigVersion } from '@minimall/db';
+import { type SiteConfig } from '@minimall/core';
 
-// Import types - flexible config interface for database storage
-interface StoredConfig {
+// Type-safe config interface that matches both database and SiteConfig
+interface StoredConfigData extends Partial<SiteConfig> {
+  // Database stored data can be a subset of SiteConfig
   id?: string;
   [key: string]: any;
 }
+
+// Helper to safely cast database data to SiteConfig
+const createSafeConfig = (data: any, configId: string): SiteConfig => {
+  // Provide sensible defaults following our SiteConfig interface
+  return {
+    id: configId,
+    version: data?.version || 'v1',
+    categories: data?.categories || [],
+    settings: {
+      checkoutLink: data?.settings?.checkoutLink || '',
+      shopDomain: data?.settings?.shopDomain || '',
+      theme: {
+        primaryColor: data?.settings?.theme?.primaryColor || '#000000',
+        backgroundColor: data?.settings?.theme?.backgroundColor || '#ffffff',
+        ...data?.settings?.theme,
+      },
+      ...data?.settings,
+    },
+    createdAt: data?.createdAt || new Date().toISOString(),
+    updatedAt: data?.updatedAt || new Date().toISOString(),
+    ...data,
+  };
+};
 
 export const configsRouter = createTRPCRouter({
   // Get config with fallback chain: DB → R2 → Demo
@@ -48,7 +73,10 @@ export const configsRouter = createTRPCRouter({
             const versionData = version
               ? config.versions?.[0]
               : config.currentVersion;
-            return versionData?.data as StoredConfig;
+            
+            if (versionData?.data) {
+              return createSafeConfig(versionData.data, configId);
+            }
           }
         } catch (error) {
           console.warn('Database config fetch failed:', error);
@@ -59,25 +87,19 @@ export const configsRouter = createTRPCRouter({
       if (ctx.r2) {
         try {
           const r2Config = await ctx.r2.getConfig(configId, version);
-          return r2Config;
+          if (r2Config) {
+            return createSafeConfig(r2Config, configId);
+          }
         } catch (error) {
           console.warn('R2 config fetch failed:', error);
         }
       }
 
-      // Final fallback to demo data
-      return {
-        id: configId,
+      // Final fallback to demo data - return a proper SiteConfig
+      return createSafeConfig({
         title: 'Demo Configuration',
         description: 'Demo configuration when database and R2 are unavailable',
-        tabs: [],
-        theme: {
-          colors: {
-            primary: '#000000',
-            background: '#ffffff',
-          },
-        },
-      };
+      }, configId);
     }),
 
   // Save config to both DB and R2
@@ -121,7 +143,7 @@ export const configsRouter = createTRPCRouter({
       // Update current version reference
       await ctx.db
         .update(configs)
-        .set({ currentVersionId: newVersion[0].id })
+        .set({ currentVersionId: newVersion[0]?.id })
         .where(eq(configs.id, configId));
 
       // Also save to R2 as backup
@@ -134,7 +156,7 @@ export const configsRouter = createTRPCRouter({
         }
       }
 
-      return { success: true, version: newVersion[0] };
+      return { success: true, version: newVersion[0] || null };
     }),
 
   // List all configs for a shop
@@ -240,7 +262,7 @@ export const configsRouter = createTRPCRouter({
           try {
             await ctx.r2.saveConfig(
               configId,
-              publishedVersion[0].data as StoredConfig
+              createSafeConfig(publishedVersion[0]?.data, configId)
             );
           } catch (r2Error) {
             console.warn('R2 backup update failed:', r2Error);

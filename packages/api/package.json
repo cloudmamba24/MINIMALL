@@ -14,7 +14,7 @@
     }
   },
   "scripts": {
-    "build": "echo 'Skipping API build due to dependency conflicts' && exit 0",
+    "build": "tsc",
     "dev": "tsc --watch",
     "lint": "biome check .",
     "type-check": "tsc --noEmit",

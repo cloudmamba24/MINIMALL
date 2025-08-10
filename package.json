@@ -75,6 +75,7 @@
     "react-is": "^18.3.1",
     "prismjs": "^1.30.0",
     "esbuild": "^0.25.0",
+    "drizzle-orm": "^0.44.4",
     "drizzle-kit": {
       "@esbuild-kit/core-utils": {
         "esbuild": "^0.25.0"
