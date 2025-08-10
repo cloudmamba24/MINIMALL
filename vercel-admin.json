@@ -5,6 +5,11 @@
   "outputDirectory": "apps/admin/.next",
   "installCommand": "npm ci",
   "framework": "nextjs",
+  "functions": {
+    "apps/admin/src/app/api/**/*.ts": {
+      "runtime": "@vercel/node"
+    }
+  },
   "rewrites": [
     {
       "source": "/admin/:path*",
