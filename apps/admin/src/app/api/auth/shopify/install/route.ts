@@ -1,6 +1,6 @@
 import { getShopifyAuth } from "@minimall/core/server";
 import { installRateLimiter } from "@minimall/core/server";
-import { CSRFProtection } from "@minimall/core/server";
+import { generateDoubleSubmitToken, generateToken, createTokenHash } from "@minimall/core/server";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -41,8 +41,8 @@ export async function GET(request: NextRequest) {
     const state = shopifyAuth.generateState();
     
     // Generate additional CSRF token
-    const csrfToken = CSRFProtection.generateDoubleSubmitToken(process.env.SHOPIFY_API_SECRET || 'fallback-secret');
-    const csrfData = CSRFProtection.generateToken();
+    const csrfToken = generateDoubleSubmitToken(process.env.SHOPIFY_API_SECRET || 'fallback-secret');
+    const csrfData = generateToken();
 
     // Store state in cookie for verification
     const response = NextResponse.redirect(shopifyAuth.generateAuthUrl(shop, state));
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Store CSRF token data for additional protection
-    const csrfHash = CSRFProtection.createTokenHash(csrfData, process.env.SHOPIFY_API_SECRET || 'fallback-secret');
+    const csrfHash = createTokenHash(csrfData, process.env.SHOPIFY_API_SECRET || 'fallback-secret');
     response.cookies.set("csrf_hash", csrfHash, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

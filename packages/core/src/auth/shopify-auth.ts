@@ -162,17 +162,19 @@ export class ShopifyAuth {
 
 	createSessionToken(session: ShopifySession): string {
 		const now = Math.floor(Date.now() / 1000);
-		const sessionExpiry = session.expiresAt ? Math.floor(session.expiresAt.getTime() / 1000) : now + (24 * 60 * 60); // 24 hours default
-		
+		const sessionExpiry = session.expiresAt
+			? Math.floor(session.expiresAt.getTime() / 1000)
+			: now + 24 * 60 * 60; // 24 hours default
+
 		const payload = {
 			shop: session.shop,
 			// Store only encrypted access token reference, not the token itself
 			tokenId: this.generateTokenId(session.accessToken),
 			scope: session.scope,
-			exp: Math.min(sessionExpiry, now + (24 * 60 * 60)), // Max 24 hours
+			exp: Math.min(sessionExpiry, now + 24 * 60 * 60), // Max 24 hours
 			iat: now,
 			// Add nonce for additional security
-			nonce: crypto.randomBytes(16).toString('hex'),
+			nonce: crypto.randomBytes(16).toString("hex"),
 		};
 
 		// Improved JWT-like token with proper expiration and security
@@ -187,7 +189,7 @@ export class ShopifyAuth {
 
 		return `${header}.${body}.${signature}`;
 	}
-	
+
 	private generateTokenId(accessToken: string): string {
 		// Generate a deterministic but secure ID for the access token
 		return crypto
@@ -234,12 +236,15 @@ export class ShopifyAuth {
 			}
 
 			// Check issued at time (not too old, prevents replay attacks)
-			if (!payload.iat || now - payload.iat > (24 * 60 * 60)) {
+			if (!payload.iat || now - payload.iat > 24 * 60 * 60) {
 				return null;
 			}
 
 			// Get actual access token from secure storage (in production, use Redis/database)
-			const accessToken = this.getStoredAccessToken(payload.shop, payload.tokenId);
+			const accessToken = this.getStoredAccessToken(
+				payload.shop,
+				payload.tokenId,
+			);
 			if (!accessToken) {
 				return null;
 			}
@@ -254,24 +259,31 @@ export class ShopifyAuth {
 			return null;
 		}
 	}
-	
+
 	private getStoredAccessToken(shop: string, tokenId: string): string | null {
 		// In production, this should query a secure database/Redis store
 		// For now, we'll use a simple in-memory store (not production-ready)
 		const stored = this.tokenStore.get(`${shop}:${tokenId}`);
 		return stored || null;
 	}
-	
-	private storeAccessToken(shop: string, tokenId: string, accessToken: string): void {
+
+	private storeAccessToken(
+		shop: string,
+		tokenId: string,
+		accessToken: string,
+	): void {
 		// Store access token securely (in production, use encrypted database/Redis)
 		this.tokenStore.set(`${shop}:${tokenId}`, accessToken);
-		
+
 		// Set expiration cleanup (24 hours)
-		setTimeout(() => {
-			this.tokenStore.delete(`${shop}:${tokenId}`);
-		}, 24 * 60 * 60 * 1000);
+		setTimeout(
+			() => {
+				this.tokenStore.delete(`${shop}:${tokenId}`);
+			},
+			24 * 60 * 60 * 1000,
+		);
 	}
-	
+
 	// Simple in-memory store (replace with Redis/database in production)
 	private tokenStore = new Map<string, string>();
 }

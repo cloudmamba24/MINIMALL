@@ -8,7 +8,7 @@ export class RateLimiter {
 	private maxAttempts: number;
 	private windowMs: number;
 
-	constructor(maxAttempts: number = 10, windowMs: number = 60000) {
+	constructor(maxAttempts = 10, windowMs = 60000) {
 		this.maxAttempts = maxAttempts;
 		this.windowMs = windowMs;
 	}

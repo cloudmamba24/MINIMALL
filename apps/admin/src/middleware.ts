@@ -1,4 +1,4 @@
-import { getShopifyAuth, CSRFProtection } from "@minimall/core/server";
+import { getShopifyAuth, verifyDoubleSubmitToken } from "@minimall/core/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 // Define public routes that don't require authentication
@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
       if (session) {
         const sessionFingerprint = request.cookies.get("session_fingerprint")?.value;
         if (sessionFingerprint) {
-          const isValidFingerprint = CSRFProtection.verifyDoubleSubmitToken(
+          const isValidFingerprint = verifyDoubleSubmitToken(
             sessionToken,
             sessionFingerprint,
             sessionToken // Using session token as secret

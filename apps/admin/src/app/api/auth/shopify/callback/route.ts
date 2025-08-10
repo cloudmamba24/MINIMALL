@@ -1,4 +1,4 @@
-import { getShopifyAuth, authRateLimiter, CSRFProtection } from "@minimall/core/server";
+import { getShopifyAuth, authRateLimiter, generateDoubleSubmitToken } from "@minimall/core/server";
 import { createDatabase } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Set session fingerprint for additional security
-    const sessionFingerprint = CSRFProtection.generateDoubleSubmitToken(sessionToken);
+    const sessionFingerprint = generateDoubleSubmitToken(sessionToken);
     response.cookies.set("session_fingerprint", sessionFingerprint.hash, {
       httpOnly: true,
       secure: true,
