@@ -2,9 +2,10 @@
 
 import { useEffect, useState, useRef, ReactNode } from "react";
 import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { PixelUtils } from "../tracking/PixelDispatcher";
+import "../../styles/instagram-native.css";
 
 interface SwipeableModalProps {
   isOpen: boolean;
@@ -141,15 +142,16 @@ export function SwipeableModal({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+          className="instagram-modal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.15 }}
         >
           {/* Backdrop */}
           <motion.div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0"
+            style={{ background: 'var(--ig-backdrop)' }}
             onClick={handleBackdropClick}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -159,11 +161,7 @@ export function SwipeableModal({
           {/* Modal Container */}
           <motion.div
             ref={containerRef}
-            className={cn(
-              "relative w-full max-w-lg mx-4 bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl",
-              "max-h-[90vh] sm:max-h-[80vh] overflow-hidden",
-              className
-            )}
+            className={cn("instagram-modal-content", className)}
             style={{
               y,
               opacity,
@@ -179,25 +177,36 @@ export function SwipeableModal({
             exit={{ y: "100%", opacity: 0 }}
             transition={{
               type: "spring",
-              damping: 25,
-              stiffness: 200,
+              damping: 30,
+              stiffness: 300,
             }}
           >
-            {/* Drag Handle */}
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
-            </div>
+            {/* Story Progress (for multiple items) */}
+            {showNavigation && totalItems > 1 && (
+              <div className="instagram-story-progress">
+                {Array.from({ length: totalItems }).map((_, index) => (
+                  <div key={index} className="instagram-story-progress-bar">
+                    <div 
+                      className={cn(
+                        "instagram-story-progress-fill",
+                        index <= currentIndex && "active"
+                      )}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+            <div className="instagram-modal-header">
               <div className="flex-1">
                 {title && (
-                  <h2 className="text-lg font-semibold text-gray-900 truncate">
+                  <h2 className="text-white font-semibold truncate">
                     {title}
                   </h2>
                 )}
                 {showNavigation && totalItems > 1 && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs" style={{ color: 'var(--ig-text-secondary)' }}>
                     {currentIndex + 1} of {totalItems}
                   </p>
                 )}
@@ -205,10 +214,10 @@ export function SwipeableModal({
 
               <button
                 onClick={onClose}
-                className="p-2 -mr-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="instagram-modal-close"
                 aria-label="Close modal"
               >
-                <X className="w-5 h-5" />
+                <X />
               </button>
             </div>
 
@@ -216,38 +225,26 @@ export function SwipeableModal({
             {showNavigation && totalItems > 1 && (
               <>
                 {/* Previous Button */}
-                <button
-                  onClick={onPrevious}
-                  disabled={currentIndex === 0}
-                  className={cn(
-                    "absolute left-4 top-1/2 transform -translate-y-1/2 z-10",
-                    "w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg",
-                    "flex items-center justify-center transition-all",
-                    currentIndex === 0
-                      ? "opacity-30 cursor-not-allowed"
-                      : "hover:bg-white hover:scale-110 active:scale-95"
-                  )}
-                  aria-label="Previous item"
-                >
-                  <ChevronLeft className="w-5 h-5 text-gray-700" />
-                </button>
+                {currentIndex > 0 && (
+                  <button
+                    onClick={onPrevious}
+                    className="instagram-swipe-indicator left"
+                    aria-label="Previous item"
+                  >
+                    <ChevronLeft />
+                  </button>
+                )}
 
                 {/* Next Button */}
-                <button
-                  onClick={onNext}
-                  disabled={currentIndex === totalItems - 1}
-                  className={cn(
-                    "absolute right-4 top-1/2 transform -translate-y-1/2 z-10",
-                    "w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg",
-                    "flex items-center justify-center transition-all",
-                    currentIndex === totalItems - 1
-                      ? "opacity-30 cursor-not-allowed"
-                      : "hover:bg-white hover:scale-110 active:scale-95"
-                  )}
-                  aria-label="Next item"
-                >
-                  <ChevronRight className="w-5 h-5 text-gray-700" />
-                </button>
+                {currentIndex < totalItems - 1 && (
+                  <button
+                    onClick={onNext}
+                    className="instagram-swipe-indicator right"
+                    aria-label="Next item"
+                  >
+                    <ChevronRight />
+                  </button>
+                )}
               </>
             )}
 
@@ -263,20 +260,6 @@ export function SwipeableModal({
               {children}
             </motion.div>
 
-            {/* Progress Dots (for multiple items) */}
-            {showNavigation && totalItems > 1 && totalItems <= 10 && (
-              <div className="flex justify-center space-x-2 py-4 border-t border-gray-100">
-                {Array.from({ length: totalItems }).map((_, index) => (
-                  <div
-                    key={index}
-                    className={cn(
-                      "w-2 h-2 rounded-full transition-colors",
-                      index === currentIndex ? "bg-blue-600" : "bg-gray-300"
-                    )}
-                  />
-                ))}
-              </div>
-            )}
           </motion.div>
         </motion.div>
       )}

@@ -8,6 +8,8 @@ import { Renderer } from "./renderer";
 import { LayoutSwitch } from "./renderers/LayoutSwitch";
 import { UTMTracker } from "./tracking/UTMTracker";
 import { PixelDispatcher } from "./tracking/PixelDispatcher";
+import { cn } from "../lib/utils";
+import "../styles/instagram-native.css";
 
 interface UnifiedRendererProps {
   config: SiteConfig;
@@ -69,19 +71,42 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
  */
 function MobileNativeRenderer({ config, className }: { config: SiteConfig; className?: string }) {
   return (
-    <div className={className}>
+    <div className={cn("instagram-native", className)}>
+      {/* Instagram-style brand header */}
+      {config.settings.brand && (
+        <div className="instagram-header">
+          <h1 className="instagram-header-title">{config.settings.brand.name}</h1>
+          {config.settings.brand.subtitle && (
+            <p className="instagram-header-subtitle">{config.settings.brand.subtitle}</p>
+          )}
+        </div>
+      )}
+
+      {/* Category tabs for multiple categories */}
+      {config.categories.length > 1 && (
+        <div className="instagram-tabs">
+          {config.categories.map((category) => (
+            <button key={category.id} className="instagram-tab active">
+              {category.title}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Use layout system for categories that have layout config */}
       {config.categories.map((category, index) => (
-        <div key={category.id} className="mb-8">
+        <div key={category.id}>
           {category.layout ? (
             <LayoutSwitch
               category={category}
+              configId={config.id}
+              experiments={config.settings.experiments}
               onTileClick={(clickedCategory, clickIndex) => {
                 // Mobile-native modal handling
                 console.log('Mobile tile clicked:', clickedCategory.id, clickIndex);
                 // TODO: Implement mobile modal with swipe gestures
               }}
-              className="mobile-native-layout"
+              className="instagram-grid"
             />
           ) : (
             // Fallback to existing InstagramRenderer for categories without layout
@@ -107,6 +132,8 @@ function DesktopLayoutRenderer({ config, className }: { config: SiteConfig; clas
               <h2 className="text-2xl font-bold mb-6 text-gray-900">{category.title}</h2>
               <LayoutSwitch
                 category={category}
+                configId={config.id}
+                experiments={config.settings.experiments}
                 onTileClick={(clickedCategory, clickIndex) => {
                   // Desktop modal handling
                   console.log('Desktop tile clicked:', clickedCategory.id, clickIndex);

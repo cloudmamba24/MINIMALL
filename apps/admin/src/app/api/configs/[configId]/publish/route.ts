@@ -96,6 +96,29 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       }
     }
 
+    // Trigger cache invalidation on the public app
+    try {
+      const publicAppUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      const revalidateResponse = await fetch(`${publicAppUrl}/api/config/revalidate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.INTERNAL_API_TOKEN || 'dev-token'}`,
+        },
+        body: JSON.stringify({ configId }),
+      });
+
+      if (!revalidateResponse.ok) {
+        console.warn('Cache invalidation failed:', await revalidateResponse.text());
+        // Don't fail the publish if cache invalidation fails
+      } else {
+        console.log(`Cache invalidated successfully for config: ${configId}`);
+      }
+    } catch (cacheError) {
+      console.warn('Cache invalidation request failed:', cacheError);
+      // Don't fail the publish if cache invalidation fails
+    }
+
     // Add Sentry context
     Sentry.addBreadcrumb({
       category: "config-publish",
