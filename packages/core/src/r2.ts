@@ -377,6 +377,10 @@ export class R2ConfigService {
 		await this.client.deleteObject(key);
 	}
 
+	async getObject(key: string): Promise<string> {
+		return await this.client.getObject(key);
+	}
+
 	async listObjects(prefix?: string): Promise<any[]> {
 		// For now, return an empty array as R2 list objects would require
 		// implementing the S3 ListObjectsV2 API call

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { Theme } from '@minimall/core/client';
 
 interface ThemeProviderProps {
@@ -10,6 +10,11 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ theme, children }: ThemeProviderProps) {
   useEffect(() => {
+    // Skip during SSR
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
+
     // Apply CSS custom properties to the document root
     const root = document.documentElement;
     
@@ -101,17 +106,41 @@ export function ThemeProvider({ theme, children }: ThemeProviderProps) {
 
 // Hook to use theme values in components
 export function useTheme() {
-  if (typeof window === 'undefined') {
-    return null;
-  }
+  const [theme, setTheme] = useState<{
+    primaryColor: string;
+    backgroundColor: string;
+    textColor: string;
+    accentColor: string;
+  } | null>(null);
 
-  const root = document.documentElement;
-  const computedStyle = getComputedStyle(root);
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
 
-  return {
-    primaryColor: computedStyle.getPropertyValue('--theme-primary'),
-    backgroundColor: computedStyle.getPropertyValue('--theme-background'),
-    textColor: computedStyle.getPropertyValue('--theme-text'),
-    accentColor: computedStyle.getPropertyValue('--theme-accent'),
-  };
+    const updateTheme = () => {
+      const root = document.documentElement;
+      const computedStyle = getComputedStyle(root);
+
+      setTheme({
+        primaryColor: computedStyle.getPropertyValue('--theme-primary'),
+        backgroundColor: computedStyle.getPropertyValue('--theme-background'),
+        textColor: computedStyle.getPropertyValue('--theme-text'),
+        accentColor: computedStyle.getPropertyValue('--theme-accent'),
+      });
+    };
+
+    updateTheme();
+    
+    // Listen for theme changes
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['style']
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return theme;
 }

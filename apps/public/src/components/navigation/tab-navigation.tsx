@@ -33,6 +33,10 @@ export function TabNavigation({ categories, className, onTabChange }: TabNavigat
 
   // Handle sticky navigation on scroll
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       setIsSticky(scrollTop > 100);
@@ -47,16 +51,18 @@ export function TabNavigation({ categories, className, onTabChange }: TabNavigat
     onTabChange?.(categoryId);
 
     // Smooth scroll to section
-    const element = document.getElementById(categoryId);
-    if (element) {
-      const offset = 80; // Account for sticky header
-      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-      const offsetPosition = elementPosition - offset;
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      const element = document.getElementById(categoryId);
+      if (element) {
+        const offset = 80; // Account for sticky header
+        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+        const offsetPosition = elementPosition - offset;
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth',
-      });
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        });
+      }
     }
   };
 

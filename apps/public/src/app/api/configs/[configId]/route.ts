@@ -7,10 +7,10 @@ import { getR2Service } from '@minimall/core/server';
 // GET /api/configs/[configId] - Get configuration
 export async function GET(
   request: NextRequest,
-  { params }: { params: { configId: string } }
+  { params }: { params: Promise<{ configId: string }> }
 ) {
   try {
-    const { configId } = params;
+    const { configId } = await params;
 
     if (!db) {
       // Fallback to demo data if no database
@@ -54,10 +54,10 @@ export async function GET(
 // PUT /api/configs/[configId] - Update configuration  
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { configId: string } }
+  { params }: { params: Promise<{ configId: string }> }
 ) {
   try {
-    const { configId } = params;
+    const { configId } = await params;
     const data = await request.json();
 
     if (!db) {
@@ -92,9 +92,11 @@ export async function PUT(
     }).returning();
 
     // Update current version reference
-    await db.update(configs)
-      .set({ currentVersionId: newVersion[0].id })
-      .where(eq(configs.id, configId));
+    if (newVersion[0]) {
+      await db.update(configs)
+        .set({ currentVersionId: newVersion[0].id })
+        .where(eq(configs.id, configId));
+    }
 
     // Also save to R2 as backup
     try {

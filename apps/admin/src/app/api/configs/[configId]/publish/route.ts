@@ -40,58 +40,59 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "No draft version found to publish" }, { status: 404 });
     }
 
-    // Mark the version as published
-    await db
-      .update(configVersions)
-      .set({
-        isPublished: true,
-        publishedAt: new Date(),
-      })
-      .where(eq(configVersions.id, versionToPublish.id));
+    // Use atomic transaction to avoid race conditions
+    const publishedVersion = await db.transaction(async (tx) => {
+      const publishedAt = new Date();
+      
+      // First, unpublish all existing versions for this config
+      await tx
+        .update(configVersions)
+        .set({
+          isPublished: false,
+          publishedAt: null,
+        })
+        .where(
+          and(
+            eq(configVersions.configId, configId),
+            eq(configVersions.isPublished, true)
+          )
+        );
 
-    // Unpublish any other versions for this config
-    await db
-      .update(configVersions)
-      .set({
-        isPublished: false,
-        publishedAt: null,
-      })
-      .where(
-        and(
-          eq(configVersions.configId, configId),
-          eq(configVersions.isPublished, true)
-          // Don't unpublish the version we just published
-          // Note: This is a bit of a race condition, but acceptable for now
-        )
-      );
+      // Then publish the specific version (atomic operation)
+      const [published] = await tx
+        .update(configVersions)
+        .set({
+          isPublished: true,
+          publishedAt,
+        })
+        .where(eq(configVersions.id, versionToPublish.id))
+        .returning();
 
-    // Re-mark our version as published (in case it was caught by the above)
-    await db
-      .update(configVersions)
-      .set({
-        isPublished: true,
-        publishedAt: new Date(),
-      })
-      .where(eq(configVersions.id, versionToPublish.id));
+      if (!published) {
+        throw new Error('Failed to publish configuration version');
+      }
+
+      return published;
+    });
 
     // Publish to R2 for production serving
     if (r2Service) {
       try {
-        const config = versionToPublish.data as SiteConfig;
+        const config = publishedVersion.data as SiteConfig;
         await r2Service.saveConfig(configId, config);
 
-        // Config successfully published to R2
+        console.log(`Successfully published config ${configId} to R2`);
       } catch (r2Error) {
         console.error("Failed to publish to R2:", r2Error);
 
-        // Rollback database changes if R2 publish fails
+        // Rollback database changes if R2 publish fails (atomic rollback)
         await db
           .update(configVersions)
           .set({
             isPublished: false,
             publishedAt: null,
           })
-          .where(eq(configVersions.id, versionToPublish.id));
+          .where(eq(configVersions.id, publishedVersion.id));
 
         return NextResponse.json(
           { error: "Failed to publish to production storage" },
@@ -106,8 +107,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       message: `Published configuration: ${configId}`,
       data: {
         configId,
-        versionId: versionToPublish.id,
-        version: versionToPublish.version,
+        versionId: publishedVersion.id,
+        version: publishedVersion.version,
       },
       level: "info",
     });
@@ -115,8 +116,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
       success: true,
       message: "Configuration published successfully",
-      version: versionToPublish.version,
-      publishedAt: new Date().toISOString(),
+      version: publishedVersion.version,
+      publishedAt: publishedVersion.publishedAt?.toISOString(),
     });
   } catch (error) {
     console.error("Failed to publish configuration:", error);

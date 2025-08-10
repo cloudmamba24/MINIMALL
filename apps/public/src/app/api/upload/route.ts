@@ -6,6 +6,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const shopId = formData.get('shopId') as string || 'demo';
+    const uploadId = formData.get('uploadId') as string; // For streaming uploads
 
     if (!file) {
       return NextResponse.json(
@@ -14,14 +15,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file type and size
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    if (file.size > maxSize) {
+    // For large files (>5MB), suggest using streaming upload
+    const streamingThreshold = 5 * 1024 * 1024; // 5MB
+    const maxSimpleUploadSize = 10 * 1024 * 1024; // 10MB
+
+    if (file.size > maxSimpleUploadSize) {
       return NextResponse.json(
-        { error: 'File too large (max 10MB)' },
-        { status: 400 }
+        { 
+          error: 'File too large for simple upload (max 10MB). Use streaming upload for files larger than 10MB.',
+          suggested: 'streaming',
+          size: file.size,
+          threshold: maxSimpleUploadSize
+        },
+        { status: 413 }
       );
     }
+
+    // Suggest streaming for files larger than 5MB but still allow simple upload
+    const shouldSuggestStreaming = file.size > streamingThreshold && !uploadId;
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
@@ -51,14 +62,25 @@ export async function POST(request: NextRequest) {
       // Generate public URL
       const publicUrl = r2Service.getPublicUrl(key);
       
-      return NextResponse.json({
+      const response: any = {
         success: true,
         url: publicUrl,
         key,
         fileName,
         size: file.size,
         type: file.type,
-      });
+      };
+
+      // Add streaming suggestion for large files
+      if (shouldSuggestStreaming) {
+        response.suggestion = {
+          message: 'For better performance and reliability, consider using streaming upload for files larger than 5MB',
+          recommended: 'streaming',
+          threshold: streamingThreshold
+        };
+      }
+
+      return NextResponse.json(response);
 
     } catch (r2Error) {
       console.error('R2 upload failed:', r2Error);
@@ -68,7 +90,7 @@ export async function POST(request: NextRequest) {
       const base64 = Buffer.from(buffer).toString('base64');
       const dataUrl = `data:${file.type};base64,${base64}`;
       
-      return NextResponse.json({
+      const fallbackResponse: any = {
         success: true,
         url: dataUrl,
         key: null,
@@ -77,7 +99,18 @@ export async function POST(request: NextRequest) {
         type: file.type,
         fallback: 'base64',
         warning: 'R2 storage not configured, using temporary data URL'
-      });
+      };
+
+      // Add streaming suggestion for large files even in fallback
+      if (shouldSuggestStreaming) {
+        fallbackResponse.suggestion = {
+          message: 'For better performance, configure R2 storage and use streaming upload for files larger than 5MB',
+          recommended: 'streaming',
+          threshold: streamingThreshold
+        };
+      }
+      
+      return NextResponse.json(fallbackResponse);
     }
 
   } catch (error) {

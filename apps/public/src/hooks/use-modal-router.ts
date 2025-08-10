@@ -62,7 +62,7 @@ export function useModalRouter(modalKey: string) {
 
     const newUrl = newSearchParams.toString() 
       ? `?${newSearchParams.toString()}` 
-      : window.location.pathname;
+      : (typeof window !== 'undefined' ? window.location.pathname : '/');
     
     router.push(newUrl, { scroll: false });
   }, [searchParams, modalKey, router]);

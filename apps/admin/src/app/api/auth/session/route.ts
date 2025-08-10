@@ -1,4 +1,4 @@
-import { getShopifyAuth } from "@minimall/core";
+import { getShopifyAuth } from "@minimall/core/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 // Force Node.js runtime for crypto operations

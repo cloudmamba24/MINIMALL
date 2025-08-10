@@ -148,8 +148,10 @@ export function ImageUpload({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        whileHover={!disabled && !uploading ? { scale: 1.02 } : undefined}
-        whileTap={!disabled && !uploading ? { scale: 0.98 } : undefined}
+        {...(!disabled && !uploading ? { 
+          whileHover: { scale: 1.02 },
+          whileTap: { scale: 0.98 }
+        } : {})}
       >
         <div className="flex flex-col items-center space-y-4">
           {uploading ? (

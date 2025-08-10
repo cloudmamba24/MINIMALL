@@ -24,8 +24,8 @@ export {
 // Export R2 service
 export * from "./r2";
 
-// Export authentication
-export * from "./auth/shopify-auth";
+// Server-only exports (Node.js crypto, etc.)
+// Note: Authentication is server-only due to crypto module usage
 
 // Export Shopify services
 export * from "./services/shopify-storefront";

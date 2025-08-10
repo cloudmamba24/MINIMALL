@@ -44,10 +44,13 @@ export function useShopifyCart({ shopDomain }: UseShopifyCartOptions = {}) {
         productId: product.id,
         variantId,
         title: product.title,
-        variant: variant.title,
+        variant: {
+          title: variant.title,
+          selectedOptions: variant.selectedOptions || [],
+        },
         price: parseFloat(variant.price.amount),
         quantity,
-        image: variant.image || product.images[0],
+        image: variant.image?.url || product.images[0]?.url || '',
       });
 
       // Open cart drawer

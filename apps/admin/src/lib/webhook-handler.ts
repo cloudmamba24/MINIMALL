@@ -247,15 +247,31 @@ export class WebhookHandler {
       // Remove all remaining data for this shop
       await db.delete(webhooks).where(eq(webhooks.shopDomain, shop));
 
-      // Remove analytics data (consider retention policies)
-      await db
-        .delete(analyticsEvents)
-        .where(
-          eq(
-            analyticsEvents.configId,
-            db.select({ id: configs.id }).from(configs).where(eq(configs.shop, shop)).limit(1)
-          )
-        );
+      // Remove analytics data efficiently using join (consider retention policies)
+      // First get all config IDs for this shop to avoid subquery
+      const shopConfigs = await db
+        .select({ id: configs.id })
+        .from(configs)
+        .where(eq(configs.shop, shop));
+
+      // Delete analytics events for all configs belonging to this shop
+      if (shopConfigs.length > 0) {
+        const configIds = shopConfigs.map(config => config.id);
+        
+        // Use Promise.all for parallel deletion if there are many configs
+        if (configIds.length > 10) {
+          // Batch delete for better performance with many configs
+          const deletePromises = configIds.map(configId => 
+            db.delete(analyticsEvents).where(eq(analyticsEvents.configId, configId))
+          );
+          await Promise.all(deletePromises);
+        } else {
+          // Simple deletion for few configs
+          for (const configId of configIds) {
+            await db.delete(analyticsEvents).where(eq(analyticsEvents.configId, configId));
+          }
+        }
+      }
 
       Sentry.addBreadcrumb({
         category: "gdpr",

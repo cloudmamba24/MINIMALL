@@ -68,7 +68,7 @@ export class ShopifyAuth {
 
 		const data = await response.json();
 
-		return {
+		const session = {
 			shop,
 			accessToken: data.access_token,
 			scope: data.scope,
@@ -81,6 +81,12 @@ export class ShopifyAuth {
 					}
 				: undefined,
 		};
+
+		// Store access token securely
+		const tokenId = this.generateTokenId(session.accessToken);
+		this.storeAccessToken(shop, tokenId, session.accessToken);
+
+		return session;
 	}
 
 	generateState(): string {
@@ -155,15 +161,21 @@ export class ShopifyAuth {
 	}
 
 	createSessionToken(session: ShopifySession): string {
+		const now = Math.floor(Date.now() / 1000);
+		const sessionExpiry = session.expiresAt ? Math.floor(session.expiresAt.getTime() / 1000) : now + (24 * 60 * 60); // 24 hours default
+		
 		const payload = {
 			shop: session.shop,
-			accessToken: session.accessToken,
+			// Store only encrypted access token reference, not the token itself
+			tokenId: this.generateTokenId(session.accessToken),
 			scope: session.scope,
-			expiresAt: session.expiresAt?.getTime(),
-			iat: Math.floor(Date.now() / 1000),
+			exp: Math.min(sessionExpiry, now + (24 * 60 * 60)), // Max 24 hours
+			iat: now,
+			// Add nonce for additional security
+			nonce: crypto.randomBytes(16).toString('hex'),
 		};
 
-		// Simple JWT-like token for demo (in production, use a proper JWT library)
+		// Improved JWT-like token with proper expiration and security
 		const header = Buffer.from(
 			JSON.stringify({ alg: "HS256", typ: "JWT" }),
 		).toString("base64url");
@@ -175,12 +187,25 @@ export class ShopifyAuth {
 
 		return `${header}.${body}.${signature}`;
 	}
+	
+	private generateTokenId(accessToken: string): string {
+		// Generate a deterministic but secure ID for the access token
+		return crypto
+			.createHmac("sha256", this.config.apiSecret)
+			.update(accessToken)
+			.digest("hex")
+			.substring(0, 16);
+	}
 
 	verifySessionToken(token: string): ShopifySession | null {
 		try {
 			const [header, body, signature] = token.split(".");
 
-			// Verify signature
+			if (!header || !body || !signature) {
+				return null;
+			}
+
+			// Verify signature using timing-safe comparison
 			const expectedSignature = crypto
 				.createHmac("sha256", this.config.apiSecret)
 				.update(`${header}.${body}`)
@@ -188,30 +213,67 @@ export class ShopifyAuth {
 
 			if (
 				!crypto.timingSafeEqual(
-					Buffer.from(signature),
-					Buffer.from(expectedSignature),
+					Buffer.from(signature, "base64url"),
+					Buffer.from(expectedSignature, "base64url"),
 				)
 			) {
 				return null;
 			}
 
 			const payload = JSON.parse(Buffer.from(body, "base64url").toString());
+			const now = Math.floor(Date.now() / 1000);
 
-			// Check expiration
-			if (payload.expiresAt && Date.now() > payload.expiresAt) {
+			// Verify required fields
+			if (!payload.shop || !payload.tokenId || !payload.scope) {
+				return null;
+			}
+
+			// Check expiration (proper JWT exp check)
+			if (!payload.exp || now >= payload.exp) {
+				return null;
+			}
+
+			// Check issued at time (not too old, prevents replay attacks)
+			if (!payload.iat || now - payload.iat > (24 * 60 * 60)) {
+				return null;
+			}
+
+			// Get actual access token from secure storage (in production, use Redis/database)
+			const accessToken = this.getStoredAccessToken(payload.shop, payload.tokenId);
+			if (!accessToken) {
 				return null;
 			}
 
 			return {
 				shop: payload.shop,
-				accessToken: payload.accessToken,
+				accessToken: accessToken,
 				scope: payload.scope,
-				expiresAt: payload.expiresAt ? new Date(payload.expiresAt) : undefined,
+				expiresAt: new Date(payload.exp * 1000),
 			};
 		} catch {
 			return null;
 		}
 	}
+	
+	private getStoredAccessToken(shop: string, tokenId: string): string | null {
+		// In production, this should query a secure database/Redis store
+		// For now, we'll use a simple in-memory store (not production-ready)
+		const stored = this.tokenStore.get(`${shop}:${tokenId}`);
+		return stored || null;
+	}
+	
+	private storeAccessToken(shop: string, tokenId: string, accessToken: string): void {
+		// Store access token securely (in production, use encrypted database/Redis)
+		this.tokenStore.set(`${shop}:${tokenId}`, accessToken);
+		
+		// Set expiration cleanup (24 hours)
+		setTimeout(() => {
+			this.tokenStore.delete(`${shop}:${tokenId}`);
+		}, 24 * 60 * 60 * 1000);
+	}
+	
+	// Simple in-memory store (replace with Redis/database in production)
+	private tokenStore = new Map<string, string>();
 }
 
 // Create singleton instance

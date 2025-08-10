@@ -1,4 +1,4 @@
-import { getShopifyAuth } from "@minimall/core";
+import { getShopifyAuth, CSRFProtection } from "@minimall/core/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 // Define public routes that don't require authentication
@@ -45,6 +45,22 @@ export async function middleware(request: NextRequest) {
     if (sessionToken) {
       const shopifyAuth = getShopifyAuth();
       session = shopifyAuth.verifySessionToken(sessionToken);
+      
+      // Additional session validation with fingerprint
+      if (session) {
+        const sessionFingerprint = request.cookies.get("session_fingerprint")?.value;
+        if (sessionFingerprint) {
+          const isValidFingerprint = CSRFProtection.verifyDoubleSubmitToken(
+            sessionToken,
+            sessionFingerprint,
+            sessionToken // Using session token as secret
+          );
+          
+          if (!isValidFingerprint) {
+            session = null; // Invalid fingerprint, invalidate session
+          }
+        }
+      }
     }
 
     // For embedded apps, also check if we have shop in URL but no valid session
@@ -57,10 +73,11 @@ export async function middleware(request: NextRequest) {
         return NextResponse.json({ error: "Authentication required" }, { status: 401 });
       }
 
-      // Add shop context to headers for API routes
+      // Add shop context to headers for API routes (no access token for security)
       const response = NextResponse.next();
       response.headers.set("x-shopify-shop-domain", session.shop);
-      response.headers.set("x-shopify-access-token", session.accessToken);
+      response.headers.set("x-shopify-scope", session.scope);
+      response.headers.set("x-session-id", Buffer.from(`${session.shop}:${Date.now()}`).toString('base64'));
       return response;
     }
 

@@ -133,7 +133,7 @@ const nextConfig = {
   trailingSlash: false,
   
   // Transpile packages - only include packages that are actually used in public app
-  transpilePackages: ['@minimall/core', '@minimall/ui'],
+  transpilePackages: ['@minimall/core', '@minimall/ui', '@minimall/api', '@minimall/db'],
   
   // Remove output configuration - let Vercel handle it
   // output: 'standalone',

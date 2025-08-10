@@ -15,7 +15,7 @@ export function PreviewWrapper({ initialConfig, isPreview = false }: PreviewWrap
 
   // Handle preview messages from admin
   useEffect(() => {
-    if (!isPreview) return;
+    if (!isPreview || typeof window === 'undefined') return;
 
     // Verify origin - should be from admin app
     const adminUrl = process.env.NODE_ENV === 'development' 

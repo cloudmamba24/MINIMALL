@@ -1,4 +1,4 @@
-import { getShopifyAuth } from "@minimall/core";
+import { getShopifyAuth, authRateLimiter, CSRFProtection } from "@minimall/core/server";
 import { createDatabase } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
@@ -14,6 +14,15 @@ export async function GET(request: NextRequest) {
     const state = url.searchParams.get("state");
     const shop = url.searchParams.get("shop");
     const hmac = url.searchParams.get("hmac");
+    const clientIP = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+
+    // Rate limiting for callback attempts
+    if (!authRateLimiter.isAllowed(clientIP)) {
+      const timeUntilReset = Math.ceil(authRateLimiter.getTimeUntilReset(clientIP) / 1000);
+      const errorUrl = new URL("/admin/auth/error", process.env.NEXT_PUBLIC_APP_URL);
+      errorUrl.searchParams.set("error", "rate_limit_exceeded");
+      return NextResponse.redirect(errorUrl.toString());
+    }
 
     // Verify required parameters
     if (!code || !state || !shop || !hmac) {
@@ -98,13 +107,17 @@ export async function GET(request: NextRequest) {
     
     const response = NextResponse.redirect(redirectUrl.toString());
 
-    // Set session cookie with primary strategy
+    // Set session cookie with enhanced security
     response.cookies.set("shopify_session", sessionToken, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      maxAge: 60 * 60 * 24 * 30,
+      maxAge: 60 * 60 * 24 * 7, // Reduced to 7 days for better security
       path: "/",
+      // Add additional security flags
+      ...(process.env.NODE_ENV === "production" && {
+        domain: new URL(process.env.NEXT_PUBLIC_APP_URL || '').hostname,
+      })
     });
     
     // Set fallback cookie for browsers that don't support sameSite=none
@@ -112,7 +125,20 @@ export async function GET(request: NextRequest) {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30,
+      maxAge: 60 * 60 * 24 * 7, // Reduced to 7 days
+      path: "/",
+      ...(process.env.NODE_ENV === "production" && {
+        domain: new URL(process.env.NEXT_PUBLIC_APP_URL || '').hostname,
+      })
+    });
+
+    // Set session fingerprint for additional security
+    const sessionFingerprint = CSRFProtection.generateDoubleSubmitToken(sessionToken);
+    response.cookies.set("session_fingerprint", sessionFingerprint.hash, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
 

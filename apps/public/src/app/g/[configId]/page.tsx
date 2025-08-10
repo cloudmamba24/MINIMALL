@@ -1,86 +1,40 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { r2Service, createDefaultSiteConfig, createEnhancedSiteConfig, edgeCache, type SiteConfig } from '@minimall/core/server';
+import { type SiteConfig } from '@minimall/core/client';
 import { UnifiedRenderer } from '@/components/unified-renderer';
 import { PreviewWrapper } from '@/components/preview-wrapper';
 
-// Create enhanced demo config with real Shopify data when possible
-let STABLE_DEMO_CONFIG: any = null;
-
-async function getStableDemoConfig() {
-  if (STABLE_DEMO_CONFIG) {
-    return STABLE_DEMO_CONFIG;
-  }
-
-  const shopDomain = 'demo-shop.myshopify.com';
-  const accessToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN || 
-                     process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
-
-  try {
-    // Try to create enhanced config with real data
-    if (accessToken) {
-      console.log('Creating enhanced demo config with real Shopify data');
-      STABLE_DEMO_CONFIG = await createEnhancedSiteConfig(shopDomain, accessToken);
-    } else {
-      console.log('Creating demo config with mock data (no Shopify access token)');
-      STABLE_DEMO_CONFIG = createDefaultSiteConfig(shopDomain);
-    }
-  } catch (error) {
-    console.warn('Failed to create enhanced config, falling back to mock data:', error);
-    STABLE_DEMO_CONFIG = createDefaultSiteConfig(shopDomain);
-  }
-
-  // Ensure stable properties
-  STABLE_DEMO_CONFIG = {
-    ...STABLE_DEMO_CONFIG,
-    id: 'demo',
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
-  };
-
-  return STABLE_DEMO_CONFIG;
-}
-
-// Edge-cached config loading with proper fallback strategy
+// Client-safe config loading using API route
 async function loadConfigWithCache(configId: string, draftVersion?: string): Promise<SiteConfig> {
-  const cacheKey = `config:${configId}${draftVersion ? `:${draftVersion}` : ''}`;
-  
-  // Try edge cache first (300s TTL as per spec)
-  const cached = edgeCache.get<SiteConfig>(cacheKey);
-  if (cached) {
-    console.log(`Cache HIT for ${cacheKey}`);
-    return cached;
+  const searchParams = new URLSearchParams();
+  if (draftVersion) {
+    searchParams.set('draft', draftVersion);
   }
-
-  console.log(`Cache MISS for ${cacheKey}, fetching from R2`);
-
+  
+  const apiUrl = `/api/config/${configId}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+  
   try {
-    // Try R2 first - this is the production path
-    const config = await r2Service.getConfig(configId, draftVersion);
+    const response = await fetch(new URL(apiUrl, 
+      process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000' 
+        : process.env.VERCEL_URL 
+          ? `https://${process.env.VERCEL_URL}` 
+          : 'https://minimall-public.vercel.app'
+    ).toString(), {
+      next: { revalidate: 300 } // 5 minutes cache
+    });
     
-    // Cache successful R2 fetch for 300s (5 minutes as per spec)
-    edgeCache.set(cacheKey, config, 300);
-    console.log(`R2 SUCCESS: Cached config ${cacheKey} for 300s`);
+    if (!response.ok) {
+      throw new Error(`Failed to load config: ${response.status} ${response.statusText}`);
+    }
+    
+    const config = await response.json();
+    console.log(`Successfully loaded config via API for: ${configId}${draftVersion ? ` (draft: ${draftVersion})` : ''}`);
     
     return config;
   } catch (error) {
-    console.warn(`R2 FAILED for ${cacheKey}:`, error instanceof Error ? error.message : 'Unknown error');
-    
-    // Fallback strategy based on environment and configId
-    if (configId === 'demo') {
-      // Demo always gets demo config
-      return await getStableDemoConfig();
-    }
-    
-    if (process.env.NODE_ENV === 'development') {
-      // Development: return demo config with notice
-      console.log(`DEV MODE: Serving demo config for ${configId}`);
-      const demoConfig = await getStableDemoConfig();
-      return { ...demoConfig, id: configId };
-    }
-    
-    // Production: throw error for non-demo configs that aren't found
-    throw new Error(`Configuration not found: ${configId}`);
+    console.error(`Failed to load config via API for ${configId}:`, error);
+    throw error;
   }
 }
 
@@ -174,7 +128,6 @@ export default async function SitePage({ params, searchParams }: PageProps) {
 
     // Production configs get appropriate status notices
     const isDev = process.env.NODE_ENV === 'development';
-    const isServedFromCache = !!edgeCache.get(`config:${configId}${draft ? `:${draft}` : ''}`);
     const wasFromR2 = config.id === configId; // Proper config vs fallback demo
 
     return (
@@ -191,8 +144,8 @@ export default async function SitePage({ params, searchParams }: PageProps) {
           <div className={`border px-4 py-3 mb-4 ${wasFromR2 ? 'bg-green-50 border-green-200 text-green-700' : 'bg-orange-50 border-orange-200 text-orange-700'}`}>
             <strong>Dev Mode:</strong> 
             {wasFromR2 ? 
-              ` Config loaded from R2${isServedFromCache ? ' (cached)' : ''}` :
-              ` Config not found in R2, serving demo fallback`
+              ` Config loaded from API` :
+              ` Config not found, serving demo fallback`
             }
           </div>
         )}

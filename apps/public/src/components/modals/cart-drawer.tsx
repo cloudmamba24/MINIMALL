@@ -23,6 +23,10 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
 
   // Close modal on escape key
   useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         closeCartDrawer();
@@ -51,7 +55,9 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
   };
 
   const handleCheckout = () => {
-    window.location.href = buildCheckoutUrl();
+    if (typeof window !== 'undefined') {
+      window.location.href = buildCheckoutUrl();
+    }
   };
 
   if (!modals.cartDrawer.isOpen) return null;

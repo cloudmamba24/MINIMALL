@@ -1,4 +1,6 @@
-import { getShopifyAuth } from "@minimall/core";
+import { getShopifyAuth } from "@minimall/core/server";
+import { installRateLimiter } from "@minimall/core/server";
+import { CSRFProtection } from "@minimall/core/server";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -10,9 +12,22 @@ export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const shop = url.searchParams.get("shop");
+    const clientIP = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
 
     if (!shop) {
       return NextResponse.json({ error: "Missing shop parameter" }, { status: 400 });
+    }
+
+    // Rate limiting by IP address
+    if (!installRateLimiter.isAllowed(clientIP)) {
+      const timeUntilReset = Math.ceil(installRateLimiter.getTimeUntilReset(clientIP) / 1000);
+      return NextResponse.json({ 
+        error: "Too many requests", 
+        retryAfter: timeUntilReset 
+      }, { 
+        status: 429,
+        headers: { 'Retry-After': timeUntilReset.toString() }
+      });
     }
 
     const shopifyAuth = getShopifyAuth();
@@ -22,8 +37,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid shop domain" }, { status: 400 });
     }
 
-    // Generate state for CSRF protection
+    // Generate state for CSRF protection  
     const state = shopifyAuth.generateState();
+    
+    // Generate additional CSRF token
+    const csrfToken = CSRFProtection.generateDoubleSubmitToken(process.env.SHOPIFY_API_SECRET || 'fallback-secret');
+    const csrfData = CSRFProtection.generateToken();
 
     // Store state in cookie for verification
     const response = NextResponse.redirect(shopifyAuth.generateAuthUrl(shop, state));
@@ -32,6 +51,7 @@ export async function GET(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 300, // 5 minutes
+      path: "/",
     });
 
     // Store shop in cookie for callback verification
@@ -40,6 +60,26 @@ export async function GET(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 300, // 5 minutes
+      path: "/",
+    });
+
+    // Store CSRF token data for additional protection
+    const csrfHash = CSRFProtection.createTokenHash(csrfData, process.env.SHOPIFY_API_SECRET || 'fallback-secret');
+    response.cookies.set("csrf_hash", csrfHash, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 3600, // 1 hour
+      path: "/",
+    });
+
+    // Store timestamp for CSRF validation
+    response.cookies.set("csrf_timestamp", csrfData.timestamp.toString(), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 3600, // 1 hour
+      path: "/",
     });
 
     Sentry.addBreadcrumb({

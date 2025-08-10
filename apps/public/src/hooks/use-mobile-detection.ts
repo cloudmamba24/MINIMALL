@@ -11,19 +11,23 @@ interface MobileDetectionResult {
 }
 
 export function useMobileDetection(): MobileDetectionResult {
+  // Start with neutral state to prevent hydration mismatch
   const [detection, setDetection] = useState<MobileDetectionResult>({
     isMobile: false,
     isTablet: false,
-    isDesktop: true,
+    isDesktop: false, // Don't assume desktop during SSR
     userAgent: null,
     renderMode: 'flexible'
   });
+  
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
     }
 
+    setHasMounted(true);
     const userAgent = navigator.userAgent;
     
     // Mobile device detection via user agent
@@ -66,6 +70,17 @@ export function useMobileDetection(): MobileDetectionResult {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  // Return consistent state during SSR/hydration
+  if (!hasMounted) {
+    return {
+      isMobile: false,
+      isTablet: false,
+      isDesktop: false,
+      userAgent: null,
+      renderMode: 'flexible'
+    };
+  }
 
   return detection;
 }

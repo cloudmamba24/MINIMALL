@@ -29,7 +29,7 @@ export async function GET() {
         WHERE table_schema = 'public'
       `);
       
-      tableCount = Number(result.rows[0]?.table_count) || 0;
+      tableCount = Number(result[0]?.table_count) || 0;
       connectionTest = 'SUCCESS - Database connection working';
       
     } catch (dbError) {
