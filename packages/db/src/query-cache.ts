@@ -14,7 +14,7 @@ interface CacheStats {
 }
 
 export class QueryCache {
-  private cache = new Map<string, CacheEntry<any>>();
+  private cache = new Map<string, CacheEntry<unknown>>();
   private stats = {
     hits: 0,
     misses: 0,
@@ -22,7 +22,8 @@ export class QueryCache {
   private maxSize: number;
   private defaultTtl: number;
 
-  constructor(maxSize = 1000, defaultTtl = 300000) { // 5 minutes default TTL
+  constructor(maxSize = 1000, defaultTtl = 300000) {
+    // 5 minutes default TTL
     this.maxSize = maxSize;
     this.defaultTtl = defaultTtl;
 
@@ -33,11 +34,7 @@ export class QueryCache {
   /**
    * Get cached value or execute query function
    */
-  async get<T>(
-    key: string,
-    queryFn: () => Promise<T>,
-    ttl = this.defaultTtl
-  ): Promise<T> {
+  async get<T>(key: string, queryFn: () => Promise<T>, ttl = this.defaultTtl): Promise<T> {
     const cached = this.cache.get(key);
 
     // Check if cached entry is still valid
@@ -139,7 +136,7 @@ export class QueryCache {
       }
     }
 
-    if (removedCount > 0 && process.env.NODE_ENV === 'development') {
+    if (removedCount > 0 && process.env.NODE_ENV === "development") {
       console.log(`🧹 Cache cleanup: removed ${removedCount} expired entries`);
     }
   }
@@ -148,14 +145,14 @@ export class QueryCache {
    * Evict least recently used entry (by hits)
    */
   private evictLRU(): void {
-    let lruKey = '';
+    let lruKey = "";
     let minHits = Number.MAX_SAFE_INTEGER;
     let oldestTimestamp = Date.now();
 
     for (const [key, entry] of this.cache.entries()) {
       // Prefer entries with fewer hits, but also consider age
       const score = entry.hits + (Date.now() - entry.timestamp) / 1000000;
-      
+
       if (score < minHits || (score === minHits && entry.timestamp < oldestTimestamp)) {
         lruKey = key;
         minHits = score;
@@ -180,13 +177,16 @@ export const queryCache = new QueryCache(
 /**
  * Utility function to create cache keys
  */
-export function createCacheKey(type: string, params: Record<string, any>): string {
+export function createCacheKey(type: string, params: Record<string, unknown>): string {
   const sortedParams = Object.keys(params)
     .sort()
-    .reduce((result, key) => {
-      result[key] = params[key];
-      return result;
-    }, {} as Record<string, any>);
+    .reduce(
+      (result, key) => {
+        result[key] = params[key];
+        return result;
+      },
+      {} as Record<string, unknown>
+    );
 
   return `${type}:${JSON.stringify(sortedParams)}`;
 }
@@ -207,22 +207,21 @@ export async function cachedQuery<T>(
  */
 export function invalidateCache(pattern: string): number {
   const deletedCount = queryCache.deletePattern(pattern);
-  
-  if (deletedCount > 0 && process.env.NODE_ENV === 'development') {
+
+  if (deletedCount > 0 && process.env.NODE_ENV === "development") {
     console.log(`🗑️ Cache invalidation: removed ${deletedCount} entries matching "${pattern}"`);
   }
-  
+
   return deletedCount;
 }
 
 // Cache keys for common queries
 export const CacheKeys = {
-  config: (configId: string, version?: string) => 
-    createCacheKey('config', { configId, version }),
+  config: (configId: string, version?: string) => createCacheKey("config", { configId, version }),
   configList: (shop: string, limit: number, offset: number) =>
-    createCacheKey('config_list', { shop, limit, offset }),
+    createCacheKey("config_list", { shop, limit, offset }),
   analytics: (configId?: string, timeframe?: string, startDate?: string, endDate?: string) =>
-    createCacheKey('analytics', { configId, timeframe, startDate, endDate }),
+    createCacheKey("analytics", { configId, timeframe, startDate, endDate }),
   performance: (configId?: string, timeframe?: string) =>
-    createCacheKey('performance', { configId, timeframe }),
+    createCacheKey("performance", { configId, timeframe }),
 } as const;

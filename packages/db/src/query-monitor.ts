@@ -38,7 +38,7 @@ class QueryMonitor {
           duration,
           params,
           timestamp: new Date(),
-          stack: stack?.split('\n').slice(1, 6).join('\n'), // First 5 stack frames
+          stack: stack?.split("\n").slice(1, 6).join("\n"), // First 5 stack frames
         };
 
         this.recordSlowQuery(metrics);
@@ -46,7 +46,7 @@ class QueryMonitor {
       }
 
       // Always log query info in development
-      if (process.env.NODE_ENV === 'development' && process.env.DB_DEBUG === 'true') {
+      if (process.env.NODE_ENV === "development" && process.env.DB_DEBUG === "true") {
         console.log(`🔍 Query executed in ${duration}ms: ${queryDescription}`);
       }
 
@@ -54,7 +54,7 @@ class QueryMonitor {
     } catch (error) {
       const duration = Date.now() - startTime;
       console.error(`❌ Query failed after ${duration}ms: ${queryDescription}`, {
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         params,
       });
       throw error;
@@ -86,7 +86,7 @@ class QueryMonitor {
     });
 
     // Send to monitoring service in production
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       this.reportToMonitoring(metrics);
     }
   }
@@ -97,18 +97,18 @@ class QueryMonitor {
   private reportToMonitoring(metrics: QueryMetrics): void {
     // This could integrate with Sentry, DataDog, New Relic, etc.
     try {
-      if (typeof window === 'undefined') {
+      if (typeof window === "undefined") {
         // Server-side: Use Sentry if available
-        const Sentry = require('@sentry/nextjs');
+        const Sentry = require("@sentry/nextjs");
         if (Sentry) {
           Sentry.addBreadcrumb({
-            category: 'database',
+            category: "database",
             message: `Slow query: ${metrics.query}`,
             data: {
               duration: metrics.duration,
               params: metrics.params,
             },
-            level: 'warning',
+            level: "warning",
           });
         }
       }
@@ -175,21 +175,19 @@ export const queryMonitor = new QueryMonitor(
 /**
  * Decorator for monitoring database queries
  */
-export function monitorQuery<T extends unknown[], R>(
-  queryDescription: string
-) {
-  return function (
-    target: any,
+export function monitorQuery<T extends unknown[], R>(_queryDescription: string) {
+  return (
+    target: unknown,
     propertyName: string,
     descriptor: TypedPropertyDescriptor<(...args: T) => Promise<R>>
-  ) {
+  ) => {
     const method = descriptor.value;
     if (!method) return;
 
     descriptor.value = async function (...args: T): Promise<R> {
       return queryMonitor.measureQuery(
         () => method.apply(this, args),
-        `${target.constructor.name}.${propertyName}`,
+        `${(target as Record<string, unknown>)?.constructor?.name || "Unknown"}.${propertyName}`,
         args
       );
     };
