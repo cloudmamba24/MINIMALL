@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@minimall/ui/button";
-import { Card } from "@minimall/ui/card";
-import { Badge } from "@minimall/ui/badge";
+import { Button, Card, cn } from "@minimall/ui";
 import { 
   Settings, 
   Eye, 
@@ -16,8 +14,7 @@ import {
   ArrowRight,
   Images
 } from "lucide-react";
-import { Category, LayoutConfig, LayoutPreset } from "@minimall/core/types";
-import { cn } from "../../lib/utils";
+import { Category, LayoutConfig, LayoutPreset } from "@minimall/core";
 import { PresetPicker } from "./PresetPicker";
 import { LayoutKnobs } from "./LayoutKnobs";
 import { TemplateDrawer } from "./TemplateDrawer";
@@ -138,9 +135,9 @@ export function EditorPanel({
             <h2 className="text-lg font-semibold text-gray-900">Gallery Editor</h2>
             <div className="flex items-center space-x-2">
               {getPresetIcon(currentLayout.preset)}
-              <Badge variant={hasUnsavedChanges ? "destructive" : "secondary"}>
+              <span className={`px-2 py-1 text-xs rounded ${hasUnsavedChanges ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-800"}`}>
                 {hasUnsavedChanges ? "Unsaved" : "Saved"}
-              </Badge>
+              </span>
             </div>
           </div>
           <p className="text-sm text-gray-500 mt-1">

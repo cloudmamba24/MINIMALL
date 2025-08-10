@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@minimall/ui/button";
-import { Card } from "@minimall/ui/card";
-import { Badge } from "@minimall/ui/badge";
+import { Button, Card, cn } from "@minimall/ui";
 import { 
   FlaskConical, 
   Plus, 
@@ -16,8 +14,7 @@ import {
   Users,
   Award
 } from "lucide-react";
-import { ExperimentConfig, LayoutConfig } from "@minimall/core/types";
-import { cn } from "../../lib/utils";
+import { ExperimentConfig, LayoutConfig } from "@minimall/core";
 
 interface ExperimentManagerProps {
   configId: string;
@@ -145,22 +142,29 @@ export function ExperimentManager({
     const config = variants[status];
     const Icon = config.icon;
     
+    const baseClasses = "inline-flex items-center gap-1 px-2 py-1 text-xs rounded";
+    const variantClasses = {
+      default: "bg-blue-100 text-blue-700",
+      secondary: "bg-gray-100 text-gray-600",
+      outline: "bg-white border border-gray-300 text-gray-700"
+    };
+    
     return (
-      <Badge variant={config.variant} className="flex items-center gap-1">
+      <span className={`${baseClasses} ${variantClasses[config.variant]}`}>
         <Icon className="w-3 h-3" />
         {config.label}
-      </Badge>
+      </span>
     );
   };
 
   const getWinnerBadge = (winner: string) => {
     if (winner === 'control') {
-      return <Badge variant="outline">Control Wins</Badge>;
+      return <span className="px-2 py-1 text-xs rounded bg-white border border-gray-300 text-gray-700">Control Wins</span>;
     }
     if (winner === 'variant') {
-      return <Badge variant="default">Variant Wins</Badge>;
+      return <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700">Variant Wins</span>;
     }
-    return <Badge variant="secondary">Inconclusive</Badge>;
+    return <span className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-600">Inconclusive</span>;
   };
 
   const formatCurrency = (amount: number) => {

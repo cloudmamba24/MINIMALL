@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ShopService } from "@minimall/core/server";
+import { getStorefrontToken } from "@minimall/core/server";
 
 /**
  * Get storefront access token for a specific shop
@@ -24,7 +24,7 @@ export async function GET(
     const decodedShopDomain = decodeURIComponent(shopDomain);
     
     // Get token from database or fallback chain
-    const token = await ShopService.getStorefrontToken(decodedShopDomain);
+    const token = await getStorefrontToken(decodedShopDomain);
     
     if (!token) {
       return NextResponse.json(

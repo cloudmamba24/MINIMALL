@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@minimall/ui/button";
-import { Badge } from "@minimall/ui/badge";
-import { Card } from "@minimall/ui/card";
+import { Button, Card, cn } from "@minimall/ui";
 import { 
   Wand2, 
   Grid3X3, 
@@ -16,8 +14,7 @@ import {
   Zap,
   Sparkles
 } from "lucide-react";
-import { LayoutConfig, LayoutTemplate, TemplateCategory } from "@minimall/core/types";
-import { cn } from "../../lib/utils";
+import { LayoutConfig, LayoutTemplate, TemplateCategory } from "@minimall/core";
 
 interface TemplateDrawerProps {
   currentLayout: LayoutConfig;
@@ -279,13 +276,13 @@ export function TemplateDrawer({ currentLayout, onTemplateApply, className }: Te
                       <h4 className="font-medium text-gray-900 truncate">
                         {template.name}
                       </h4>
-                      <Badge variant="secondary" className="text-xs">
+                      <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
                         {template.layout.preset}
-                      </Badge>
+                      </span>
                       {CATEGORY_CONFIG[template.category] && (
-                        <Badge variant="outline" className="text-xs">
+                        <span className="px-2 py-0.5 text-xs bg-gray-50 text-gray-500 rounded border">
                           {CATEGORY_CONFIG[template.category].name}
-                        </Badge>
+                        </span>
                       )}
                     </div>
                     

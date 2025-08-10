@@ -229,12 +229,8 @@
           "name": "analytics_events_config_id_configs_id_fk",
           "tableFrom": "analytics_events",
           "tableTo": "configs",
-          "columnsFrom": [
-            "config_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["config_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -366,12 +362,8 @@
           "name": "assets_shop_domain_shops_shop_domain_fk",
           "tableFrom": "assets",
           "tableTo": "shops",
-          "columnsFrom": [
-            "shop_domain"
-          ],
-          "columnsTo": [
-            "shop_domain"
-          ],
+          "columnsFrom": ["shop_domain"],
+          "columnsTo": ["shop_domain"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -496,12 +488,8 @@
           "name": "config_versions_config_id_configs_id_fk",
           "tableFrom": "config_versions",
           "tableTo": "configs",
-          "columnsFrom": [
-            "config_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["config_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -592,12 +580,8 @@
           "name": "configs_shop_shops_shop_domain_fk",
           "tableFrom": "configs",
           "tableTo": "shops",
-          "columnsFrom": [
-            "shop"
-          ],
-          "columnsTo": [
-            "shop_domain"
-          ],
+          "columnsFrom": ["shop"],
+          "columnsTo": ["shop_domain"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -605,12 +589,8 @@
           "name": "configs_current_version_id_config_versions_id_fk",
           "tableFrom": "configs",
           "tableTo": "config_versions",
-          "columnsFrom": [
-            "current_version_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["current_version_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -826,12 +806,8 @@
           "name": "performance_metrics_config_id_configs_id_fk",
           "tableFrom": "performance_metrics",
           "tableTo": "configs",
-          "columnsFrom": [
-            "config_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["config_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1072,12 +1048,8 @@
           "name": "revenue_attributions_shop_domain_shops_shop_domain_fk",
           "tableFrom": "revenue_attributions",
           "tableTo": "shops",
-          "columnsFrom": [
-            "shop_domain"
-          ],
-          "columnsTo": [
-            "shop_domain"
-          ],
+          "columnsFrom": ["shop_domain"],
+          "columnsTo": ["shop_domain"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1085,12 +1057,8 @@
           "name": "revenue_attributions_config_id_configs_id_fk",
           "tableFrom": "revenue_attributions",
           "tableTo": "configs",
-          "columnsFrom": [
-            "config_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["config_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1181,12 +1149,8 @@
           "name": "sessions_config_id_configs_id_fk",
           "tableFrom": "sessions",
           "tableTo": "configs",
-          "columnsFrom": [
-            "config_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["config_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1352,12 +1316,8 @@
           "name": "usage_rollups_shop_domain_shops_shop_domain_fk",
           "tableFrom": "usage_rollups",
           "tableTo": "shops",
-          "columnsFrom": [
-            "shop_domain"
-          ],
-          "columnsTo": [
-            "shop_domain"
-          ],
+          "columnsFrom": ["shop_domain"],
+          "columnsTo": ["shop_domain"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1464,9 +1424,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},

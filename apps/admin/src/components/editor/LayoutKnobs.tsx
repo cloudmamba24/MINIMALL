@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Slider } from "@minimall/ui/slider";
-import { Switch } from "@minimall/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@minimall/ui/select";
-import { Button } from "@minimall/ui/button";
-import { Badge } from "@minimall/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@minimall/ui/tabs";
+import { Button, cn } from "@minimall/ui";
 import { 
   Monitor, 
   Tablet, 
@@ -14,8 +9,7 @@ import {
   RotateCcw,
   Info
 } from "lucide-react";
-import { LayoutConfig, AspectRatio, MediaFilter, ASPECT_RATIOS, MEDIA_FILTERS } from "@minimall/core/types";
-import { cn } from "../../lib/utils";
+import { LayoutConfig, AspectRatio, MediaFilter, ASPECT_RATIOS, MEDIA_FILTERS } from "@minimall/core";
 
 interface LayoutKnobsProps {
   layout: LayoutConfig;
@@ -152,9 +146,9 @@ export function LayoutKnobs({
               {device.id !== 'base' && getDeviceIcon(device.id)}
               <span>{device.label}</span>
               {device.id !== 'base' && hasCustomSettings() && device.id === activeDevice && (
-                <Badge variant="secondary" className="h-4 px-1 text-xs">
+                <span className="bg-gray-100 text-gray-600 px-1 py-0.5 text-xs rounded">
                   Custom
-                </Badge>
+                </span>
               )}
             </button>
           ))}
@@ -169,13 +163,14 @@ export function LayoutKnobs({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Rows
             </label>
-            <Slider
-              value={[currentConfig.rows]}
-              onValueChange={([value]) => updateConfig({ rows: value })}
+            <input
+              type="range"
+              value={currentConfig.rows}
+              onChange={(e) => updateConfig({ rows: parseInt(e.target.value) })}
               min={1}
               max={6}
               step={1}
-              className="w-full"
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
             />
             <div className="text-xs text-gray-500 mt-1">{currentConfig.rows}</div>
           </div>
@@ -184,13 +179,14 @@ export function LayoutKnobs({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Columns
             </label>
-            <Slider
-              value={[currentConfig.columns]}
-              onValueChange={([value]) => updateConfig({ columns: value })}
+            <input
+              type="range"
+              value={currentConfig.columns}
+              onChange={(e) => updateConfig({ columns: parseInt(e.target.value) })}
               min={1}
               max={4}
               step={1}
-              className="w-full"
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
             />
             <div className="text-xs text-gray-500 mt-1">{currentConfig.columns}</div>
           </div>
@@ -202,13 +198,14 @@ export function LayoutKnobs({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Gutter
             </label>
-            <Slider
-              value={[currentConfig.gutter]}
-              onValueChange={([value]) => updateConfig({ gutter: value })}
+            <input
+              type="range"
+              value={currentConfig.gutter}
+              onChange={(e) => updateConfig({ gutter: parseInt(e.target.value) })}
               min={0}
               max={32}
               step={2}
-              className="w-full"
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
             />
             <div className="text-xs text-gray-500 mt-1">{currentConfig.gutter}px</div>
           </div>
@@ -217,13 +214,14 @@ export function LayoutKnobs({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Margin
             </label>
-            <Slider
-              value={[currentConfig.outerMargin]}
-              onValueChange={([value]) => updateConfig({ outerMargin: value })}
+            <input
+              type="range"
+              value={currentConfig.outerMargin}
+              onChange={(e) => updateConfig({ outerMargin: parseInt(e.target.value) })}
               min={0}
               max={64}
               step={4}
-              className="w-full"
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
             />
             <div className="text-xs text-gray-500 mt-1">{currentConfig.outerMargin}px</div>
           </div>
@@ -238,13 +236,14 @@ export function LayoutKnobs({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Border Radius
             </label>
-            <Slider
-              value={[layout.borderRadius]}
-              onValueChange={([value]) => onLayoutChange({ borderRadius: value })}
+            <input
+              type="range"
+              value={layout.borderRadius}
+              onChange={(e) => onLayoutChange({ borderRadius: parseInt(e.target.value) })}
               min={0}
               max={24}
               step={2}
-              className="w-full"
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
             />
             <div className="text-xs text-gray-500 mt-1">{layout.borderRadius}px</div>
           </div>
@@ -254,21 +253,17 @@ export function LayoutKnobs({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Aspect Ratio
             </label>
-            <Select
+            <select
               value={layout.aspect}
-              onValueChange={(value) => onLayoutChange({ aspect: value as AspectRatio })}
+              onChange={(e) => onLayoutChange({ aspect: e.target.value as AspectRatio })}
+              className="w-full p-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ASPECT_RATIOS.map((ratio) => (
-                  <SelectItem key={ratio} value={ratio}>
-                    {ratio === 'auto' ? 'Auto' : ratio}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {ASPECT_RATIOS.map((ratio) => (
+                <option key={ratio} value={ratio}>
+                  {ratio === 'auto' ? 'Auto' : ratio}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Media Filter */}
@@ -276,21 +271,17 @@ export function LayoutKnobs({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Media Filter
             </label>
-            <Select
+            <select
               value={layout.mediaFilter}
-              onValueChange={(value) => onLayoutChange({ mediaFilter: value as MediaFilter })}
+              onChange={(e) => onLayoutChange({ mediaFilter: e.target.value as MediaFilter })}
+              className="w-full p-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {MEDIA_FILTERS.map((filter) => (
-                  <SelectItem key={filter} value={filter}>
-                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {MEDIA_FILTERS.map((filter) => (
+                <option key={filter} value={filter}>
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Hover Zoom */}
@@ -301,10 +292,15 @@ export function LayoutKnobs({
               </label>
               <p className="text-xs text-gray-500">Scale items on hover</p>
             </div>
-            <Switch
-              checked={layout.hoverZoom}
-              onCheckedChange={(checked) => onLayoutChange({ hoverZoom: checked })}
-            />
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={layout.hoverZoom}
+                onChange={(e) => onLayoutChange({ hoverZoom: e.target.checked })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@minimall/ui";
 import { motion } from "framer-motion";
 import { 
   Grid3X3, 
@@ -8,8 +9,7 @@ import {
   Images,
   Check
 } from "lucide-react";
-import { LayoutPreset, LAYOUT_PRESETS } from "@minimall/core/types";
-import { cn } from "../../lib/utils";
+import { LayoutPreset, LAYOUT_PRESETS } from "@minimall/core";
 
 interface PresetPickerProps {
   currentPreset: LayoutPreset;

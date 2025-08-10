@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Button } from "@minimall/ui/button";
-import { Badge } from "@minimall/ui/badge";
+import { Button, cn } from "@minimall/ui";
 import { 
   Monitor, 
   Tablet, 
@@ -12,9 +11,9 @@ import {
   Eye,
   EyeOff
 } from "lucide-react";
-import { Category } from "@minimall/core/types";
-import { LayoutSwitch } from "../../../public/src/components/renderers/LayoutSwitch";
-import { cn } from "../../lib/utils";
+import { Category } from "@minimall/core";
+// TODO: Move LayoutSwitch to a shared package instead of importing from public app
+// import { LayoutSwitch } from "../../../public/src/components/renderers/LayoutSwitch";
 
 interface LivePreviewProps {
   category: Category;
@@ -86,9 +85,13 @@ export function LivePreview({
       <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200">
         <div className="flex items-center space-x-3">
           <h3 className="font-medium text-gray-900">Live Preview</h3>
-          <Badge variant={isPreviewMode ? "default" : "secondary"}>
+          <span className={`px-2 py-1 text-xs rounded ${
+            isPreviewMode 
+              ? "bg-blue-100 text-blue-700" 
+              : "bg-gray-100 text-gray-600"
+          }`}>
             {isPreviewMode ? "Interactive" : "Design Mode"}
-          </Badge>
+          </span>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -184,16 +187,16 @@ export function LivePreview({
                   sandbox="allow-scripts allow-same-origin"
                 />
               ) : (
-                // Static preview using LayoutSwitch
+                // Static preview placeholder (TODO: implement proper preview)
                 <div className="p-4 h-full">
                   {category.layout ? (
-                    <LayoutSwitch
-                      category={category}
-                      onTileClick={(clickedCategory, index) => {
-                        console.log('Preview tile clicked:', clickedCategory.id, index);
-                      }}
-                      className="h-full"
-                    />
+                    <div className="h-full bg-gray-100 rounded-lg flex items-center justify-center">
+                      <div className="text-gray-500 text-center">
+                        <Eye className="h-8 w-8 mx-auto mb-2" />
+                        <p>Preview for {category.title}</p>
+                        <p className="text-sm">Layout: {category.layout.preset}</p>
+                      </div>
+                    </div>
                   ) : (
                     <div className="flex items-center justify-center h-full text-gray-500">
                       <div className="text-center">

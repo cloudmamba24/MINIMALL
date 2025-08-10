@@ -18,7 +18,7 @@ import {
   ImportIcon,
   LinkIcon,
   ViewIcon,
-  DownloadIcon,
+  // DownloadIcon, // This icon doesn't exist in Polaris icons
   ImageIcon,
   PlayIcon,
 } from "@shopify/polaris-icons";
@@ -298,7 +298,7 @@ export function SocialImporter({
                     onChange={setUrl}
                     placeholder="https://www.instagram.com/p/ABC123/"
                     prefix={<LinkIcon />}
-                    error={urlError || undefined}
+                    {...(urlError && { error: urlError })}
                     autoComplete="off"
                     helpText="Paste a link from Instagram, TikTok, Twitter, YouTube, or Pinterest"
                   />
@@ -389,14 +389,14 @@ export function SocialImporter({
                     
                     {previewPost.hashtags.length > 0 && (
                       <div className="mt-2 flex gap-2 flex-wrap">
-                        {previewPost.hashtags.slice(0, 5).map((tag) => (
-                          <Badge key={tag} tone="subdued">
-                            #{tag}
+                        {previewPost.hashtags.slice(0, 5).map((tag, index) => (
+                          <Badge key={`hashtag-${index}`}>
+                            {`#${Array.isArray(tag) ? tag.join(' ') : String(tag)}`}
                           </Badge>
                         ))}
                         {previewPost.hashtags.length > 5 && (
-                          <Badge tone="subdued">
-                            +{previewPost.hashtags.length - 5} more
+                          <Badge>
+                            {`+${previewPost.hashtags.length - 5} more`}
                           </Badge>
                         )}
                       </div>
@@ -429,7 +429,7 @@ export function SocialImporter({
                         <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                           <div className="text-center">
                             <PlayIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                            <Text variant="bodySm" tone="subdued">
+                            <Text variant="bodySm" tone="subdued" as="p">
                               Video {media.duration && `(${media.duration}s)`}
                             </Text>
                           </div>
@@ -444,7 +444,7 @@ export function SocialImporter({
                       
                       {media.width && media.height && (
                         <div className="absolute bottom-2 right-2">
-                          <Badge tone="subdued">
+                          <Badge>
                             {media.width} × {media.height}
                           </Badge>
                         </div>
@@ -532,7 +532,7 @@ export function SocialImporter({
             <Card>
               <div className="p-4 text-center">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <DownloadIcon className="w-8 h-8 text-green-600" />
+                  <ImportIcon className="w-8 h-8 text-green-600" />
                 </div>
                 
                 <Text variant="headingLg" as="h2">

@@ -23,6 +23,7 @@ import {
 } from "@shopify/polaris-icons";
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { type ProcessingOptions } from "../../lib/image-processing";
+import { conditionalProps } from "../../lib/type-utils";
 
 interface SmartCropperProps {
   open: boolean;
@@ -222,19 +223,24 @@ export function SmartCropper({
     try {
       const sizes = customSizes.split(",").map(s => parseInt(s.trim())).filter(Boolean);
       
-      const options: ProcessingOptions = {
-        aspectRatio,
+      const baseOptions = {
         smartCrop,
-        focusPoint: smartCrop ? focusPoint : undefined,
-        format,
-        quality: quality[0],
+        quality: quality[0] ?? 85,
         progressive,
-        sizes: generateVariants ? sizes : undefined,
         sharpen,
         enhance,
         removeBackground,
         stripExif: true,
       };
+      
+      const optionalOptions = conditionalProps({
+        aspectRatio,
+        focusPoint: smartCrop ? focusPoint : undefined,
+        format,
+        sizes: generateVariants ? sizes : undefined,
+      });
+      
+      const options = { ...baseOptions, ...optionalOptions } as ProcessingOptions;
       
       await onProcess(options);
     } catch (error) {
@@ -253,7 +259,7 @@ export function SmartCropper({
   }, []);
 
   const calculateNewDimensions = useCallback(() => {
-    if (!imageMetadata || aspectRatio === "original") return imageMetadata;
+    if (!imageMetadata || aspectRatio === "original" || !aspectRatio) return imageMetadata;
     
     const targetRatio = getAspectRatioValue(aspectRatio);
     const currentRatio = imageMetadata.aspectRatio;
@@ -351,13 +357,13 @@ export function SmartCropper({
               {imageMetadata && (
                 <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <Text variant="bodySm" tone="subdued">Original</Text>
-                    <Text variant="bodyMd">{imageMetadata.width} × {imageMetadata.height}</Text>
-                    <Text variant="bodySm" tone="subdued">{formatFileSize(imageMetadata.size)}</Text>
+                    <Text variant="bodySm" tone="subdued" as="p">Original</Text>
+                    <Text variant="bodyMd" as="p">{imageMetadata.width} × {imageMetadata.height}</Text>
+                    <Text variant="bodySm" tone="subdued" as="p">{formatFileSize(imageMetadata.size)}</Text>
                   </div>
                   <div>
-                    <Text variant="bodySm" tone="subdued">After Crop</Text>
-                    <Text variant="bodyMd">{newDimensions?.width} × {newDimensions?.height}</Text>
+                    <Text variant="bodySm" tone="subdued" as="p">After Crop</Text>
+                    <Text variant="bodyMd" as="p">{newDimensions?.width} × {newDimensions?.height}</Text>
                     <Badge tone={newDimensions?.aspectRatio !== imageMetadata.aspectRatio ? "info" : "success"}>
                       {aspectRatio === "original" ? "No change" : "Modified"}
                     </Badge>
@@ -398,10 +404,10 @@ export function SmartCropper({
                     
                     {smartCrop && (
                       <div className="text-sm bg-gray-50 p-3 rounded">
-                        <Text variant="bodySm" tone="subdued">
+                        <Text variant="bodySm" tone="subdued" as="p">
                           Focus Point: {focusPoint.x}%, {focusPoint.y}%
                         </Text>
-                        <Text variant="bodySm" tone="subdued">
+                        <Text variant="bodySm" tone="subdued" as="p">
                           Click on the image above to adjust the focus point
                         </Text>
                       </div>
@@ -424,16 +430,16 @@ export function SmartCropper({
                     />
                     
                     <div>
-                      <Text variant="bodyMd" as="label">
-                        Quality: {quality[0]}%
+                      <Text variant="bodyMd" as="p">
+                        Quality: {quality[0] ?? 85}%
                       </Text>
                       <RangeSlider
                         label=""
-                        value={quality[0]}
+                        value={quality[0] ?? 85}
                         min={20}
                         max={100}
                         step={5}
-                        onChange={(value) => setQuality([value])}
+                        onChange={(value) => setQuality([typeof value === 'number' ? value : value[0]])}
                       />
                     </div>
                     

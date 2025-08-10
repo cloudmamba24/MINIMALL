@@ -13,22 +13,21 @@ import {
 } from "drizzle-orm/pg-core";
 
 // Shops table - per-shop storefront tokens
-export const shops = pgTable(
-  "shops",
-  {
-    shopDomain: text("shop_domain").primaryKey(),
-    storefrontAccessToken: text("storefront_access_token").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  }
-);
+export const shops = pgTable("shops", {
+  shopDomain: text("shop_domain").primaryKey(),
+  storefrontAccessToken: text("storefront_access_token").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
 
 // Configuration versions table
 export const configVersions = pgTable(
   "config_versions",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    configId: text("config_id").references(() => configs.id, { onDelete: "cascade" }).notNull(),
+    configId: text("config_id")
+      .references(() => configs.id, { onDelete: "cascade" })
+      .notNull(),
     version: varchar("version", { length: 50 }).notNull(),
     data: jsonb("data").notNull(),
     isPublished: boolean("is_published").default(false).notNull(),
@@ -49,7 +48,9 @@ export const configs = pgTable(
   "configs",
   {
     id: text("id").primaryKey(),
-    shop: text("shop").references(() => shops.shopDomain, { onDelete: "cascade" }).notNull(),
+    shop: text("shop")
+      .references(() => shops.shopDomain, { onDelete: "cascade" })
+      .notNull(),
     slug: text("slug").notNull(),
     currentVersionId: uuid("current_version_id"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -60,7 +61,6 @@ export const configs = pgTable(
     slugIdx: index("slug_idx").on(table.slug),
   })
 );
-
 
 // Users/Admin table
 export const users = pgTable(
@@ -204,7 +204,9 @@ export const assets = pgTable(
   "assets",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    shopDomain: text("shop_domain").references(() => shops.shopDomain, { onDelete: "cascade" }).notNull(),
+    shopDomain: text("shop_domain")
+      .references(() => shops.shopDomain, { onDelete: "cascade" })
+      .notNull(),
     type: varchar("type", { length: 10 }).notNull(), // 'image' or 'video'
     r2Key: text("r2_key").notNull(),
     originalFilename: text("original_filename").notNull(),
@@ -226,7 +228,9 @@ export const usageRollups = pgTable(
   "usage_rollups",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    shopDomain: text("shop_domain").references(() => shops.shopDomain, { onDelete: "cascade" }).notNull(),
+    shopDomain: text("shop_domain")
+      .references(() => shops.shopDomain, { onDelete: "cascade" })
+      .notNull(),
     month: varchar("month", { length: 7 }).notNull(), // YYYY-MM format
     mau: integer("mau").notNull(), // Monthly Active Users
     impressions: integer("impressions").default(0).notNull(),
@@ -248,8 +252,12 @@ export const revenueAttributions = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     orderId: text("order_id").notNull(),
     lineItemId: text("line_item_id").notNull(),
-    shopDomain: text("shop_domain").references(() => shops.shopDomain, { onDelete: "cascade" }).notNull(),
-    configId: text("config_id").references(() => configs.id, { onDelete: "cascade" }).notNull(),
+    shopDomain: text("shop_domain")
+      .references(() => shops.shopDomain, { onDelete: "cascade" })
+      .notNull(),
+    configId: text("config_id")
+      .references(() => configs.id, { onDelete: "cascade" })
+      .notNull(),
     blockId: text("block_id").notNull(),
     layoutPreset: varchar("layout_preset", { length: 50 }).notNull(),
     experimentKey: varchar("experiment_key", { length: 100 }),

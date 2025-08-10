@@ -38,6 +38,7 @@
 	},
 	"files": ["dist/**"],
 	"dependencies": {
+		"@minimall/db": "*",
 		"drizzle-orm": "^0.44.4",
 		"zod": "^3.24.1"
 	},
