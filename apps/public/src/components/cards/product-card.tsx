@@ -226,6 +226,7 @@ export function ProductCard({
           <div className="flex gap-2">
             {/* Add to Cart Button */}
             <button
+              type="button"
               className={cn(
                 "w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-black transition-all duration-200 hover:bg-white hover:scale-110",
                 isPending && "opacity-50 cursor-not-allowed"
@@ -243,6 +244,7 @@ export function ProductCard({
 
             {/* Like Button */}
             <button
+              type="button"
               className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-black transition-all duration-200 hover:bg-white hover:scale-110"
               onClick={handleLike}
               aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
@@ -257,6 +259,7 @@ export function ProductCard({
 
             {/* External Link Button */}
             <button
+              type="button"
               className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-black transition-all duration-200 hover:bg-white hover:scale-110"
               onClick={(e) => {
                 e.stopPropagation();

@@ -2,43 +2,43 @@
 /**
  * API Route Generator Script
  * Generates a new Next.js API route with TypeScript types and documentation
- * 
+ *
  * Usage: npx tsx scripts/generate-api.ts route-name [app]
  */
 
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 const routeName = process.argv[2];
-const appName = process.argv[3] || 'admin'; // Default to admin app
+const appName = process.argv[3] || "admin"; // Default to admin app
 
 if (!routeName) {
-  console.error('❌ Please provide a route name');
-  console.log('Usage: npx tsx scripts/generate-api.ts route-name [app]');
-  console.log('Examples:');
-  console.log('  npx tsx scripts/generate-api.ts users');
-  console.log('  npx tsx scripts/generate-api.ts configs/publish admin');
+  console.error("❌ Please provide a route name");
+  console.log("Usage: npx tsx scripts/generate-api.ts route-name [app]");
+  console.log("Examples:");
+  console.log("  npx tsx scripts/generate-api.ts users");
+  console.log("  npx tsx scripts/generate-api.ts configs/publish admin");
   process.exit(1);
 }
 
 // Validate route name
 if (!/^[a-z0-9\/-]+$/.test(routeName)) {
-  console.error('❌ Route name must be lowercase with hyphens and slashes only');
+  console.error("❌ Route name must be lowercase with hyphens and slashes only");
   process.exit(1);
 }
 
 const apps = {
-  admin: 'apps/admin',
-  public: 'apps/public'
+  admin: "apps/admin",
+  public: "apps/public",
 };
 
 if (!apps[appName as keyof typeof apps]) {
-  console.error(`❌ Invalid app. Choose from: ${Object.keys(apps).join(', ')}`);
+  console.error(`❌ Invalid app. Choose from: ${Object.keys(apps).join(", ")}`);
   process.exit(1);
 }
 
 const basePath = apps[appName as keyof typeof apps];
-const apiDir = join(process.cwd(), basePath, 'src/pages/api', routeName);
+const apiDir = join(process.cwd(), basePath, "src/pages/api", routeName);
 const routeDir = dirname(apiDir);
 const routeFile = `${apiDir}.ts`;
 
@@ -50,7 +50,7 @@ if (!existsSync(routeDir)) {
 console.log(`🚀 Generating API route /${routeName} in ${appName} app`);
 
 // Extract route segments for naming
-const routeSegments = routeName.split('/');
+const routeSegments = routeName.split("/");
 const resourceName = routeSegments[routeSegments.length - 1];
 const capitalizedResource = resourceName.charAt(0).toUpperCase() + resourceName.slice(1);
 
@@ -344,7 +344,7 @@ export interface ${capitalizedResource}ErrorResponse {
 }
 `;
 
-const typesDir = join(process.cwd(), basePath, 'src/types/api');
+const typesDir = join(process.cwd(), basePath, "src/types/api");
 if (!existsSync(typesDir)) {
   mkdirSync(typesDir, { recursive: true });
 }
@@ -513,14 +513,14 @@ describe('/${routeName} API route', () => {
 });
 `;
 
-const testDir = join(process.cwd(), basePath, 'src/__tests__/api');
+const testDir = join(process.cwd(), basePath, "src/__tests__/api");
 const testSubDir = join(testDir, ...routeSegments.slice(0, -1));
 
 if (!existsSync(testSubDir)) {
   mkdirSync(testSubDir, { recursive: true });
 }
 
-writeFileSync(join(testDir, `${routeName.replace('/', '-')}.test.ts`), testCode);
+writeFileSync(join(testDir, `${routeName.replace("/", "-")}.test.ts`), testCode);
 
 // 4. Generate client SDK helper
 const clientCode = `/**
@@ -538,7 +538,7 @@ import type {
 
 const API_BASE = process.env.NODE_ENV === 'production' 
   ? 'https://${appName}.minimall.com'
-  : \`http://localhost:\${${appName === 'admin' ? '3001' : '3000'}}\`;
+  : \`http://localhost:\${${appName === "admin" ? "3001" : "3000"}}\`;
 
 class ${capitalizedResource}API {
   private baseUrl = \`\${API_BASE}/api/${routeName}\`;
@@ -622,19 +622,19 @@ export const ${resourceName}API = new ${capitalizedResource}API();
 export { ${capitalizedResource}API };
 `;
 
-const clientDir = join(process.cwd(), basePath, 'src/lib/api');
+const clientDir = join(process.cwd(), basePath, "src/lib/api");
 if (!existsSync(clientDir)) {
   mkdirSync(clientDir, { recursive: true });
 }
 
 writeFileSync(join(clientDir, `${resourceName}.ts`), clientCode);
 
-console.log('✅ API route generation complete!');
+console.log("✅ API route generation complete!");
 console.log(`
 Generated files:
 - ${basePath}/src/pages/api/${routeName}.ts (API route)
 - ${basePath}/src/types/api/${resourceName}.ts (TypeScript types)
-- ${basePath}/src/__tests__/api/${routeName.replace('/', '-')}.test.ts (Tests)
+- ${basePath}/src/__tests__/api/${routeName.replace("/", "-")}.test.ts (Tests)
 - ${basePath}/src/lib/api/${resourceName}.ts (Client SDK)
 
 Next steps:
@@ -642,7 +642,7 @@ Next steps:
 2. Update the mock data with your actual data structure
 3. Add database schema and migrations if needed
 4. Run tests: npm test ${routeName}
-5. Test the API: curl http://localhost:${appName === 'admin' ? '3001' : '3000'}/api/${routeName}
+5. Test the API: curl http://localhost:${appName === "admin" ? "3001" : "3000"}/api/${routeName}
 
 API Endpoints:
 - GET    /api/${routeName}     - List ${resourceName}s
@@ -654,5 +654,3 @@ Usage in components:
 import { ${resourceName}API } from '../lib/api/${resourceName}';
 const data = await ${resourceName}API.list();
 `);
-
-export {};

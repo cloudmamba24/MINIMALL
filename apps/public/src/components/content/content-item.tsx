@@ -63,7 +63,14 @@ export function ContentItem({
       {type === "video" && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
-            <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-6 h-6 text-white ml-1"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              role="img"
+              aria-label="Play video"
+            >
+              <title>Play video</title>
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>
@@ -81,7 +88,17 @@ export function ContentItem({
 
   if (href) {
     return (
-      <a href={href} className="block transition-transform hover:scale-105">
+      <a 
+        href={href} 
+        className="block transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            window.open(href, '_blank', 'noopener,noreferrer');
+          }
+        }}
+      >
         {content}
       </a>
     );

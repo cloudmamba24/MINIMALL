@@ -1,10 +1,10 @@
-import { getShopifyAuth, authRateLimiter, generateDoubleSubmitToken } from "@minimall/core/server";
+import { authRateLimiter, generateDoubleSubmitToken, getShopifyAuth } from "@minimall/core/server";
 import { createDatabase } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
 // Force Node.js runtime for crypto operations
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 // GET /api/auth/shopify/callback - Handle OAuth callback from Shopify
 export async function GET(request: NextRequest) {
@@ -14,11 +14,12 @@ export async function GET(request: NextRequest) {
     const state = url.searchParams.get("state");
     const shop = url.searchParams.get("shop");
     const hmac = url.searchParams.get("hmac");
-    const clientIP = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const clientIP =
+      request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
 
     // Rate limiting for callback attempts
     if (!authRateLimiter.isAllowed(clientIP)) {
-      const timeUntilReset = Math.ceil(authRateLimiter.getTimeUntilReset(clientIP) / 1000);
+      const _timeUntilReset = Math.ceil(authRateLimiter.getTimeUntilReset(clientIP) / 1000);
       const errorUrl = new URL("/admin/auth/error", process.env.NEXT_PUBLIC_APP_URL);
       errorUrl.searchParams.set("error", "rate_limit_exceeded");
       return NextResponse.redirect(errorUrl.toString());
@@ -26,14 +27,14 @@ export async function GET(request: NextRequest) {
 
     // Verify required parameters
     if (!code || !state || !shop || !hmac) {
-      console.error("Missing OAuth parameters:", { 
-        code: !!code, 
-        state: !!state, 
-        shop: !!shop, 
+      console.error("Missing OAuth parameters:", {
+        code: !!code,
+        state: !!state,
+        shop: !!shop,
         hmac: !!hmac,
-        allParams: Object.fromEntries(url.searchParams.entries())
+        allParams: Object.fromEntries(url.searchParams.entries()),
       });
-      
+
       const errorUrl = new URL("/admin/auth/error", process.env.NEXT_PUBLIC_APP_URL);
       errorUrl.searchParams.set("error", !shop ? "no_shop_provided" : "authentication_failed");
       return NextResponse.redirect(errorUrl.toString());
@@ -103,8 +104,8 @@ export async function GET(request: NextRequest) {
     // Create response with redirect to admin app with session in URL for embedded apps
     const redirectUrl = new URL(`${process.env.NEXT_PUBLIC_APP_URL}/admin`);
     redirectUrl.searchParams.set("shop", shop);
-    redirectUrl.searchParams.set("host", Buffer.from(`${shop}/admin`).toString('base64'));
-    
+    redirectUrl.searchParams.set("host", Buffer.from(`${shop}/admin`).toString("base64"));
+
     const response = NextResponse.redirect(redirectUrl.toString());
 
     // Set session cookie with enhanced security
@@ -116,10 +117,10 @@ export async function GET(request: NextRequest) {
       path: "/",
       // Add additional security flags
       ...(process.env.NODE_ENV === "production" && {
-        domain: new URL(process.env.NEXT_PUBLIC_APP_URL || '').hostname,
-      })
+        domain: new URL(process.env.NEXT_PUBLIC_APP_URL || "").hostname,
+      }),
     });
-    
+
     // Set fallback cookie for browsers that don't support sameSite=none
     response.cookies.set("shopify_session_fallback", sessionToken, {
       httpOnly: true,
@@ -128,8 +129,8 @@ export async function GET(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 7, // Reduced to 7 days
       path: "/",
       ...(process.env.NODE_ENV === "production" && {
-        domain: new URL(process.env.NEXT_PUBLIC_APP_URL || '').hostname,
-      })
+        domain: new URL(process.env.NEXT_PUBLIC_APP_URL || "").hostname,
+      }),
     });
 
     // Set session fingerprint for additional security

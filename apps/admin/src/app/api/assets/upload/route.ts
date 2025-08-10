@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
 
     // Upload to R2
-    const uploadResult = await r2Service.putObject(key, buffer, {
+    const _uploadResult = await r2Service.putObject(key, buffer, {
       metadata: {
         originalName: file.name,
         uploadedAt: new Date().toISOString(),

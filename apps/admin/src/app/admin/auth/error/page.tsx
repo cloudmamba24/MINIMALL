@@ -52,7 +52,13 @@ function AuthErrorContent() {
 
 export default function AuthErrorPage() {
   return (
-    <Suspense fallback={<Page title="Loading..."><Card>Loading...</Card></Page>}>
+    <Suspense
+      fallback={
+        <Page title="Loading...">
+          <Card>Loading...</Card>
+        </Page>
+      }
+    >
       <AuthErrorContent />
     </Suspense>
   );

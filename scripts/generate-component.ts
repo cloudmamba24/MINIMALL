@@ -2,42 +2,45 @@
 /**
  * Component Generator Script
  * Generates a new React component with TypeScript, tests, and stories
- * 
+ *
  * Usage: npx tsx scripts/generate-component.ts ComponentName [package]
  */
 
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 const componentName = process.argv[2];
-const packageName = process.argv[3] || 'ui'; // Default to ui package
+const packageName = process.argv[3] || "ui"; // Default to ui package
 
 if (!componentName) {
-  console.error('❌ Please provide a component name');
-  console.log('Usage: npx tsx scripts/generate-component.ts ComponentName [package]');
+  console.error("❌ Please provide a component name");
+  console.log("Usage: npx tsx scripts/generate-component.ts ComponentName [package]");
   process.exit(1);
 }
 
 // Validate component name
 if (!/^[A-Z][a-zA-Z0-9]*$/.test(componentName)) {
-  console.error('❌ Component name must be PascalCase and start with a capital letter');
+  console.error("❌ Component name must be PascalCase and start with a capital letter");
   process.exit(1);
 }
 
 const packages = {
-  ui: 'packages/ui/src/components',
-  admin: 'apps/admin/src/components',
-  public: 'apps/public/src/components'
+  ui: "packages/ui/src/components",
+  admin: "apps/admin/src/components",
+  public: "apps/public/src/components",
 };
 
 if (!packages[packageName as keyof typeof packages]) {
-  console.error(`❌ Invalid package. Choose from: ${Object.keys(packages).join(', ')}`);
+  console.error(`❌ Invalid package. Choose from: ${Object.keys(packages).join(", ")}`);
   process.exit(1);
 }
 
 const basePath = packages[packageName as keyof typeof packages];
 const componentDir = join(process.cwd(), basePath);
-const kebabCaseName = componentName.replace(/([A-Z])/g, '-$1').toLowerCase().slice(1);
+const kebabCaseName = componentName
+  .replace(/([A-Z])/g, "-$1")
+  .toLowerCase()
+  .slice(1);
 
 // Ensure directory exists
 if (!existsSync(componentDir)) {
@@ -142,7 +145,7 @@ const storiesCode = `import type { Meta, StoryObj } from '@storybook/react';
 import { ${componentName} } from './${kebabCaseName}';
 
 const meta: Meta<typeof ${componentName}> = {
-  title: '${packageName === 'ui' ? 'UI' : packageName === 'admin' ? 'Admin' : 'Public'}/${componentName}',
+  title: '${packageName === "ui" ? "UI" : packageName === "admin" ? "Admin" : "Public"}/${componentName}',
   component: ${componentName},
   parameters: {
     layout: 'centered',
@@ -213,13 +216,13 @@ export const WithComplexContent: Story = {
 writeFileSync(join(componentDir, `${kebabCaseName}.stories.tsx`), storiesCode);
 
 // 4. Generate index file for easy imports (if it doesn't exist)
-const indexPath = join(componentDir, 'index.ts');
-let indexContent = '';
+const indexPath = join(componentDir, "index.ts");
+let indexContent = "";
 
 if (existsSync(indexPath)) {
   // Read existing index and add new export
-  const fs = require('fs');
-  indexContent = fs.readFileSync(indexPath, 'utf8');
+  const fs = require("node:fs");
+  indexContent = fs.readFileSync(indexPath, "utf8");
   if (!indexContent.includes(kebabCaseName)) {
     indexContent += `export * from './${kebabCaseName}';\n`;
   }
@@ -230,21 +233,21 @@ if (existsSync(indexPath)) {
 writeFileSync(indexPath, indexContent);
 
 // 5. Update main package index if it exists
-const packageIndexPath = join(process.cwd(), basePath, '../index.ts');
+const packageIndexPath = join(process.cwd(), basePath, "../index.ts");
 if (existsSync(packageIndexPath)) {
-  const fs = require('fs');
-  let packageIndex = fs.readFileSync(packageIndexPath, 'utf8');
+  const fs = require("node:fs");
+  let packageIndex = fs.readFileSync(packageIndexPath, "utf8");
   const exportLine = `export * from './components/${kebabCaseName}';`;
-  
+
   if (!packageIndex.includes(exportLine)) {
     packageIndex += `${exportLine}\n`;
     writeFileSync(packageIndexPath, packageIndex);
-    console.log('📝 Updated package index');
+    console.log("📝 Updated package index");
   }
 }
 
 // 6. Generate CSS file if ui package
-if (packageName === 'ui') {
+if (packageName === "ui") {
   const cssCode = `.${kebabCaseName} {
   /* Base styles for ${componentName} */
 }
@@ -255,22 +258,22 @@ if (packageName === 'ui') {
 }
 `;
 
-  const cssPath = join(process.cwd(), 'packages/ui/src/styles/components');
+  const cssPath = join(process.cwd(), "packages/ui/src/styles/components");
   if (!existsSync(cssPath)) {
     mkdirSync(cssPath, { recursive: true });
   }
-  
+
   writeFileSync(join(cssPath, `${kebabCaseName}.css`), cssCode);
-  console.log('🎨 Generated CSS file');
+  console.log("🎨 Generated CSS file");
 }
 
-console.log('✅ Component generation complete!');
+console.log("✅ Component generation complete!");
 console.log(`
 Generated files:
 - ${basePath}/${kebabCaseName}.tsx
 - ${basePath}/${kebabCaseName}.test.tsx  
 - ${basePath}/${kebabCaseName}.stories.tsx
-${packageName === 'ui' ? `- packages/ui/src/styles/components/${kebabCaseName}.css` : ''}
+${packageName === "ui" ? `- packages/ui/src/styles/components/${kebabCaseName}.css` : ""}
 
 Next steps:
 1. Review the generated component and customize as needed
@@ -279,5 +282,3 @@ Next steps:
 4. View in Storybook: npm run storybook
 5. Import and use: import { ${componentName} } from '@minimall/${packageName}';
 `);
-
-export {};

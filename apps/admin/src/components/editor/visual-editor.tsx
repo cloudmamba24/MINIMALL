@@ -293,7 +293,7 @@ function ComponentPalette({
 
 export function VisualEditor({ config, onConfigChange, onPreview }: VisualEditorProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [editingItem, setEditingItem] = useState<ContentItem | null>(null);
+  const [_editingItem, setEditingItem] = useState<ContentItem | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -391,8 +391,8 @@ export function VisualEditor({ config, onConfigChange, onPreview }: VisualEditor
       const originalCategory = contentItemToCategory(item);
       const duplicatedCategory: Category = {
         ...originalCategory,
-        id: `${item.type}-${Date.now()}`,
-        title: `${item.title} (Copy)`,
+        id: `${item.type}-${Date.now()}",
+        title: "${item.title} (Copy)`,
         order: config.categories?.length || 0,
       };
 

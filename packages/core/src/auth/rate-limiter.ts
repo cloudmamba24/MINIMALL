@@ -1,66 +1,66 @@
 interface RateLimitEntry {
-	count: number;
-	resetTime: number;
+  count: number;
+  resetTime: number;
 }
 
 export class RateLimiter {
-	private store = new Map<string, RateLimitEntry>();
-	private maxAttempts: number;
-	private windowMs: number;
+  private store = new Map<string, RateLimitEntry>();
+  private maxAttempts: number;
+  private windowMs: number;
 
-	constructor(maxAttempts = 10, windowMs = 60000) {
-		this.maxAttempts = maxAttempts;
-		this.windowMs = windowMs;
-	}
+  constructor(maxAttempts = 10, windowMs = 60000) {
+    this.maxAttempts = maxAttempts;
+    this.windowMs = windowMs;
+  }
 
-	isAllowed(identifier: string): boolean {
-		const now = Date.now();
-		const entry = this.store.get(identifier);
+  isAllowed(identifier: string): boolean {
+    const now = Date.now();
+    const entry = this.store.get(identifier);
 
-		if (!entry) {
-			this.store.set(identifier, { count: 1, resetTime: now + this.windowMs });
-			return true;
-		}
+    if (!entry) {
+      this.store.set(identifier, { count: 1, resetTime: now + this.windowMs });
+      return true;
+    }
 
-		if (now > entry.resetTime) {
-			// Reset window
-			this.store.set(identifier, { count: 1, resetTime: now + this.windowMs });
-			return true;
-		}
+    if (now > entry.resetTime) {
+      // Reset window
+      this.store.set(identifier, { count: 1, resetTime: now + this.windowMs });
+      return true;
+    }
 
-		if (entry.count >= this.maxAttempts) {
-			return false;
-		}
+    if (entry.count >= this.maxAttempts) {
+      return false;
+    }
 
-		entry.count++;
-		return true;
-	}
+    entry.count++;
+    return true;
+  }
 
-	getRemainingAttempts(identifier: string): number {
-		const entry = this.store.get(identifier);
-		if (!entry || Date.now() > entry.resetTime) {
-			return this.maxAttempts;
-		}
-		return Math.max(0, this.maxAttempts - entry.count);
-	}
+  getRemainingAttempts(identifier: string): number {
+    const entry = this.store.get(identifier);
+    if (!entry || Date.now() > entry.resetTime) {
+      return this.maxAttempts;
+    }
+    return Math.max(0, this.maxAttempts - entry.count);
+  }
 
-	getTimeUntilReset(identifier: string): number {
-		const entry = this.store.get(identifier);
-		if (!entry || Date.now() > entry.resetTime) {
-			return 0;
-		}
-		return entry.resetTime - Date.now();
-	}
+  getTimeUntilReset(identifier: string): number {
+    const entry = this.store.get(identifier);
+    if (!entry || Date.now() > entry.resetTime) {
+      return 0;
+    }
+    return entry.resetTime - Date.now();
+  }
 
-	// Clean up expired entries periodically
-	cleanup(): void {
-		const now = Date.now();
-		for (const [key, entry] of this.store.entries()) {
-			if (now > entry.resetTime) {
-				this.store.delete(key);
-			}
-		}
-	}
+  // Clean up expired entries periodically
+  cleanup(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.store.entries()) {
+      if (now > entry.resetTime) {
+        this.store.delete(key);
+      }
+    }
+  }
 }
 
 // Global rate limiter instances
@@ -69,6 +69,6 @@ export const installRateLimiter = new RateLimiter(10, 300000); // 10 installs pe
 
 // Cleanup expired entries every 5 minutes
 setInterval(() => {
-	authRateLimiter.cleanup();
-	installRateLimiter.cleanup();
+  authRateLimiter.cleanup();
+  installRateLimiter.cleanup();
 }, 300000);

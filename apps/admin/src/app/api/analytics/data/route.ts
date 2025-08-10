@@ -1,6 +1,13 @@
-import { analyticsEvents, db, performanceMetrics, cachedQuery, CacheKeys, withQueryMonitoring } from "@minimall/db";
+import {
+  CacheKeys,
+  analyticsEvents,
+  cachedQuery,
+  db,
+  performanceMetrics,
+  withQueryMonitoring,
+} from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, sql, type SQL } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -46,7 +53,7 @@ export async function GET(request: NextRequest) {
                 connection: "4g",
                 viewportWidth: 1920,
                 viewportHeight: 1080,
-              }
+              },
             ],
             aggregates: {
               avgLcp: 1200,
@@ -70,7 +77,7 @@ export async function GET(request: NextRequest) {
                 utmSource: "instagram",
                 utmMedium: "social",
                 utmCampaign: "demo",
-              }
+              },
             ],
             eventCounts: {
               page_view: 25,
@@ -80,7 +87,8 @@ export async function GET(request: NextRequest) {
             uniqueSessions: 18,
             totalEvents: 42,
           },
-          _note: "This is mock data. Configure DATABASE_URL environment variable for real analytics."
+          _note:
+            "This is mock data. Configure DATABASE_URL environment variable for real analytics.",
         },
       });
     }
@@ -113,7 +121,7 @@ export async function GET(request: NextRequest) {
     const endDate = params.endDate ? new Date(params.endDate) : now;
 
     // Build base conditions (fix the date range filter bug)
-    const baseConditions: any[] = [];
+    const baseConditions: SQL[] = [];
     if (params.configId) {
       baseConditions.push(eq(performanceMetrics.configId, params.configId));
     }
@@ -123,7 +131,7 @@ export async function GET(request: NextRequest) {
       baseConditions.push(sql`${performanceMetrics.timestamp} <= ${endDate}`);
     }
 
-    const analyticsConditions: any[] = [];
+    const analyticsConditions: SQL[] = [];
     if (params.configId) {
       analyticsConditions.push(eq(analyticsEvents.configId, params.configId));
     }
@@ -134,97 +142,103 @@ export async function GET(request: NextRequest) {
     }
 
     // Create cache key for this specific query
-    const cacheKey = CacheKeys.analytics(params.configId, params.timeframe, startDate.toISOString(), endDate.toISOString());
+    const cacheKey = CacheKeys.analytics(
+      params.configId,
+      params.timeframe,
+      startDate.toISOString(),
+      endDate.toISOString()
+    );
 
     // Execute all queries with caching and monitoring (cache for 2 minutes for analytics data)
     const analyticsData = await cachedQuery(
       cacheKey,
       async () => {
         if (!db) {
-          throw new Error('Database not available');
+          throw new Error("Database not available");
         }
-        
-        const [performanceData, performanceAggregates, eventsData, eventAggregates] = await Promise.all([
-          // Fetch recent performance metrics for display
-          withQueryMonitoring(
-            () => db!
-              .select({
-                id: performanceMetrics.id,
-                configId: performanceMetrics.configId,
-                lcp: performanceMetrics.lcp,
-                fid: performanceMetrics.fid,
-                cls: performanceMetrics.cls,
-                ttfb: performanceMetrics.ttfb,
-                loadTime: performanceMetrics.loadTime,
-                timestamp: performanceMetrics.timestamp,
-                userAgent: performanceMetrics.userAgent,
-                connection: performanceMetrics.connection,
-                viewportWidth: performanceMetrics.viewportWidth,
-                viewportHeight: performanceMetrics.viewportHeight,
-              })
-              .from(performanceMetrics)
-              .where(baseConditions.length > 0 ? and(...baseConditions) : undefined)
-              .orderBy(desc(performanceMetrics.timestamp))
-              .limit(1000),
-            'fetch_performance_metrics',
-            [params.configId, params.timeframe]
-          ),
 
-          // Database aggregation for performance metrics (much more efficient)
-          withQueryMonitoring(
-            () => db!
-              .select({
-                avgLcp: sql<number>`COALESCE(AVG(${performanceMetrics.lcp}), 0)`,
-                avgFid: sql<number>`COALESCE(AVG(${performanceMetrics.fid}), 0)`,
-                avgCls: sql<number>`COALESCE(AVG(${performanceMetrics.cls}), 0)`,
-                avgTtfb: sql<number>`COALESCE(AVG(${performanceMetrics.ttfb}), 0)`,
-                totalMetrics: sql<number>`COUNT(*)`,
-              })
-              .from(performanceMetrics)
-              .where(baseConditions.length > 0 ? and(...baseConditions) : undefined),
-            'aggregate_performance_metrics',
-            [params.configId, params.timeframe]
-          ),
+        const [performanceData, performanceAggregates, eventsData, eventAggregates] =
+          await Promise.all([
+            // Fetch recent performance metrics for display
+            withQueryMonitoring(
+              () =>
+                db!.select({
+                    id: performanceMetrics.id,
+                    configId: performanceMetrics.configId,
+                    lcp: performanceMetrics.lcp,
+                    fid: performanceMetrics.fid,
+                    cls: performanceMetrics.cls,
+                    ttfb: performanceMetrics.ttfb,
+                    loadTime: performanceMetrics.loadTime,
+                    timestamp: performanceMetrics.timestamp,
+                    userAgent: performanceMetrics.userAgent,
+                    connection: performanceMetrics.connection,
+                    viewportWidth: performanceMetrics.viewportWidth,
+                    viewportHeight: performanceMetrics.viewportHeight,
+                  })
+                  .from(performanceMetrics)
+                  .where(baseConditions.length > 0 ? and(...baseConditions) : sql`TRUE`)
+                  .orderBy(desc(performanceMetrics.timestamp))
+                  .limit(1000),
+              "fetch_performance_metrics",
+              [params.configId, params.timeframe]
+            ),
 
-          // Fetch recent analytics events for display
-          withQueryMonitoring(
-            () => db!
-              .select({
-                id: analyticsEvents.id,
-                event: analyticsEvents.event,
-                configId: analyticsEvents.configId,
-                sessionId: analyticsEvents.sessionId,
-                properties: analyticsEvents.properties,
-                timestamp: analyticsEvents.timestamp,
-                userAgent: analyticsEvents.userAgent,
-                referrer: analyticsEvents.referrer,
-                utmSource: analyticsEvents.utmSource,
-                utmMedium: analyticsEvents.utmMedium,
-                utmCampaign: analyticsEvents.utmCampaign,
-              })
-              .from(analyticsEvents)
-              .where(analyticsConditions.length > 0 ? and(...analyticsConditions) : undefined)
-              .orderBy(desc(analyticsEvents.timestamp))
-              .limit(1000),
-            'fetch_analytics_events',
-            [params.configId, params.timeframe]
-          ),
+            // Database aggregation for performance metrics (much more efficient)
+            withQueryMonitoring(
+              () =>
+                db!.select({
+                    avgLcp: sql<number>`COALESCE(AVG(${performanceMetrics.lcp}), 0)",
+                avgFid: sql<number>"COALESCE(AVG(${performanceMetrics.fid}), 0)",
+                avgCls: sql<number>"COALESCE(AVG(${performanceMetrics.cls}), 0)",
+                avgTtfb: sql<number>"COALESCE(AVG(${performanceMetrics.ttfb}), 0)",
+                totalMetrics: sql<number>"COUNT(*)`,
+                  })
+                  .from(performanceMetrics)
+                  .where(baseConditions.length > 0 ? and(...baseConditions) : sql`TRUE`),
+              "aggregate_performance_metrics",
+              [params.configId, params.timeframe]
+            ),
 
-          // Database aggregation for analytics events (much more efficient)
-          withQueryMonitoring(
-            () => db!
-              .select({
-                event: analyticsEvents.event,
-                eventCount: sql<number>`COUNT(*)`,
-                uniqueSessions: sql<number>`COUNT(DISTINCT ${analyticsEvents.sessionId})`,
-              })
-              .from(analyticsEvents)
-              .where(analyticsConditions.length > 0 ? and(...analyticsConditions) : undefined)
-              .groupBy(analyticsEvents.event),
-            'aggregate_analytics_events',
-            [params.configId, params.timeframe]
-          ),
-        ]);
+            // Fetch recent analytics events for display
+            withQueryMonitoring(
+              () =>
+                db!.select({
+                    id: analyticsEvents.id,
+                    event: analyticsEvents.event,
+                    configId: analyticsEvents.configId,
+                    sessionId: analyticsEvents.sessionId,
+                    properties: analyticsEvents.properties,
+                    timestamp: analyticsEvents.timestamp,
+                    userAgent: analyticsEvents.userAgent,
+                    referrer: analyticsEvents.referrer,
+                    utmSource: analyticsEvents.utmSource,
+                    utmMedium: analyticsEvents.utmMedium,
+                    utmCampaign: analyticsEvents.utmCampaign,
+                  })
+                  .from(analyticsEvents)
+                  .where(analyticsConditions.length > 0 ? and(...analyticsConditions) : sql`TRUE`)
+                  .orderBy(desc(analyticsEvents.timestamp))
+                  .limit(1000),
+              "fetch_analytics_events",
+              [params.configId, params.timeframe]
+            ),
+
+            // Database aggregation for analytics events (much more efficient)
+            withQueryMonitoring(
+              () =>
+                db!.select({
+                    event: analyticsEvents.event,
+                    eventCount: sql<number>`COUNT(*)`,
+                    uniqueSessions: sql<number>`COUNT(DISTINCT ${analyticsEvents.sessionId})`,
+                  })
+                  .from(analyticsEvents)
+                  .where(analyticsConditions.length > 0 ? and(...analyticsConditions) : sql`TRUE`)
+                  .groupBy(analyticsEvents.event),
+              "aggregate_analytics_events",
+              [params.configId, params.timeframe]
+            ),
+          ]);
 
         return { performanceData, performanceAggregates, eventsData, eventAggregates };
       },
@@ -243,7 +257,10 @@ export async function GET(request: NextRequest) {
       {} as Record<string, number>
     );
 
-    const uniqueSessions = eventAggregates.reduce((total, { uniqueSessions }) => total + uniqueSessions, 0);
+    const uniqueSessions = eventAggregates.reduce(
+      (total, { uniqueSessions }) => total + uniqueSessions,
+      0
+    );
     const totalEvents = eventAggregates.reduce((total, { eventCount }) => total + eventCount, 0);
 
     return NextResponse.json({

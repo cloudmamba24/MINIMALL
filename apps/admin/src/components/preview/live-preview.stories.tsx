@@ -243,6 +243,7 @@ export const InteractiveViewports: Story = {
           <div style={{ display: "flex", gap: "0.5rem" }}>
             {(["mobile", "tablet", "desktop"] as const).map((size) => (
               <button
+                type="button"
                 key={size}
                 onClick={() => setViewport(size)}
                 style={{

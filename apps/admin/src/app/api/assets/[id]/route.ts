@@ -9,7 +9,7 @@ interface RouteParams {
 }
 
 // DELETE /api/assets/[id] - Delete an asset
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
 

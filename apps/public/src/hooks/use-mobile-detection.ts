@@ -40,7 +40,7 @@ export function useMobileDetection(): MobileDetectionResult {
       const width = window.innerWidth;
       const isMobileViewport = width <= 768;
       const isTabletViewport = width > 768 && width <= 1024;
-      const _isDesktopViewport = width > 1024;
+      const __isDesktopViewport = width > 1024;
 
       // Combined detection - either mobile UA OR mobile viewport
       const isMobile = isMobileUA || isMobileViewport;

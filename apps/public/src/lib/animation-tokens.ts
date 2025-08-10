@@ -63,7 +63,7 @@ export const animationTokens = {
 /**
  * Pre-built animation presets for common UI patterns
  */
-export const animationPresets = {
+export const _animationPresets = {
   // Modal entrance: gentle fade + scale up
   modalEntrance: {
     initial: {
@@ -151,7 +151,7 @@ export const animationPresets = {
 /**
  * CSS-in-JS helper for creating transition styles
  */
-export const createTransition = (
+export const _createTransition = (
   property: string | string[],
   duration: keyof typeof animationTokens.duration = "normal",
   easing: keyof typeof animationTokens.easingCSS = "entrance"
@@ -162,3 +162,6 @@ export const createTransition = (
 
   return properties.map((prop) => `${prop} ${durationMs}ms ${easingCurve}`).join(", ");
 };
+
+// Public API export (without underscore prefix for component imports)
+export const animationPresets = _animationPresets;

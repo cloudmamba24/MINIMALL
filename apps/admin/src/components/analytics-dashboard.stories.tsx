@@ -87,7 +87,7 @@ const mockAnalyticsData = {
   },
 };
 
-const emptyAnalyticsData = {
+const _emptyAnalyticsData = {
   success: true,
   data: {
     timeframe: {
@@ -114,7 +114,7 @@ const emptyAnalyticsData = {
   },
 };
 
-const highTrafficData = {
+const _highTrafficData = {
   success: true,
   data: {
     timeframe: {
@@ -333,7 +333,7 @@ export const InteractiveDashboard: Story = {
           <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
             <select
               value={timeframe}
-              onChange={(e) => handleTimeframeChange(e.target.value as any)}
+              onChange={(e) => handleTimeframeChange(e.target.value as Record<string, unknown>)}
               style={{
                 padding: "0.5rem",
                 border: "1px solid #ccc",
@@ -347,6 +347,7 @@ export const InteractiveDashboard: Story = {
               <option value="30d">Last 30 Days</option>
             </select>
             <button
+              type="button"
               onClick={handleRefresh}
               disabled={loading}
               style={{

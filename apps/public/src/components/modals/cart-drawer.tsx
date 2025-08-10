@@ -50,7 +50,8 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
 
   // Build Shopify checkout URL
   const buildCheckoutUrl = () => {
-    if (cart.items.length === 0) return `https://${shopDomain}/cart`;
+    if (cart.items.length === 0)
+      return `https://${shopDomain}/cart`;
 
     // Build variant query string for Shopify
     const variantParams = cart.items.map((item) => `${item.variantId}:${item.quantity}`).join(",");
@@ -60,7 +61,10 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
 
   const handleCheckout = () => {
     if (typeof window !== "undefined") {
-      window.location.href = buildCheckoutUrl();
+      const checkoutUrl = buildCheckoutUrl();
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      }
     }
   };
 
@@ -87,6 +91,7 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
             Cart ({cart.totalItems})
           </h2>
           <button
+            type="button"
             onClick={closeCartDrawer}
             className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors"
           >
@@ -104,6 +109,7 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
               <p className="text-gray-400 mb-2">Your cart is empty</p>
               <p className="text-sm text-gray-500">Add some products to get started</p>
               <button
+                type="button"
                 onClick={closeCartDrawer}
                 className="mt-4 px-6 py-2 bg-white text-black rounded hover:bg-gray-100 transition-colors"
               >
@@ -149,6 +155,7 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
                       {/* Quantity Controls */}
                       <div className="flex items-center gap-2">
                         <button
+                          type="button"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           disabled={item.quantity <= 1}
                           className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -157,6 +164,7 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
                         </button>
                         <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
                         <button
+                          type="button"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           className="w-6 h-6 border border-gray-600 rounded flex items-center justify-center hover:border-gray-400 transition-colors"
                         >
@@ -170,6 +178,7 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
                           ${((item.price * item.quantity) / 100).toFixed(2)}
                         </span>
                         <button
+                          type="button"
                           onClick={() => removeFromCart(item.id)}
                           className="w-6 h-6 rounded flex items-center justify-center hover:bg-red-600 transition-colors text-gray-400 hover:text-white"
                         >
@@ -206,6 +215,7 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
               </motion.button>
 
               <button
+                type="button"
                 onClick={closeCartDrawer}
                 className="w-full py-3 border border-gray-600 rounded font-medium hover:border-gray-400 transition-colors"
               >

@@ -1,7 +1,7 @@
-import { type NextRequest, NextResponse } from "next/server";
+import crypto from "node:crypto";
 import { r2Service } from "@minimall/core";
 import * as Sentry from "@sentry/nextjs";
-import crypto from 'crypto';
+import { type NextRequest, NextResponse } from "next/server";
 
 // POST /api/upload/chunk - Upload file chunk
 export async function POST(request: NextRequest) {
@@ -13,9 +13,9 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const chunk = formData.get("chunk") as File;
     const uploadId = formData.get("uploadId") as string;
-    const chunkIndex = parseInt(formData.get("chunkIndex") as string);
+    const chunkIndex = Number.parseInt(formData.get("chunkIndex") as string);
 
-    if (!chunk || !uploadId || isNaN(chunkIndex)) {
+    if (!chunk || !uploadId || Number.isNaN(chunkIndex)) {
       return NextResponse.json(
         { error: "Missing required fields: chunk, uploadId, chunkIndex" },
         { status: 400 }
@@ -25,49 +25,43 @@ export async function POST(request: NextRequest) {
     // Get upload session
     globalThis.uploadSessions = globalThis.uploadSessions || new Map();
     const uploadSession = globalThis.uploadSessions.get(uploadId);
-    
+
     if (!uploadSession) {
-      return NextResponse.json(
-        { error: "Upload session not found or expired" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Upload session not found or expired" }, { status: 404 });
     }
 
     // Validate chunk index
     if (chunkIndex < 0) {
-      return NextResponse.json(
-        { error: "Invalid chunk index" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid chunk index" }, { status: 400 });
     }
 
     // Convert chunk to buffer
     const buffer = Buffer.from(await chunk.arrayBuffer());
-    
+
     // Generate ETag for chunk (MD5 hash)
-    const etag = crypto.createHash('md5').update(buffer).digest('hex');
-    
+    const etag = crypto.createHash("md5").update(buffer).digest("hex");
+
     // Upload chunk to R2 with chunk-specific key
-    const chunkKey = `${uploadSession.key}.chunk.${chunkIndex.toString().padStart(6, '0')}`;
-    
+    const chunkKey = `${uploadSession.key}.chunk.${chunkIndex.toString().padStart(6, "0")}`;
+
     await r2Service.putObject(chunkKey, buffer, {
-      contentType: 'application/octet-stream',
+      contentType: "application/octet-stream",
       metadata: {
         uploadId,
         chunkIndex: chunkIndex.toString(),
         etag,
-        uploadedAt: new Date().toISOString()
-      }
+        uploadedAt: new Date().toISOString(),
+      },
     });
 
     // Store chunk info in session
     uploadSession.chunks.set(chunkIndex, {
       etag,
-      size: buffer.length
+      size: buffer.length,
     });
 
     // Update session status
-    uploadSession.status = 'uploading';
+    uploadSession.status = "uploading";
 
     Sentry.addBreadcrumb({
       category: "streaming-upload",
@@ -76,7 +70,7 @@ export async function POST(request: NextRequest) {
         uploadId,
         chunkIndex,
         chunkSize: buffer.length,
-        etag
+        etag,
       },
       level: "debug",
     });
@@ -86,17 +80,13 @@ export async function POST(request: NextRequest) {
       etag,
       chunkIndex,
       chunkSize: buffer.length,
-      message: `Chunk ${chunkIndex} uploaded successfully`
+      message: `Chunk ${chunkIndex} uploaded successfully`,
     });
-
   } catch (error) {
     console.error("Failed to upload chunk:", error);
     Sentry.captureException(error);
 
-    return NextResponse.json(
-      { error: "Failed to upload chunk" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to upload chunk" }, { status: 500 });
   }
 }
 

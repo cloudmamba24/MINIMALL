@@ -307,15 +307,15 @@ export const useAppStore = create<AppState>()(
 );
 
 // Convenience hooks for specific parts of the store
-export const useCart = () => useAppStore((state) => state.cart);
+export const _useCart = () => useAppStore((state) => state.cart);
 // Individual selectors for stable function references
-export const useAddToCart = () => useAppStore((state) => state.addToCart);
-export const useRemoveFromCart = () => useAppStore((state) => state.removeFromCart);
-export const useUpdateQuantity = () => useAppStore((state) => state.updateQuantity);
-export const useClearCart = () => useAppStore((state) => state.clearCart);
+export const _useAddToCart = () => useAppStore((state) => state.addToCart);
+export const _useRemoveFromCart = () => useAppStore((state) => state.removeFromCart);
+export const _useUpdateQuantity = () => useAppStore((state) => state.updateQuantity);
+export const _useClearCart = () => useAppStore((state) => state.clearCart);
 
 // Backward compatibility
-export const useCartActions = () =>
+export const _useCartActions = () =>
   useAppStore((state) => ({
     addToCart: state.addToCart,
     removeFromCart: state.removeFromCart,
@@ -323,18 +323,18 @@ export const useCartActions = () =>
     clearCart: state.clearCart,
   }));
 
-export const useModals = () => useAppStore((state) => state.modals);
+export const _useModals = () => useAppStore((state) => state.modals);
 // Individual selectors for stable function references
-export const useOpenPostModal = () => useAppStore((state) => state.openPostModal);
-export const useClosePostModal = () => useAppStore((state) => state.closePostModal);
-export const useOpenProductQuickView = () => useAppStore((state) => state.openProductQuickView);
-export const useCloseProductQuickView = () => useAppStore((state) => state.closeProductQuickView);
-export const useOpenCartDrawer = () => useAppStore((state) => state.openCartDrawer);
-export const useCloseCartDrawer = () => useAppStore((state) => state.closeCartDrawer);
-export const useCloseAllModals = () => useAppStore((state) => state.closeAllModals);
+export const _useOpenPostModal = () => useAppStore((state) => state.openPostModal);
+export const _useClosePostModal = () => useAppStore((state) => state.closePostModal);
+export const _useOpenProductQuickView = () => useAppStore((state) => state.openProductQuickView);
+export const _useCloseProductQuickView = () => useAppStore((state) => state.closeProductQuickView);
+export const _useOpenCartDrawer = () => useAppStore((state) => state.openCartDrawer);
+export const _useCloseCartDrawer = () => useAppStore((state) => state.closeCartDrawer);
+export const _useCloseAllModals = () => useAppStore((state) => state.closeAllModals);
 
 // Backward compatibility - but this can cause re-renders
-export const useModalActions = () =>
+export const _useModalActions = () =>
   useAppStore((state) => ({
     openPostModal: state.openPostModal,
     closePostModal: state.closePostModal,
@@ -344,3 +344,20 @@ export const useModalActions = () =>
     closeCartDrawer: state.closeCartDrawer,
     closeAllModals: state.closeAllModals,
   }));
+
+// Public API exports (without underscore prefixes for component imports)
+export const useCart = _useCart;
+export const useAddToCart = _useAddToCart;
+export const useRemoveFromCart = _useRemoveFromCart;
+export const useUpdateQuantity = _useUpdateQuantity;
+export const useClearCart = _useClearCart;
+export const useCartActions = _useCartActions;
+export const useModals = _useModals;
+export const useOpenPostModal = _useOpenPostModal;
+export const useClosePostModal = _useClosePostModal;
+export const useOpenProductQuickView = _useOpenProductQuickView;
+export const useCloseProductQuickView = _useCloseProductQuickView;
+export const useOpenCartDrawer = _useOpenCartDrawer;
+export const useCloseCartDrawer = _useCloseCartDrawer;
+export const useCloseAllModals = _useCloseAllModals;
+export const useModalActions = _useModalActions;

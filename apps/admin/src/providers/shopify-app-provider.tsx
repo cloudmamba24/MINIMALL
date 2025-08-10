@@ -45,10 +45,11 @@ export function ShopifyAppProvider({ children }: ShopifyAppProviderProps) {
   }
 
   // Get host parameter more safely
-  const searchParams = typeof window !== "undefined" 
-    ? new URLSearchParams(window.location.search)
-    : new URLSearchParams();
-  
+  const searchParams =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : new URLSearchParams();
+
   const host = searchParams.get("host") || searchParams.get("shop") || "";
 
   // If no host parameter, render development mode without App Bridge
@@ -78,28 +79,32 @@ export function ShopifyAppProvider({ children }: ShopifyAppProviderProps) {
         }}
       >
         <div style={{ padding: "20px", background: "#f6f6f7", minHeight: "100vh" }}>
-          <div style={{ 
-            background: "white", 
-            padding: "20px", 
-            borderRadius: "8px", 
-            textAlign: "center",
-            maxWidth: "600px",
-            margin: "0 auto"
-          }}>
+          <div
+            style={{
+              background: "white",
+              padding: "20px",
+              borderRadius: "8px",
+              textAlign: "center",
+              maxWidth: "600px",
+              margin: "0 auto",
+            }}
+          >
             <h2 style={{ color: "#202223", marginBottom: "16px" }}>
               🔧 Shopify App Setup Required
             </h2>
             <p style={{ color: "#6d7175", marginBottom: "16px" }}>
-              This admin panel needs to be installed as a Shopify app. 
+              This admin panel needs to be installed as a Shopify app.
             </p>
-            <div style={{ 
-              background: "#f6f6f7", 
-              padding: "12px", 
-              borderRadius: "4px",
-              fontFamily: "monospace",
-              fontSize: "14px",
-              marginBottom: "16px"
-            }}>
+            <div
+              style={{
+                background: "#f6f6f7",
+                padding: "12px",
+                borderRadius: "4px",
+                fontFamily: "monospace",
+                fontSize: "14px",
+                marginBottom: "16px",
+              }}
+            >
               https://minimall-admin.vercel.app/api/auth/shopify/install?shop=your-store.myshopify.com
             </div>
             <p style={{ color: "#6d7175", fontSize: "14px" }}>
@@ -150,7 +155,7 @@ export function ShopifyAppProvider({ children }: ShopifyAppProviderProps) {
     );
   } catch (error) {
     console.error("App Bridge initialization error:", error);
-    
+
     // Fallback to standalone mode if App Bridge fails
     return (
       <AppProvider
@@ -176,30 +181,32 @@ export function ShopifyAppProvider({ children }: ShopifyAppProviderProps) {
         }}
       >
         <div style={{ padding: "20px", background: "#f6f6f7", minHeight: "100vh" }}>
-          <div style={{ 
-            background: "white", 
-            padding: "20px", 
-            borderRadius: "8px", 
-            textAlign: "center",
-            maxWidth: "600px",
-            margin: "0 auto"
-          }}>
-            <h2 style={{ color: "#dc2626", marginBottom: "16px" }}>
-              ⚠️ App Bridge Error
-            </h2>
+          <div
+            style={{
+              background: "white",
+              padding: "20px",
+              borderRadius: "8px",
+              textAlign: "center",
+              maxWidth: "600px",
+              margin: "0 auto",
+            }}
+          >
+            <h2 style={{ color: "#dc2626", marginBottom: "16px" }}>⚠️ App Bridge Error</h2>
             <p style={{ color: "#6d7175", marginBottom: "16px" }}>
-              There was an error initializing the Shopify App Bridge. 
+              There was an error initializing the Shopify App Bridge.
             </p>
             <details style={{ marginTop: "16px", textAlign: "left" }}>
               <summary style={{ cursor: "pointer", color: "#6d7175" }}>Error Details</summary>
-              <pre style={{ 
-                background: "#f6f6f7", 
-                padding: "12px", 
-                borderRadius: "4px",
-                fontSize: "12px",
-                overflow: "auto",
-                marginTop: "8px"
-              }}>
+              <pre
+                style={{
+                  background: "#f6f6f7",
+                  padding: "12px",
+                  borderRadius: "4px",
+                  fontSize: "12px",
+                  overflow: "auto",
+                  marginTop: "8px",
+                }}
+              >
                 {error instanceof Error ? error.message : String(error)}
               </pre>
             </details>

@@ -13,12 +13,10 @@ export interface UploadSession {
   type: string;
   chunks: Map<number, ChunkInfo>;
   createdAt: Date;
-  status: 'initiated' | 'uploading' | 'completed' | 'failed' | 'cancelled';
+  status: "initiated" | "uploading" | "completed" | "failed" | "cancelled";
 }
 
 // Extend global object for upload sessions
 declare global {
   var uploadSessions: Map<string, UploadSession> | undefined;
 }
-
-export {};

@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getWebhookHandler } from "../../../../../lib/webhook-handler";
 
 // Force Node.js runtime for crypto operations
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 // POST /api/webhooks/customers/redact - Handle GDPR customer data redaction webhook
 export async function POST(request: NextRequest) {

@@ -78,7 +78,7 @@ export function AssetManager({
   const [uploading, setUploading] = useState<UploadProgress[]>([]);
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [folderFilter, setFolderFilter] = useState<string>("all");
+  const [folderFilter, _setFolderFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedTab, setSelectedTab] = useState(0);
@@ -209,9 +209,11 @@ export function AssetManager({
         return asset.type === "image";
       case 2: // Videos
         return asset.type === "video";
-      case 3: // Recent (last 24 hours)
+      case 3: {
+        // Recent (last 24 hours)
         const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
         return new Date(asset.uploadedAt) > dayAgo;
+      }
       default: // All
         break;
     }
@@ -249,7 +251,7 @@ export function AssetManager({
 
       setAssets((prev) => prev.filter((asset) => asset.id !== assetId));
       setSelectedAssets((prev) => prev.filter((id) => id !== assetId));
-    } catch (error) {
+    } catch (_error) {
       setError("Failed to delete asset");
     }
   };
@@ -259,10 +261,10 @@ export function AssetManager({
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
   };
 
-  const getAssetIcon = (asset: AssetFile) => {
+  const _getAssetIcon = (asset: AssetFile) => {
     switch (asset.type) {
       case "image":
         return ImageIcon;
@@ -318,8 +320,8 @@ export function AssetManager({
         {/* Upload progress */}
         {uploading.length > 0 && (
           <div className="mt-4 space-y-2">
-            {uploading.map((upload, index) => (
-              <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+            {uploading.map((upload) => (
+              <div key={upload.file.name + upload.file.size} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
                 <Text variant="bodySm" as="span">
                   {upload.file.name}
                 </Text>

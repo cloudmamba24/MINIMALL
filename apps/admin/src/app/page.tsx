@@ -22,62 +22,56 @@ export default function AdminHomePage() {
               <p style={{ margin: "20px 0" }}>
                 Configure your Instagram-native link-in-bio experience
               </p>
-              
-              <div style={{ 
-                display: "grid", 
-                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", 
-                gap: "16px", 
-                marginTop: "24px" 
-              }}>
-                <Button 
-                  variant="primary" 
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                  gap: "16px",
+                  marginTop: "24px",
+                }}
+              >
+                <Button
+                  variant="primary"
                   size="large"
                   onClick={() => router.push("/editor/new")}
                   fullWidth
                 >
                   🎨 Create New Link-in-Bio Page
                 </Button>
-                
-                <Button 
-                  size="large"
-                  onClick={() => router.push("/editor")}
-                  fullWidth
-                >
+
+                <Button size="large" onClick={() => router.push("/editor")} fullWidth>
                   📝 Manage Existing Pages
                 </Button>
-                
-                <Button 
-                  size="large"
-                  onClick={() => router.push("/analytics")}
-                  fullWidth
-                >
+
+                <Button size="large" onClick={() => router.push("/analytics")} fullWidth>
                   📊 View Analytics
                 </Button>
-                
-                <Button 
-                  size="large"
-                  onClick={() => router.push("/settings")}
-                  fullWidth
-                >
+
+                <Button size="large" onClick={() => router.push("/settings")} fullWidth>
                   ⚙️ Settings
                 </Button>
               </div>
-              
-              <div style={{ 
-                marginTop: "32px", 
-                padding: "16px", 
-                backgroundColor: "#f6f6f7", 
-                borderRadius: "8px" 
-              }}>
+
+              <div
+                style={{
+                  marginTop: "32px",
+                  padding: "16px",
+                  backgroundColor: "#f6f6f7",
+                  borderRadius: "8px",
+                }}
+              >
                 <h3 style={{ margin: "0 0 8px 0", fontSize: "16px", fontWeight: "600" }}>
                   Quick Stats
                 </h3>
-                <div style={{ 
-                  display: "grid", 
-                  gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", 
-                  gap: "16px",
-                  fontSize: "14px"
-                }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+                    gap: "16px",
+                    fontSize: "14px",
+                  }}
+                >
                   <div>
                     <div style={{ fontWeight: "600", color: "#008060" }}>3</div>
                     <div style={{ color: "#6d7175" }}>Active Pages</div>

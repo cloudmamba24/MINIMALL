@@ -22,8 +22,8 @@ export function ProductTag({ tag, onTagClick }: ProductTagProps) {
       onClick={onTagClick}
       className="absolute group"
       style={{
-        left: `${position.x * 100}%`,
-        top: `${position.y * 100}%`,
+        left: `${position.x * 100}%",
+        top: "${position.y * 100}%`,
         transform: "translate(-50%, -50%)",
       }}
     >

@@ -39,13 +39,13 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      const _r2Service = getR2Service();
+      const __r2Service = getR2Service();
 
       // Generate unique key with shop organization
       const timestamp = Date.now();
-      const _extension = filename.split(".").pop() || "";
-      const fileName = `${timestamp}-${filename}`;
-      const key = `uploads/${shopId}/streaming/${fileName}`;
+      const __extension = filename.split(".").pop() || "";
+      const _fileName = `${timestamp}-${filename}`;
+      const key = `uploads/${shopId}/streaming/${_fileName}`;
 
       // Store upload metadata (in production, use Redis or database)
       const uploadMetadata: UploadSession = {

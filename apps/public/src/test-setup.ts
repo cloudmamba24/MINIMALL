@@ -1,12 +1,12 @@
 // Basic test setup for public app (App Router)
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
 // Mock environment variables for tests
-process.env.NODE_ENV = 'test';
-process.env.NEXT_PUBLIC_BASE_URL = 'http://localhost:3000';
+process.env.NODE_ENV = "test";
+process.env.NEXT_PUBLIC_BASE_URL = "http://localhost:3000";
 
 // Mock Next.js navigation for App Router
-vi.mock('next/navigation', () => ({
+vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
@@ -15,7 +15,7 @@ vi.mock('next/navigation', () => ({
     refresh: vi.fn(),
     prefetch: vi.fn(),
   }),
-  usePathname: () => '/',
+  usePathname: () => "/",
   useSearchParams: () => new URLSearchParams(),
   useParams: () => ({}),
 }));

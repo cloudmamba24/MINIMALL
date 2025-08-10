@@ -121,7 +121,7 @@ export default function EditorPage({ params }: EditorPageProps) {
     setHasUnsavedChanges(true);
   }, []);
 
-  const handlePreview = useCallback((previewConfig: SiteConfig) => {
+  const handlePreview = useCallback((_previewConfig: SiteConfig) => {
     // The live preview will automatically update via postMessage
     // No additional action needed here
   }, []);

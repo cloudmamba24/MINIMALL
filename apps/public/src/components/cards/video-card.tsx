@@ -54,7 +54,7 @@ export function VideoCard({
       if (typeof link === "string") {
         window.open(link, "_blank", "noopener,noreferrer");
       } else if (link.url) {
-        window.open(link.url, "_blank", "noopener,noreferrer");
+        window.open(link.url as string, "_blank", "noopener,noreferrer");
       }
     } else {
       handlePlayToggle();

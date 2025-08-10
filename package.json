@@ -25,10 +25,7 @@
     "reset": "npm run clean && npm install",
     "analyze": "turbo analyze"
   },
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "workspaces": ["apps/*", "packages/*"],
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@storybook/addon-essentials": "^8.6.14",

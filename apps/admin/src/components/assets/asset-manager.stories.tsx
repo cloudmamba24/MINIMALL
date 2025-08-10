@@ -4,7 +4,7 @@ import React from "react";
 import { AssetManager } from "./asset-manager";
 
 // Mock asset data
-const mockAssets = [
+const _mockAssets = [
   {
     id: "uploads/1704067200-image1.jpg",
     name: "Hero Image",
@@ -52,7 +52,7 @@ const mockAssets = [
   },
 ];
 
-const largeAssetCollection = Array.from({ length: 24 }, (_, i) => ({
+const _largeAssetCollection = Array.from({ length: 24 }, (_, i) => ({
   id: `uploads/170406${7000 + i * 60}-image${i + 1}.jpg`,
   name: `Image ${i + 1}`,
   originalName: `photo-${i + 1}.jpg`,

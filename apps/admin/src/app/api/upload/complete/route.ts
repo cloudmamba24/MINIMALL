@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { r2Service } from "@minimall/core";
 import * as Sentry from "@sentry/nextjs";
+import { type NextRequest, NextResponse } from "next/server";
 
 interface CompleteUploadRequest {
   uploadId: string;
@@ -30,22 +30,19 @@ export async function POST(request: NextRequest) {
     // Get upload session
     globalThis.uploadSessions = globalThis.uploadSessions || new Map();
     const uploadSession = globalThis.uploadSessions.get(uploadId);
-    
+
     if (!uploadSession) {
-      return NextResponse.json(
-        { error: "Upload session not found or expired" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Upload session not found or expired" }, { status: 404 });
     }
 
     try {
       // Sort chunks by index to ensure correct order
       const sortedChunks = chunks
         .sort((a, b) => a.index - b.index)
-        .filter(chunk => uploadSession.chunks.has(chunk.index));
+        .filter((chunk) => uploadSession.chunks.has(chunk.index));
 
       // Verify all chunks are present
-      const expectedChunkCount = Math.max(...chunks.map(c => c.index)) + 1;
+      const expectedChunkCount = Math.max(...chunks.map((c) => c.index)) + 1;
       if (sortedChunks.length !== expectedChunkCount) {
         return NextResponse.json(
           { error: `Missing chunks. Expected ${expectedChunkCount}, got ${sortedChunks.length}` },
@@ -55,20 +52,20 @@ export async function POST(request: NextRequest) {
 
       // Read and combine all chunks in order
       const chunkBuffers: Buffer[] = [];
-      let totalSize = 0;
+      let _totalSize = 0;
 
       for (const chunkInfo of sortedChunks) {
-        const chunkKey = `${uploadSession.key}.chunk.${chunkInfo.index.toString().padStart(6, '0')}`;
-        
+        const chunkKey = `${uploadSession.key}.chunk.${chunkInfo.index.toString().padStart(6, "0")}`;
+
         try {
           // Get chunk from R2
           const chunkData = await r2Service.getObject(chunkKey);
-          const chunkBuffer = Buffer.from(chunkData, 'base64');
+          const chunkBuffer = Buffer.from(chunkData, "base64");
           chunkBuffers.push(chunkBuffer);
-          totalSize += chunkBuffer.length;
-        } catch (chunkError) {
-          console.error(`Failed to retrieve chunk ${chunkInfo.index}:`, chunkError);
-          throw new Error(`Failed to retrieve chunk ${chunkInfo.index}`);
+          _totalSize += chunkBuffer.length;
+        } catch (_chunkError) {
+          console.error(`Failed to retrieve chunk ${chunkInfo.index}:", chunkError);
+          throw new Error("Failed to retrieve chunk ${chunkInfo.index}`);
         }
       }
 
@@ -83,14 +80,14 @@ export async function POST(request: NextRequest) {
           uploadedAt: new Date().toISOString(),
           size: finalBuffer.length.toString(),
           mimeType: uploadSession.type,
-          uploadType: 'streaming',
-          chunkCount: sortedChunks.length.toString()
-        }
+          uploadType: "streaming",
+          chunkCount: sortedChunks.length.toString(),
+        },
       });
 
       // Clean up chunk files
       const cleanupPromises = sortedChunks.map(async (chunkInfo) => {
-        const chunkKey = `${uploadSession.key}.chunk.${chunkInfo.index.toString().padStart(6, '0')}`;
+        const chunkKey = `${uploadSession.key}.chunk.${chunkInfo.index.toString().padStart(6, "0")}`;
         try {
           await r2Service.deleteObject(chunkKey);
         } catch (error) {
@@ -99,8 +96,8 @@ export async function POST(request: NextRequest) {
       });
 
       // Don't wait for cleanup to complete
-      Promise.all(cleanupPromises).catch(error => {
-        console.warn('Chunk cleanup failed:', error);
+      Promise.all(cleanupPromises).catch((error) => {
+        console.warn("Chunk cleanup failed:", error);
       });
 
       // Get the final URL
@@ -117,11 +114,11 @@ export async function POST(request: NextRequest) {
         url,
         folder: "uploads/streaming",
         uploadedAt: new Date(),
-        uploadType: 'streaming'
+        uploadType: "streaming",
       };
 
       // Mark session as completed and remove it
-      uploadSession.status = 'completed';
+      uploadSession.status = "completed";
       globalThis.uploadSessions.delete(uploadId);
 
       Sentry.addBreadcrumb({
@@ -131,7 +128,7 @@ export async function POST(request: NextRequest) {
           uploadId,
           finalSize: finalBuffer.length,
           chunkCount: sortedChunks.length,
-          filename: uploadSession.filename
+          filename: uploadSession.filename,
         },
         level: "info",
       });
@@ -143,30 +140,22 @@ export async function POST(request: NextRequest) {
         key: uploadSession.key,
         size: finalBuffer.length,
         type: uploadSession.type,
-        uploadType: 'streaming',
-        message: "Streaming upload completed successfully"
+        uploadType: "streaming",
+        message: "Streaming upload completed successfully",
       });
-
     } catch (assemblyError) {
       console.error("Failed to assemble chunks:", assemblyError);
-      
-      // Mark session as failed but don't delete (for debugging)
-      uploadSession.status = 'failed';
-      
-      return NextResponse.json(
-        { error: "Failed to assemble file chunks" },
-        { status: 500 }
-      );
-    }
 
+      // Mark session as failed but don't delete (for debugging)
+      uploadSession.status = "failed";
+
+      return NextResponse.json({ error: "Failed to assemble file chunks" }, { status: 500 });
+    }
   } catch (error) {
     console.error("Failed to complete streaming upload:", error);
     Sentry.captureException(error);
 
-    return NextResponse.json(
-      { error: "Failed to complete upload" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to complete upload" }, { status: 500 });
   }
 }
 

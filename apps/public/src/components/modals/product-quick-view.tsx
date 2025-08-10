@@ -132,6 +132,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
             <p className="text-red-500 mb-2">Error loading product</p>
             <p className="text-sm text-gray-500">{error}</p>
             <button
+              type="button"
               onClick={closeProductQuickView}
               className="mt-4 px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
             >
@@ -180,6 +181,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
             {/* Images Section */}
             <div className="md:w-1/2 relative">
               <button
+                type="button"
                 onClick={closeProductQuickView}
                 className="absolute top-4 right-4 z-10 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors"
               >
@@ -205,7 +207,10 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                 </AnimatePresence>
 
                 {/* Like Button */}
-                <button className="absolute top-4 left-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center">
+                <button
+                  type="button"
+                  className="absolute top-4 left-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center"
+                >
                   <Heart size={18} className="text-gray-600" />
                 </button>
               </div>
@@ -215,6 +220,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                 <div className="flex gap-2 p-4 overflow-x-auto">
                   {product.images.map((image, index) => (
                     <button
+                      type="button"
                       key={image.id || index}
                       onClick={() => setSelectedImage(index)}
                       className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 ${
@@ -284,6 +290,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                         <div className="flex gap-2 flex-wrap">
                           {optionValues.map((value: string) => (
                             <button
+                              type="button"
                               key={value}
                               onClick={() => handleOptionChange(optionName, value)}
                               className={`px-3 py-2 border rounded font-medium text-sm ${
@@ -305,6 +312,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                     <label className="block text-sm font-medium mb-2">Quantity</label>
                     <div className="flex items-center gap-3">
                       <button
+                        type="button"
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
                         className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400"
                       >
@@ -312,6 +320,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                       </button>
                       <span className="w-12 text-center font-medium">{quantity}</span>
                       <button
+                        type="button"
                         onClick={() => setQuantity(quantity + 1)}
                         className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400"
                       >
@@ -323,6 +332,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
 
                 {/* Add to Cart */}
                 <button
+                  type="button"
                   onClick={handleAddToCart}
                   disabled={isAddingToCart || !selectedVariant?.availableForSale}
                   className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-colors ${

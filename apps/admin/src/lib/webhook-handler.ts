@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import * as Sentry from "@sentry/nextjs";
 import { and, eq } from "drizzle-orm";
 
@@ -6,7 +6,7 @@ export interface WebhookPayload {
   id: string | number;
   shop_domain: string;
   created_at: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface WebhookContext {
@@ -43,11 +43,16 @@ export class WebhookHandler {
     }
   }
 
-  async processWebhook(topic: string, shop: string, payload: any, rawBody: string): Promise<void> {
+  async processWebhook(
+    topic: string,
+    shop: string,
+    payload: unknown,
+    rawBody: string
+  ): Promise<void> {
     const context: WebhookContext = {
       shop,
       topic,
-      payload,
+      payload: payload as WebhookPayload,
       timestamp: new Date(),
     };
 
@@ -81,7 +86,7 @@ export class WebhookHandler {
     }
   }
 
-  private async storeWebhook(context: WebhookContext, rawBody: string): Promise<void> {
+  private async storeWebhook(context: WebhookContext, _rawBody: string): Promise<void> {
     const { createDatabase, webhooks } = await import("@minimall/db");
     const db = createDatabase(process.env.DATABASE_URL!);
 
@@ -148,11 +153,11 @@ export class WebhookHandler {
   private async handleAppUninstall(context: WebhookContext): Promise<void> {
     const { shop } = context;
     const { createDatabase, users, configs, featureFlags } = await import("@minimall/db");
-    const db = createDatabase(process.env.DATABASE_URL!);
+    const _db = createDatabase(process.env.DATABASE_URL!);
 
     try {
       // Clean up shop data (be careful with cascade deletions)
-      console.log(`Processing app uninstall for shop: ${shop}`);
+      console.log(`Processing app uninstall for shop: ${shop}");
 
       // Delete user accounts for this shop
       await db.delete(users).where(eq(users.shopDomain, shop));
@@ -166,7 +171,7 @@ export class WebhookHandler {
       // Keep webhooks and analytics for audit purposes
       // but could be deleted after retention period
 
-      console.log(`App uninstall cleanup completed for shop: ${shop}`);
+      console.log("App uninstall cleanup completed for shop: ${shop}`);
 
       Sentry.addBreadcrumb({
         category: "app-lifecycle",
@@ -196,7 +201,7 @@ export class WebhookHandler {
     const { shop, payload } = context;
 
     // GDPR compliance: Handle customer data request
-    console.log(`Customer data request for shop ${shop}, customer:`, payload.customer?.id);
+    console.log(`Customer data request for shop ${shop}, customer:`, (payload as Record<string, unknown>).customer);
 
     // TODO: Implement GDPR data export
     // - Collect all customer data from analytics
@@ -212,7 +217,7 @@ export class WebhookHandler {
 
   private async handleCustomerRedact(context: WebhookContext): Promise<void> {
     const { shop, payload } = context;
-    const customerId = payload.customer?.id;
+    const customerId = (payload as Record<string, unknown>).customer;
 
     if (!customerId) return;
 
@@ -256,12 +261,12 @@ export class WebhookHandler {
 
       // Delete analytics events for all configs belonging to this shop
       if (shopConfigs.length > 0) {
-        const configIds = shopConfigs.map(config => config.id);
-        
+        const configIds = shopConfigs.map((config) => config.id);
+
         // Use Promise.all for parallel deletion if there are many configs
         if (configIds.length > 10) {
           // Batch delete for better performance with many configs
-          const deletePromises = configIds.map(configId => 
+          const deletePromises = configIds.map((configId) =>
             db.delete(analyticsEvents).where(eq(analyticsEvents.configId, configId))
           );
           await Promise.all(deletePromises);

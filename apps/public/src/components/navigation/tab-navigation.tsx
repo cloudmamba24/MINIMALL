@@ -88,6 +88,7 @@ export function TabNavigation({ categories, className, onTabChange }: TabNavigat
 
                 return (
                   <button
+                    type="button"
                     key={category.id}
                     className={cn(
                       "relative whitespace-nowrap px-1 py-2 text-sm font-medium transition-all duration-200 hover:text-primary",

@@ -61,9 +61,9 @@ export async function POST(request: NextRequest) {
           const chunkBuffer = Buffer.from(chunkData, "base64");
           chunkBuffers.push(chunkBuffer);
           _totalSize += chunkBuffer.length;
-        } catch (chunkError) {
-          console.error(`Failed to retrieve chunk ${chunkInfo.index}:`, chunkError);
-          throw new Error(`Failed to retrieve chunk ${chunkInfo.index}`);
+        } catch (_chunkError) {
+          console.error(`Failed to retrieve chunk ${chunkInfo.index}:", chunkError);
+          throw new Error("Failed to retrieve chunk ${chunkInfo.index}`);
         }
       }
 

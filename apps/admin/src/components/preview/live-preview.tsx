@@ -47,7 +47,7 @@ export function LivePreview({
 
   // Generate preview URL based on config
   useEffect(() => {
-    if (config && config.id) {
+    if (config?.id) {
       const baseUrl =
         process.env.NODE_ENV === "development"
           ? "http://localhost:3000"

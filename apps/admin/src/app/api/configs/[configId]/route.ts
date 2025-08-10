@@ -12,7 +12,7 @@ interface RouteParams {
 }
 
 // GET /api/configs/[configId] - Get configuration
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   try {
     const { configId } = await params;
 
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           config,
           source: "r2",
         });
-      } catch (error) {
+      } catch (_error) {
         // R2 config not found, checking database fallback
       }
     }
@@ -207,7 +207,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE /api/configs/[configId] - Delete configuration
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const { configId } = await params;
 

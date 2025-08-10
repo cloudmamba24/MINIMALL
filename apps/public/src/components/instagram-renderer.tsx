@@ -11,7 +11,7 @@ import { ContentItem } from "./content/content-item";
 import { EnhancedCartDrawer } from "./modals/enhanced-cart-drawer";
 import { EnhancedPostModal } from "./modals/enhanced-post-modal";
 import { EnhancedProductQuickView } from "./modals/enhanced-product-quick-view";
-import { LinkTabs } from "./navigation/link-tabs";
+import { LinkTabs, type Tab } from "./navigation/link-tabs";
 
 interface InstagramRendererProps {
   config: SiteConfig;
@@ -30,8 +30,8 @@ interface InstagramRendererProps {
  * - Tab-based content switching
  */
 export function InstagramRenderer({ config, className = "" }: InstagramRendererProps) {
-  // Production debugging for infinite loops
-  if (typeof window !== "undefined" && process.env.NODE_ENV === "production") {
+  // Development debugging for infinite loops
+  if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
     console.log("[InstagramRenderer] Render with config ID:", config.id, "timestamp:", Date.now());
   }
 
@@ -85,7 +85,7 @@ export function InstagramRenderer({ config, className = "" }: InstagramRendererP
   const renderedTabs = useMemo(
     () =>
       tabs.map((tab) => {
-        const renderedTab: any = {
+        const renderedTab: Tab = {
           id: tab.id,
           label: tab.label,
           content:
@@ -240,6 +240,7 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
             className="relative aspect-square"
           >
             <button
+              type="button"
               onClick={() => openPostModal(child.id, child)}
               className="w-full h-full relative overflow-hidden bg-gray-800 group"
             >
@@ -260,7 +261,7 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
 interface InstagramContentItemProps {
   child: Category;
   cardType: string;
-  cardDetails: any;
+  cardDetails: unknown;
   onClick?: () => void;
   showInstagramEffects?: boolean;
   className?: string;
@@ -274,11 +275,13 @@ function InstagramContentItem({
   showInstagramEffects = false,
   className = "",
 }: InstagramContentItemProps) {
+  // Cast cardDetails for type safety
+  const details = cardDetails as Record<string, any>;
   const content = (
     <div className={`relative w-full h-full overflow-hidden bg-gray-800 group ${className}`}>
       {/* Background Image */}
       <img
-        src={cardDetails.image || cardDetails.imageUrl || ""}
+        src={details.image || details.imageUrl || ""}
         alt={child.title || "Content item"}
         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
       />
@@ -288,19 +291,23 @@ function InstagramContentItem({
         <>
           {/* Heart icon overlay (appears on hover) */}
           <div className="absolute inset-0 bg-black bg-opacity-30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24" role="img" aria-label="Like">
+              <title>Like this post</title>
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
           </div>
 
           {/* Multiple images indicator (if applicable) */}
-          {cardDetails.gallery && cardDetails.gallery.length > 1 && (
+          {details.gallery && details.gallery.length > 1 && (
             <div className="absolute top-2 right-2">
               <svg
                 className="w-4 h-4 text-white drop-shadow-md"
                 fill="currentColor"
                 viewBox="0 0 24 24"
+                role="img"
+                aria-label="Multiple images"
               >
+                <title>Multiple images available</title>
                 <rect x="3" y="3" width="7" height="7" rx="1" />
                 <rect x="14" y="3" width="7" height="7" rx="1" />
                 <rect x="14" y="14" width="7" height="7" rx="1" />
@@ -312,36 +319,36 @@ function InstagramContentItem({
       )}
 
       {/* Original overlay content */}
-      {cardDetails.overlay && (
+      {details.overlay && (
         <div
           className={`
           absolute z-10 text-white font-bold text-xs px-2 py-1 
-          ${cardDetails.overlay.position === "top-left" ? "top-2 left-2" : ""}
-          ${cardDetails.overlay.position === "top-right" ? "top-2 right-2" : ""}
-          ${cardDetails.overlay.position === "bottom-left" ? "bottom-2 left-2" : ""}
-          ${cardDetails.overlay.position === "bottom-right" ? "bottom-2 right-2" : ""}
-          ${cardDetails.overlay.position === "center" ? "inset-0 flex items-center justify-center text-center text-lg" : ""}
+          ${details.overlay.position === "top-left" ? "top-2 left-2" : ""}
+          ${details.overlay.position === "top-right" ? "top-2 right-2" : ""}
+          ${details.overlay.position === "bottom-left" ? "bottom-2 left-2" : ""}
+          ${details.overlay.position === "bottom-right" ? "bottom-2 right-2" : ""}
+          ${details.overlay.position === "center" ? "inset-0 flex items-center justify-center text-center text-lg" : ""}
         `}
         >
           <span
             className={
-              cardDetails.overlay.position === "center"
+              details.overlay.position === "center"
                 ? "bg-black bg-opacity-50 px-4 py-2 rounded"
                 : ""
             }
           >
-            {cardDetails.overlay.text}
+            {details.overlay.text}
           </span>
         </div>
       )}
 
       {/* Title and price */}
-      {(child.title || cardDetails.price) && !showInstagramEffects && (
+      {(child.title || details.price) && !showInstagramEffects && (
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-3">
           {child.title && (
             <h3 className="text-white text-sm font-medium leading-tight">{child.title}</h3>
           )}
-          {cardDetails.price && <p className="text-white/90 text-xs mt-1">{cardDetails.price}</p>}
+          {details.price && <p className="text-white/90 text-xs mt-1">{details.price}</p>}
         </div>
       )}
 
@@ -349,7 +356,14 @@ function InstagramContentItem({
       {cardType === "video" && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
-            <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-6 h-6 text-white ml-1"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              role="img"
+              aria-label="Play video"
+            >
+              <title>Play video</title>
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>
@@ -357,9 +371,9 @@ function InstagramContentItem({
       )}
 
       {/* Product Price Badge */}
-      {cardType === "product" && cardDetails.price && showInstagramEffects && (
+      {cardType === "product" && details.price && showInstagramEffects && (
         <div className="absolute top-2 left-2 bg-white text-black text-xs px-2 py-1 rounded-full font-medium">
-          {cardDetails.price}
+          {details.price}
         </div>
       )}
     </div>
@@ -367,7 +381,7 @@ function InstagramContentItem({
 
   if (onClick) {
     return (
-      <button onClick={onClick} className="w-full h-full">
+      <button type="button" onClick={onClick} className="w-full h-full">
         {content}
       </button>
     );

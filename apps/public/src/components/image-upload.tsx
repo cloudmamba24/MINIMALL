@@ -109,9 +109,11 @@ export function ImageUpload({
                 className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <button
+                  type="button"
                   onClick={onRemove}
                   className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
                   disabled={uploading}
+                  aria-label="Remove image"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -132,6 +134,8 @@ export function ImageUpload({
         onChange={handleFileSelect}
         className="hidden"
         disabled={disabled || uploading}
+        aria-label="Select image file to upload"
+        id="image-file-input"
       />
 
       <motion.div

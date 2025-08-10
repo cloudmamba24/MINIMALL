@@ -92,15 +92,19 @@ export default async function SitePage({ params, searchParams }: PageProps) {
   const { configId } = await params;
   const { draft, preview } = await searchParams;
 
-  // Debug logging
-  console.log("[SitePage] Route accessed:", {
-    configId,
-    draft,
-    timestamp: new Date().toISOString(),
-  });
+  // Development debug logging
+  if (process.env.NODE_ENV === "development") {
+    console.log("[SitePage] Route accessed:", {
+      configId,
+      draft,
+      timestamp: new Date().toISOString(),
+    });
+  }
 
   if (!configId) {
-    console.log("[SitePage] No configId provided, showing 404");
+    if (process.env.NODE_ENV === "development") {
+      console.log("[SitePage] No configId provided, showing 404");
+    }
     notFound();
   }
 
@@ -116,8 +120,8 @@ export default async function SitePage({ params, searchParams }: PageProps) {
 
     // Special handling for demo config to show data source status
     if (configId === "demo") {
-      const hasRealData = config.categories.some((cat: Record<string, unknown>) =>
-        cat.categoryType[1]?.children?.some((item: Record<string, unknown>) =>
+      const hasRealData = config.categories.some((cat) =>
+        cat.categoryType[1]?.children?.some((item) =>
           item.card[1]?.image?.includes("cdn.shopify.com")
         )
       );

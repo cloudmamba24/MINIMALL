@@ -1,0 +1,28 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "extends": ["../../biome.json"],
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noExplicitAny": "warn",
+        "noGlobalIsNan": "off"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "warn",
+        "useButtonType": "warn",
+        "useSemanticElements": "warn"
+      },
+      "correctness": {
+        "noUnusedVariables": "warn"
+      },
+      "style": {
+        "noUnusedTemplateLiteral": "warn",
+        "useTemplate": "warn",
+        "useNodejsImportProtocol": "warn"
+      },
+      "complexity": {
+        "noForEach": "warn"
+      }
+    }
+  }
+}

@@ -3,7 +3,7 @@
 import { useTabGestures } from "@/hooks/use-gesture-handler";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-interface Tab {
+export interface Tab {
   id: string;
   label: string;
   content: React.ReactNode | null;
@@ -17,14 +17,13 @@ interface LinkTabsProps {
 }
 
 export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
-  // Production debugging
-  if (typeof window !== "undefined" && process.env.NODE_ENV === "production") {
+  // Development debugging
+  if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
     console.log("[LinkTabs] Render with tabs count:", tabs.length, "timestamp:", Date.now());
   }
 
   // Memoize filtered tabs to prevent re-creation on every render
   const contentTabs = useMemo(() => tabs.filter((tab) => !tab.isAction), [tabs]);
-  const _actionTabs = useMemo(() => tabs.filter((tab) => tab.isAction), [tabs]);
 
   const [activeTab, setActiveTab] = useState("");
 
@@ -69,6 +68,7 @@ export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
         <div className="flex space-x-8">
           {tabs.map((tab) => (
             <button
+              type="button"
               key={tab.id}
               onClick={() => handleTabClick(tab)}
               className={`

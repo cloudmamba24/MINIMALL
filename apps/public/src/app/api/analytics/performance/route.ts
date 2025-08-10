@@ -48,15 +48,20 @@ export async function POST(request: NextRequest) {
       });
 
       // Save to database
-      if (db) {
+      if (db && data.configId) {
         try {
-          const metricData: Record<string, unknown> = {
+          const metricData = {
             configId: data.configId,
             timestamp: new Date(data.timestamp),
-            userAgent: data.userAgent,
-            connection: data.connection,
-            viewportWidth: data.viewport?.width,
-            viewportHeight: data.viewport?.height,
+            userAgent: data.userAgent || null,
+            connection: data.connection || null,
+            viewportWidth: data.viewport?.width || null,
+            viewportHeight: data.viewport?.height || null,
+            lcp: null as number | null,
+            fid: null as number | null,
+            cls: null as number | null,
+            ttfb: null as number | null,
+            loadTime: null as number | null,
           };
 
           // Set the specific metric field based on the metric type

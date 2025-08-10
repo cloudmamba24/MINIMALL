@@ -32,7 +32,7 @@ interface CustomRenderOptions extends Omit<RenderOptions, "wrapper"> {
 /**
  * Custom render function for public app components
  */
-export const renderWithAppContext = (
+export const _renderWithAppContext = (
   ui: React.ReactElement,
   options: CustomRenderOptions = {}
 ): RenderResult => {
@@ -48,7 +48,7 @@ export const renderWithAppContext = (
 /**
  * Mock Next.js router for testing
  */
-export const createMockRouter = (overrides = {}) => ({
+export const _createMockRouter = (overrides = {}) => ({
   push: vi.fn(),
   replace: vi.fn(),
   back: vi.fn(),
@@ -61,7 +61,7 @@ export const createMockRouter = (overrides = {}) => ({
 /**
  * Mock Next.js params/searchParams for testing
  */
-export const createMockPageProps = (configId = "test-config", searchParams = {}) => ({
+export const _createMockPageProps = (configId = "test-config", searchParams = {}) => ({
   params: Promise.resolve({ configId }),
   searchParams: Promise.resolve(searchParams),
 });

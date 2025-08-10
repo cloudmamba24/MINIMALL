@@ -11,7 +11,7 @@ interface RouteParams {
 }
 
 // POST /api/configs/[configId]/publish - Publish configuration
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(_request: NextRequest, { params }: RouteParams) {
   try {
     const { configId } = await params;
 
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Use atomic transaction to avoid race conditions
     const publishedVersion = await db.transaction(async (tx) => {
       const publishedAt = new Date();
-      
+
       // First, unpublish all existing versions for this config
       await tx
         .update(configVersions)
@@ -51,12 +51,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           isPublished: false,
           publishedAt: null,
         })
-        .where(
-          and(
-            eq(configVersions.configId, configId),
-            eq(configVersions.isPublished, true)
-          )
-        );
+        .where(and(eq(configVersions.configId, configId), eq(configVersions.isPublished, true)));
 
       // Then publish the specific version (atomic operation)
       const [published] = await tx
@@ -69,7 +64,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         .returning();
 
       if (!published) {
-        throw new Error('Failed to publish configuration version');
+        throw new Error("Failed to publish configuration version");
       }
 
       return published;

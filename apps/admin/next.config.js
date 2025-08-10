@@ -8,7 +8,7 @@ const nextConfig = {
 
   // Force Node.js runtime for API routes that use crypto
   // (required for Shopify authentication)
-  serverExternalPackages: ['crypto'],
+  serverExternalPackages: ["crypto"],
 
   // External packages that should not be bundled (removed core and db from transpilePackages)
 
@@ -78,13 +78,16 @@ const nextConfig = {
     SHOPIFY_API_KEY: process.env.SHOPIFY_API_KEY,
   },
 
+
   // Webpack configuration
-  webpack: (config, { isServer, dev }) => {
+  webpack: (config, { isServer }) => {
     // Shopify Polaris compatibility
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
+        crypto: false,
+        "node:crypto": false,
       };
     }
 

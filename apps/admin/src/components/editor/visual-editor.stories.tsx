@@ -5,7 +5,7 @@ import React from "react";
 import { VisualEditor } from "./visual-editor";
 
 // Mock Shopify Polaris theme
-const mockTheme = {};
+const _mockTheme = {};
 
 // Sample configuration data
 const sampleConfig: SiteConfig = {

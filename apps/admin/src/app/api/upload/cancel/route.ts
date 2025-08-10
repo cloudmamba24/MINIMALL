@@ -1,6 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { r2Service } from "@minimall/core";
 import * as Sentry from "@sentry/nextjs";
+import { type NextRequest, NextResponse } from "next/server";
 
 interface CancelUploadRequest {
   uploadId: string;
@@ -13,21 +13,18 @@ export async function POST(request: NextRequest) {
     const { uploadId } = body;
 
     if (!uploadId) {
-      return NextResponse.json(
-        { error: "Missing required field: uploadId" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing required field: uploadId" }, { status: 400 });
     }
 
     // Get upload session
     globalThis.uploadSessions = globalThis.uploadSessions || new Map();
     const uploadSession = globalThis.uploadSessions.get(uploadId);
-    
+
     if (!uploadSession) {
       // Session might already be completed or never existed
       return NextResponse.json({
         success: true,
-        message: "Upload session not found (may already be completed or cancelled)"
+        message: "Upload session not found (may already be completed or cancelled)",
       });
     }
 
@@ -37,10 +34,10 @@ export async function POST(request: NextRequest) {
         const cleanupPromises: Promise<void>[] = [];
 
         for (const chunkIndex of uploadSession.chunks.keys()) {
-          const chunkKey = `${uploadSession.key}.chunk.${chunkIndex.toString().padStart(6, '0')}`;
-          
+          const chunkKey = `${uploadSession.key}.chunk.${chunkIndex.toString().padStart(6, "0")}`;
+
           cleanupPromises.push(
-            r2Service.deleteObject(chunkKey).catch(error => {
+            r2Service.deleteObject(chunkKey).catch((error) => {
               console.warn(`Failed to delete chunk ${chunkKey} during cancellation:`, error);
             })
           );
@@ -51,7 +48,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Mark session as cancelled and remove it
-      uploadSession.status = 'cancelled';
+      uploadSession.status = "cancelled";
       globalThis.uploadSessions.delete(uploadId);
 
       Sentry.addBreadcrumb({
@@ -60,7 +57,7 @@ export async function POST(request: NextRequest) {
         data: {
           uploadId,
           filename: uploadSession.filename,
-          chunksUploaded: uploadSession.chunks?.size || 0
+          chunksUploaded: uploadSession.chunks?.size || 0,
         },
         level: "info",
       });
@@ -68,31 +65,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: "Upload cancelled successfully",
-        chunksDeleted: uploadSession.chunks?.size || 0
+        chunksDeleted: uploadSession.chunks?.size || 0,
       });
-
     } catch (cleanupError) {
       console.error("Error during upload cancellation cleanup:", cleanupError);
-      
+
       // Still mark as cancelled even if cleanup partially failed
-      uploadSession.status = 'cancelled';
+      uploadSession.status = "cancelled";
       globalThis.uploadSessions.delete(uploadId);
 
       return NextResponse.json({
         success: true,
         message: "Upload cancelled (some cleanup may have failed)",
-        warning: "Some temporary files may not have been deleted"
+        warning: "Some temporary files may not have been deleted",
       });
     }
-
   } catch (error) {
     console.error("Failed to cancel streaming upload:", error);
     Sentry.captureException(error);
 
-    return NextResponse.json(
-      { error: "Failed to cancel upload" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to cancel upload" }, { status: 500 });
   }
 }
 

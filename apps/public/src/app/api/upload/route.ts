@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
       // Generate unique filename
       const timestamp = Date.now();
-      const _extension = file.name.split(".").pop();
+      const __extension = file.name.split(".").pop();
       const fileName = `${timestamp}-${file.name}`;
 
       // Convert file to buffer

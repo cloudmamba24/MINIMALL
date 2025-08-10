@@ -68,8 +68,8 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
         transition={{ duration: fadeInDuration }}
         className={"fixed inset-0 z-50 flex items-center justify-center p-4"}
         style={{
-          backgroundColor: `rgba(0, 0, 0, ${backdropOpacity})`,
-          backdropFilter: `blur(${backdropBlur}px)`,
+          backgroundColor: `rgba(0, 0, 0, ${backdropOpacity})",
+          backdropFilter: "blur(${backdropBlur}px)`,
         }}
         onClick={handleBackdropClick}
       >
@@ -83,6 +83,7 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
         >
           {/* Close Button */}
           <button
+            type="button"
             onClick={closePostModal}
             className="absolute top-4 right-4 z-10 w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-colors"
           >
@@ -133,6 +134,7 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
                 <div className="space-y-3">
                   {cardDetails.productTags.map((tag, index) => (
                     <button
+                      type="button"
                       key={index}
                       onClick={() => handleProductTagClick(tag.productId)}
                       className="flex items-center gap-3 p-3 rounded-lg border border-gray-800 hover:border-gray-700 transition-colors w-full text-left group"
@@ -150,6 +152,7 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
+                          role="img"
                         >
                           <path
                             strokeLinecap="round"

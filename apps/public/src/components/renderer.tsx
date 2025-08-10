@@ -142,7 +142,7 @@ function CardRenderer({ category, displayType, className }: CardRendererProps) {
         <ImageCard
           title={category.title}
           imageUrl={cardDetails.imageUrl || ""}
-          link={cardDetails.link}
+          {...(typeof cardDetails.link === 'string' && cardDetails.link && { link: { url: cardDetails.link } })}
           shape={cardDetails.shape?.[0] || "square"}
           className={cardClass}
         />
@@ -154,7 +154,7 @@ function CardRenderer({ category, displayType, className }: CardRendererProps) {
           title={category.title}
           videoUrl={cardDetails.videoUrl || ""}
           imageUrl={cardDetails.imageUrl || ""} // Thumbnail
-          link={cardDetails.link}
+          {...(typeof cardDetails.link === 'string' && cardDetails.link && { link: { url: cardDetails.link } })}
           className={cardClass}
         />
       );
@@ -188,7 +188,7 @@ function CardRenderer({ category, displayType, className }: CardRendererProps) {
         <ImageCard
           title={category.title}
           imageUrl={cardDetails.imageUrl || ""}
-          link={cardDetails.link}
+          {...(typeof cardDetails.link === 'string' && cardDetails.link && { link: { url: cardDetails.link } })}
           shape={cardDetails.shape?.[0] || "square"}
           className={cardClass}
         />

@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getWebhookHandler } from "../../../../../lib/webhook-handler";
 
 // Force Node.js runtime for crypto operations
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 // POST /api/webhooks/app/uninstalled - Handle app uninstall webhook
 export async function POST(request: NextRequest) {

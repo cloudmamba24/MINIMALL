@@ -12,7 +12,7 @@ import { ContentGrid, GridItem } from "./layout/content-grid";
 import { EnhancedCartDrawer } from "./modals/enhanced-cart-drawer";
 import { EnhancedPostModal } from "./modals/enhanced-post-modal";
 import { EnhancedProductQuickView } from "./modals/enhanced-product-quick-view";
-import { LinkTabs } from "./navigation/link-tabs";
+import { LinkTabs, type Tab } from "./navigation/link-tabs";
 
 interface DemoRendererProps {
   config: SiteConfig;
@@ -20,8 +20,8 @@ interface DemoRendererProps {
 }
 
 export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
-  // Production debugging for infinite loops
-  if (typeof window !== "undefined" && process.env.NODE_ENV === "production") {
+  // Development debugging for infinite loops
+  if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
     console.log("[DemoRenderer] Render with config ID:", config.id, "timestamp:", Date.now());
   }
 
@@ -75,7 +75,7 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
   const renderedTabs = useMemo(
     () =>
       tabs.map((tab) => {
-        const renderedTab: any = {
+        const renderedTab: Tab = {
           id: tab.id,
           label: tab.label,
           content:

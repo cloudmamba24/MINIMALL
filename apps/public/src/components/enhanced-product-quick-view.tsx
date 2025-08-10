@@ -142,6 +142,7 @@ export function EnhancedProductQuickView() {
         >
           {/* Close Button */}
           <button
+            type="button"
             onClick={handleClose}
             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
           >
@@ -189,6 +190,7 @@ export function EnhancedProductQuickView() {
 
                   {/* Like Button */}
                   <button
+                    type="button"
                     onClick={() => setIsLiked(!isLiked)}
                     className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center"
                   >
@@ -204,6 +206,7 @@ export function EnhancedProductQuickView() {
                   <div className="flex gap-3 overflow-x-auto">
                     {product.images.map((image, index) => (
                       <button
+                        type="button"
                         key={image.id || index}
                         onClick={() => setSelectedImage(index)}
                         className={`
@@ -271,6 +274,7 @@ export function EnhancedProductQuickView() {
                           <div className="flex gap-2 flex-wrap">
                             {optionValues.map((value) => (
                               <button
+                                type="button"
                                 key={value}
                                 onClick={() =>
                                   setSelectedOptions((prev) => ({ ...prev, [optionName]: value }))
@@ -299,6 +303,7 @@ export function EnhancedProductQuickView() {
                   <label className="block text-sm font-medium text-gray-900 mb-2">Quantity</label>
                   <div className="flex items-center gap-3">
                     <button
+                      type="button"
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400"
                     >
@@ -308,6 +313,7 @@ export function EnhancedProductQuickView() {
                     <span className="w-12 text-center font-medium text-lg">{quantity}</span>
 
                     <button
+                      type="button"
                       onClick={() => setQuantity(quantity + 1)}
                       className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400"
                     >
@@ -318,6 +324,7 @@ export function EnhancedProductQuickView() {
 
                 {/* Add to Cart Button */}
                 <button
+                  type="button"
                   onClick={handleAddToCart}
                   disabled={isAddingToCart || !selectedVariant?.availableForSale}
                   className={`

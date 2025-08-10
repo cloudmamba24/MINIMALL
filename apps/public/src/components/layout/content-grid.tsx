@@ -30,7 +30,11 @@ export function GridItem({ children, href, onClick, className = "" }: GridItemPr
 
   if (onClick) {
     return (
-      <button onClick={onClick} className={`${baseClasses} ${className} cursor-pointer`}>
+      <button
+        type="button"
+        onClick={onClick}
+        className={`${baseClasses} ${className} cursor-pointer`}
+      >
         {children}
       </button>
     );

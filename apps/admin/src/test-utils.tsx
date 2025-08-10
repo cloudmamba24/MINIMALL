@@ -33,7 +33,7 @@ interface CustomRenderOptions extends Omit<RenderOptions, "wrapper"> {
 /**
  * Custom render function for admin app components
  */
-export const renderWithProviders = (
+export const _renderWithProviders = (
   ui: React.ReactElement,
   options: CustomRenderOptions = {}
 ): RenderResult => {
@@ -53,7 +53,7 @@ export const renderWithProviders = (
 /**
  * Mock Shopify API response factory
  */
-export const createMockShopifyApiResponse = <T,>(data: T) => ({
+export const _createMockShopifyApiResponse = <T,>(data: T) => ({
   ok: true,
   status: 200,
   json: () => Promise.resolve(data),
@@ -62,7 +62,7 @@ export const createMockShopifyApiResponse = <T,>(data: T) => ({
 /**
  * Mock Next.js API request/response
  */
-export const createMockApiRequest = (method = "GET", body = {}) => ({
+export const _createMockApiRequest = (method = "GET", body = {}) => ({
   method,
   body: JSON.stringify(body),
   headers: {
@@ -70,7 +70,7 @@ export const createMockApiRequest = (method = "GET", body = {}) => ({
   },
 });
 
-export const createMockApiResponse = () => {
+export const _createMockApiResponse = () => {
   const json = vi.fn();
   const status = vi.fn(() => ({ json }));
   const setHeader = vi.fn();

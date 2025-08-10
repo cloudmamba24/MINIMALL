@@ -15,7 +15,7 @@ import { formatPrice } from "@minimall/core/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, memo } from "react";
 
 interface EnhancedCartDrawerProps {
   shopDomain: string;
@@ -56,10 +56,14 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
       const checkoutUrl = await shopifyCart.getCheckoutUrl(cart.items);
 
       if (checkoutUrl) {
-        console.log("Redirecting to checkout:", checkoutUrl);
+        if (process.env.NODE_ENV === "development") {
+          console.log("Redirecting to checkout:", checkoutUrl);
+        }
         window.open(checkoutUrl, "_blank");
       } else {
-        console.error("Failed to get checkout URL");
+        if (process.env.NODE_ENV === "development") {
+          console.error("Failed to get checkout URL");
+        }
       }
     } catch (error) {
       console.error("Checkout error:", error);
@@ -115,6 +119,7 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
             <div className="flex items-center gap-3">
               {cart.totalItems > 0 && (
                 <button
+                  type="button"
                   onClick={handleSyncWithShopify}
                   disabled={isSyncing}
                   className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 flex items-center gap-1"
@@ -131,6 +136,7 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
               )}
               {cart.totalItems > 0 && (
                 <button
+                  type="button"
                   onClick={handleClearCart}
                   className="text-red-600 hover:text-red-700 font-medium"
                 >
@@ -259,7 +265,7 @@ interface CartItemProps {
   onRemove: (itemId: string) => void;
 }
 
-function CartItem({ item, index, onQuantityUpdate, onRemove }: CartItemProps) {
+const CartItem = memo(function CartItem({ item, index, onQuantityUpdate, onRemove }: CartItemProps) {
   const [isRemoving, setIsRemoving] = useState(false);
 
   const handleRemove = async () => {
@@ -355,4 +361,4 @@ function CartItem({ item, index, onQuantityUpdate, onRemove }: CartItemProps) {
       </div>
     </motion.div>
   );
-}
+});

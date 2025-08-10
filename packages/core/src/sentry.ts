@@ -89,13 +89,13 @@ export function createClientConfig(overrides: Partial<SentryConfig> = {}): Sentr
     enableReplays: true,
     ...overrides,
   });
-  
+
   // Ensure DSN is provided for client-side configuration
   if (!baseConfig.dsn) {
-    console.warn('Sentry DSN not provided. Sentry will be disabled.');
-    return { ...baseConfig, dsn: '', beforeSend: () => null } as SentryConfig;
+    console.warn("Sentry DSN not provided. Sentry will be disabled.");
+    return { ...baseConfig, dsn: "", beforeSend: () => null } as SentryConfig;
   }
-  
+
   return { ...baseConfig, dsn: baseConfig.dsn } as SentryConfig;
 }
 
@@ -108,13 +108,13 @@ export function createServerConfig(overrides: Partial<SentryConfig> = {}): Sentr
     enableReplays: false,
     ...overrides,
   });
-  
+
   // Ensure DSN is provided for server-side configuration
   if (!baseConfig.dsn) {
-    console.warn('Sentry DSN not provided. Sentry will be disabled.');
-    return { ...baseConfig, dsn: '', beforeSend: () => null } as SentryConfig;
+    console.warn("Sentry DSN not provided. Sentry will be disabled.");
+    return { ...baseConfig, dsn: "", beforeSend: () => null } as SentryConfig;
   }
-  
+
   return { ...baseConfig, dsn: baseConfig.dsn } as SentryConfig;
 }
 
@@ -128,12 +128,12 @@ export function createEdgeConfig(overrides: Partial<SentryConfig> = {}): SentryC
     tracesSampleRate: 0.1, // Lower sample rate for edge
     ...overrides,
   });
-  
+
   // Ensure DSN is provided for edge runtime configuration
   if (!baseConfig.dsn) {
-    console.warn('Sentry DSN not provided. Sentry will be disabled.');
-    return { ...baseConfig, dsn: '', beforeSend: () => null } as SentryConfig;
+    console.warn("Sentry DSN not provided. Sentry will be disabled.");
+    return { ...baseConfig, dsn: "", beforeSend: () => null } as SentryConfig;
   }
-  
+
   return { ...baseConfig, dsn: baseConfig.dsn } as SentryConfig;
 }
