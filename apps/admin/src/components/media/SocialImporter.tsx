@@ -445,7 +445,7 @@ export function SocialImporter({
                       {media.width && media.height && (
                         <div className="absolute bottom-2 right-2">
                           <Badge>
-                            {media.width} × {media.height}
+                            {`${media.width} × ${media.height}`}
                           </Badge>
                         </div>
                       )}
