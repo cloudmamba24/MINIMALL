@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@minimall/db';
-import { configs, configVersions } from '@minimall/db/schema';
+import { configs, configVersions } from '@minimall/db';
 import { eq, and, desc } from 'drizzle-orm';
 import { getR2Service } from '@minimall/core/server';
 
