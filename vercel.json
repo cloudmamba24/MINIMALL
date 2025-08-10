@@ -10,16 +10,6 @@
       "runtime": "@vercel/node"
     }
   },
-  "rewrites": [
-    {
-      "source": "/g/:path*",
-      "destination": "/g/:path*"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ],
   "headers": [
     {
       "source": "/api/(.*)",
@@ -79,7 +69,6 @@
   ],
   "env": {
     "NODE_ENV": "production",
-    "NEXT_PUBLIC_APP_ENV": "production",
-    "NEXT_PUBLIC_BASE_URL": "https://minimall-rilx5o8qt-bryans-projects-e2d7a177.vercel.app"
+    "NEXT_PUBLIC_APP_ENV": "production"
   }
 }

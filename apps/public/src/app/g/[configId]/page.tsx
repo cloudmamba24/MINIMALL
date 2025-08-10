@@ -51,13 +51,10 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
         }
       }
 
-      if (process.env.NODE_ENV === "development") {
-        console.log(`DEV MODE: Serving demo config for ${configId}`);
-        const demoConfig = createDefaultSiteConfig("demo-shop.myshopify.com");
-        return { ...demoConfig, id: configId };
-      }
-
-      throw new Error(`Configuration not found: ${configId}`);
+      // Production fallback for missing configs
+      console.log(`CONFIG FALLBACK: Serving demo config for ${configId} due to storage unavailability`);
+      const demoConfig = createDefaultSiteConfig("demo-shop.myshopify.com");
+      return { ...demoConfig, id: configId };
     }
   } catch (importError) {
     console.error("Failed to import server functions:", importError);

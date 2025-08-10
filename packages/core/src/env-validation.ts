@@ -12,8 +12,8 @@ const envSchema = z.object({
   // R2 Storage
   R2_ENDPOINT: z.string().url().optional(),
   R2_BUCKET_NAME: z.string().optional(),
-  R2_ACCESS_KEY_ID: z.string().optional(),
-  R2_SECRET_ACCESS_KEY: z.string().optional(),
+  R2_ACCESS_KEY: z.string().optional(),
+  R2_SECRET: z.string().optional(),
 
   // Shopify
   SHOPIFY_API_KEY: z.string().optional(),
@@ -117,7 +117,7 @@ export const checkServiceAvailability = async () => {
 
   // R2 check
   try {
-    if (process.env.R2_ENDPOINT && process.env.R2_ACCESS_KEY_ID) {
+    if (process.env.R2_ENDPOINT && process.env.R2_ACCESS_KEY) {
       results.r2 = true;
     }
   } catch (error) {
