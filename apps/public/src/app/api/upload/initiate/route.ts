@@ -61,14 +61,14 @@ export async function POST(request: NextRequest) {
       };
 
       // In production, store this in Redis or database
-      globalThis.uploadSessions = globalThis.uploadSessions || new Map();
-      globalThis.uploadSessions.set(uploadId, uploadMetadata);
+      globalThis.publicUploadSessions = globalThis.publicUploadSessions || new Map();
+      globalThis.publicUploadSessions.set(uploadId, uploadMetadata);
 
       // Cleanup old sessions (older than 1 hour)
       const oneHourAgo = Date.now() - 60 * 60 * 1000;
-      for (const [id, session] of globalThis.uploadSessions.entries()) {
+      for (const [id, session] of globalThis.publicUploadSessions.entries()) {
         if (session.createdAt.getTime() < oneHourAgo) {
-          globalThis.uploadSessions.delete(id);
+          globalThis.publicUploadSessions.delete(id);
         }
       }
 

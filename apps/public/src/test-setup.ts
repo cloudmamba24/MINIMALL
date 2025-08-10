@@ -2,6 +2,7 @@
 import { vi } from "vitest";
 
 // Mock environment variables for tests
+// @ts-ignore - Allow setting NODE_ENV in test setup
 process.env.NODE_ENV = "test";
 process.env.NEXT_PUBLIC_BASE_URL = "http://localhost:3000";
 

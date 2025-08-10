@@ -17,8 +17,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get upload session
-    globalThis.uploadSessions = globalThis.uploadSessions || new Map();
-    const uploadSession = globalThis.uploadSessions.get(uploadId);
+    globalThis.adminUploadSessions = globalThis.adminUploadSessions || new Map();
+    const uploadSession = globalThis.adminUploadSessions.get(uploadId);
 
     if (!uploadSession) {
       // Session might already be completed or never existed
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
       // Mark session as cancelled and remove it
       uploadSession.status = "cancelled";
-      globalThis.uploadSessions.delete(uploadId);
+      globalThis.adminUploadSessions.delete(uploadId);
 
       Sentry.addBreadcrumb({
         category: "streaming-upload",
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
       // Still mark as cancelled even if cleanup partially failed
       uploadSession.status = "cancelled";
-      globalThis.uploadSessions.delete(uploadId);
+      globalThis.adminUploadSessions.delete(uploadId);
 
       return NextResponse.json({
         success: true,

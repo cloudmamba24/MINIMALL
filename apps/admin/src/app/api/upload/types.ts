@@ -16,7 +16,7 @@ export interface UploadSession {
   status: "initiated" | "uploading" | "completed" | "failed" | "cancelled";
 }
 
-// Extend global object for upload sessions
+// Extend global object for upload sessions (admin app)
 declare global {
-  var uploadSessions: Map<string, UploadSession> | undefined;
+  var adminUploadSessions: Map<string, UploadSession> | undefined;
 }

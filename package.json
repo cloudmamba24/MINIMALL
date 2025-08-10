@@ -23,16 +23,7 @@
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "setup": "npm install && npm run db:push",
     "reset": "npm run clean && npm install",
-    "analyze": "turbo analyze",
-    "guard:typescript": "node codeguard-engine/agents/typescript-agent.js",
-    "guard:security": "node codeguard-engine/agents/security-agent.js",
-    "guard:accessibility": "node codeguard-engine/agents/accessibility-agent.js",
-    "guard:performance": "node codeguard-engine/agents/performance-agent.js",
-    "guard:testing": "node codeguard-engine/agents/testing-agent.js",
-    "guard:dependency": "node codeguard-engine/agents/dependency-agent.js",
-    "guard:code-quality": "node codeguard-engine/agents/code-quality-agent.js",
-    "guard:deployment": "node codeguard-engine/agents/deployment-agent.js",
-    "guard:all": "node codeguard-engine/core-engine.js"
+    "analyze": "turbo analyze"
   },
   "workspaces": ["apps/*", "packages/*"],
   "devDependencies": {

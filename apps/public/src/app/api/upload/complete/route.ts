@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get upload session
-    globalThis.uploadSessions = globalThis.uploadSessions || new Map();
-    const uploadSession = globalThis.uploadSessions.get(uploadId);
+    globalThis.publicUploadSessions = globalThis.publicUploadSessions || new Map();
+    const uploadSession = globalThis.publicUploadSessions.get(uploadId);
 
     if (!uploadSession) {
       return NextResponse.json({ error: "Upload session not found or expired" }, { status: 404 });
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
 
       // Mark session as completed and remove it
       uploadSession.status = "completed";
-      globalThis.uploadSessions.delete(uploadId);
+      globalThis.publicUploadSessions.delete(uploadId);
 
       return NextResponse.json({
         success: true,

@@ -70,14 +70,14 @@ export async function POST(request: NextRequest) {
 
     // In production, store this in Redis or database
     // For now, we'll use a simple in-memory store with cleanup
-    globalThis.uploadSessions = globalThis.uploadSessions || new Map();
-    globalThis.uploadSessions.set(uploadId, uploadMetadata);
+    globalThis.adminUploadSessions = globalThis.adminUploadSessions || new Map();
+    globalThis.adminUploadSessions.set(uploadId, uploadMetadata);
 
     // Cleanup old sessions (older than 1 hour)
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
-    for (const [id, session] of globalThis.uploadSessions.entries()) {
+    for (const [id, session] of globalThis.adminUploadSessions.entries()) {
       if (session.createdAt.getTime() < oneHourAgo) {
-        globalThis.uploadSessions.delete(id);
+        globalThis.adminUploadSessions.delete(id);
       }
     }
 
