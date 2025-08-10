@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       // Generate public URL
       const publicUrl = r2Service.getPublicUrl(key);
 
-      const response: any = {
+      const response: Record<string, unknown> = {
         success: true,
         url: publicUrl,
         key,
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       const base64 = Buffer.from(buffer).toString("base64");
       const dataUrl = `data:${file.type};base64,${base64}`;
 
-      const fallbackResponse: any = {
+      const fallbackResponse: Record<string, unknown> = {
         success: true,
         url: dataUrl,
         key: null,

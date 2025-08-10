@@ -5,7 +5,7 @@ import type React from "react";
 // Mock app context for testing
 interface MockAppContext {
   config?: SiteConfig;
-  cart?: any;
+  cart?: Record<string, unknown>;
   isLoading?: boolean;
 }
 

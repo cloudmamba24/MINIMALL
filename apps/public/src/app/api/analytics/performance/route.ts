@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       // Save to database
       if (db) {
         try {
-          const metricData: any = {
+          const metricData: Record<string, unknown> = {
             configId: data.configId,
             timestamp: new Date(data.timestamp),
             userAgent: data.userAgent,

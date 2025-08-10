@@ -16,7 +16,7 @@ export default function ProductQuickViewPage() {
   const router = useRouter();
   const params = useParams();
   const { openProductQuickView } = useAppStore();
-  const { addToShopifyCart } = useShopifyCart();
+  // const { addToShopifyCart } = useShopifyCart();
 
   const configId = params.configId as string;
   const productId = params.productId as string;

@@ -116,8 +116,8 @@ export default async function SitePage({ params, searchParams }: PageProps) {
 
     // Special handling for demo config to show data source status
     if (configId === "demo") {
-      const hasRealData = config.categories.some((cat: any) =>
-        cat.categoryType[1]?.children?.some((item: any) =>
+      const hasRealData = config.categories.some((cat: Record<string, unknown>) =>
+        cat.categoryType[1]?.children?.some((item: Record<string, unknown>) =>
           item.card[1]?.image?.includes("cdn.shopify.com")
         )
       );

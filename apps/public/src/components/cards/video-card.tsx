@@ -8,7 +8,7 @@ interface VideoCardProps {
   title: string;
   videoUrl?: string;
   imageUrl?: string; // Thumbnail
-  link?: any;
+  link?: Record<string, unknown>;
   className?: string;
   autoPlay?: boolean;
   muted?: boolean;

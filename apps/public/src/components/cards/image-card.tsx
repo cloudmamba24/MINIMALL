@@ -7,7 +7,7 @@ import { useState } from "react";
 interface ImageCardProps {
   title: string;
   imageUrl?: string;
-  link?: any;
+  link?: Record<string, unknown>;
   shape?: string;
   className?: string;
   onClick?: () => void;
