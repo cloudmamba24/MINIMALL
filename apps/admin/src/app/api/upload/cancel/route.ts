@@ -1,4 +1,4 @@
-import { r2Service } from "@minimall/core";
+import { getR2Service } from "@minimall/core";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -30,7 +30,8 @@ export async function POST(request: NextRequest) {
 
     try {
       // Clean up any uploaded chunks
-      if (uploadSession.chunks && uploadSession.chunks.size > 0) {
+      const r2Service = getR2Service();
+      if (r2Service && uploadSession.chunks && uploadSession.chunks.size > 0) {
         const cleanupPromises: Promise<void>[] = [];
 
         for (const chunkIndex of uploadSession.chunks.keys()) {
@@ -45,6 +46,8 @@ export async function POST(request: NextRequest) {
 
         // Wait for cleanup but don't fail if some chunks can't be deleted
         await Promise.allSettled(cleanupPromises);
+      } else if (!r2Service) {
+        console.warn("R2 service not available - unable to cleanup upload chunks");
       }
 
       // Mark session as cancelled and remove it

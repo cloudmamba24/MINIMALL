@@ -1,4 +1,4 @@
-import { type SiteConfig, r2Service } from "@minimall/core";
+import { type SiteConfig, getR2Service, edgeCache } from "@minimall/core";
 import { configVersions, configs, db } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { and, desc, eq } from "drizzle-orm";
@@ -71,12 +71,11 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
     });
 
     // Publish to R2 for production serving
+    const r2Service = getR2Service();
     if (r2Service) {
       try {
         const config = publishedVersion.data as SiteConfig;
         await r2Service.saveConfig(configId, config);
-
-        console.log(`Successfully published config ${configId} to R2`);
       } catch (r2Error) {
         console.error("Failed to publish to R2:", r2Error);
 
@@ -94,7 +93,17 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
           { status: 500 }
         );
       }
+    } else {
+      console.warn("R2 service not available - config published to database only");
     }
+
+    // Invalidate edge cache for published config
+    const tagsToInvalidate = [
+      `config:${configId}`,
+      `config:${configId}:published`
+    ];
+    const invalidatedCount = edgeCache.invalidateByTags(tagsToInvalidate);
+    console.log(`Invalidated ${invalidatedCount} published cache entries for config: ${configId}`);
 
     // Trigger cache invalidation on the public app
     try {

@@ -374,24 +374,45 @@ export class R2ConfigService {
 // Create service instance lazily to avoid build-time errors
 let _r2ServiceInstance: R2ConfigService | null = null;
 
-export function getR2Service(): R2ConfigService {
+export function getR2Service(): R2ConfigService | null {
+  // Check if R2 environment variables are available
+  const endpoint = process.env.R2_ENDPOINT;
+  const accessKeyId = process.env.R2_ACCESS_KEY;
+  const secretAccessKey = process.env.R2_SECRET;
+  const bucketName = process.env.R2_BUCKET_NAME;
+
+  if (!endpoint || !accessKeyId || !secretAccessKey || !bucketName) {
+    console.warn("R2 environment variables not configured. R2 operations will be skipped.");
+    return null;
+  }
+
   if (!_r2ServiceInstance) {
-    _r2ServiceInstance = new R2ConfigService();
+    try {
+      _r2ServiceInstance = new R2ConfigService();
+    } catch (error) {
+      console.error("Failed to initialize R2 service:", error);
+      return null;
+    }
   }
   return _r2ServiceInstance;
 }
 
-// Backward compatibility
+// DEPRECATED: Use getR2Service() instead
+// This proxy is maintained for backward compatibility but should not be used in new code
 export const r2Service = new Proxy({} as R2ConfigService, {
   get(_target, prop) {
-    return getR2Service()[prop as keyof R2ConfigService];
+    const service = getR2Service();
+    if (!service) {
+      throw new Error("R2 service not available. Check R2 environment variables.");
+    }
+    return service[prop as keyof R2ConfigService];
   },
 });
 
 // Cache utilities for edge functions
 export class EdgeCache {
   private static instance: EdgeCache;
-  private cache = new Map<string, { data: unknown; expires: number }>();
+  private cache = new Map<string, { data: unknown; expires: number; tags: string[] }>();
 
   static getInstance(): EdgeCache {
     if (!EdgeCache.instance) {
@@ -400,10 +421,11 @@ export class EdgeCache {
     return EdgeCache.instance;
   }
 
-  set<T>(key: string, data: T, ttl: number): void {
+  set<T>(key: string, data: T, ttl: number, tags: string[] = []): void {
     this.cache.set(key, {
       data,
       expires: Date.now() + ttl * 1000,
+      tags,
     });
   }
 
@@ -424,8 +446,77 @@ export class EdgeCache {
     this.cache.delete(key);
   }
 
+  /**
+   * Invalidate all cache entries with specific tags
+   */
+  invalidateByTags(tags: string[]): number {
+    let invalidated = 0;
+    for (const [key, item] of this.cache.entries()) {
+      if (item.tags.some(tag => tags.includes(tag))) {
+        this.cache.delete(key);
+        invalidated++;
+      }
+    }
+    return invalidated;
+  }
+
+  /**
+   * Invalidate all cache entries matching a pattern
+   */
+  invalidateByPattern(pattern: RegExp): number {
+    let invalidated = 0;
+    for (const [key] of this.cache.entries()) {
+      if (pattern.test(key)) {
+        this.cache.delete(key);
+        invalidated++;
+      }
+    }
+    return invalidated;
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getStats() {
+    const now = Date.now();
+    let expired = 0;
+    let valid = 0;
+    
+    for (const [key, item] of this.cache.entries()) {
+      if (now > item.expires) {
+        expired++;
+      } else {
+        valid++;
+      }
+    }
+    
+    return {
+      total: this.cache.size,
+      valid,
+      expired,
+      hitRate: valid / (valid + expired) || 0,
+    };
+  }
+
   clear(): void {
     this.cache.clear();
+  }
+
+  /**
+   * Clean up expired entries
+   */
+  cleanup(): number {
+    const now = Date.now();
+    let removed = 0;
+    
+    for (const [key, item] of this.cache.entries()) {
+      if (now > item.expires) {
+        this.cache.delete(key);
+        removed++;
+      }
+    }
+    
+    return removed;
   }
 }
 

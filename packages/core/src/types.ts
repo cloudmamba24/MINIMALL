@@ -62,6 +62,15 @@ export interface Settings {
   modals?: ModalSettings;
   pixels?: PixelSettings; // Analytics pixels
   experiments?: ExperimentConfig[]; // A/B testing
+  shopify?: ShopifySettings; // Shopify integration settings
+}
+
+export interface ShopifySettings {
+  storefrontAccessToken?: string; // Per-shop storefront token
+  webhookSecret?: string; // For webhook validation
+  appId?: string; // Shopify app installation ID
+  scope?: string[]; // Granted permissions
+  installedAt?: string; // Installation timestamp
 }
 
 export interface BrandSettings {

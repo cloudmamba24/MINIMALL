@@ -1,0 +1,601 @@
+"use client";
+
+import {
+  Badge,
+  Button,
+  ButtonGroup,
+  Card,
+  Checkbox,
+  FormLayout,
+  Modal,
+  Select,
+  Spinner,
+  Text,
+  TextField,
+  Thumbnail,
+} from "@shopify/polaris";
+import {
+  ImportIcon,
+  LinkIcon,
+  ViewIcon,
+  DownloadIcon,
+  ImageIcon,
+  PlayIcon,
+} from "@shopify/polaris-icons";
+import React, { useState, useCallback } from "react";
+import {
+  getSupportedPlatforms,
+  type SocialMediaPost,
+} from "../../lib/social-extractors";
+
+interface SocialImporterProps {
+  open: boolean;
+  onClose: () => void;
+  onImportComplete: (assets: ImportedAsset[]) => void;
+  folder?: string;
+}
+
+interface ImportedAsset {
+  id: string;
+  url: string;
+  type: "image" | "video";
+  filename: string;
+  size: number;
+  metadata: Record<string, any>;
+}
+
+interface ImportResult {
+  success: boolean;
+  post?: SocialMediaPost;
+  assets?: ImportedAsset[];
+  error?: string;
+}
+
+export function SocialImporter({
+  open,
+  onClose,
+  onImportComplete,
+  folder = "social-imports",
+}: SocialImporterProps) {
+  const [loading, setLoading] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [step, setStep] = useState<"input" | "preview" | "import" | "complete">("input");
+  
+  // Form state
+  const [url, setUrl] = useState("");
+  const [urlError, setUrlError] = useState<string | null>(null);
+  const [downloadMedia, setDownloadMedia] = useState(true);
+  const [processImages, setProcessImages] = useState(true);
+  const [generateTags, setGenerateTags] = useState(true);
+  
+  // Preview state
+  const [previewPost, setPreviewPost] = useState<SocialMediaPost | null>(null);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+
+  const supportedPlatforms = getSupportedPlatforms();
+
+  const validateUrl = useCallback(async () => {
+    if (!url.trim()) {
+      setUrlError("URL is required");
+      return false;
+    }
+    
+    setLoading(true);
+    setUrlError(null);
+    
+    try {
+      const response = await fetch(`/api/social/import?url=${encodeURIComponent(url)}`);
+      const data = await response.json();
+      
+      if (!data.valid) {
+        setUrlError(data.error || "Invalid social media URL");
+        return false;
+      }
+      
+      console.log(`[SocialImporter] URL validated for ${data.platform}`);
+      return true;
+    } catch (error) {
+      setUrlError("Failed to validate URL");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [url]);
+
+  const extractContent = useCallback(async () => {
+    setLoading(true);
+    
+    try {
+      const response = await fetch("/api/social/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url,
+          folder,
+          downloadMedia: false, // Preview mode - don't download yet
+          processImages: false,
+          generateTags,
+        }),
+      });
+      
+      const data: ImportResult = await response.json();
+      
+      if (!data.success) {
+        setUrlError(data.error || "Failed to extract content");
+        return;
+      }
+      
+      setPreviewPost(data.post || null);
+      setStep("preview");
+    } catch (error) {
+      setUrlError("Failed to extract content");
+    } finally {
+      setLoading(false);
+    }
+  }, [url, folder, generateTags]);
+
+  const importContent = useCallback(async () => {
+    if (!previewPost) return;
+    
+    setImporting(true);
+    setStep("import");
+    
+    try {
+      const response = await fetch("/api/social/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url,
+          folder,
+          downloadMedia,
+          processImages,
+          generateTags,
+        }),
+      });
+      
+      const data: ImportResult = await response.json();
+      
+      if (!data.success) {
+        setUrlError(data.error || "Import failed");
+        setStep("preview");
+        return;
+      }
+      
+      setImportResult(data);
+      setStep("complete");
+      
+      if (data.assets) {
+        onImportComplete(data.assets);
+      }
+    } catch (error) {
+      setUrlError("Import failed");
+      setStep("preview");
+    } finally {
+      setImporting(false);
+    }
+  }, [url, folder, downloadMedia, processImages, generateTags, previewPost, onImportComplete]);
+
+  const handleNext = useCallback(async () => {
+    switch (step) {
+      case "input":
+        if (await validateUrl()) {
+          await extractContent();
+        }
+        break;
+      case "preview":
+        await importContent();
+        break;
+    }
+  }, [step, validateUrl, extractContent, importContent]);
+
+  const handleBack = useCallback(() => {
+    switch (step) {
+      case "preview":
+        setStep("input");
+        setPreviewPost(null);
+        break;
+      case "import":
+        setStep("preview");
+        break;
+      case "complete":
+        onClose();
+        break;
+    }
+  }, [step, onClose]);
+
+  const resetForm = useCallback(() => {
+    setUrl("");
+    setUrlError(null);
+    setPreviewPost(null);
+    setImportResult(null);
+    setStep("input");
+    setDownloadMedia(true);
+    setProcessImages(true);
+    setGenerateTags(true);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    resetForm();
+    onClose();
+  }, [resetForm, onClose]);
+
+  const formatFileSize = useCallback((bytes: number) => {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${(bytes / k ** i).toFixed(1)} ${sizes[i]}`;
+  }, []);
+
+  const getPrimaryAction = () => {
+    switch (step) {
+      case "input":
+        return {
+          content: loading ? "Validating..." : "Preview Content",
+          onAction: handleNext,
+          loading,
+          disabled: !url.trim() || !!urlError,
+        };
+      case "preview":
+        return {
+          content: importing ? "Importing..." : "Import Media",
+          onAction: handleNext,
+          loading: importing,
+          disabled: !previewPost,
+        };
+      case "import":
+        return {
+          content: "Importing...",
+          onAction: () => {},
+          loading: true,
+          disabled: true,
+        };
+      case "complete":
+        return {
+          content: "Done",
+          onAction: handleClose,
+        };
+    }
+  };
+
+  const getSecondaryActions = () => {
+    const actions = [];
+    
+    if (step === "preview" || step === "import") {
+      actions.push({
+        content: "Back",
+        onAction: handleBack,
+      });
+    }
+    
+    actions.push({
+      content: "Cancel",
+      onAction: handleClose,
+    });
+    
+    return actions;
+  };
+
+  return (
+    <Modal
+      open={open}
+      onClose={handleClose}
+      title="Import from Social Media"
+      size="large"
+      primaryAction={getPrimaryAction()}
+      secondaryActions={getSecondaryActions()}
+    >
+      <Modal.Section>
+        {step === "input" && (
+          <div className="space-y-6">
+            {/* URL Input */}
+            <Card>
+              <div className="p-4">
+                <FormLayout>
+                  <TextField
+                    label="Social Media URL"
+                    value={url}
+                    onChange={setUrl}
+                    placeholder="https://www.instagram.com/p/ABC123/"
+                    prefix={<LinkIcon />}
+                    error={urlError || undefined}
+                    autoComplete="off"
+                    helpText="Paste a link from Instagram, TikTok, Twitter, YouTube, or Pinterest"
+                  />
+                  
+                  <div className="space-y-3">
+                    <Checkbox
+                      label="Download media files"
+                      checked={downloadMedia}
+                      onChange={setDownloadMedia}
+                      helpText="Download and store images/videos in your asset library"
+                    />
+                    
+                    <Checkbox
+                      label="Process images"
+                      checked={processImages}
+                      onChange={setProcessImages}
+                      disabled={!downloadMedia}
+                      helpText="Optimize images for web with format conversion and compression"
+                    />
+                    
+                    <Checkbox
+                      label="Generate content tags"
+                      checked={generateTags}
+                      onChange={setGenerateTags}
+                      helpText="Automatically generate tags based on content analysis"
+                    />
+                  </div>
+                </FormLayout>
+              </div>
+            </Card>
+
+            {/* Supported Platforms */}
+            <Card>
+              <div className="p-4">
+                <Text variant="headingMd" as="h3">
+                  Supported Platforms
+                </Text>
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {supportedPlatforms.map((platform) => (
+                    <div
+                      key={platform.platform}
+                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg"
+                    >
+                      <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                        <ImportIcon />
+                      </div>
+                      <div className="flex-1">
+                        <Text variant="bodyMd" as="p">
+                          {platform.name}
+                        </Text>
+                        <Text variant="bodySm" tone="subdued" as="p">
+                          {platform.example}
+                        </Text>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {step === "preview" && previewPost && (
+          <div className="space-y-6">
+            {/* Post Preview */}
+            <Card>
+              <div className="p-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                    <ImportIcon />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Text variant="headingMd" as="h3">
+                        @{previewPost.author.username}
+                      </Text>
+                      {previewPost.author.verified && (
+                        <Badge tone="info">Verified</Badge>
+                      )}
+                      <Badge>{previewPost.platform}</Badge>
+                    </div>
+                    
+                    {previewPost.caption && (
+                      <Text variant="bodyMd" as="p" truncate>
+                        {previewPost.caption}
+                      </Text>
+                    )}
+                    
+                    {previewPost.hashtags.length > 0 && (
+                      <div className="mt-2 flex gap-2 flex-wrap">
+                        {previewPost.hashtags.slice(0, 5).map((tag) => (
+                          <Badge key={tag} tone="subdued">
+                            #{tag}
+                          </Badge>
+                        ))}
+                        {previewPost.hashtags.length > 5 && (
+                          <Badge tone="subdued">
+                            +{previewPost.hashtags.length - 5} more
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Media Preview */}
+            <Card>
+              <div className="p-4">
+                <Text variant="headingMd" as="h3">
+                  Media ({previewPost.media.length})
+                </Text>
+                
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {previewPost.media.map((media, index) => (
+                    <div
+                      key={index}
+                      className="relative border border-gray-200 rounded-lg overflow-hidden aspect-square"
+                    >
+                      {media.type === "image" ? (
+                        <img
+                          src={media.thumbnailUrl || media.url}
+                          alt={media.altText || `Media ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                          <div className="text-center">
+                            <PlayIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                            <Text variant="bodySm" tone="subdued">
+                              Video {media.duration && `(${media.duration}s)`}
+                            </Text>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="absolute top-2 left-2">
+                        <Badge tone={media.type === "image" ? "info" : "success"}>
+                          {media.type}
+                        </Badge>
+                      </div>
+                      
+                      {media.width && media.height && (
+                        <div className="absolute bottom-2 right-2">
+                          <Badge tone="subdued">
+                            {media.width} × {media.height}
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+
+            {/* Engagement Stats */}
+            {previewPost.engagement && (
+              <Card>
+                <div className="p-4">
+                  <Text variant="headingMd" as="h3">
+                    Engagement
+                  </Text>
+                  
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {previewPost.engagement.likes && (
+                      <div className="text-center">
+                        <Text variant="headingLg" as="p">
+                          {previewPost.engagement.likes.toLocaleString()}
+                        </Text>
+                        <Text variant="bodySm" tone="subdued">
+                          Likes
+                        </Text>
+                      </div>
+                    )}
+                    
+                    {previewPost.engagement.views && (
+                      <div className="text-center">
+                        <Text variant="headingLg" as="p">
+                          {previewPost.engagement.views.toLocaleString()}
+                        </Text>
+                        <Text variant="bodySm" tone="subdued">
+                          Views
+                        </Text>
+                      </div>
+                    )}
+                    
+                    {previewPost.engagement.comments && (
+                      <div className="text-center">
+                        <Text variant="headingLg" as="p">
+                          {previewPost.engagement.comments.toLocaleString()}
+                        </Text>
+                        <Text variant="bodySm" tone="subdued">
+                          Comments
+                        </Text>
+                      </div>
+                    )}
+                    
+                    {previewPost.engagement.shares && (
+                      <div className="text-center">
+                        <Text variant="headingLg" as="p">
+                          {previewPost.engagement.shares.toLocaleString()}
+                        </Text>
+                        <Text variant="bodySm" tone="subdued">
+                          Shares
+                        </Text>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {step === "import" && (
+          <div className="text-center py-8">
+            <Spinner size="large" />
+            <Text variant="headingMd" as="h2">
+              Importing content...
+            </Text>
+            <Text variant="bodyMd" tone="subdued" as="p">
+              Downloading and processing media files
+            </Text>
+          </div>
+        )}
+
+        {step === "complete" && importResult && (
+          <div className="space-y-6">
+            {/* Success Message */}
+            <Card>
+              <div className="p-4 text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <DownloadIcon className="w-8 h-8 text-green-600" />
+                </div>
+                
+                <Text variant="headingLg" as="h2">
+                  Import Complete!
+                </Text>
+                
+                <Text variant="bodyMd" tone="subdued" as="p">
+                  Successfully imported {importResult.assets?.length || 0} media files
+                </Text>
+              </div>
+            </Card>
+
+            {/* Imported Assets */}
+            {importResult.assets && importResult.assets.length > 0 && (
+              <Card>
+                <div className="p-4">
+                  <Text variant="headingMd" as="h3">
+                    Imported Assets
+                  </Text>
+                  
+                  <div className="mt-4 space-y-3">
+                    {importResult.assets.map((asset) => (
+                      <div
+                        key={asset.id}
+                        className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg"
+                      >
+                        <Thumbnail
+                          source={asset.url}
+                          alt={asset.filename}
+                          size="small"
+                        />
+                        
+                        <div className="flex-1">
+                          <Text variant="bodyMd" as="p">
+                            {asset.filename}
+                          </Text>
+                          <div className="flex gap-2 mt-1">
+                            <Badge tone={asset.type === "image" ? "info" : "success"}>
+                              {asset.type}
+                            </Badge>
+                            <Text variant="bodySm" tone="subdued">
+                              {formatFileSize(asset.size)}
+                            </Text>
+                          </div>
+                        </div>
+                        
+                        <Button
+                          size="slim"
+                          icon={ViewIcon}
+                          url={asset.url}
+                          external
+                        >
+                          View
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
+        )}
+      </Modal.Section>
+    </Modal>
+  );
+}

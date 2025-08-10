@@ -31,6 +31,8 @@ export * from "./r2";
 export * from "./services/shopify-storefront";
 export * from "./services/shopify-transformer";
 
+// Note: ShopService moved to server.ts to avoid client-side database imports
+
 // Export performance and analytics
 export * from "./performance";
 export * from "./rum";

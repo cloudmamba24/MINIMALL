@@ -64,13 +64,13 @@ export async function createEnhancedSiteConfig(
   // Use real products or fallback to mock
   const productsToUse = realProducts.length > 0 ? realProducts.slice(0, 4) : ([] as unknown[]);
 
-  return createSiteConfigWithProducts(shopDomain, productsToUse);
+  return createSiteConfigWithProducts(shopDomain, productsToUse, accessToken);
 }
 
 /**
  * Create site config with provided products (real or mock)
  */
-function createSiteConfigWithProducts(shopDomain: string, products: unknown[]): SiteConfig {
+function createSiteConfigWithProducts(shopDomain: string, products: unknown[], accessToken?: string): SiteConfig {
   // Generate mock products if none provided
   const mockProducts = [
     {
@@ -140,7 +140,7 @@ function createSiteConfigWithProducts(shopDomain: string, products: unknown[]): 
     visible: true,
   }));
 
-  return createBaseSiteConfig(shopDomain, productItems, finalProducts[0]);
+  return createBaseSiteConfig(shopDomain, productItems, finalProducts[0], accessToken);
 }
 
 /**
@@ -149,7 +149,8 @@ function createSiteConfigWithProducts(shopDomain: string, products: unknown[]): 
 function createBaseSiteConfig(
   shopDomain: string,
   productItems: unknown[],
-  featuredProduct?: unknown
+  featuredProduct?: unknown,
+  accessToken?: string
 ): SiteConfig {
   return {
     id: generateConfigId(),
@@ -389,6 +390,13 @@ function createBaseSiteConfig(
         description: "Interactive link in bio for fashion and lifestyle brands",
         keywords: "fashion, lifestyle, shopping, demo",
       },
+      // Include Shopify settings if access token is provided
+      ...(accessToken && {
+        shopify: {
+          storefrontAccessToken: accessToken,
+          installedAt: new Date().toISOString(),
+        },
+      }),
     },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -398,8 +406,8 @@ function createBaseSiteConfig(
 /**
  * Legacy synchronous function for backward compatibility
  */
-export function createDefaultSiteConfig(shopDomain: string): SiteConfig {
-  return createSiteConfigWithProducts(shopDomain, []);
+export function createDefaultSiteConfig(shopDomain: string, accessToken?: string): SiteConfig {
+  return createSiteConfigWithProducts(shopDomain, [], accessToken);
 }
 
 // Category utilities

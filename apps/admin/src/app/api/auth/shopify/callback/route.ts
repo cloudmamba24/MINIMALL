@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
               : "Admin",
             shopDomain: shop,
             role: session.onlineAccessInfo?.associated_user?.account_owner ? "owner" : "editor",
-            permissions: JSON.stringify([]),
+            permissions: [],
           })
           .onConflictDoUpdate({
             target: users.email,

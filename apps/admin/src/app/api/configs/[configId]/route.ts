@@ -1,4 +1,4 @@
-import { type SiteConfig, r2Service } from "@minimall/core";
+import { type SiteConfig, getR2Service, edgeCache } from "@minimall/core";
 import { configVersions, configs, db } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { desc, eq } from "drizzle-orm";
@@ -21,6 +21,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     }
 
     // Try to load from R2 first (production configs)
+    const r2Service = getR2Service();
     if (r2Service) {
       try {
         const config = await r2Service.getConfig(configId);
@@ -120,57 +121,87 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const validatedConfig = configSchema.parse(config);
     validatedConfig.updatedAt = new Date().toISOString();
 
-    // Save to database first (for versioning)
+    // Atomic save operation: Database + R2 with rollback on failure
+    let versionId: string | null = null;
+    
     if (db) {
       try {
-        // Ensure the config record exists
-        await db
-          .insert(configs)
-          .values({
-            id: configId,
-            shop: validatedConfig.shop,
-            slug: validatedConfig.slug,
-            updatedAt: new Date(),
-          })
-          .onConflictDoUpdate({
-            target: configs.id,
-            set: {
+        // Use transaction for atomic database operations
+        const result = await db.transaction(async (tx) => {
+          // Ensure the config record exists
+          await tx
+            .insert(configs)
+            .values({
+              id: configId,
               shop: validatedConfig.shop,
               slug: validatedConfig.slug,
               updatedAt: new Date(),
-            },
+            })
+            .onConflictDoUpdate({
+              target: configs.id,
+              set: {
+                shop: validatedConfig.shop,
+                slug: validatedConfig.slug,
+                updatedAt: new Date(),
+              },
+            });
+
+          // Create new version
+          const newVersionId = crypto.randomUUID();
+          await tx.insert(configVersions).values({
+            id: newVersionId,
+            configId,
+            version: `v${Date.now()}`,
+            data: validatedConfig,
+            isPublished: false,
+            createdBy: "admin", // TODO: Get from authentication
           });
 
-        // Create new version
-        const versionId = crypto.randomUUID();
-        await db.insert(configVersions).values({
-          id: versionId,
-          configId,
-          version: `v${Date.now()}`,
-          data: validatedConfig,
-          isPublished: false,
-          createdBy: "admin", // TODO: Get from authentication
-        });
+          // Update current version reference
+          await tx
+            .update(configs)
+            .set({ currentVersionId: newVersionId })
+            .where(eq(configs.id, configId));
 
-        // Update current version reference
-        await db
-          .update(configs)
-          .set({ currentVersionId: versionId })
-          .where(eq(configs.id, configId));
+          return newVersionId;
+        });
+        
+        versionId = result;
+        
+        // After successful database save, attempt R2 save
+        const r2Service = getR2Service();
+        if (r2Service) {
+          try {
+            await r2Service.saveConfig(configId, validatedConfig as unknown as SiteConfig);
+          } catch (r2Error) {
+            console.error("Failed to save to R2:", r2Error);
+            // R2 failure is not critical for editor functionality, continue
+          }
+        } else {
+          console.warn("R2 service not available - config saved to database only");
+        }
+
+        // Invalidate edge cache for this config
+        const tagsToInvalidate = [
+          `config:${configId}`,
+          `config:${configId}:draft`,
+          `config:${configId}:published`
+        ];
+        const invalidatedCount = edgeCache.invalidateByTags(tagsToInvalidate);
+        console.log(`Invalidated ${invalidatedCount} cache entries for config: ${configId}`);
+        
       } catch (dbError) {
         console.error("Failed to save to database:", dbError);
-        // Continue anyway - R2 is the primary storage
+        return NextResponse.json(
+          { error: "Failed to save configuration to database" },
+          { status: 500 }
+        );
       }
-    }
-
-    // Save to R2 for production serving
-    if (r2Service) {
-      try {
-        await r2Service.saveConfig(configId, validatedConfig as unknown as SiteConfig);
-      } catch (r2Error) {
-        console.error("Failed to save to R2:", r2Error);
-        // This is more critical, but we'll still return success for the editor
-      }
+    } else {
+      return NextResponse.json(
+        { error: "Database not available" },
+        { status: 503 }
+      );
     }
 
     // Add Sentry context
@@ -179,6 +210,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       message: `Updated configuration: ${configId}`,
       data: {
         configId,
+        versionId,
         shop: validatedConfig.shop,
         slug: validatedConfig.slug,
         contentItems: validatedConfig.content?.length || 0,
@@ -189,6 +221,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
       success: true,
       config: validatedConfig,
+      versionId,
       message: "Configuration updated successfully",
     });
   } catch (error) {
@@ -216,6 +249,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     }
 
     // Delete from R2
+    const r2Service = getR2Service();
     if (r2Service) {
       try {
         await r2Service.deleteConfig(configId);

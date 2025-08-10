@@ -1,7 +1,7 @@
 "use client";
 
-import { type ShopifyProduct, createShopifyClient, getMockProduct } from "@/lib/shopify-client";
-import { type ShopifyProduct as CoreShopifyProduct, transformProduct } from "@minimall/core/client";
+import { type ShopifyProduct, ShopifyClient, getMockProduct } from "@/lib/shopify-client";
+import { useSiteConfig } from "@/contexts/site-config-context";
 import { useEffect, useState } from "react";
 
 interface UseShopifyProductResult {
@@ -12,15 +12,30 @@ interface UseShopifyProductResult {
 
 /**
  * Hook to fetch a single Shopify product by ID
- * Falls back to mock data in development when Shopify is unavailable
+ * Uses config-specific Shopify tokens when available
+ * Falls back to environment tokens, then mock data
  */
 export function useShopifyProduct(
   productId: string | undefined,
-  shopDomain?: string
+  overrideShopDomain?: string
 ): UseShopifyProductResult {
   const [product, setProduct] = useState<ShopifyProduct | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Get config from context (may not be available in all contexts)
+  let siteConfig = null;
+  let configShopDomain = overrideShopDomain;
+  let configAccessToken = null;
+  
+  try {
+    const config = useSiteConfig();
+    siteConfig = config.config;
+    configShopDomain = overrideShopDomain || config.shopDomain;
+    configAccessToken = config.config.settings.shopify?.storefrontAccessToken;
+  } catch {
+    // Context not available, use fallbacks
+  }
 
   useEffect(() => {
     if (!productId) {
@@ -35,36 +50,50 @@ export function useShopifyProduct(
       setError(null);
 
       try {
-        // Try to get real Shopify data first
-        if (shopDomain) {
-          const client = createShopifyClient(shopDomain);
+        // Try to get real Shopify data with proper token resolution
+        if (configShopDomain) {
+          const { createShopifyClient } = await import("@/lib/shopify-client");
+          const client = await createShopifyClient(configShopDomain, configAccessToken || undefined);
+          
           if (client) {
-            console.log(`Fetching product ${productId} from ${shopDomain}`);
             const shopifyProduct = await client.getProduct(productId);
             if (shopifyProduct) {
               setProduct(shopifyProduct);
               setLoading(false);
               return;
             }
+          } else {
+            console.warn(`Failed to create Shopify client for ${configShopDomain}`);
           }
         }
 
-        // Fall back to mock data
-        console.log(`Using mock data for product ${productId}`);
-        const mockProduct = getMockProduct(productId);
-        setProduct(mockProduct);
+        // Fall back to mock data in development
+        if (process.env.NODE_ENV === "development") {
+          console.log(`Using mock data for product ${productId}`);
+          const mockProduct = getMockProduct(productId);
+          setProduct(mockProduct);
 
-        if (!mockProduct) {
-          setError(`Product ${productId} not found`);
+          if (!mockProduct) {
+            setError(`Mock product ${productId} not found`);
+          } else {
+            setError("Using mock data - no Shopify token available");
+          }
+        } else {
+          setError("Shopify integration not configured");
         }
       } catch (err) {
         console.error("Error fetching product:", err);
 
-        // Try mock data as final fallback
-        const mockProduct = getMockProduct(productId);
-        if (mockProduct) {
-          setProduct(mockProduct);
-          setError("Using mock data due to API error");
+        // Try mock data as final fallback in development
+        if (process.env.NODE_ENV === "development") {
+          const mockProduct = getMockProduct(productId);
+          if (mockProduct) {
+            setProduct(mockProduct);
+            setError("Using mock data due to API error");
+          } else {
+            setError(err instanceof Error ? err.message : "Failed to fetch product");
+            setProduct(null);
+          }
         } else {
           setError(err instanceof Error ? err.message : "Failed to fetch product");
           setProduct(null);
@@ -75,17 +104,21 @@ export function useShopifyProduct(
     };
 
     fetchProduct();
-  }, [productId, shopDomain]);
+  }, [productId, configShopDomain, configAccessToken]);
 
   return { product, loading, error };
 }
 
 /**
  * Hook to get shop domain from current config context
- * This would typically come from a config context in a real app
+ * Falls back to demo domain if no config is available
  */
-export function useShopDomain(): string | undefined {
-  // For demo purposes, return the demo shop domain
-  // In a real app, this would come from the current site config context
-  return "demo-shop.myshopify.com";
+export function useShopDomain(): string {
+  try {
+    const { shopDomain } = useSiteConfig();
+    return shopDomain;
+  } catch {
+    // Context not available, return demo domain
+    return "demo-shop.myshopify.com";
+  }
 }

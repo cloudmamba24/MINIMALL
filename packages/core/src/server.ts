@@ -6,6 +6,9 @@ export * from "./auth/rate-limiter";
 export * from "./auth/csrf";
 export * from "./r2";
 
+// Server-only services that require database access
+export * from "./lib/shop-service";
+
 // Re-export all client-safe exports
 export * from "./types";
 export * from "./utils";

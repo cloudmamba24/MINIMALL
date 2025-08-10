@@ -1,10 +1,11 @@
-import { r2Service } from "@minimall/core";
+import { getR2Service } from "@minimall/core";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
 // POST /api/assets/upload - Upload file to R2
 export async function POST(request: NextRequest) {
   try {
+    const r2Service = getR2Service();
     if (!r2Service) {
       return NextResponse.json({ error: "R2 service not configured" }, { status: 503 });
     }

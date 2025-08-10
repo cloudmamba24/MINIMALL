@@ -25,14 +25,23 @@ export default function ProductQuickViewPage() {
     // Fetch product data and open modal
     const loadProductAndOpenModal = async () => {
       try {
-        // Fetch product from API
-        const response = await fetch(`/api/shopify/products/${productId}`);
-
-        if (!response.ok) {
-          throw new Error("Product not found");
+        // Use Shopify client directly instead of non-existent API
+        const { ShopifyClient } = await import("../../../../../lib/shopify-client");
+        
+        // Get shop domain and access token from config or environment  
+        const shopDomain = "demo-shop.myshopify.com"; // This should come from config context
+        const accessToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+        
+        if (!accessToken) {
+          throw new Error("Shopify access token not configured");
         }
 
-        const { product } = (await response.json()) as { product: ShopifyProduct };
+        const client = new ShopifyClient(shopDomain, accessToken);
+        const product = await client.getProduct(productId);
+        
+        if (!product) {
+          throw new Error("Product not found");
+        }
 
         // Open the modal with the product data
         openProductQuickView(productId, product);

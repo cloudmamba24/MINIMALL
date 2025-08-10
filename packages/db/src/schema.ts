@@ -12,21 +12,15 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-// Main configuration table
-export const configs = pgTable(
-  "configs",
+// Shops table - per-shop storefront tokens
+export const shops = pgTable(
+  "shops",
   {
-    id: text("id").primaryKey(),
-    shop: text("shop").notNull(),
-    slug: text("slug").notNull(),
-    currentVersionId: text("current_version_id"),
+    shopDomain: text("shop_domain").primaryKey(),
+    storefrontAccessToken: text("storefront_access_token").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => ({
-    shopIdx: index("shop_idx").on(table.shop),
-    slugIdx: index("slug_idx").on(table.slug),
-  })
+  }
 );
 
 // Configuration versions table
@@ -34,9 +28,7 @@ export const configVersions = pgTable(
   "config_versions",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    configId: text("config_id")
-      .references(() => configs.id, { onDelete: "cascade" })
-      .notNull(),
+    configId: text("config_id").references(() => configs.id, { onDelete: "cascade" }).notNull(),
     version: varchar("version", { length: 50 }).notNull(),
     data: jsonb("data").notNull(),
     isPublished: boolean("is_published").default(false).notNull(),
@@ -51,6 +43,24 @@ export const configVersions = pgTable(
     scheduledIdx: index("scheduled_idx").on(table.scheduledAt),
   })
 );
+
+// Main configuration table
+export const configs = pgTable(
+  "configs",
+  {
+    id: text("id").primaryKey(),
+    shop: text("shop").references(() => shops.shopDomain, { onDelete: "cascade" }).notNull(),
+    slug: text("slug").notNull(),
+    currentVersionId: uuid("current_version_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    shopIdx: index("shop_idx").on(table.shop),
+    slugIdx: index("slug_idx").on(table.slug),
+  })
+);
+
 
 // Users/Admin table
 export const users = pgTable(
@@ -189,17 +199,6 @@ export const featureFlags = pgTable(
   })
 );
 
-// Shops table - per-shop storefront tokens
-export const shops = pgTable(
-  "shops",
-  {
-    shopDomain: text("shop_domain").primaryKey(),
-    storefrontAccessToken: text("storefront_access_token").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  }
-);
-
 // Assets table - managed media workflow
 export const assets = pgTable(
   "assets",
@@ -281,6 +280,10 @@ export const revenueAttributions = pgTable(
 
 // Relations
 export const configsRelations = relations(configs, ({ many, one }) => ({
+  shop: one(shops, {
+    fields: [configs.shop],
+    references: [shops.shopDomain],
+  }),
   versions: many(configVersions),
   currentVersion: one(configVersions, {
     fields: [configs.currentVersionId],
@@ -325,6 +328,7 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 }));
 
 export const shopsRelations = relations(shops, ({ many }) => ({
+  configs: many(configs),
   assets: many(assets),
   usageRollups: many(usageRollups),
   revenueAttributions: many(revenueAttributions),

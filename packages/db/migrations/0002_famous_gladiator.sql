@@ -1,0 +1,2 @@
+ALTER TABLE "configs" ALTER COLUMN "current_version_id" SET DATA TYPE uuid;--> statement-breakpoint
+ALTER TABLE "configs" ADD CONSTRAINT "configs_current_version_id_config_versions_id_fk" FOREIGN KEY ("current_version_id") REFERENCES "public"."config_versions"("id") ON DELETE set null ON UPDATE no action;

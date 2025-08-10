@@ -198,22 +198,62 @@ export class ShopifyClient {
 }
 
 /**
- * Create Shopify client from shop domain
- * Uses environment variables for access token
+ * Create Shopify client from shop domain with per-shop token resolution
  */
-export function createShopifyClient(shopDomain: string): ShopifyClient | null {
-  // In a real app, you'd get the access token from your database
-  // For now, use environment variable
-  const accessToken =
+export async function createShopifyClient(
+  shopDomain: string,
+  configToken?: string
+): Promise<ShopifyClient | null> {
+  try {
+    // Get token with fallback chain (client-side safe)
+    const accessToken = await getTokenWithFallback(shopDomain, configToken);
+
+    if (!accessToken) {
+      console.warn(`No Shopify access token found for ${shopDomain}`);
+      return null;
+    }
+
+    return new ShopifyClient(shopDomain, accessToken);
+  } catch (error) {
+    console.error(`Failed to create Shopify client for ${shopDomain}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Get token with fallback chain (client-side safe version)
+ * 1. Config-specific token from settings
+ * 2. Environment variable fallback
+ * Note: Shop-specific database tokens are handled server-side
+ */
+async function getTokenWithFallback(
+  shopDomain: string,
+  configToken?: string
+): Promise<string | null> {
+  // 1. Use config-specific token if provided
+  if (configToken) {
+    return configToken;
+  }
+
+  // 2. Try to get shop-specific token via API call (server-side)
+  if (typeof window !== "undefined") {
+    try {
+      const response = await fetch(`/api/shops/${encodeURIComponent(shopDomain)}/token`);
+      if (response.ok) {
+        const { token } = await response.json();
+        if (token) return token;
+      }
+    } catch (error) {
+      console.warn(`Failed to fetch shop token for ${shopDomain}:`, error);
+    }
+  }
+
+  // 3. Fallback to environment variable
+  const envToken =
     process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN ||
     process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
 
-  if (!accessToken) {
-    console.warn("Shopify Storefront API access token not found");
-    return null;
-  }
-
-  return new ShopifyClient(shopDomain, accessToken);
+  return envToken || null;
 }
 
 /**

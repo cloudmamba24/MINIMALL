@@ -169,12 +169,12 @@ export const RevenueAttributionSchema = AttributionDataSchema.extend({
 });
 
 // Extended Category validation
-export const CategorySchema = z.object({
+export const CategorySchema: z.ZodType<any> = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   card: z.tuple([z.string(), z.record(z.unknown())]),
   categoryType: z.tuple([z.string(), z.record(z.unknown())]),
-  children: z.array(z.lazy(() => CategorySchema)).optional(),
+  children: z.array(z.lazy((): z.ZodType<any> => CategorySchema)).optional(),
   order: z.number().int().optional(),
   visible: z.boolean().optional(),
   layout: LayoutConfigSchema.optional(),
@@ -263,7 +263,16 @@ export const SiteConfigSchema = z.object({
 
 // Partial schemas for updates
 export const PartialSiteConfigSchema = SiteConfigSchema.partial();
-export const PartialCategorySchema = CategorySchema.partial();
+export const PartialCategorySchema = z.object({
+  id: z.string().min(1).optional(),
+  title: z.string().min(1).optional(),
+  card: z.tuple([z.string(), z.record(z.unknown())]).optional(),
+  categoryType: z.tuple([z.string(), z.record(z.unknown())]).optional(),
+  children: z.array(z.lazy((): z.ZodType<any> => CategorySchema)).optional(),
+  order: z.number().int().optional(),
+  visible: z.boolean().optional(),
+  layout: LayoutConfigSchema.optional(),
+}).partial();
 export const PartialLayoutConfigSchema = LayoutConfigSchema.partial();
 
 // Helper functions for validation

@@ -1,4 +1,4 @@
-import { r2Service } from "@minimall/core";
+import { getR2Service } from "@minimall/core";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -12,7 +12,8 @@ interface RouteParams {
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-
+    const r2Service = getR2Service();
+    
     if (!r2Service) {
       return NextResponse.json({ error: "R2 service not configured" }, { status: 503 });
     }
@@ -49,6 +50,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const body = await request.json();
+    const r2Service = getR2Service();
 
     if (!r2Service) {
       return NextResponse.json({ error: "R2 service not configured" }, { status: 503 });

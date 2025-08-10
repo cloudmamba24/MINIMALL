@@ -1,4 +1,4 @@
-import { UTMParameters } from "@minimall/core/types";
+import { UTMParameters } from "@minimall/core";
 import { UTMUtils } from "../components/tracking/UTMTracker";
 
 /**

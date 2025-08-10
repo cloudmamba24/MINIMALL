@@ -1,11 +1,12 @@
 import crypto from "node:crypto";
-import { r2Service } from "@minimall/core";
+import { getR2Service } from "@minimall/core";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
 // POST /api/upload/chunk - Upload file chunk
 export async function POST(request: NextRequest) {
   try {
+    const r2Service = getR2Service();
     if (!r2Service) {
       return NextResponse.json({ error: "R2 service not configured" }, { status: 503 });
     }

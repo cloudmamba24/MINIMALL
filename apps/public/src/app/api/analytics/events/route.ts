@@ -3,6 +3,25 @@ import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+/**
+ * Detect device type from user agent
+ */
+function detectDevice(userAgent: string | null): "mobile" | "tablet" | "desktop" {
+  if (!userAgent) return "desktop";
+  
+  const ua = userAgent.toLowerCase();
+  
+  if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
+    return "mobile";
+  }
+  
+  if (ua.includes("tablet") || ua.includes("ipad")) {
+    return "tablet";
+  }
+  
+  return "desktop";
+}
+
 const analyticsEventSchema = z.object({
   event: z.string(),
   configId: z.string().optional(),
@@ -49,6 +68,7 @@ export async function POST(request: NextRequest) {
             configId: data.configId || "unknown",
             userId: data.userId,
             sessionId: data.sessionId,
+            device: detectDevice(request.headers.get("user-agent")), // Required field
             properties: data.properties,
             userAgent: data.userAgent || request.headers.get("user-agent"),
             referrer: data.referrer || request.headers.get("referer"),

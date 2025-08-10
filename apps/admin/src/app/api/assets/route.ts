@@ -1,4 +1,4 @@
-import { r2Service } from "@minimall/core";
+import { getR2Service } from "@minimall/core";
 import { configs, db } from "@minimall/db";
 import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
     const folder = searchParams.get("folder") || "uploads";
     const type = searchParams.get("type") || "all";
     const limit = Number.parseInt(searchParams.get("limit") || "50");
+    const r2Service = getR2Service();
 
     if (!r2Service) {
       return NextResponse.json({ error: "R2 service not configured" }, { status: 503 });

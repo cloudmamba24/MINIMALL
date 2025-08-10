@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
             configId: data.configId || "unknown",
             sessionId: data.sessionId || `session_${Date.now()}`,
             userId: data.userId,
+            device: "unknown", // Required field
             properties: {
               metricName: data.name,
               duration: data.duration,

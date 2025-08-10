@@ -3,7 +3,7 @@ import {
   createDefaultSiteConfig,
   createEnhancedSiteConfig,
   edgeCache,
-  r2Service,
+  getR2Service,
 } from "@minimall/core/server";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -29,14 +29,12 @@ async function getStableDemoConfig() {
   try {
     // Try to create enhanced config with real data
     if (accessToken) {
-      console.log("Creating enhanced demo config with real Shopify data");
       STABLE_DEMO_CONFIG = await createEnhancedSiteConfig(shopDomain, accessToken);
     } else {
-      console.log("Creating demo config with mock data (no Shopify access token)");
       STABLE_DEMO_CONFIG = createDefaultSiteConfig(shopDomain);
     }
   } catch (error) {
-    console.warn("Failed to create enhanced config, falling back to mock data:", error);
+    // Fallback to mock data on error
     STABLE_DEMO_CONFIG = createDefaultSiteConfig(shopDomain);
   }
 
@@ -58,26 +56,25 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
   // Try edge cache first (300s TTL as per spec)
   const cached = edgeCache.get<SiteConfig>(cacheKey);
   if (cached) {
-    console.log(`Cache HIT for ${cacheKey}`);
     return cached;
   }
 
-  console.log(`Cache MISS for ${cacheKey}, fetching from R2`);
-
   try {
     // Try R2 first - this is the production path
-    const config = await r2Service.getConfig(configId, draftVersion);
+    const r2Service = getR2Service();
+    if (r2Service) {
+      const config = await r2Service.getConfig(configId, draftVersion);
 
-    // Cache successful R2 fetch for 300s (5 minutes as per spec)
-    edgeCache.set(cacheKey, config, 300);
-    console.log(`R2 SUCCESS: Cached config ${cacheKey} for 300s`);
+      // Cache successful R2 fetch for 300s (5 minutes as per spec) with tags
+      const tags = [`config:${configId}`, `config:${configId}:${draftVersion ? 'draft' : 'published'}`];
+      edgeCache.set(cacheKey, config, 300, tags);
 
-    return config;
+      return config;
+    } else {
+      throw new Error("R2 service not available");
+    }
   } catch (error) {
-    console.warn(
-      `R2 FAILED for ${cacheKey}:`,
-      error instanceof Error ? error.message : "Unknown error"
-    );
+    // R2 fetch failed, try fallback strategies
 
     // Fallback strategy based on environment and configId
     if (configId === "demo") {
@@ -85,14 +82,15 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
       return await getStableDemoConfig();
     }
 
-    if (process.env.NODE_ENV === "development") {
-      // Development: return demo config with notice
-      console.log(`DEV MODE: Serving demo config for ${configId}`);
+    // In development, provide fallback for easier debugging
+    if (process.env.NODE_ENV === "development" && process.env.ENABLE_DEV_FALLBACKS === "true") {
+      console.warn(`Using demo config as fallback for configId: ${configId}`);
       const demoConfig = await getStableDemoConfig();
       return { ...demoConfig, id: configId };
     }
 
-    // Production: throw error for non-demo configs that aren't found
+    // Production and strict development: throw error for configs that aren't found
+    console.error(`Configuration not found: ${configId}. R2 error: ${error}`);
     throw new Error(`Configuration not found: ${configId}`);
   }
 }
@@ -106,20 +104,11 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const draft = searchParams.get("draft") || undefined;
 
-    console.log("[Config API] Loading config:", {
-      configId,
-      draft,
-      timestamp: new Date().toISOString(),
-    });
-
     if (!configId) {
       return NextResponse.json({ error: "Configuration ID is required" }, { status: 400 });
     }
 
     const config = await loadConfigWithCache(configId, draft);
-    console.log(
-      `[Config API] Successfully loaded config for: ${configId}${draft ? ` (draft: ${draft})` : ""}`
-    );
 
     // Add cache headers
     const headers = new Headers();

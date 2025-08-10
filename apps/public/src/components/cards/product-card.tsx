@@ -2,49 +2,17 @@
 
 import { formatPrice } from "@minimall/core/client";
 import { ExternalLink, Heart, ShoppingCart, cn } from "@minimall/ui";
+import { useShopifyProduct, useShopDomain } from "@/hooks/use-shopify-product";
+import { type ShopifyProduct } from "@/lib/shopify-client";
 import Image from "next/image";
-import { useEffect, useMemo, useState, useTransition } from "react";
-
-// Mock Shopify product type - in real implementation, this would come from Shopify API
-interface ShopifyProduct {
-  id: string;
-  title: string;
-  handle: string;
-  images: Array<{
-    id: string;
-    url: string;
-    altText?: string;
-  }>;
-  variants: Array<{
-    id: string;
-    title: string;
-    price: {
-      amount: string;
-      currencyCode: string;
-    };
-    compareAtPrice?: {
-      amount: string;
-      currencyCode: string;
-    };
-    availableForSale: boolean;
-  }>;
-  priceRange: {
-    minVariantPrice: {
-      amount: string;
-      currencyCode: string;
-    };
-    maxVariantPrice: {
-      amount: string;
-      currencyCode: string;
-    };
-  };
-}
+import { useState, useTransition } from "react";
 
 interface ProductCardProps {
   productId: string;
   variantId?: string | null;
   displayType?: string;
   className?: string;
+  shopDomain?: string; // Allow explicit shop domain override
   onAddToCart?: (productId: string, variantId: string) => void;
   onQuickView?: (productId: string) => void;
 }
@@ -54,70 +22,17 @@ export function ProductCard({
   variantId,
   displayType,
   className,
+  shopDomain,
   onAddToCart,
   onQuickView,
 }: ProductCardProps) {
-  const [product, setProduct] = useState<ShopifyProduct | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, _setError] = useState<string | null>(null);
+  // Use the proper hook for fetching product data
+  const fallbackShopDomain = useShopDomain();
+  const { product, loading, error } = useShopifyProduct(productId, shopDomain || fallbackShopDomain);
+  
   const [imageLoading, setImageLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [isPending, startTransition] = useTransition();
-
-  // Memoize mock product to prevent recreation on every render
-  const mockProduct = useMemo(
-    (): ShopifyProduct => ({
-      id: productId,
-      title: "Sample Product",
-      handle: "sample-product",
-      images: [
-        {
-          id: "1",
-          url: "https://via.placeholder.com/400x400/ccc/999?text=Product+Image",
-          altText: "Sample Product",
-        },
-      ],
-      variants: [
-        {
-          id: variantId || "variant-1",
-          title: "Default Title",
-          price: {
-            amount: "29.99",
-            currencyCode: "USD",
-          },
-          compareAtPrice: {
-            amount: "39.99",
-            currencyCode: "USD",
-          },
-          availableForSale: true,
-        },
-      ],
-      priceRange: {
-        minVariantPrice: {
-          amount: "29.99",
-          currencyCode: "USD",
-        },
-        maxVariantPrice: {
-          amount: "29.99",
-          currencyCode: "USD",
-        },
-      },
-    }),
-    [productId, variantId]
-  );
-
-  // Load product with stable reference
-  useEffect(() => {
-    setLoading(true);
-
-    // Simulate API delay
-    const timer = setTimeout(() => {
-      setProduct(mockProduct);
-      setLoading(false);
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [mockProduct]);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -166,7 +81,7 @@ export function ProductCard({
     );
   }
 
-  if (error || !product) {
+  if (error || (!loading && !product)) {
     return (
       <div
         className={cn(
@@ -175,9 +90,23 @@ export function ProductCard({
           className
         )}
       >
-        <p className="text-muted-foreground text-sm">Product unavailable</p>
+        <div className="text-center p-4">
+          <p className="text-muted-foreground text-sm">
+            {error ? "Product error" : "Product unavailable"}
+          </p>
+          {error && (
+            <p className="text-xs text-muted-foreground mt-1" title={error}>
+              {error.length > 50 ? `${error.substring(0, 50)}...` : error}
+            </p>
+          )}
+        </div>
       </div>
     );
+  }
+
+  // Type guard: product is definitely not null at this point
+  if (!product) {
+    return null;
   }
 
   return (

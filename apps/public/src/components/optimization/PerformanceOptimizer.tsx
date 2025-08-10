@@ -91,8 +91,9 @@ export function LazyImage({
     if (priority) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
+      (entries) => {
+        const entry = entries[0];
+        if (entry?.isIntersecting) {
           setIsInView(true);
           observer.disconnect();
         }
@@ -159,10 +160,10 @@ export function useImagePreloader(images: string[], currentIndex: number) {
     const nextIndex = currentIndex + 1;
     const prevIndex = currentIndex - 1;
 
-    if (nextIndex < images.length) {
+    if (nextIndex < images.length && images[nextIndex]) {
       preloadImage(images[nextIndex]);
     }
-    if (prevIndex >= 0) {
+    if (prevIndex >= 0 && images[prevIndex]) {
       preloadImage(images[prevIndex]);
     }
   }, [images, currentIndex]);
@@ -308,9 +309,10 @@ export function usePerformanceMonitor(configId: string) {
     const lcpObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries();
       const lastEntry = entries[entries.length - 1];
-      metricsRef.current.lcp = lastEntry.startTime;
-      
-      console.log(`[Performance] LCP: ${lastEntry.startTime.toFixed(2)}ms`);
+      if (lastEntry) {
+        metricsRef.current.lcp = lastEntry.startTime;
+        console.log(`[Performance] LCP: ${lastEntry.startTime.toFixed(2)}ms`);
+      }
     });
 
     // First Input Delay
