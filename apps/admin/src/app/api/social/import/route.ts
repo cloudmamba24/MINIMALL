@@ -7,6 +7,7 @@ import {
   validateSocialMediaUrl,
   type SocialMediaPost,
 } from "../../../../lib/social-extractors";
+import { conditionalProps } from "../../../../lib/type-utils";
 
 /**
  * Social Media Import API Endpoint
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
       data: {
         platform: post.platform,
         mediaCount: post.media.length,
-        assetsUploaded: assets.length,
+        assetsUploaded: assets ? assets.length : 0,
         author: post.author.username,
         hashtags: post.hashtags,
       },
@@ -106,7 +107,7 @@ export async function POST(request: NextRequest) {
           hashtags: [...post.hashtags, ...generateContentTags(post)],
         }),
       },
-      assets,
+      ...(assets && assets.length > 0 && { assets }),
     };
     
     return NextResponse.json(result);
@@ -147,6 +148,11 @@ async function downloadAndUploadMedia(
   for (let i = 0; i < post.media.length; i++) {
     const mediaItem = post.media[i];
     
+    if (!mediaItem) {
+      console.warn(`[SocialImport] Media item ${i + 1} is undefined, skipping`);
+      continue;
+    }
+    
     try {
       // Processing media file
       
@@ -163,7 +169,7 @@ async function downloadAndUploadMedia(
       const key = `${folder}/${filename}`;
       
       // Prepare metadata
-      const metadata = {
+      const baseMetadata = {
         originalUrl: mediaItem.url,
         platform: post.platform,
         postId: post.id,
@@ -172,12 +178,18 @@ async function downloadAndUploadMedia(
         hashtags: post.hashtags.join(","),
         extractedAt: post.extractedAt.toISOString(),
         mediaType: mediaItem.type,
-        ...(mediaItem.width && { originalWidth: mediaItem.width.toString() }),
-        ...(mediaItem.height && { originalHeight: mediaItem.height.toString() }),
-        ...(mediaItem.duration && { duration: mediaItem.duration.toString() }),
-        ...(post.engagement && {
-          likes: post.engagement.likes?.toString() || "0",
-          views: post.engagement.views?.toString() || "0",
+      };
+      
+      const metadata = {
+        ...baseMetadata,
+        ...conditionalProps({
+          originalWidth: mediaItem.width?.toString(),
+          originalHeight: mediaItem.height?.toString(),
+          duration: mediaItem.duration?.toString(),
+          ...(post.engagement && {
+            likes: post.engagement.likes?.toString() || "0",
+            views: post.engagement.views?.toString() || "0",
+          }),
         }),
       };
       
@@ -192,10 +204,12 @@ async function downloadAndUploadMedia(
             finalBuffer = processedResult.buffer!;
             processedMetadata = {
               ...metadata,
-              processed: "true",
-              originalSize: downloadResult.buffer.length.toString(),
-              processedSize: finalBuffer.length.toString(),
-              ...processedResult.metadata,
+              ...conditionalProps({
+                processed: "true",
+                originalSize: downloadResult.buffer.length.toString(),
+                processedSize: finalBuffer.length.toString(),
+                ...processedResult.metadata,
+              }),
             };
           }
         } catch (error) {

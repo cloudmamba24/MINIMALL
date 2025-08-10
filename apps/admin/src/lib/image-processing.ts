@@ -7,6 +7,7 @@
 
 import sharp from "sharp";
 import { z } from "zod";
+import { conditionalProps } from "./type-utils";
 
 export interface ProcessingOptions {
   // Auto-cropping options
@@ -118,9 +119,11 @@ export async function processImage(
       totalSize,
       compressionRatio: originalSize / totalSize,
       processingTime,
-      dominantColors,
-      hasTransparency: metadata.hasAlpha,
       aspectRatio,
+      ...conditionalProps({
+        dominantColors,
+        hasTransparency: metadata.hasAlpha,
+      }),
     },
   };
 }
@@ -232,7 +235,7 @@ async function generateVariants(
           size: info.size,
           quality,
           variant: `${size}w-${density}x`,
-          size: size,
+          targetSize: size,
           density,
         });
       } catch (error) {
@@ -279,7 +282,7 @@ async function applyCropping(
     // Use entropy or focus point for smart cropping
     const gravity = options.focusPoint 
       ? calculateGravity(options.focusPoint, metadata.width, metadata.height)
-      : sharp.gravity.entropy;
+      : sharp.strategy.entropy;
     
     return pipeline.resize(cropWidth, cropHeight, {
       fit: "cover",

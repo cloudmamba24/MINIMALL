@@ -18,14 +18,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
       - name: Lint
-        run: npx turbo lint --filter='@minimall/ui' --filter='@minimall/core' --filter='@minimall/db' --filter='@minimall/public'
+        run: npx turbo lint --filter='@minimall/ui' --filter='@minimall/core' --filter='@minimall/db' --filter='@minimall/public' --filter='@minimall/admin'
 
       - name: Type check
         run: npm run type-check
@@ -41,7 +41,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -77,7 +77,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies

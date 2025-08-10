@@ -213,6 +213,9 @@ function findNextWeeklyOccurrence(startDate: Date, daysOfWeek: number[], interva
   
   // No more days this week, go to next interval
   const firstDayNextInterval = sortedDays[0];
+  if (firstDayNextInterval === undefined) {
+    throw new Error("No valid days configured for weekly schedule");
+  }
   const nextDate = new Date(startDate);
   const daysToAdd = (7 * intervalWeeks) - currentDay + firstDayNextInterval;
   nextDate.setDate(startDate.getDate() + daysToAdd);
@@ -292,6 +295,11 @@ export function validateCampaignSchedules(
   
   for (let i = 0; i < schedules.length; i++) {
     const schedule = schedules[i];
+    
+    if (!schedule) {
+      errors.push(`Schedule ${i + 1}: Schedule is undefined`);
+      continue;
+    }
     
     if (!schedule.scheduledAt || !schedule.configId) {
       errors.push(`Schedule ${i + 1}: Missing required fields`);

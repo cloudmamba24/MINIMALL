@@ -6,6 +6,7 @@
  */
 
 import { z } from "zod";
+import { safeOptionalProp, conditionalProps } from "./type-utils";
 
 export interface SocialMediaPost {
   id: string;
@@ -406,7 +407,7 @@ function extractInstagramPostId(url: string): string | null {
   
   for (const pattern of patterns) {
     const match = url.match(pattern);
-    if (match) return match[1];
+    if (match && match[1]) return match[1];
   }
   
   return null;
@@ -424,7 +425,7 @@ function extractTikTokPostId(url: string): string | null {
   
   for (const pattern of patterns) {
     const match = url.match(pattern);
-    if (match) return match[1];
+    if (match && match[1]) return match[1];
   }
   
   return null;
@@ -441,7 +442,7 @@ function extractTwitterPostId(url: string): string | null {
   
   for (const pattern of patterns) {
     const match = url.match(pattern);
-    if (match) return match[1];
+    if (match && match[1]) return match[1];
   }
   
   return null;
@@ -459,7 +460,7 @@ function extractYouTubeVideoId(url: string): string | null {
   
   for (const pattern of patterns) {
     const match = url.match(pattern);
-    if (match) return match[1];
+    if (match && match[1]) return match[1];
   }
   
   return null;
@@ -476,7 +477,7 @@ function extractPinterestPinId(url: string): string | null {
   
   for (const pattern of patterns) {
     const match = url.match(pattern);
-    if (match) return match[1];
+    if (match && match[1]) return match[1];
   }
   
   return null;
@@ -491,7 +492,9 @@ export function extractHashtags(text: string): string[] {
   let match;
   
   while ((match = hashtagRegex.exec(text)) !== null) {
-    hashtags.push(match[1]);
+    if (match[1]) {
+      hashtags.push(match[1]);
+    }
   }
   
   return [...new Set(hashtags)]; // Remove duplicates
@@ -506,7 +509,9 @@ export function extractMentions(text: string): string[] {
   let match;
   
   while ((match = mentionRegex.exec(text)) !== null) {
-    mentions.push(match[1]);
+    if (match[1]) {
+      mentions.push(match[1]);
+    }
   }
   
   return [...new Set(mentions)]; // Remove duplicates
@@ -543,12 +548,12 @@ export async function downloadMediaFromUrl(url: string, timeout = 30000): Promis
     }
     
     const buffer = Buffer.from(await response.arrayBuffer());
-    const contentType = response.headers.get("content-type") || undefined;
+    const contentType = response.headers.get("content-type");
     
     return {
       success: true,
       buffer,
-      contentType,
+      ...conditionalProps({ contentType }),
     };
   } catch (error) {
     return {

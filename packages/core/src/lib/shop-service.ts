@@ -2,118 +2,122 @@ import { db, shops } from "@minimall/db";
 import { eq } from "drizzle-orm";
 
 /**
- * Service for managing per-shop Shopify integration data
+ * Functions for managing per-shop Shopify integration data
  */
-export class ShopService {
-  /**
-   * Get shop configuration including storefront access token
-   */
-  static async getShop(shopDomain: string) {
-    if (!db) {
-      console.warn("Database not available");
-      return null;
-    }
 
-    try {
-      const shop = await db.query.shops.findFirst({
-        where: eq(shops.shopDomain, shopDomain),
-      });
+/**
+ * Get shop configuration including storefront access token
+ */
+export async function getShop(shopDomain: string) {
+	if (!db) {
+		console.warn("Database not available");
+		return null;
+	}
 
-      return shop || null;
-    } catch (error) {
-      console.error(`Failed to get shop ${shopDomain}:`, error);
-      return null;
-    }
-  }
+	try {
+		const shop = await db.query.shops.findFirst({
+			where: eq(shops.shopDomain, shopDomain),
+		});
 
-  /**
-   * Get storefront access token for a shop
-   */
-  static async getStorefrontToken(shopDomain: string): Promise<string | null> {
-    const shop = await this.getShop(shopDomain);
-    return shop?.storefrontAccessToken || null;
-  }
+		return shop || null;
+	} catch (error) {
+		console.error(`Failed to get shop ${shopDomain}:`, error);
+		return null;
+	}
+}
 
-  /**
-   * Create or update shop with storefront access token
-   */
-  static async upsertShop(shopDomain: string, storefrontAccessToken: string) {
-    if (!db) {
-      console.warn("Database not available");
-      return null;
-    }
+/**
+ * Get storefront access token for a shop
+ */
+export async function getStorefrontToken(
+	shopDomain: string,
+): Promise<string | null> {
+	const shop = await getShop(shopDomain);
+	return shop?.storefrontAccessToken || null;
+}
 
-    try {
-      const result = await db
-        .insert(shops)
-        .values({
-          shopDomain,
-          storefrontAccessToken,
-        })
-        .onConflictDoUpdate({
-          target: shops.shopDomain,
-          set: {
-            storefrontAccessToken,
-            updatedAt: new Date(),
-          },
-        })
-        .returning();
+/**
+ * Create or update shop with storefront access token
+ */
+export async function upsertShop(
+	shopDomain: string,
+	storefrontAccessToken: string,
+) {
+	if (!db) {
+		console.warn("Database not available");
+		return null;
+	}
 
-      return result[0] || null;
-    } catch (error) {
-      console.error(`Failed to upsert shop ${shopDomain}:`, error);
-      return null;
-    }
-  }
+	try {
+		const result = await db
+			.insert(shops)
+			.values({
+				shopDomain,
+				storefrontAccessToken,
+			})
+			.onConflictDoUpdate({
+				target: shops.shopDomain,
+				set: {
+					storefrontAccessToken,
+					updatedAt: new Date(),
+				},
+			})
+			.returning();
 
-  /**
-   * Delete shop configuration
-   */
-  static async deleteShop(shopDomain: string) {
-    if (!db) {
-      console.warn("Database not available");
-      return false;
-    }
+		return result[0] || null;
+	} catch (error) {
+		console.error(`Failed to upsert shop ${shopDomain}:`, error);
+		return null;
+	}
+}
 
-    try {
-      const result = await db
-        .delete(shops)
-        .where(eq(shops.shopDomain, shopDomain))
-        .returning();
+/**
+ * Delete shop configuration
+ */
+export async function deleteShop(shopDomain: string) {
+	if (!db) {
+		console.warn("Database not available");
+		return false;
+	}
 
-      return result.length > 0;
-    } catch (error) {
-      console.error(`Failed to delete shop ${shopDomain}:`, error);
-      return false;
-    }
-  }
+	try {
+		const result = await db
+			.delete(shops)
+			.where(eq(shops.shopDomain, shopDomain))
+			.returning();
 
-  /**
-   * Get token with fallback chain:
-   * 1. Config-specific token from settings
-   * 2. Shop-specific token from database  
-   * 3. Environment variable
-   */
-  static async getTokenWithFallback(
-    shopDomain: string,
-    configToken?: string
-  ): Promise<string | null> {
-    // 1. Use config-specific token if provided
-    if (configToken) {
-      return configToken;
-    }
+		return result.length > 0;
+	} catch (error) {
+		console.error(`Failed to delete shop ${shopDomain}:`, error);
+		return false;
+	}
+}
 
-    // 2. Try shop-specific token from database
-    const shopToken = await this.getStorefrontToken(shopDomain);
-    if (shopToken) {
-      return shopToken;
-    }
+/**
+ * Get token with fallback chain:
+ * 1. Config-specific token from settings
+ * 2. Shop-specific token from database
+ * 3. Environment variable
+ */
+export async function getTokenWithFallback(
+	shopDomain: string,
+	configToken?: string,
+): Promise<string | null> {
+	// 1. Use config-specific token if provided
+	if (configToken) {
+		return configToken;
+	}
 
-    // 3. Fallback to environment variable
-    const envToken =
-      process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN ||
-      process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+	// 2. Try shop-specific token from database
+	const shopToken = await getStorefrontToken(shopDomain);
+	if (shopToken) {
+		return shopToken;
+	}
 
-    return envToken || null;
-  }
+	// 3. Fallback to environment variable
+	const envToken =
+		process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN ||
+		process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+
+	return envToken || null;
 }

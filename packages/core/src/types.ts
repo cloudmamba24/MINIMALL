@@ -1,363 +1,369 @@
 // Core types for the link-in-bio platform
 
 export interface SiteConfig {
-  id: string;
-  version: string;
-  categories: Category[];
-  settings: Settings;
-  createdAt: string;
-  updatedAt: string;
+	id: string;
+	version: string;
+	categories: Category[];
+	settings: Settings;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface Category {
-  id: string;
-  title: string;
-  card: [string, CardDetails];
-  categoryType: [string, CategoryTypeDetails];
-  children?: Category[];
-  order?: number;
-  visible?: boolean;
-  layout?: LayoutConfig; // New layout system
+	id: string;
+	title: string;
+	card: [string, CardDetails];
+	categoryType: [string, CategoryTypeDetails];
+	children?: Category[];
+	order?: number;
+	visible?: boolean;
+	layout?: LayoutConfig; // New layout system
 }
 
 export interface CardDetails {
-  link?: string | null;
-  shape?: string[];
-  image?: string;
-  imageUrl?: string;
-  videoUrl?: string;
-  description?: string;
-  products?: Product[];
-  price?: string;
-  overlay?: {
-    text: string;
-    position: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center";
-  };
-  // Enhanced for interactivity
-  productTags?: ProductTag[];
-  clickAction?: ClickAction;
-  hoverEffect?: HoverEffect;
+	link?: string | null;
+	shape?: string[];
+	image?: string;
+	imageUrl?: string;
+	videoUrl?: string;
+	description?: string;
+	products?: Product[];
+	price?: string;
+	overlay?: {
+		text: string;
+		position:
+			| "top-left"
+			| "top-right"
+			| "bottom-left"
+			| "bottom-right"
+			| "center";
+	};
+	// Enhanced for interactivity
+	productTags?: ProductTag[];
+	clickAction?: ClickAction;
+	hoverEffect?: HoverEffect;
 }
 
 export interface CategoryTypeDetails {
-  children: Category[];
-  products?: Product[];
-  displayType?: "grid" | "slider" | "list";
-  itemsPerRow?: number;
+	children: Category[];
+	products?: Product[];
+	displayType?: "grid" | "slider" | "list";
+	itemsPerRow?: number;
 }
 
 export interface Product {
-  id: string;
-  productId: string;
-  variantId?: string | null;
+	id: string;
+	productId: string;
+	variantId?: string | null;
 }
 
 export interface Settings {
-  checkoutLink: string;
-  shopDomain: string;
-  theme: Theme;
-  seo?: SEOSettings;
-  brand?: BrandSettings;
-  animations?: AnimationSettings;
-  modals?: ModalSettings;
-  pixels?: PixelSettings; // Analytics pixels
-  experiments?: ExperimentConfig[]; // A/B testing
-  shopify?: ShopifySettings; // Shopify integration settings
+	checkoutLink: string;
+	shopDomain: string;
+	theme: Theme;
+	seo?: SEOSettings;
+	brand?: BrandSettings;
+	animations?: AnimationSettings;
+	modals?: ModalSettings;
+	pixels?: PixelSettings; // Analytics pixels
+	experiments?: ExperimentConfig[]; // A/B testing
+	shopify?: ShopifySettings; // Shopify integration settings
 }
 
 export interface ShopifySettings {
-  storefrontAccessToken?: string; // Per-shop storefront token
-  webhookSecret?: string; // For webhook validation
-  appId?: string; // Shopify app installation ID
-  scope?: string[]; // Granted permissions
-  installedAt?: string; // Installation timestamp
+	storefrontAccessToken?: string; // Per-shop storefront token
+	webhookSecret?: string; // For webhook validation
+	appId?: string; // Shopify app installation ID
+	scope?: string[]; // Granted permissions
+	installedAt?: string; // Installation timestamp
 }
 
 export interface BrandSettings {
-  name: string;
-  subtitle?: string;
-  logo?: string;
-  socialLinks?: {
-    instagram?: string;
-    twitter?: string;
-    pinterest?: string;
-    tiktok?: string;
-    youtube?: string;
-    website?: string;
-  };
-  ctaButton?: {
-    text: string;
-    url: string;
-  };
+	name: string;
+	subtitle?: string;
+	logo?: string;
+	socialLinks?: {
+		instagram?: string;
+		twitter?: string;
+		pinterest?: string;
+		tiktok?: string;
+		youtube?: string;
+		website?: string;
+	};
+	ctaButton?: {
+		text: string;
+		url: string;
+	};
 }
 
 export interface Theme {
-  primaryColor: string;
-  backgroundColor: string;
-  textColor?: string;
-  accentColor?: string;
-  fontFamily?: string;
-  borderRadius?: "none" | "sm" | "md" | "lg" | "xl";
+	primaryColor: string;
+	backgroundColor: string;
+	textColor?: string;
+	accentColor?: string;
+	fontFamily?: string;
+	borderRadius?: "none" | "sm" | "md" | "lg" | "xl";
 }
 
 export interface SEOSettings {
-  title?: string;
-  description?: string;
-  keywords?: string;
+	title?: string;
+	description?: string;
+	keywords?: string;
 }
 
 // Shopify types
 export interface ShopifyProduct {
-  id: string;
-  title: string;
-  handle: string;
-  description: string;
-  images: ShopifyImage[];
-  variants: ShopifyVariant[];
-  priceRange: {
-    minVariantPrice: MoneyV2;
-    maxVariantPrice: MoneyV2;
-  };
-  tags: string[];
-  productType: string;
-  vendor: string;
-  availableForSale: boolean;
-  createdAt: string;
-  updatedAt: string;
+	id: string;
+	title: string;
+	handle: string;
+	description: string;
+	images: ShopifyImage[];
+	variants: ShopifyVariant[];
+	priceRange: {
+		minVariantPrice: MoneyV2;
+		maxVariantPrice: MoneyV2;
+	};
+	tags: string[];
+	productType: string;
+	vendor: string;
+	availableForSale: boolean;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface ShopifyVariant {
-  id: string;
-  title: string;
-  price: MoneyV2;
-  compareAtPrice?: MoneyV2;
-  availableForSale: boolean;
-  selectedOptions: SelectedOption[];
-  image?: ShopifyImage;
-  sku?: string;
-  barcode?: string;
-  weight?: number;
-  weightUnit?: string;
-  requiresShipping: boolean;
+	id: string;
+	title: string;
+	price: MoneyV2;
+	compareAtPrice?: MoneyV2;
+	availableForSale: boolean;
+	selectedOptions: SelectedOption[];
+	image?: ShopifyImage;
+	sku?: string;
+	barcode?: string;
+	weight?: number;
+	weightUnit?: string;
+	requiresShipping: boolean;
 }
 
 export interface ShopifyImage {
-  id: string;
-  url: string;
-  altText?: string;
-  width: number;
-  height: number;
+	id: string;
+	url: string;
+	altText?: string;
+	width: number;
+	height: number;
 }
 
 export interface MoneyV2 {
-  amount: string;
-  currencyCode: string;
+	amount: string;
+	currencyCode: string;
 }
 
 export interface SelectedOption {
-  name: string;
-  value: string;
+	name: string;
+	value: string;
 }
 
 // Cart types
 export interface CartItem {
-  id: string;
-  productId: string;
-  variantId: string;
-  title: string;
-  price: number; // in cents
-  quantity: number;
-  image?: string;
-  variant: {
-    title: string;
-    selectedOptions: SelectedOption[];
-  };
+	id: string;
+	productId: string;
+	variantId: string;
+	title: string;
+	price: number; // in cents
+	quantity: number;
+	image?: string;
+	variant: {
+		title: string;
+		selectedOptions: SelectedOption[];
+	};
 }
 
 export interface Cart {
-  id: string;
-  items: CartItem[];
-  totalQuantity: number;
-  totalPrice: number; // in cents
-  checkoutUrl?: string;
-  createdAt: string;
-  updatedAt: string;
+	id: string;
+	items: CartItem[];
+	totalQuantity: number;
+	totalPrice: number; // in cents
+	checkoutUrl?: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 // Performance monitoring types
 export interface PerformanceMetrics {
-  configId: string;
-  lcp?: number; // Largest Contentful Paint
-  fid?: number; // First Input Delay
-  cls?: number; // Cumulative Layout Shift
-  ttfb?: number; // Time to First Byte
-  loadTime?: number;
-  timestamp: Date;
-  userAgent?: string;
-  connection?: string;
-  viewport?: {
-    width: number;
-    height: number;
-  };
+	configId: string;
+	lcp?: number; // Largest Contentful Paint
+	fid?: number; // First Input Delay
+	cls?: number; // Cumulative Layout Shift
+	ttfb?: number; // Time to First Byte
+	loadTime?: number;
+	timestamp: Date;
+	userAgent?: string;
+	connection?: string;
+	viewport?: {
+		width: number;
+		height: number;
+	};
 }
 
 // API Response types
 export interface APIResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  timestamp: string;
+	success: boolean;
+	data?: T;
+	error?: string;
+	timestamp: string;
 }
 
 export interface PaginatedResponse<T = unknown> extends APIResponse<T> {
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-  };
+	pagination: {
+		page: number;
+		limit: number;
+		total: number;
+		pages: number;
+	};
 }
 
 // Admin types
 export interface AdminUser {
-  id: string;
-  email: string;
-  name: string;
-  shopDomain: string;
-  role: "owner" | "admin" | "editor";
-  permissions: string[];
-  createdAt: string;
-  updatedAt: string;
+	id: string;
+	email: string;
+	name: string;
+	shopDomain: string;
+	role: "owner" | "admin" | "editor";
+	permissions: string[];
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface ConfigVersion {
-  id: string;
-  configId: string;
-  version: string;
-  data: SiteConfig;
-  createdBy: string;
-  createdAt: string;
-  isPublished: boolean;
-  publishedAt?: string;
+	id: string;
+	configId: string;
+	version: string;
+	data: SiteConfig;
+	createdBy: string;
+	createdAt: string;
+	isPublished: boolean;
+	publishedAt?: string;
 }
 
 // Webhook types
 export interface ShopifyWebhookPayload {
-  id: string;
-  event: string;
-  shop_domain: string;
-  created_at: string;
-  data: unknown;
+	id: string;
+	event: string;
+	shop_domain: string;
+	created_at: string;
+	data: unknown;
 }
 
 // Image processing types
 export interface ImageProcessingOptions {
-  width?: number;
-  height?: number;
-  quality?: number;
-  format?: "webp" | "avif" | "jpg" | "png";
-  fit?: "cover" | "contain" | "fill" | "inside" | "outside";
+	width?: number;
+	height?: number;
+	quality?: number;
+	format?: "webp" | "avif" | "jpg" | "png";
+	fit?: "cover" | "contain" | "fill" | "inside" | "outside";
 }
 
 export interface OptimizedImage {
-  original: string;
-  webp?: string;
-  avif?: string;
-  placeholder?: string;
-  dimensions: {
-    width: number;
-    height: number;
-  };
+	original: string;
+	webp?: string;
+	avif?: string;
+	placeholder?: string;
+	dimensions: {
+		width: number;
+		height: number;
+	};
 }
 
 // Analytics types
 export interface AnalyticsEvent {
-  event: string;
-  configId: string;
-  userId?: string;
-  sessionId: string;
-  timestamp: Date;
-  properties: Record<string, unknown>;
-  userAgent?: string;
-  referrer?: string;
-  utm?: {
-    source?: string;
-    medium?: string;
-    campaign?: string;
-    term?: string;
-    content?: string;
-  };
+	event: string;
+	configId: string;
+	userId?: string;
+	sessionId: string;
+	timestamp: Date;
+	properties: Record<string, unknown>;
+	userAgent?: string;
+	referrer?: string;
+	utm?: {
+		source?: string;
+		medium?: string;
+		campaign?: string;
+		term?: string;
+		content?: string;
+	};
 }
 
 export interface AnalyticsSummary {
-  configId: string;
-  period: "day" | "week" | "month";
-  pageViews: number;
-  uniqueVisitors: number;
-  bounceRate: number;
-  averageSessionDuration: number;
-  topProducts: Array<{
-    productId: string;
-    views: number;
-    clicks: number;
-    conversions: number;
-  }>;
-  topSources: Array<{
-    source: string;
-    visits: number;
-    conversions: number;
-  }>;
+	configId: string;
+	period: "day" | "week" | "month";
+	pageViews: number;
+	uniqueVisitors: number;
+	bounceRate: number;
+	averageSessionDuration: number;
+	topProducts: Array<{
+		productId: string;
+		views: number;
+		clicks: number;
+		conversions: number;
+	}>;
+	topSources: Array<{
+		source: string;
+		visits: number;
+		conversions: number;
+	}>;
 }
 
 // Error types
 export interface AppError {
-  code: string;
-  message: string;
-  details?: unknown;
-  timestamp: Date;
-  stack?: string;
-  userId?: string;
-  configId?: string;
+	code: string;
+	message: string;
+	details?: unknown;
+	timestamp: Date;
+	stack?: string;
+	userId?: string;
+	configId?: string;
 }
 
 // Feature flags
 export interface FeatureFlags {
-  enableAdvancedAnalytics: boolean;
-  enableABTesting: boolean;
-  enableVideoCards: boolean;
-  enableCustomCSS: boolean;
-  enableMultiLanguage: boolean;
-  maxConfigsPerShop: number;
-  maxCategoriesPerConfig: number;
-  maxItemsPerCategory: number;
+	enableAdvancedAnalytics: boolean;
+	enableABTesting: boolean;
+	enableVideoCards: boolean;
+	enableCustomCSS: boolean;
+	enableMultiLanguage: boolean;
+	maxConfigsPerShop: number;
+	maxCategoriesPerConfig: number;
+	maxItemsPerCategory: number;
 }
 
 // Utility types
 export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+	[P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
 export type RequiredKeys<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
-export type OptionalKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type OptionalKeys<T, K extends keyof T> = Omit<T, K> &
+	Partial<Pick<T, K>>;
 
 // Event types for real-time updates
 export type ConfigEvent =
-  | { type: "CONFIG_CREATED"; configId: string; data: SiteConfig }
-  | { type: "CONFIG_UPDATED"; configId: string; data: Partial<SiteConfig> }
-  | { type: "CONFIG_PUBLISHED"; configId: string; versionId: string }
-  | { type: "CONFIG_DELETED"; configId: string };
+	| { type: "CONFIG_CREATED"; configId: string; data: SiteConfig }
+	| { type: "CONFIG_UPDATED"; configId: string; data: Partial<SiteConfig> }
+	| { type: "CONFIG_PUBLISHED"; configId: string; versionId: string }
+	| { type: "CONFIG_DELETED"; configId: string };
 
 export type CartEvent =
-  | { type: "ITEM_ADDED"; cartId: string; item: CartItem }
-  | { type: "ITEM_REMOVED"; cartId: string; itemId: string }
-  | {
-      type: "ITEM_UPDATED";
-      cartId: string;
-      itemId: string;
-      updates: Partial<CartItem>;
-    }
-  | { type: "CART_CLEARED"; cartId: string };
+	| { type: "ITEM_ADDED"; cartId: string; item: CartItem }
+	| { type: "ITEM_REMOVED"; cartId: string; itemId: string }
+	| {
+			type: "ITEM_UPDATED";
+			cartId: string;
+			itemId: string;
+			updates: Partial<CartItem>;
+	  }
+	| { type: "CART_CLEARED"; cartId: string };
 
 // Constants
 export const CARD_TYPES = ["image", "video", "product", "grid"] as const;
@@ -372,217 +378,228 @@ export type ThemeRadius = (typeof THEME_RADIUS_OPTIONS)[number];
 
 // Enhanced interactivity types
 export interface ProductTag {
-  productId: string;
-  position: {
-    x: number; // 0-1 relative position
-    y: number; // 0-1 relative position
-  };
-  label?: string;
+	productId: string;
+	position: {
+		x: number; // 0-1 relative position
+		y: number; // 0-1 relative position
+	};
+	label?: string;
 }
 
 export interface ClickAction {
-  type: "modal" | "quickview" | "link" | "cart";
-  target?: string; // postId, productId, or URL
-  data?: unknown; // Additional action data
+	type: "modal" | "quickview" | "link" | "cart";
+	target?: string; // postId, productId, or URL
+	data?: unknown; // Additional action data
 }
 
 export interface HoverEffect {
-  type: "zoom" | "fade" | "slide" | "overlay";
-  intensity?: number; // 0-1 scale
-  duration?: number; // milliseconds
+	type: "zoom" | "fade" | "slide" | "overlay";
+	intensity?: number; // 0-1 scale
+	duration?: number; // milliseconds
 }
 
 export interface AnimationSettings {
-  transitions: {
-    duration: number; // Default transition duration in ms
-    easing: string; // CSS easing function
-  };
-  modals: {
-    fadeIn: number;
-    slideIn: number;
-    backdrop: {
-      opacity: number;
-      blur: number;
-    };
-  };
-  hover: {
-    scale: number; // Default hover scale
-    duration: number;
-  };
+	transitions: {
+		duration: number; // Default transition duration in ms
+		easing: string; // CSS easing function
+	};
+	modals: {
+		fadeIn: number;
+		slideIn: number;
+		backdrop: {
+			opacity: number;
+			blur: number;
+		};
+	};
+	hover: {
+		scale: number; // Default hover scale
+		duration: number;
+	};
 }
 
 export interface ModalSettings {
-  backdrop: {
-    blur: boolean;
-    opacity: number;
-  };
-  positioning: {
-    centered: boolean;
-    offsetY?: number;
-  };
-  behavior: {
-    closeOnBackdrop: boolean;
-    closeOnEscape: boolean;
-    preventScroll: boolean;
-  };
+	backdrop: {
+		blur: boolean;
+		opacity: number;
+	};
+	positioning: {
+		centered: boolean;
+		offsetY?: number;
+	};
+	behavior: {
+		closeOnBackdrop: boolean;
+		closeOnEscape: boolean;
+		preventScroll: boolean;
+	};
 }
 
 // Enhanced Layout System Types
 export interface LayoutConfig {
-  preset: LayoutPreset;
-  rows: number; // 1-6
-  columns: number; // 1-4
-  gutter: number; // 0-32 px
-  outerMargin: number; // 0-64 px
-  borderRadius: number; // 0-24 px
-  hoverZoom: boolean;
-  aspect: AspectRatio;
-  mediaFilter: MediaFilter;
-  responsive?: ResponsiveOverrides;
-  blockId: string; // Stable ID for analytics
-  experimentKey?: string; // A/B variant label
+	preset: LayoutPreset;
+	rows: number; // 1-6
+	columns: number; // 1-4
+	gutter: number; // 0-32 px
+	outerMargin: number; // 0-64 px
+	borderRadius: number; // 0-24 px
+	hoverZoom: boolean;
+	aspect: AspectRatio;
+	mediaFilter: MediaFilter;
+	responsive?: ResponsiveOverrides;
+	blockId: string; // Stable ID for analytics
+	experimentKey?: string; // A/B variant label
 }
 
 export interface ResponsiveOverrides {
-  sm?: Partial<Pick<LayoutConfig, 'rows' | 'columns' | 'gutter' | 'outerMargin'>>;
-  md?: Partial<Pick<LayoutConfig, 'rows' | 'columns' | 'gutter' | 'outerMargin'>>;
-  lg?: Partial<Pick<LayoutConfig, 'rows' | 'columns' | 'gutter' | 'outerMargin'>>;
+	sm?: Partial<
+		Pick<LayoutConfig, "rows" | "columns" | "gutter" | "outerMargin">
+	>;
+	md?: Partial<
+		Pick<LayoutConfig, "rows" | "columns" | "gutter" | "outerMargin">
+	>;
+	lg?: Partial<
+		Pick<LayoutConfig, "rows" | "columns" | "gutter" | "outerMargin">
+	>;
 }
 
 // Analytics and Attribution Types
 export interface PixelSettings {
-  facebook?: string;
-  google?: string;
-  tiktok?: string;
-  pinterest?: string;
-  snapchat?: string;
-  custom?: Array<{
-    name: string;
-    id: string;
-    type: 'script' | 'pixel' | 'tag';
-  }>;
+	facebook?: string;
+	google?: string;
+	tiktok?: string;
+	pinterest?: string;
+	snapchat?: string;
+	custom?: Array<{
+		name: string;
+		id: string;
+		type: "script" | "pixel" | "tag";
+	}>;
 }
 
 export interface ExperimentConfig {
-  key: string;
-  name: string;
-  description?: string;
-  targets: ExperimentTarget[];
-  trafficSplit: number; // 0-100 percentage
-  status: 'draft' | 'running' | 'paused' | 'completed';
-  startDate?: string;
-  endDate?: string;
+	key: string;
+	name: string;
+	description?: string;
+	targets: ExperimentTarget[];
+	trafficSplit: number; // 0-100 percentage
+	status: "draft" | "running" | "paused" | "completed";
+	startDate?: string;
+	endDate?: string;
 }
 
 export interface ExperimentTarget {
-  blockId: string;
-  variantPercent: number; // 0-100
+	blockId: string;
+	variantPercent: number; // 0-100
 }
 
 // Enhanced Analytics Events
 export interface EnhancedAnalyticsEvent extends AnalyticsEvent {
-  blockId?: string;
-  layoutPreset?: LayoutPreset;
-  variantId?: string;
-  experimentKey?: string;
-  device: DeviceType;
-  country?: string;
+	blockId?: string;
+	layoutPreset?: LayoutPreset;
+	variantId?: string;
+	experimentKey?: string;
+	device: DeviceType;
+	country?: string;
 }
 
 // Template System Types
 export interface LayoutTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: TemplateCategory;
-  layout: LayoutConfig;
-  preview?: string;
-  tags: string[];
+	id: string;
+	name: string;
+	description: string;
+	category: TemplateCategory;
+	layout: LayoutConfig;
+	preview?: string;
+	tags: string[];
 }
 
 // Database Extension Types
 export interface Shop {
-  shopDomain: string;
-  storefrontAccessToken: string;
-  createdAt: string;
-  updatedAt: string;
+	shopDomain: string;
+	storefrontAccessToken: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface Asset {
-  id: string;
-  shopDomain: string;
-  type: 'image' | 'video';
-  r2Key: string;
-  originalFilename: string;
-  fileSize: number;
-  dimensions?: {
-    width: number;
-    height: number;
-  };
-  variants: AssetVariant[];
-  createdAt: string;
-  updatedAt: string;
+	id: string;
+	shopDomain: string;
+	type: "image" | "video";
+	r2Key: string;
+	originalFilename: string;
+	fileSize: number;
+	dimensions?: {
+		width: number;
+		height: number;
+	};
+	variants: AssetVariant[];
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface AssetVariant {
-  key: string;
-  width: number;
-  height: number;
-  format: string;
-  quality?: number;
+	key: string;
+	width: number;
+	height: number;
+	format: string;
+	quality?: number;
 }
 
 export interface UsageRollup {
-  id: string;
-  shopDomain: string;
-  month: string; // YYYY-MM format
-  mau: number; // Monthly Active Users
-  impressions: number;
-  checkouts: number;
-  revenue: number; // in cents
-  createdAt: string;
+	id: string;
+	shopDomain: string;
+	month: string; // YYYY-MM format
+	mau: number; // Monthly Active Users
+	impressions: number;
+	checkouts: number;
+	revenue: number; // in cents
+	createdAt: string;
 }
 
 // Type Unions and Constants
-export const LAYOUT_PRESETS = ['grid', 'masonry', 'slider', 'stories'] as const;
-export const ASPECT_RATIOS = ['1:1', '4:5', '9:16', 'auto'] as const;
-export const MEDIA_FILTERS = ['all', 'photo', 'video'] as const;
-export const DEVICE_TYPES = ['mobile', 'tablet', 'desktop'] as const;
-export const TEMPLATE_CATEGORIES = ['classic', 'minimal', 'video', 'ecommerce'] as const;
+export const LAYOUT_PRESETS = ["grid", "masonry", "slider", "stories"] as const;
+export const ASPECT_RATIOS = ["1:1", "4:5", "9:16", "auto"] as const;
+export const MEDIA_FILTERS = ["all", "photo", "video"] as const;
+export const DEVICE_TYPES = ["mobile", "tablet", "desktop"] as const;
+export const TEMPLATE_CATEGORIES = [
+	"classic",
+	"minimal",
+	"video",
+	"ecommerce",
+] as const;
 
-export type LayoutPreset = typeof LAYOUT_PRESETS[number];
-export type AspectRatio = typeof ASPECT_RATIOS[number];
-export type MediaFilter = typeof MEDIA_FILTERS[number];
-export type DeviceType = typeof DEVICE_TYPES[number];
-export type TemplateCategory = typeof TEMPLATE_CATEGORIES[number];
+export type LayoutPreset = (typeof LAYOUT_PRESETS)[number];
+export type AspectRatio = (typeof ASPECT_RATIOS)[number];
+export type MediaFilter = (typeof MEDIA_FILTERS)[number];
+export type DeviceType = (typeof DEVICE_TYPES)[number];
+export type TemplateCategory = (typeof TEMPLATE_CATEGORIES)[number];
 
 // UTM Tracking Types
 export interface UTMParameters {
-  source?: string;
-  medium?: string;
-  campaign?: string;
-  term?: string;
-  content?: string;
+	source?: string;
+	medium?: string;
+	campaign?: string;
+	term?: string;
+	content?: string;
 }
 
 export interface AttributionData {
-  configId: string;
-  blockId: string;
-  layoutPreset: LayoutPreset;
-  experimentKey?: string;
-  utm: UTMParameters;
-  sessionId: string;
-  device: DeviceType;
-  timestamp: Date;
+	configId: string;
+	blockId: string;
+	layoutPreset: LayoutPreset;
+	experimentKey?: string;
+	utm: UTMParameters;
+	sessionId: string;
+	device: DeviceType;
+	timestamp: Date;
 }
 
 // Revenue Attribution Types
 export interface RevenueAttribution extends AttributionData {
-  orderId: string;
-  lineItemId: string;
-  productId: string;
-  variantId: string;
-  quantity: number;
-  price: number; // in cents
-  revenue: number; // in cents (price * quantity)
+	orderId: string;
+	lineItemId: string;
+	productId: string;
+	variantId: string;
+	quantity: number;
+	price: number; // in cents
+	revenue: number; // in cents (price * quantity)
 }
