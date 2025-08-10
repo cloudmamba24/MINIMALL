@@ -1,4 +1,5 @@
 import { UTMUtils } from "../components/tracking/UTMTracker";
+import { createAttributionData } from "./type-utils";
 
 /**
  * Cart Attribution System
@@ -210,8 +211,8 @@ export function trackAttributionEvent(
   additionalData: Record<string, any> = {}
 ) {
   // Dispatch analytics event with full attribution context
-  if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', event, {
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    (window as any).gtag('event', event, {
       config_id: attributionData.configId,
       block_id: attributionData.blockId,
       layout_preset: attributionData.layoutPreset,
@@ -243,14 +244,7 @@ export function getPageAttribution(
   // This would typically be passed down from the component context
   // or extracted from URL parameters in a real implementation
   
-  return {
-    configId,
-    categoryId,
-    itemId,
-    // blockId would be determined by the specific layout block being interacted with
-    // layoutPreset would come from the category's layout configuration
-    // experimentKey would be determined by any active A/B tests
-  };
+  return createAttributionData({ configId, categoryId, itemId });
 }
 
 /**

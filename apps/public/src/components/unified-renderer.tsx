@@ -9,6 +9,7 @@ import { LayoutSwitch } from "./renderers/LayoutSwitch";
 import { UTMTracker } from "./tracking/UTMTracker";
 import { PixelDispatcher } from "./tracking/PixelDispatcher";
 import { cn } from "../lib/utils";
+import { conditionalProps } from "../lib/type-utils";
 import "../styles/instagram-native.css";
 
 interface UnifiedRendererProps {
@@ -54,9 +55,9 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
 
       {/* Main Content Rendering */}
       {renderMode === "instagram-native" ? (
-        <MobileNativeRenderer config={config} className={className} />
+        <MobileNativeRenderer config={config} {...conditionalProps({ className })} />
       ) : (
-        <DesktopLayoutRenderer config={config} className={className} />
+        <DesktopLayoutRenderer config={config} {...conditionalProps({ className })} />
       )}
 
       {/* Shared Components */}
@@ -100,13 +101,15 @@ function MobileNativeRenderer({ config, className }: { config: SiteConfig; class
             <LayoutSwitch
               category={category}
               configId={config.id}
-              experiments={config.settings.experiments}
+              {...conditionalProps({ 
+                experiments: config.settings.experiments,
+                className: "instagram-grid"
+              })}
               onTileClick={(clickedCategory, clickIndex) => {
                 // Mobile-native modal handling
                 console.log('Mobile tile clicked:', clickedCategory.id, clickIndex);
                 // TODO: Implement mobile modal with swipe gestures
               }}
-              className="instagram-grid"
             />
           ) : (
             // Fallback to existing InstagramRenderer for categories without layout
@@ -133,13 +136,15 @@ function DesktopLayoutRenderer({ config, className }: { config: SiteConfig; clas
               <LayoutSwitch
                 category={category}
                 configId={config.id}
-                experiments={config.settings.experiments}
+                {...conditionalProps({ 
+                  experiments: config.settings.experiments,
+                  className: "desktop-layout"
+                })}
                 onTileClick={(clickedCategory, clickIndex) => {
                   // Desktop modal handling
                   console.log('Desktop tile clicked:', clickedCategory.id, clickIndex);
                   // TODO: Implement desktop modal system
                 }}
-                className="desktop-layout"
               />
             </div>
           ) : (

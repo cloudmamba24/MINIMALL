@@ -1,20 +1,21 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { Category, LayoutConfig, SiteConfig } from "@minimall/core/types";
+import { Category, LayoutConfig, SiteConfig } from "@minimall/core";
 import { GridRenderer } from "./GridRenderer";
 import { MasonryRenderer } from "./MasonryRenderer";
 import { SliderRenderer } from "./SliderRenderer";
 import { StoriesRenderer } from "./StoriesRenderer";
 import { routeExperiment, trackExperimentExposure, ExperimentContext } from "../../lib/experiment-router";
 import { UTMUtils } from "../tracking/UTMTracker";
+import { conditionalProps } from "../../lib/type-utils";
 
 interface LayoutSwitchProps {
   category: Category;
   onTileClick?: (category: Category, index: number) => void;
   className?: string;
   configId?: string;
-  experiments?: Array<import("@minimall/core/types").ExperimentConfig>;
+  experiments?: Array<import("@minimall/core").ExperimentConfig>;
 }
 
 // Default layout configuration
@@ -90,8 +91,7 @@ export function LayoutSwitch({
         <GridRenderer
           category={category}
           layout={finalLayout}
-          onTileClick={onTileClick}
-          className={className}
+          {...conditionalProps({ className, onTileClick })}
         />
       );
 
@@ -100,8 +100,7 @@ export function LayoutSwitch({
         <MasonryRenderer
           category={category}
           layout={finalLayout}
-          onTileClick={onTileClick}
-          className={className}
+          {...conditionalProps({ className, onTileClick })}
         />
       );
 
@@ -110,8 +109,7 @@ export function LayoutSwitch({
         <SliderRenderer
           category={category}
           layout={finalLayout}
-          onTileClick={onTileClick}
-          className={className}
+          {...conditionalProps({ className, onTileClick })}
         />
       );
 
@@ -120,8 +118,7 @@ export function LayoutSwitch({
         <StoriesRenderer
           category={category}
           layout={finalLayout}
-          onTileClick={onTileClick}
-          className={className}
+          {...conditionalProps({ className, onTileClick })}
         />
       );
 
@@ -132,8 +129,7 @@ export function LayoutSwitch({
         <GridRenderer
           category={{ ...category, layout: { ...finalLayout, preset: 'grid' } }}
           layout={{ ...finalLayout, preset: 'grid' }}
-          onTileClick={onTileClick}
-          className={className}
+          {...conditionalProps({ className, onTileClick })}
         />
       );
   }

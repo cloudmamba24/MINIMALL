@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Category, LayoutConfig } from "@minimall/core/types";
+import { Category, LayoutConfig } from "@minimall/core";
 import { cn } from "../../lib/utils";
+import { conditionalProps } from "../../lib/type-utils";
 
 interface SliderRendererProps {
   category: Category;
@@ -174,7 +175,7 @@ export function SliderRenderer({
                 aspectRatio: getAspectRatio(),
                 borderRadius: `${layout.borderRadius}px`,
               }}
-              whileHover={layout.hoverZoom ? { scale: 1.05 } : undefined}
+              {...(layout.hoverZoom ? { whileHover: { scale: 1.05 } } : {})}
               transition={{ duration: 0.3, ease: "easeOut" }}
               onClick={() => handleTileClick(item, index)}
             >

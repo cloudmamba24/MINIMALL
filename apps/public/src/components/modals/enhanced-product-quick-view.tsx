@@ -61,9 +61,6 @@ export function EnhancedProductQuickView() {
 
     setIsAddingToCart(true);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
     const optionsString = selectedVariant.selectedOptions
       .map((opt: { name: string; value: string }) => opt.value)
       .join(" / ");

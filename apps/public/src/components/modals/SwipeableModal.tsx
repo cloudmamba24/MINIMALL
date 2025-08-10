@@ -255,7 +255,7 @@ export function SwipeableModal({
               drag={showNavigation ? "x" : false}
               dragConstraints={{ left: -50, right: 50 }}
               dragElastic={0.1}
-              onDragEnd={showNavigation ? handleHorizontalSwipe : undefined}
+              {...(showNavigation ? { onDragEnd: handleHorizontalSwipe } : {})}
             >
               {children}
             </motion.div>

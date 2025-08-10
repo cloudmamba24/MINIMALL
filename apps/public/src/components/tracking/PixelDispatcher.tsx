@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { PixelSettings } from "@minimall/core/types";
+import { PixelSettings } from "@minimall/core";
 import { UTMUtils } from "./UTMTracker";
 
 interface PixelDispatcherProps {

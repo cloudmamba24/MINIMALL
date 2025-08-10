@@ -18,7 +18,7 @@ export interface ShopifyCartState {
  */
 export class ShopifyCartIntegration {
   private shopDomain: string;
-  private client: ReturnType<typeof createShopifyClient> | null;
+  private clientPromise: ReturnType<typeof createShopifyClient>;
   private state: ShopifyCartState = {
     cartId: null,
     isLoading: false,
@@ -28,7 +28,7 @@ export class ShopifyCartIntegration {
 
   constructor(shopDomain: string) {
     this.shopDomain = normalizeShopDomain(shopDomain);
-    this.client = createShopifyClient(this.shopDomain);
+    this.clientPromise = createShopifyClient(this.shopDomain);
 
     // Load persisted cart state
     this.loadPersistedState();
@@ -38,7 +38,8 @@ export class ShopifyCartIntegration {
    * Initialize or get existing Shopify cart
    */
   async getOrCreateCart(items: UICartItem[] = []): Promise<string | null> {
-    if (!this.client) {
+    const client = await this.clientPromise;
+    if (!client) {
       console.warn("Shopify client not available, skipping cart creation");
       return null;
     }
@@ -49,7 +50,7 @@ export class ShopifyCartIntegration {
       // If we have an existing cart ID, try to use it
       if (this.state.cartId) {
         try {
-          const existingCart = await this.client.getCart(this.state.cartId);
+          const existingCart = await client.getCart(this.state.cartId);
           if (existingCart) {
             this.state.checkoutUrl = existingCart.checkoutUrl;
             this.persistState();
@@ -67,7 +68,7 @@ export class ShopifyCartIntegration {
         quantity: item.quantity,
       }));
 
-      const newCart = await this.client.createCart(cartLines);
+      const newCart = await client.createCart(cartLines);
 
       if (newCart) {
         this.state.cartId = newCart.id;
@@ -92,7 +93,8 @@ export class ShopifyCartIntegration {
    * Add items to Shopify cart
    */
   async addToCart(items: UICartItem[]): Promise<boolean> {
-    if (!this.client) return false;
+    const client = await this.clientPromise;
+    if (!client) return false;
 
     try {
       this.state.isLoading = true;
@@ -106,7 +108,7 @@ export class ShopifyCartIntegration {
         quantity: item.quantity,
       }));
 
-      const updatedCart = await this.client.addToCart(cartId, cartLines);
+      const updatedCart = await client.addToCart(cartId, cartLines);
 
       if (updatedCart) {
         this.state.checkoutUrl = updatedCart.checkoutUrl;
@@ -128,7 +130,8 @@ export class ShopifyCartIntegration {
    * Sync local cart with Shopify cart
    */
   async syncCart(localItems: UICartItem[]): Promise<boolean> {
-    if (!this.client || localItems.length === 0) return false;
+    const client = await this.clientPromise;
+    if (!client || localItems.length === 0) return false;
 
     try {
       this.state.isLoading = true;
@@ -148,7 +151,8 @@ export class ShopifyCartIntegration {
    * Get checkout URL for current cart
    */
   async getCheckoutUrl(localItems: UICartItem[]): Promise<string | null> {
-    if (!this.client) {
+    const client = await this.clientPromise;
+    if (!client) {
       // Fallback to basic Shopify cart URL
       const params = localItems.map((item) => `${item.variantId}:${item.quantity}`).join(",");
       return `https://${this.shopDomain}/cart/${params}`;

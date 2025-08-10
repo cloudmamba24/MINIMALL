@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
 import { Play, Pause, Volume2, VolumeX } from "lucide-react";
-import { Category, LayoutConfig } from "@minimall/core/types";
+import { Category, LayoutConfig } from "@minimall/core";
 import { cn } from "../../lib/utils";
+import { safeArrayAccess } from "../../lib/type-utils";
 
 interface StoriesRendererProps {
   category: Category;
@@ -163,7 +164,14 @@ export function StoriesRenderer({
     );
   }
 
-  const currentItem = filteredItems[currentIndex];
+  const currentItem = safeArrayAccess(filteredItems, currentIndex);
+  if (!currentItem) {
+    return (
+      <div className={cn("flex items-center justify-center h-full text-gray-500", className)}>
+        Story not found
+      </div>
+    );
+  }
   const cardDetails = currentItem.card[1];
 
   return (

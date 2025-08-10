@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { UTMParameters } from "@minimall/core/types";
+import { UTMParameters } from "@minimall/core";
+import { createUTMParams } from "../../lib/type-utils";
 
 interface UTMTrackerProps {
   configId: string;
@@ -72,14 +73,7 @@ function captureUTMParameters(): UTMParameters {
   if (typeof window === "undefined") return {};
 
   const urlParams = new URLSearchParams(window.location.search);
-  
-  return {
-    source: urlParams.get("utm_source") || undefined,
-    medium: urlParams.get("utm_medium") || undefined,
-    campaign: urlParams.get("utm_campaign") || undefined,
-    term: urlParams.get("utm_term") || undefined,
-    content: urlParams.get("utm_content") || undefined,
-  };
+  return createUTMParams(urlParams);
 }
 
 /**

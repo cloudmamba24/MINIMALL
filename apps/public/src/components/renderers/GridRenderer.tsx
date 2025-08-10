@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Category, LayoutConfig } from "@minimall/core/types";
+import { Category, LayoutConfig } from "@minimall/core";
 import { cn } from "../../lib/utils";
 
 interface GridRendererProps {

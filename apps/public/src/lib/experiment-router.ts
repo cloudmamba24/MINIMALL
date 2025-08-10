@@ -1,4 +1,5 @@
-import { Category, ExperimentConfig, LayoutConfig } from "@minimall/core/types";
+import { Category, ExperimentConfig, LayoutConfig } from "@minimall/core";
+import { safeArrayAccess } from "./type-utils";
 
 /**
  * A/B Testing Experiment Router
@@ -46,7 +47,11 @@ export function routeExperiment(
   }
 
   // For multiple experiments, use the first one (in practice, avoid overlapping experiments)
-  const experiment = activeExperiments[0];
+  const experiment = safeArrayAccess(activeExperiments, 0);
+  if (!experiment) {
+    return null;
+  }
+  
   const target = experiment.targets.find(t => t.blockId === category.layout!.blockId);
   
   if (!target) {
@@ -141,14 +146,20 @@ function applyExperimentVariant(
   if (experiment.key.includes('preset')) {
     const presets: Array<LayoutConfig['preset']> = ['grid', 'masonry', 'slider'];
     const currentIndex = presets.indexOf(baseLayout.preset);
-    variantLayout.preset = presets[(currentIndex + 1) % presets.length];
+    const nextPreset = safeArrayAccess(presets, (currentIndex + 1) % presets.length);
+    if (nextPreset) {
+      variantLayout.preset = nextPreset;
+    }
   }
   
   // Example: Test different aspect ratios
   if (experiment.key.includes('aspect')) {
     const aspects: Array<LayoutConfig['aspect']> = ['1:1', '4:5', '9:16'];
     const currentIndex = aspects.indexOf(baseLayout.aspect);
-    variantLayout.aspect = aspects[(currentIndex + 1) % aspects.length];
+    const nextAspect = safeArrayAccess(aspects, (currentIndex + 1) % aspects.length);
+    if (nextAspect) {
+      variantLayout.aspect = nextAspect;
+    }
   }
   
   // Mark this layout as a variant for tracking
@@ -167,8 +178,8 @@ export function trackExperimentExposure(
   // Track the experiment exposure event
   if (typeof window !== 'undefined') {
     // Google Analytics
-    if (window.gtag) {
-      window.gtag('event', 'experiment_exposure', {
+    if ((window as any).gtag) {
+      (window as any).gtag('event', 'experiment_exposure', {
         experiment_key: result.experimentKey,
         variant_id: result.variantId,
         is_control: result.isControl,
@@ -268,17 +279,18 @@ export function createSimpleExperiment(
   trafficPercent: number,
   description?: string
 ): ExperimentConfig {
-  return {
+  const config: any = {
     key,
     name,
-    description,
     targets: [{
       blockId,
       variantPercent: trafficPercent,
     }],
     trafficSplit: trafficPercent,
     status: 'draft',
-    startDate: undefined,
-    endDate: undefined,
   };
+  
+  if (description) config.description = description;
+  
+  return config;
 }

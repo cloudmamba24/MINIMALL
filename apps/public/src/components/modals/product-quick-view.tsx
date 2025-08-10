@@ -58,8 +58,6 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
     setIsAddingToCart(true);
 
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
 
       const optionsString = selectedVariant.selectedOptions
         .map((opt: { name: string; value: string }) => opt.value)

@@ -1,6 +1,7 @@
-import { EnhancedAnalyticsEvent, LayoutPreset, DeviceType } from "@minimall/core/types";
+import { EnhancedAnalyticsEvent, LayoutPreset, DeviceType } from "@minimall/core";
 import { UTMUtils } from "../components/tracking/UTMTracker";
 import { PixelUtils } from "../components/tracking/PixelDispatcher";
+import { conditionalProps } from "./type-utils";
 
 /**
  * Enhanced Analytics System
@@ -301,28 +302,13 @@ export class EnhancedAnalytics {
     const utmData = UTMUtils.getUTMData(this.configId);
     const sessionData = UTMUtils.getSessionData(this.configId);
     
-    return {
+    const baseEvent: Partial<EnhancedAnalyticsEvent> = {
       event: data.event,
       configId: this.configId,
       sessionId: sessionData?.sessionId || '',
       timestamp: new Date(),
-      
-      // Event-specific data
-      blockId: data.blockId,
-      layoutPreset: data.layoutPreset,
-      variantId: data.variantId,
-      experimentKey: data.experimentKey,
-      
-      // Device and session info
       device: (sessionData?.device as DeviceType) || 'desktop',
-      country: undefined, // TODO: Add geo-location if needed
-      userAgent: sessionData?.userAgent,
-      referrer: sessionData?.referrer,
-      
-      // UTM attribution
       utm: utmData?.utm || {},
-      
-      // Event properties
       properties: {
         ...data.properties,
         product_id: data.productId,
@@ -336,12 +322,28 @@ export class EnhancedAnalytics {
         session_duration: Math.floor((Date.now() - this.sessionStartTime) / 1000),
       },
     };
+    
+    // Add optional properties only if they exist
+    const enrichedEvent = {
+      ...baseEvent,
+      ...conditionalProps({
+        blockId: data.blockId,
+        layoutPreset: data.layoutPreset,
+        variantId: data.variantId,
+        experimentKey: data.experimentKey,
+        country: undefined, // TODO: Add geo-location if needed
+        userAgent: sessionData?.userAgent,
+        referrer: sessionData?.referrer,
+      }),
+    };
+    
+    return enrichedEvent as EnhancedAnalyticsEvent;
   }
   
   /**
    * Send event to analytics endpoint
    */
-  private async sendEvent(eventData: EnhancedAnalyticsEvent): Promise<void> {
+  async sendEvent(eventData: EnhancedAnalyticsEvent): Promise<void> {
     try {
       const response = await fetch('/api/analytics/events', {
         method: 'POST',
@@ -452,13 +454,16 @@ export function createImpressionTracker(
           const layoutPreset = element.dataset.layoutPreset as LayoutPreset;
           
           if (blockId) {
-            analytics.trackTileImpression({
+            const impressionData: any = {
               configId: analytics['configId'],
               blockId,
-              itemId,
-              categoryId,
               layoutPreset,
-            });
+            };
+            
+            if (itemId) impressionData.itemId = itemId;
+            if (categoryId) impressionData.categoryId = categoryId;
+            
+            analytics.trackTileImpression(impressionData);
           }
         }
       });
@@ -484,7 +489,9 @@ export function setupPerformanceTracking(analytics: EnhancedAnalytics) {
   new PerformanceObserver((list) => {
     const entries = list.getEntries();
     const lastEntry = entries[entries.length - 1];
-    lcp = lastEntry.startTime;
+    if (lastEntry) {
+      lcp = lastEntry.startTime;
+    }
   }).observe({ entryTypes: ['largest-contentful-paint'] });
   
   // First Input Delay
@@ -507,12 +514,14 @@ export function setupPerformanceTracking(analytics: EnhancedAnalytics) {
   
   // Send performance data when page is about to unload
   window.addEventListener('beforeunload', () => {
-    analytics.trackPerformance({
-      lcp,
-      fid,
+    const perfData: any = {
       cls,
-      ttfb: undefined, // Can be calculated from Navigation Timing API
       loadTime: performance.now(),
-    });
+    };
+    
+    if (lcp !== undefined) perfData.lcp = lcp;
+    if (fid !== undefined) perfData.fid = fid;
+    
+    analytics.trackPerformance(perfData);
   });
 }

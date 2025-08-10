@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Category, LayoutConfig } from "@minimall/core/types";
+import { Category, LayoutConfig } from "@minimall/core";
 import { cn } from "../../lib/utils";
+import { safeArrayAccess } from "../../lib/type-utils";
 
 interface MasonryRendererProps {
   category: Category;
@@ -133,11 +134,12 @@ export function MasonryRenderer({
   // Get column for next item (shortest column)
   const getShortestColumn = (heights: number[]) => {
     let shortestIndex = 0;
-    let shortestHeight = heights[0];
+    let shortestHeight = safeArrayAccess(heights, 0) || 0;
     
     for (let i = 1; i < heights.length; i++) {
-      if (heights[i] < shortestHeight) {
-        shortestHeight = heights[i];
+      const height = safeArrayAccess(heights, i) || 0;
+      if (height < shortestHeight) {
+        shortestHeight = height;
         shortestIndex = i;
       }
     }
@@ -171,11 +173,17 @@ export function MasonryRenderer({
     for (let i = 0; i <= index; i++) {
       itemColumn = getShortestColumn(tempHeights);
       if (i === index) break;
-      tempHeights[itemColumn] += masonryItems[i].height + layout.gutter;
+      
+      const currentHeight = safeArrayAccess(tempHeights, itemColumn);
+      const currentItem = safeArrayAccess(masonryItems, i);
+      
+      if (currentHeight !== undefined && currentItem) {
+        tempHeights[itemColumn] = currentHeight + currentItem.height + layout.gutter;
+      }
     }
     
     const x = itemColumn * (columnWidth + layout.gutter);
-    const y = tempHeights[itemColumn];
+    const y = safeArrayAccess(tempHeights, itemColumn) || 0;
     
     return {
       position: 'absolute' as const,
