@@ -43,10 +43,12 @@ export const configVersions = pgTable(
     createdBy: text("created_by").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     publishedAt: timestamp("published_at", { withTimezone: true }),
+    scheduledAt: timestamp("scheduled_at", { withTimezone: true }), // New field for scheduling
   },
   (table) => ({
     configIdIdx: index("config_id_idx").on(table.configId),
     publishedIdx: index("published_idx").on(table.isPublished),
+    scheduledIdx: index("scheduled_idx").on(table.scheduledAt),
   })
 );
 
@@ -113,6 +115,13 @@ export const analyticsEvents = pgTable(
     utmCampaign: varchar("utm_campaign", { length: 100 }),
     utmTerm: varchar("utm_term", { length: 100 }),
     utmContent: varchar("utm_content", { length: 100 }),
+    // Enhanced analytics fields
+    blockId: text("block_id"),
+    layoutPreset: varchar("layout_preset", { length: 50 }),
+    variantId: text("variant_id"),
+    experimentKey: varchar("experiment_key", { length: 100 }),
+    device: varchar("device", { length: 20 }).notNull(),
+    country: varchar("country", { length: 5 }),
     timestamp: timestamp("timestamp", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
@@ -120,6 +129,8 @@ export const analyticsEvents = pgTable(
     eventIdx: index("analytics_event_idx").on(table.event),
     timestampIdx: index("analytics_timestamp_idx").on(table.timestamp),
     sessionIdx: index("analytics_session_idx").on(table.sessionId),
+    blockIdIdx: index("analytics_block_id_idx").on(table.blockId),
+    experimentIdx: index("analytics_experiment_idx").on(table.experimentKey),
   })
 );
 
@@ -178,6 +189,96 @@ export const featureFlags = pgTable(
   })
 );
 
+// Shops table - per-shop storefront tokens
+export const shops = pgTable(
+  "shops",
+  {
+    shopDomain: text("shop_domain").primaryKey(),
+    storefrontAccessToken: text("storefront_access_token").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  }
+);
+
+// Assets table - managed media workflow
+export const assets = pgTable(
+  "assets",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    shopDomain: text("shop_domain").references(() => shops.shopDomain, { onDelete: "cascade" }).notNull(),
+    type: varchar("type", { length: 10 }).notNull(), // 'image' or 'video'
+    r2Key: text("r2_key").notNull(),
+    originalFilename: text("original_filename").notNull(),
+    fileSize: integer("file_size").notNull(),
+    dimensions: jsonb("dimensions"), // { width: number, height: number }
+    variants: jsonb("variants").default([]).notNull(), // AssetVariant[]
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    shopDomainIdx: index("assets_shop_domain_idx").on(table.shopDomain),
+    typeIdx: index("assets_type_idx").on(table.type),
+    r2KeyIdx: index("assets_r2_key_idx").on(table.r2Key),
+  })
+);
+
+// Usage rollups table - MAU tracking
+export const usageRollups = pgTable(
+  "usage_rollups",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    shopDomain: text("shop_domain").references(() => shops.shopDomain, { onDelete: "cascade" }).notNull(),
+    month: varchar("month", { length: 7 }).notNull(), // YYYY-MM format
+    mau: integer("mau").notNull(), // Monthly Active Users
+    impressions: integer("impressions").default(0).notNull(),
+    checkouts: integer("checkouts").default(0).notNull(),
+    revenue: integer("revenue").default(0).notNull(), // in cents
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    shopDomainIdx: index("usage_rollups_shop_domain_idx").on(table.shopDomain),
+    monthIdx: index("usage_rollups_month_idx").on(table.month),
+    uniqueMonthShop: index("usage_rollups_unique_month_shop").on(table.shopDomain, table.month),
+  })
+);
+
+// Revenue attribution table
+export const revenueAttributions = pgTable(
+  "revenue_attributions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    orderId: text("order_id").notNull(),
+    lineItemId: text("line_item_id").notNull(),
+    shopDomain: text("shop_domain").references(() => shops.shopDomain, { onDelete: "cascade" }).notNull(),
+    configId: text("config_id").references(() => configs.id, { onDelete: "cascade" }).notNull(),
+    blockId: text("block_id").notNull(),
+    layoutPreset: varchar("layout_preset", { length: 50 }).notNull(),
+    experimentKey: varchar("experiment_key", { length: 100 }),
+    productId: text("product_id").notNull(),
+    variantId: text("variant_id").notNull(),
+    quantity: integer("quantity").notNull(),
+    price: integer("price").notNull(), // in cents
+    revenue: integer("revenue").notNull(), // in cents (price * quantity)
+    // UTM data
+    utmSource: varchar("utm_source", { length: 100 }),
+    utmMedium: varchar("utm_medium", { length: 100 }),
+    utmCampaign: varchar("utm_campaign", { length: 100 }),
+    utmTerm: varchar("utm_term", { length: 100 }),
+    utmContent: varchar("utm_content", { length: 100 }),
+    sessionId: text("session_id").notNull(),
+    device: varchar("device", { length: 20 }).notNull(),
+    timestamp: timestamp("timestamp", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    orderIdIdx: index("revenue_attr_order_id_idx").on(table.orderId),
+    configIdIdx: index("revenue_attr_config_id_idx").on(table.configId),
+    blockIdIdx: index("revenue_attr_block_id_idx").on(table.blockId),
+    shopDomainIdx: index("revenue_attr_shop_domain_idx").on(table.shopDomain),
+    timestampIdx: index("revenue_attr_timestamp_idx").on(table.timestamp),
+    experimentIdx: index("revenue_attr_experiment_idx").on(table.experimentKey),
+  })
+);
+
 // Relations
 export const configsRelations = relations(configs, ({ many, one }) => ({
   versions: many(configVersions),
@@ -188,6 +289,7 @@ export const configsRelations = relations(configs, ({ many, one }) => ({
   performanceMetrics: many(performanceMetrics),
   analyticsEvents: many(analyticsEvents),
   sessions: many(sessions),
+  revenueAttributions: many(revenueAttributions),
 }));
 
 export const configVersionsRelations = relations(configVersions, ({ one }) => ({
@@ -222,6 +324,37 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
   }),
 }));
 
+export const shopsRelations = relations(shops, ({ many }) => ({
+  assets: many(assets),
+  usageRollups: many(usageRollups),
+  revenueAttributions: many(revenueAttributions),
+}));
+
+export const assetsRelations = relations(assets, ({ one }) => ({
+  shop: one(shops, {
+    fields: [assets.shopDomain],
+    references: [shops.shopDomain],
+  }),
+}));
+
+export const usageRollupsRelations = relations(usageRollups, ({ one }) => ({
+  shop: one(shops, {
+    fields: [usageRollups.shopDomain],
+    references: [shops.shopDomain],
+  }),
+}));
+
+export const revenueAttributionsRelations = relations(revenueAttributions, ({ one }) => ({
+  shop: one(shops, {
+    fields: [revenueAttributions.shopDomain],
+    references: [shops.shopDomain],
+  }),
+  config: one(configs, {
+    fields: [revenueAttributions.configId],
+    references: [configs.id],
+  }),
+}));
+
 // Export all tables for migrations and queries
 export const schema = {
   configs,
@@ -232,6 +365,10 @@ export const schema = {
   webhooks,
   sessions,
   featureFlags,
+  shops,
+  assets,
+  usageRollups,
+  revenueAttributions,
 };
 
 // Type exports for TypeScript inference
@@ -251,3 +388,11 @@ export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
 export type FeatureFlag = typeof featureFlags.$inferSelect;
 export type NewFeatureFlag = typeof featureFlags.$inferInsert;
+export type Shop = typeof shops.$inferSelect;
+export type NewShop = typeof shops.$inferInsert;
+export type Asset = typeof assets.$inferSelect;
+export type NewAsset = typeof assets.$inferInsert;
+export type UsageRollup = typeof usageRollups.$inferSelect;
+export type NewUsageRollup = typeof usageRollups.$inferInsert;
+export type RevenueAttribution = typeof revenueAttributions.$inferSelect;
+export type NewRevenueAttribution = typeof revenueAttributions.$inferInsert;

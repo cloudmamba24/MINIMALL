@@ -17,6 +17,7 @@ export interface Category {
   children?: Category[];
   order?: number;
   visible?: boolean;
+  layout?: LayoutConfig; // New layout system
 }
 
 export interface CardDetails {
@@ -59,6 +60,8 @@ export interface Settings {
   brand?: BrandSettings;
   animations?: AnimationSettings;
   modals?: ModalSettings;
+  pixels?: PixelSettings; // Analytics pixels
+  experiments?: ExperimentConfig[]; // A/B testing
 }
 
 export interface BrandSettings {
@@ -413,4 +416,164 @@ export interface ModalSettings {
     closeOnEscape: boolean;
     preventScroll: boolean;
   };
+}
+
+// Enhanced Layout System Types
+export interface LayoutConfig {
+  preset: LayoutPreset;
+  rows: number; // 1-6
+  columns: number; // 1-4
+  gutter: number; // 0-32 px
+  outerMargin: number; // 0-64 px
+  borderRadius: number; // 0-24 px
+  hoverZoom: boolean;
+  aspect: AspectRatio;
+  mediaFilter: MediaFilter;
+  responsive?: ResponsiveOverrides;
+  blockId: string; // Stable ID for analytics
+  experimentKey?: string; // A/B variant label
+}
+
+export interface ResponsiveOverrides {
+  sm?: Partial<Pick<LayoutConfig, 'rows' | 'columns' | 'gutter' | 'outerMargin'>>;
+  md?: Partial<Pick<LayoutConfig, 'rows' | 'columns' | 'gutter' | 'outerMargin'>>;
+  lg?: Partial<Pick<LayoutConfig, 'rows' | 'columns' | 'gutter' | 'outerMargin'>>;
+}
+
+// Analytics and Attribution Types
+export interface PixelSettings {
+  facebook?: string;
+  google?: string;
+  tiktok?: string;
+  pinterest?: string;
+  snapchat?: string;
+  custom?: Array<{
+    name: string;
+    id: string;
+    type: 'script' | 'pixel' | 'tag';
+  }>;
+}
+
+export interface ExperimentConfig {
+  key: string;
+  name: string;
+  description?: string;
+  targets: ExperimentTarget[];
+  trafficSplit: number; // 0-100 percentage
+  status: 'draft' | 'running' | 'paused' | 'completed';
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface ExperimentTarget {
+  blockId: string;
+  variantPercent: number; // 0-100
+}
+
+// Enhanced Analytics Events
+export interface EnhancedAnalyticsEvent extends AnalyticsEvent {
+  blockId?: string;
+  layoutPreset?: LayoutPreset;
+  variantId?: string;
+  experimentKey?: string;
+  device: DeviceType;
+  country?: string;
+}
+
+// Template System Types
+export interface LayoutTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: TemplateCategory;
+  layout: LayoutConfig;
+  preview?: string;
+  tags: string[];
+}
+
+// Database Extension Types
+export interface Shop {
+  shopDomain: string;
+  storefrontAccessToken: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Asset {
+  id: string;
+  shopDomain: string;
+  type: 'image' | 'video';
+  r2Key: string;
+  originalFilename: string;
+  fileSize: number;
+  dimensions?: {
+    width: number;
+    height: number;
+  };
+  variants: AssetVariant[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AssetVariant {
+  key: string;
+  width: number;
+  height: number;
+  format: string;
+  quality?: number;
+}
+
+export interface UsageRollup {
+  id: string;
+  shopDomain: string;
+  month: string; // YYYY-MM format
+  mau: number; // Monthly Active Users
+  impressions: number;
+  checkouts: number;
+  revenue: number; // in cents
+  createdAt: string;
+}
+
+// Type Unions and Constants
+export const LAYOUT_PRESETS = ['grid', 'masonry', 'slider', 'stories'] as const;
+export const ASPECT_RATIOS = ['1:1', '4:5', '9:16', 'auto'] as const;
+export const MEDIA_FILTERS = ['all', 'photo', 'video'] as const;
+export const DEVICE_TYPES = ['mobile', 'tablet', 'desktop'] as const;
+export const TEMPLATE_CATEGORIES = ['classic', 'minimal', 'video', 'ecommerce'] as const;
+
+export type LayoutPreset = typeof LAYOUT_PRESETS[number];
+export type AspectRatio = typeof ASPECT_RATIOS[number];
+export type MediaFilter = typeof MEDIA_FILTERS[number];
+export type DeviceType = typeof DEVICE_TYPES[number];
+export type TemplateCategory = typeof TEMPLATE_CATEGORIES[number];
+
+// UTM Tracking Types
+export interface UTMParameters {
+  source?: string;
+  medium?: string;
+  campaign?: string;
+  term?: string;
+  content?: string;
+}
+
+export interface AttributionData {
+  configId: string;
+  blockId: string;
+  layoutPreset: LayoutPreset;
+  experimentKey?: string;
+  utm: UTMParameters;
+  sessionId: string;
+  device: DeviceType;
+  timestamp: Date;
+}
+
+// Revenue Attribution Types
+export interface RevenueAttribution extends AttributionData {
+  orderId: string;
+  lineItemId: string;
+  productId: string;
+  variantId: string;
+  quantity: number;
+  price: number; // in cents
+  revenue: number; // in cents (price * quantity)
 }
