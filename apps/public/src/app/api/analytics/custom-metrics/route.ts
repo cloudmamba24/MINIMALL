@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import * as Sentry from '@sentry/nextjs';
-import { db, analyticsEvents } from '@minimall/db';
+import { analyticsEvents, db } from "@minimall/db";
+import * as Sentry from "@sentry/nextjs";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 const customMetricSchema = z.object({
   name: z.string(),
@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
 
     // Add Sentry context
     await Sentry.withScope(async (scope) => {
-      scope.setTag('custom_metric', data.name);
-      scope.setContext('custom_metric', {
+      scope.setTag("custom_metric", data.name);
+      scope.setContext("custom_metric", {
         name: data.name,
         duration: data.duration,
         configId: data.configId,
@@ -37,22 +37,22 @@ export async function POST(request: NextRequest) {
 
       // Add breadcrumb for Sentry
       Sentry.addBreadcrumb({
-        category: 'custom-metric',
+        category: "custom-metric",
         message: `${data.name}: ${data.duration}ms`,
         data: {
           name: data.name,
           duration: data.duration,
           configId: data.configId,
         },
-        level: 'info',
+        level: "info",
       });
 
       // Save to database using analytics events table
       if (db) {
         try {
           await db.insert(analyticsEvents).values({
-            event: 'custom_metric',
-            configId: data.configId || 'unknown',
+            event: "custom_metric",
+            configId: data.configId || "unknown",
             sessionId: data.sessionId || `session_${Date.now()}`,
             userId: data.userId,
             properties: {
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
             timestamp: new Date(data.timestamp),
           });
         } catch (dbError) {
-          console.warn('Failed to save custom metric to database:', dbError);
+          console.warn("Failed to save custom metric to database:", dbError);
           Sentry.captureException(dbError);
         }
       }
@@ -71,12 +71,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Failed to process custom metric:', error);
+    console.error("Failed to process custom metric:", error);
     Sentry.captureException(error);
-    return NextResponse.json(
-      { error: 'Failed to process custom metric' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Failed to process custom metric" }, { status: 400 });
   }
 }
 
@@ -84,9 +81,9 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
     },
   });
 }

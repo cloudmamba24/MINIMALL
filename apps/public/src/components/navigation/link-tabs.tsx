@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useTabGestures } from '@/hooks/use-gesture-handler';
+import { useTabGestures } from "@/hooks/use-gesture-handler";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface Tab {
   id: string;
@@ -18,16 +18,16 @@ interface LinkTabsProps {
 
 export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
   // Production debugging
-  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
-    console.log('[LinkTabs] Render with tabs count:', tabs.length, 'timestamp:', Date.now());
+  if (typeof window !== "undefined" && process.env.NODE_ENV === "production") {
+    console.log("[LinkTabs] Render with tabs count:", tabs.length, "timestamp:", Date.now());
   }
-  
+
   // Memoize filtered tabs to prevent re-creation on every render
-  const contentTabs = useMemo(() => tabs.filter(tab => !tab.isAction), [tabs]);
-  const actionTabs = useMemo(() => tabs.filter(tab => tab.isAction), [tabs]);
-  
-  const [activeTab, setActiveTab] = useState('');
-  
+  const contentTabs = useMemo(() => tabs.filter((tab) => !tab.isAction), [tabs]);
+  const _actionTabs = useMemo(() => tabs.filter((tab) => tab.isAction), [tabs]);
+
+  const [activeTab, setActiveTab] = useState("");
+
   // Set initial active tab only once when contentTabs are available
   useEffect(() => {
     if (!activeTab && contentTabs.length > 0 && contentTabs[0]) {
@@ -37,7 +37,7 @@ export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
 
   // Gesture navigation between tabs
   const navigateToNextTab = useCallback(() => {
-    const currentIndex = contentTabs.findIndex(tab => tab.id === activeTab);
+    const currentIndex = contentTabs.findIndex((tab) => tab.id === activeTab);
     const nextIndex = (currentIndex + 1) % contentTabs.length;
     if (contentTabs[nextIndex]) {
       setActiveTab(contentTabs[nextIndex].id);
@@ -45,7 +45,7 @@ export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
   }, [contentTabs, activeTab]);
 
   const navigateToPrevTab = useCallback(() => {
-    const currentIndex = contentTabs.findIndex(tab => tab.id === activeTab);
+    const currentIndex = contentTabs.findIndex((tab) => tab.id === activeTab);
     const prevIndex = currentIndex <= 0 ? contentTabs.length - 1 : currentIndex - 1;
     if (contentTabs[prevIndex]) {
       setActiveTab(contentTabs[prevIndex].id);
@@ -73,11 +73,12 @@ export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
               onClick={() => handleTabClick(tab)}
               className={`
                 text-sm font-medium tracking-wide transition-colors duration-200
-                ${activeTab === tab.id && !tab.isAction
-                  ? 'text-white border-b-2 border-white pb-1' 
-                  : 'text-gray-400 hover:text-gray-200'
+                ${
+                  activeTab === tab.id && !tab.isAction
+                    ? "text-white border-b-2 border-white pb-1"
+                    : "text-gray-400 hover:text-gray-200"
                 }
-                ${tab.isAction ? 'hover:text-white' : ''}
+                ${tab.isAction ? "hover:text-white" : ""}
               `}
             >
               {tab.label}
@@ -89,15 +90,13 @@ export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
       {/* Gesture hint */}
       {contentTabs.length > 1 && (
         <div className="text-center mb-4">
-          <p className="text-xs text-gray-500">
-            Swipe left or right to navigate between tabs
-          </p>
+          <p className="text-xs text-gray-500">Swipe left or right to navigate between tabs</p>
         </div>
       )}
 
       {/* Tab Content */}
       <div className="transition-opacity duration-300">
-        {contentTabs.find(tab => tab.id === activeTab)?.content}
+        {contentTabs.find((tab) => tab.id === activeTab)?.content}
       </div>
     </div>
   );

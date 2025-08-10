@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { cn } from '@minimall/ui';
+import { cn } from "@minimall/ui";
+import Image from "next/image";
+import { useState } from "react";
 
 interface ImageCardProps {
   title: string;
@@ -17,7 +17,7 @@ export function ImageCard({
   title,
   imageUrl,
   link,
-  shape = 'square',
+  shape = "square",
   className,
   onClick,
 }: ImageCardProps) {
@@ -26,11 +26,14 @@ export function ImageCard({
 
   const getAspectRatio = () => {
     switch (shape) {
-      case 'landscape': return 'aspect-[4/3]';
-      case 'portrait': return 'aspect-[3/4]';
-      case 'wide': return 'aspect-[16/9]';
-      case 'square':
-      default: return 'aspect-square';
+      case "landscape":
+        return "aspect-[4/3]";
+      case "portrait":
+        return "aspect-[3/4]";
+      case "wide":
+        return "aspect-[16/9]";
+      default:
+        return "aspect-square";
     }
   };
 
@@ -39,10 +42,10 @@ export function ImageCard({
       onClick();
     } else if (link) {
       // Handle different link types
-      if (typeof link === 'string') {
-        window.open(link, '_blank', 'noopener,noreferrer');
+      if (typeof link === "string") {
+        window.open(link, "_blank", "noopener,noreferrer");
       } else if (link.url) {
-        window.open(link.url, '_blank', 'noopener,noreferrer');
+        window.open(link.url, "_blank", "noopener,noreferrer");
       }
     }
   };
@@ -58,7 +61,7 @@ export function ImageCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           handleClick();
         }
@@ -80,10 +83,8 @@ export function ImageCard({
               onError={() => setImageError(true)}
               priority={false}
             />
-            
-            {imageLoading && (
-              <div className="absolute inset-0 bg-muted loading-shimmer" />
-            )}
+
+            {imageLoading && <div className="absolute inset-0 bg-muted loading-shimmer" />}
           </>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted">
@@ -102,18 +103,14 @@ export function ImageCard({
                 />
               </svg>
             </div>
-            <p className="text-sm text-muted-foreground text-center px-2">
-              {title}
-            </p>
+            <p className="text-sm text-muted-foreground text-center px-2">{title}</p>
           </div>
         )}
 
         {/* Overlay with title on hover */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
           <div className="w-full p-4">
-            <h3 className="text-white font-medium text-sm truncate">
-              {title}
-            </h3>
+            <h3 className="text-white font-medium text-sm truncate">{title}</h3>
           </div>
         </div>
 

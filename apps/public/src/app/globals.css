@@ -53,7 +53,7 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
@@ -66,23 +66,24 @@
     will-change: transform;
     transform: translateZ(0);
   }
-  
+
   .smooth-scroll {
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   /* Loading states */
   .loading-shimmer {
-    background: linear-gradient(90deg, 
-      hsl(var(--muted)) 25%, 
-      hsl(var(--muted-foreground) / 0.1) 50%, 
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--muted-foreground) / 0.1) 50%,
       hsl(var(--muted)) 75%
     );
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
   }
-  
+
   @keyframes shimmer {
     0% {
       background-position: -200% 0;

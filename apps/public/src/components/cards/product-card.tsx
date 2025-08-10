@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useTransition, useMemo } from 'react';
-import Image from 'next/image';
-import { cn, ShoppingCart, Heart, ExternalLink } from '@minimall/ui';
-import { formatPrice } from '@minimall/core/client';
+import { formatPrice } from "@minimall/core/client";
+import { ExternalLink, Heart, ShoppingCart, cn } from "@minimall/ui";
+import Image from "next/image";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 // Mock Shopify product type - in real implementation, this would come from Shopify API
 interface ShopifyProduct {
@@ -59,54 +59,57 @@ export function ProductCard({
 }: ProductCardProps) {
   const [product, setProduct] = useState<ShopifyProduct | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, _setError] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   // Memoize mock product to prevent recreation on every render
-  const mockProduct = useMemo((): ShopifyProduct => ({
-    id: productId,
-    title: 'Sample Product',
-    handle: 'sample-product',
-    images: [
-      {
-        id: '1',
-        url: 'https://via.placeholder.com/400x400/ccc/999?text=Product+Image',
-        altText: 'Sample Product',
-      },
-    ],
-    variants: [
-      {
-        id: variantId || 'variant-1',
-        title: 'Default Title',
-        price: {
-          amount: '29.99',
-          currencyCode: 'USD',
+  const mockProduct = useMemo(
+    (): ShopifyProduct => ({
+      id: productId,
+      title: "Sample Product",
+      handle: "sample-product",
+      images: [
+        {
+          id: "1",
+          url: "https://via.placeholder.com/400x400/ccc/999?text=Product+Image",
+          altText: "Sample Product",
         },
-        compareAtPrice: {
-          amount: '39.99',
-          currencyCode: 'USD',
+      ],
+      variants: [
+        {
+          id: variantId || "variant-1",
+          title: "Default Title",
+          price: {
+            amount: "29.99",
+            currencyCode: "USD",
+          },
+          compareAtPrice: {
+            amount: "39.99",
+            currencyCode: "USD",
+          },
+          availableForSale: true,
         },
-        availableForSale: true,
+      ],
+      priceRange: {
+        minVariantPrice: {
+          amount: "29.99",
+          currencyCode: "USD",
+        },
+        maxVariantPrice: {
+          amount: "29.99",
+          currencyCode: "USD",
+        },
       },
-    ],
-    priceRange: {
-      minVariantPrice: {
-        amount: '29.99',
-        currencyCode: 'USD',
-      },
-      maxVariantPrice: {
-        amount: '29.99',
-        currencyCode: 'USD',
-      },
-    },
-  }), [productId, variantId]);
+    }),
+    [productId, variantId]
+  );
 
   // Load product with stable reference
   useEffect(() => {
     setLoading(true);
-    
+
     // Simulate API delay
     const timer = setTimeout(() => {
       setProduct(mockProduct);
@@ -120,7 +123,7 @@ export function ProductCard({
     e.stopPropagation();
     if (!product) return;
 
-    const selectedVariant = product.variants.find(v => v.id === variantId) || product.variants[0];
+    const selectedVariant = product.variants.find((v) => v.id === variantId) || product.variants[0];
     if (selectedVariant && onAddToCart) {
       startTransition(() => {
         onAddToCart(product.id, selectedVariant.id);
@@ -139,17 +142,21 @@ export function ProductCard({
     setIsLiked(!isLiked);
   };
 
-  const selectedVariant = product?.variants.find(v => v.id === variantId) || product?.variants[0];
-  const hasDiscount = selectedVariant?.compareAtPrice && 
-    parseFloat(selectedVariant.compareAtPrice.amount) > parseFloat(selectedVariant.price.amount);
+  const selectedVariant = product?.variants.find((v) => v.id === variantId) || product?.variants[0];
+  const hasDiscount =
+    selectedVariant?.compareAtPrice &&
+    Number.parseFloat(selectedVariant.compareAtPrice.amount) >
+      Number.parseFloat(selectedVariant.price.amount);
 
   if (loading) {
     return (
-      <div className={cn(
-        "aspect-[4/5] bg-muted rounded-lg animate-pulse",
-        displayType === 'slider' && 'flex-none snap-start w-64',
-        className
-      )}>
+      <div
+        className={cn(
+          "aspect-[4/5] bg-muted rounded-lg animate-pulse",
+          displayType === "slider" && "flex-none snap-start w-64",
+          className
+        )}
+      >
         <div className="w-full h-3/4 bg-muted-foreground/10 rounded-t-lg" />
         <div className="p-3 space-y-2">
           <div className="h-4 bg-muted-foreground/10 rounded w-3/4" />
@@ -161,11 +168,13 @@ export function ProductCard({
 
   if (error || !product) {
     return (
-      <div className={cn(
-        "aspect-[4/5] bg-muted rounded-lg flex items-center justify-center",
-        displayType === 'slider' && 'flex-none snap-start w-64',
-        className
-      )}>
+      <div
+        className={cn(
+          "aspect-[4/5] bg-muted rounded-lg flex items-center justify-center",
+          displayType === "slider" && "flex-none snap-start w-64",
+          className
+        )}
+      >
         <p className="text-muted-foreground text-sm">Product unavailable</p>
       </div>
     );
@@ -175,14 +184,14 @@ export function ProductCard({
     <div
       className={cn(
         "group cursor-pointer bg-background rounded-lg overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-lg",
-        displayType === 'slider' && 'flex-none snap-start w-64',
+        displayType === "slider" && "flex-none snap-start w-64",
         className
       )}
       onClick={handleQuickView}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           handleQuickView();
         }
@@ -191,7 +200,7 @@ export function ProductCard({
       <div className="relative aspect-square">
         {/* Product Image */}
         <Image
-          src={product.images[0]?.url || '/placeholder-product.jpg'}
+          src={product.images[0]?.url || "/placeholder-product.jpg"}
           alt={product.images[0]?.altText || product.title}
           fill
           className={cn(
@@ -203,16 +212,12 @@ export function ProductCard({
           priority={false}
         />
 
-        {imageLoading && (
-          <div className="absolute inset-0 bg-muted loading-shimmer" />
-        )}
+        {imageLoading && <div className="absolute inset-0 bg-muted loading-shimmer" />}
 
         {/* Discount Badge */}
         {hasDiscount && (
           <div className="absolute top-2 left-2 z-10">
-            <div className="px-2 py-1 bg-red-500 text-white text-xs font-medium rounded">
-              SALE
-            </div>
+            <div className="px-2 py-1 bg-red-500 text-white text-xs font-medium rounded">SALE</div>
           </div>
         )}
 
@@ -240,7 +245,7 @@ export function ProductCard({
             <button
               className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-black transition-all duration-200 hover:bg-white hover:scale-110"
               onClick={handleLike}
-              aria-label={isLiked ? 'Remove from favorites' : 'Add to favorites'}
+              aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
             >
               <Heart
                 className={cn(
@@ -255,7 +260,7 @@ export function ProductCard({
               className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-black transition-all duration-200 hover:bg-white hover:scale-110"
               onClick={(e) => {
                 e.stopPropagation();
-                window.open(`/products/${product.handle}`, '_blank', 'noopener,noreferrer');
+                window.open(`/products/${product.handle}`, "_blank", "noopener,noreferrer");
               }}
               aria-label="View product page"
             >
@@ -279,24 +284,22 @@ export function ProductCard({
         <h3 className="font-medium text-sm line-clamp-2 text-foreground group-hover:text-primary transition-colors">
           {product.title}
         </h3>
-        
+
         <div className="flex items-center gap-2">
           <span className="font-semibold text-foreground">
-            {formatPrice(parseFloat(selectedVariant?.price.amount || '0') * 100)}
+            {formatPrice(Number.parseFloat(selectedVariant?.price.amount || "0") * 100)}
           </span>
-          
+
           {hasDiscount && (
             <span className="text-sm text-muted-foreground line-through">
-              {formatPrice(parseFloat(selectedVariant?.compareAtPrice?.amount || '0') * 100)}
+              {formatPrice(Number.parseFloat(selectedVariant?.compareAtPrice?.amount || "0") * 100)}
             </span>
           )}
         </div>
 
         {/* Variant Title (if not default) */}
-        {selectedVariant && selectedVariant.title !== 'Default Title' && (
-          <p className="text-xs text-muted-foreground truncate">
-            {selectedVariant.title}
-          </p>
+        {selectedVariant && selectedVariant.title !== "Default Title" && (
+          <p className="text-xs text-muted-foreground truncate">{selectedVariant.title}</p>
         )}
       </div>
     </div>

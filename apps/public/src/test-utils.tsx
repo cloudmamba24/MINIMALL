@@ -1,6 +1,6 @@
-import React from 'react';
-import { render, RenderOptions, RenderResult } from '@testing-library/react';
-import { type SiteConfig } from '@minimall/core/client';
+import type { SiteConfig } from "@minimall/core/client";
+import { type RenderOptions, type RenderResult, render } from "@testing-library/react";
+import type React from "react";
 
 // Mock app context for testing
 interface MockAppContext {
@@ -13,11 +13,11 @@ const defaultMockContext: MockAppContext = {
   isLoading: false,
 };
 
-const MockAppProvider = ({ 
-  children, 
-  context = defaultMockContext 
-}: { 
-  children: React.ReactNode; 
+const MockAppProvider = ({
+  children,
+  context = defaultMockContext,
+}: {
+  children: React.ReactNode;
   context?: MockAppContext;
 }) => (
   <div data-testid="app-provider" data-context={JSON.stringify(context)}>
@@ -25,7 +25,7 @@ const MockAppProvider = ({
   </div>
 );
 
-interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
+interface CustomRenderOptions extends Omit<RenderOptions, "wrapper"> {
   appContext?: MockAppContext;
 }
 
@@ -39,9 +39,7 @@ export const renderWithAppContext = (
   const { appContext, ...renderOptions } = options;
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
-    <MockAppProvider context={appContext ?? defaultMockContext}>
-      {children}
-    </MockAppProvider>
+    <MockAppProvider context={appContext ?? defaultMockContext}>{children}</MockAppProvider>
   );
 
   return render(ui, { wrapper: Wrapper, ...renderOptions });
@@ -63,11 +61,11 @@ export const createMockRouter = (overrides = {}) => ({
 /**
  * Mock Next.js params/searchParams for testing
  */
-export const createMockPageProps = (configId = 'test-config', searchParams = {}) => ({
+export const createMockPageProps = (configId = "test-config", searchParams = {}) => ({
   params: Promise.resolve({ configId }),
   searchParams: Promise.resolve(searchParams),
 });
 
 // Re-export everything from testing-library
-export * from '@testing-library/react';
-export { default as userEvent } from '@testing-library/user-event';
+export * from "@testing-library/react";
+export { default as userEvent } from "@testing-library/user-event";

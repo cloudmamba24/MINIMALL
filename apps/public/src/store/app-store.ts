@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { CartItem, Category, ShopifyProduct } from '@minimall/core/client';
+import type { CartItem, Category, ShopifyProduct } from "@minimall/core/client";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 // Cart item with UI-specific properties
 export interface UICartItem extends CartItem {
@@ -40,12 +40,12 @@ export interface CartState {
 export interface AppState {
   // Cart functionality
   cart: CartState;
-  addToCart: (item: Omit<UICartItem, 'addedAt' | 'isNew'>) => void;
+  addToCart: (item: Omit<UICartItem, "addedAt" | "isNew">) => void;
   removeFromCart: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
-  
-  // Modal functionality  
+
+  // Modal functionality
   modals: ModalState;
   openPostModal: (postId: string, post: Category) => void;
   closePostModal: () => void;
@@ -59,7 +59,7 @@ export interface AppState {
 // Calculate cart totals
 const calculateTotals = (items: UICartItem[]) => {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   return { totalItems, totalPrice };
 };
 
@@ -75,7 +75,7 @@ export const useAppStore = create<AppState>()(
         isLoading: false,
         lastAddedItem: null,
       },
-      
+
       // Initial modal state
       modals: {
         postModal: {
@@ -97,7 +97,7 @@ export const useAppStore = create<AppState>()(
       addToCart: (newItem) => {
         set((state) => {
           const existingItemIndex = state.cart.items.findIndex(
-            item => item.productId === newItem.productId && item.variantId === newItem.variantId
+            (item) => item.productId === newItem.productId && item.variantId === newItem.variantId
           );
 
           let updatedItems: UICartItem[];
@@ -126,7 +126,7 @@ export const useAppStore = create<AppState>()(
               isNew: true,
             };
             updatedItems = [
-              ...state.cart.items.map(item => ({ ...item, isNew: false })),
+              ...state.cart.items.map((item) => ({ ...item, isNew: false })),
               lastAddedItem,
             ];
           }
@@ -147,7 +147,7 @@ export const useAppStore = create<AppState>()(
 
       removeFromCart: (itemId) => {
         set((state) => {
-          const updatedItems = state.cart.items.filter(item => item.id !== itemId);
+          const updatedItems = state.cart.items.filter((item) => item.id !== itemId);
           const { totalItems, totalPrice } = calculateTotals(updatedItems);
 
           return {
@@ -169,7 +169,7 @@ export const useAppStore = create<AppState>()(
         }
 
         set((state) => {
-          const updatedItems = state.cart.items.map(item =>
+          const updatedItems = state.cart.items.map((item) =>
             item.id === itemId ? { ...item, quantity } : item
           );
           const { totalItems, totalPrice } = calculateTotals(updatedItems);
@@ -273,7 +273,7 @@ export const useAppStore = create<AppState>()(
       },
 
       closeAllModals: () => {
-        set((state) => ({
+        set((_state) => ({
           modals: {
             postModal: {
               isOpen: false,
@@ -293,7 +293,7 @@ export const useAppStore = create<AppState>()(
       },
     }),
     {
-      name: 'minimall-app-store',
+      name: "minimall-app-store",
       partialize: (state) => ({
         // Only persist cart state, not modals
         cart: {
@@ -308,19 +308,20 @@ export const useAppStore = create<AppState>()(
 
 // Convenience hooks for specific parts of the store
 export const useCart = () => useAppStore((state) => state.cart);
-// Individual selectors for stable function references  
+// Individual selectors for stable function references
 export const useAddToCart = () => useAppStore((state) => state.addToCart);
 export const useRemoveFromCart = () => useAppStore((state) => state.removeFromCart);
 export const useUpdateQuantity = () => useAppStore((state) => state.updateQuantity);
 export const useClearCart = () => useAppStore((state) => state.clearCart);
 
 // Backward compatibility
-export const useCartActions = () => useAppStore((state) => ({
-  addToCart: state.addToCart,
-  removeFromCart: state.removeFromCart,
-  updateQuantity: state.updateQuantity,
-  clearCart: state.clearCart,
-}));
+export const useCartActions = () =>
+  useAppStore((state) => ({
+    addToCart: state.addToCart,
+    removeFromCart: state.removeFromCart,
+    updateQuantity: state.updateQuantity,
+    clearCart: state.clearCart,
+  }));
 
 export const useModals = () => useAppStore((state) => state.modals);
 // Individual selectors for stable function references
@@ -333,12 +334,13 @@ export const useCloseCartDrawer = () => useAppStore((state) => state.closeCartDr
 export const useCloseAllModals = () => useAppStore((state) => state.closeAllModals);
 
 // Backward compatibility - but this can cause re-renders
-export const useModalActions = () => useAppStore((state) => ({
-  openPostModal: state.openPostModal,
-  closePostModal: state.closePostModal,
-  openProductQuickView: state.openProductQuickView,
-  closeProductQuickView: state.closeProductQuickView,
-  openCartDrawer: state.openCartDrawer,
-  closeCartDrawer: state.closeCartDrawer,
-  closeAllModals: state.closeAllModals,
-}));
+export const useModalActions = () =>
+  useAppStore((state) => ({
+    openPostModal: state.openPostModal,
+    closePostModal: state.closePostModal,
+    openProductQuickView: state.openProductQuickView,
+    closeProductQuickView: state.closeProductQuickView,
+    openCartDrawer: state.openCartDrawer,
+    closeCartDrawer: state.closeCartDrawer,
+    closeAllModals: state.closeAllModals,
+  }));

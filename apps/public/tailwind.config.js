@@ -1,10 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-    '../../packages/ui/src/**/*.{js,ts,jsx,tsx,mdx}',
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "../../packages/ui/src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     container: {
@@ -65,11 +65,11 @@ module.exports = {
           to: { height: "0" },
         },
         shimmer: {
-          '0%': {
-            'background-position': '-200% 0',
+          "0%": {
+            "background-position": "-200% 0",
           },
-          '100%': {
-            'background-position': '200% 0',
+          "100%": {
+            "background-position": "200% 0",
           },
         },
       },
@@ -79,12 +79,9 @@ module.exports = {
         shimmer: "shimmer 2s infinite",
       },
       aspectRatio: {
-        '4/5': '4 / 5',
+        "4/5": "4 / 5",
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-    require('@tailwindcss/aspect-ratio'),
-  ],
+  plugins: [require("@tailwindcss/typography"), require("@tailwindcss/aspect-ratio")],
 };

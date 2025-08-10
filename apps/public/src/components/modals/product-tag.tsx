@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { Plus } from 'lucide-react';
-import type { ProductTag as ProductTagType } from '@minimall/core/client';
+import type { ProductTag as ProductTagType } from "@minimall/core/client";
+import { motion } from "framer-motion";
+import { Plus } from "lucide-react";
 
 interface ProductTagProps {
   tag: ProductTagType;
@@ -18,13 +18,13 @@ export function ProductTag({ tag, onTagClick }: ProductTagProps) {
       animate={{ scale: 1 }}
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
       onClick={onTagClick}
       className="absolute group"
       style={{
         left: `${position.x * 100}%`,
         top: `${position.y * 100}%`,
-        transform: 'translate(-50%, -50%)',
+        transform: "translate(-50%, -50%)",
       }}
     >
       {/* Tag Dot */}
@@ -38,13 +38,13 @@ export function ProductTag({ tag, onTagClick }: ProductTagProps) {
           <div className="bg-black text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">
             {label}
             {/* Arrow */}
-            <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black"></div>
+            <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black" />
           </div>
         </div>
       )}
 
       {/* Ripple Effect */}
-      <div className="absolute inset-0 rounded-full bg-white opacity-30 animate-ping group-hover:animate-none"></div>
+      <div className="absolute inset-0 rounded-full bg-white opacity-30 animate-ping group-hover:animate-none" />
     </motion.button>
   );
 }

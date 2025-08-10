@@ -1,7 +1,7 @@
+import crypto from "node:crypto";
+import { getR2Service } from "@minimall/core/server";
 import { type NextRequest, NextResponse } from "next/server";
-import { getR2Service } from '@minimall/core/server';
-import crypto from 'crypto';
-import { UploadSession } from '../types';
+import { UploadSession } from "../types";
 
 // POST /api/upload/chunk - Upload file chunk
 export async function POST(request: NextRequest) {
@@ -9,9 +9,9 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const chunk = formData.get("chunk") as File;
     const uploadId = formData.get("uploadId") as string;
-    const chunkIndex = parseInt(formData.get("chunkIndex") as string);
+    const chunkIndex = Number.parseInt(formData.get("chunkIndex") as string);
 
-    if (!chunk || !uploadId || isNaN(chunkIndex)) {
+    if (!chunk || !uploadId || Number.isNaN(chunkIndex)) {
       return NextResponse.json(
         { error: "Missing required fields: chunk, uploadId, chunkIndex" },
         { status: 400 }
@@ -21,20 +21,14 @@ export async function POST(request: NextRequest) {
     // Get upload session
     globalThis.uploadSessions = globalThis.uploadSessions || new Map();
     const uploadSession = globalThis.uploadSessions.get(uploadId);
-    
+
     if (!uploadSession) {
-      return NextResponse.json(
-        { error: "Upload session not found or expired" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Upload session not found or expired" }, { status: 404 });
     }
 
     // Validate chunk index
     if (chunkIndex < 0) {
-      return NextResponse.json(
-        { error: "Invalid chunk index" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid chunk index" }, { status: 400 });
     }
 
     try {
@@ -42,49 +36,41 @@ export async function POST(request: NextRequest) {
 
       // Convert chunk to buffer
       const buffer = Buffer.from(await chunk.arrayBuffer());
-      
+
       // Generate ETag for chunk (MD5 hash)
-      const etag = crypto.createHash('md5').update(buffer).digest('hex');
-      
+      const etag = crypto.createHash("md5").update(buffer).digest("hex");
+
       // Upload chunk to R2 with chunk-specific key
-      const chunkKey = `${uploadSession.key}.chunk.${chunkIndex.toString().padStart(6, '0')}`;
-      
+      const chunkKey = `${uploadSession.key}.chunk.${chunkIndex.toString().padStart(6, "0")}`;
+
       await r2Service.putObject(chunkKey, buffer, {
-        contentType: 'application/octet-stream'
+        contentType: "application/octet-stream",
       });
 
       // Store chunk info in session
       uploadSession.chunks.set(chunkIndex, {
         etag,
-        size: buffer.length
+        size: buffer.length,
       });
 
       // Update session status
-      uploadSession.status = 'uploading';
+      uploadSession.status = "uploading";
 
       return NextResponse.json({
         success: true,
         etag,
         chunkIndex,
         chunkSize: buffer.length,
-        message: `Chunk ${chunkIndex} uploaded successfully`
+        message: `Chunk ${chunkIndex} uploaded successfully`,
       });
-
     } catch (r2Error) {
       console.error("R2 chunk upload failed:", r2Error);
-      return NextResponse.json(
-        { error: "Failed to upload chunk to storage" },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: "Failed to upload chunk to storage" }, { status: 503 });
     }
-
   } catch (error) {
     console.error("Failed to upload chunk:", error);
 
-    return NextResponse.json(
-      { error: "Failed to upload chunk" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to upload chunk" }, { status: 500 });
   }
 }
 

@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, ReactNode } from 'react';
-import { X } from 'lucide-react';
-import { animationPresets, animationTokens } from '@/lib/animation-tokens';
+import { animationPresets, animationTokens } from "@/lib/animation-tokens";
+import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
+import { type ReactNode, useEffect } from "react";
 
 interface EnhancedModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
   className?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  size?: "sm" | "md" | "lg" | "xl" | "full";
   showCloseButton?: boolean;
   closeOnBackdropClick?: boolean;
   closeOnEscape?: boolean;
@@ -18,7 +18,7 @@ interface EnhancedModalProps {
 
 /**
  * Enhanced Modal Component
- * 
+ *
  * The foundation of our "App-in-a-Tab" experience. Every modal is a stage,
  * every entrance is choreographed, every exit is graceful.
  */
@@ -26,46 +26,45 @@ export function EnhancedModal({
   isOpen,
   onClose,
   children,
-  className = '',
-  size = 'md',
+  className = "",
+  size = "md",
   showCloseButton = true,
   closeOnBackdropClick = true,
   closeOnEscape = true,
 }: EnhancedModalProps) {
-  
   // Handle escape key
   useEffect(() => {
     if (!closeOnEscape || !isOpen) return;
-    
+
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose, closeOnEscape]);
 
   // Prevent scroll when modal is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
 
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
   const sizeClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-lg', 
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
-    full: 'max-w-[95vw] max-h-[95vh]',
+    sm: "max-w-md",
+    md: "max-w-lg",
+    lg: "max-w-2xl",
+    xl: "max-w-4xl",
+    full: "max-w-[95vw] max-h-[95vh]",
   };
 
   return (
@@ -78,7 +77,7 @@ export function EnhancedModal({
             onClick={closeOnBackdropClick ? onClose : undefined}
             {...animationPresets.backdropFade}
           />
-          
+
           {/* Modal container */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
@@ -107,11 +106,9 @@ export function EnhancedModal({
                   <X size={16} className="text-gray-600" />
                 </motion.button>
               )}
-              
+
               {/* Modal content */}
-              <div className="relative max-h-[90vh] overflow-auto">
-                {children}
-              </div>
+              <div className="relative max-h-[90vh] overflow-auto">{children}</div>
             </motion.div>
           </div>
         </>
@@ -123,8 +120,8 @@ export function EnhancedModal({
 /**
  * Side Panel Modal - slides in from the right
  */
-interface SidePanelProps extends Omit<EnhancedModalProps, 'size'> {
-  width?: 'sm' | 'md' | 'lg';
+interface SidePanelProps extends Omit<EnhancedModalProps, "size"> {
+  width?: "sm" | "md" | "lg";
   pushContent?: boolean; // Whether to push the main content when panel opens
 }
 
@@ -132,32 +129,31 @@ export function SidePanel({
   isOpen,
   onClose,
   children,
-  className = '',
-  width = 'md',
+  className = "",
+  width = "md",
   pushContent = false,
   showCloseButton = true,
   closeOnBackdropClick = true,
   closeOnEscape = true,
 }: SidePanelProps) {
-  
   // Handle escape key
   useEffect(() => {
     if (!closeOnEscape || !isOpen) return;
-    
+
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose, closeOnEscape]);
 
   const widthClasses = {
-    sm: 'w-80',
-    md: 'w-96',
-    lg: 'w-[28rem]',
+    sm: "w-80",
+    md: "w-96",
+    lg: "w-[28rem]",
   };
 
   return (
@@ -170,7 +166,7 @@ export function SidePanel({
             onClick={closeOnBackdropClick ? onClose : undefined}
             {...animationPresets.backdropFade}
           />
-          
+
           {/* Side panel */}
           <motion.div
             className={`
@@ -198,13 +194,11 @@ export function SidePanel({
                 <X size={16} className="text-gray-600" />
               </motion.button>
             )}
-            
+
             {/* Panel content */}
-            <div className="flex-1 overflow-auto p-6 pt-16">
-              {children}
-            </div>
+            <div className="flex-1 overflow-auto p-6 pt-16">{children}</div>
           </motion.div>
-          
+
           {/* Content push effect */}
           {pushContent && (
             <motion.div

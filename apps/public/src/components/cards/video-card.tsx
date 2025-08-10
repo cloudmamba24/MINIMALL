@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
-import Image from 'next/image';
-import { cn, Play, Pause, Volume2, VolumeX } from '@minimall/ui';
+import { Pause, Play, Volume2, VolumeX, cn } from "@minimall/ui";
+import Image from "next/image";
+import { useRef, useState } from "react";
 
 interface VideoCardProps {
   title: string;
@@ -51,10 +51,10 @@ export function VideoCard({
 
   const handleVideoClick = () => {
     if (link) {
-      if (typeof link === 'string') {
-        window.open(link, '_blank', 'noopener,noreferrer');
+      if (typeof link === "string") {
+        window.open(link, "_blank", "noopener,noreferrer");
       } else if (link.url) {
-        window.open(link.url, '_blank', 'noopener,noreferrer');
+        window.open(link.url, "_blank", "noopener,noreferrer");
       }
     } else {
       handlePlayToggle();
@@ -71,7 +71,7 @@ export function VideoCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           handleVideoClick();
         }
@@ -115,7 +115,7 @@ export function VideoCard({
             }}
           >
             <source src={videoUrl} type="video/mp4" />
-            <source src={videoUrl.replace('.mp4', '.webm')} type="video/webm" />
+            <source src={videoUrl.replace(".mp4", ".webm")} type="video/webm" />
             Your browser does not support the video tag.
           </video>
         ) : (
@@ -124,7 +124,7 @@ export function VideoCard({
               <Play className="w-6 h-6 text-muted-foreground/50" />
             </div>
             <p className="text-sm text-muted-foreground text-center px-2">
-              {videoError ? 'Video unavailable' : title}
+              {videoError ? "Video unavailable" : title}
             </p>
           </div>
         )}
@@ -137,13 +137,9 @@ export function VideoCard({
               e.stopPropagation();
               handlePlayToggle();
             }}
-            aria-label={isPlaying ? 'Pause video' : 'Play video'}
+            aria-label={isPlaying ? "Pause video" : "Play video"}
           >
-            {isPlaying ? (
-              <Pause className="w-8 h-8" />
-            ) : (
-              <Play className="w-8 h-8 ml-1" />
-            )}
+            {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-1" />}
           </button>
         </div>
 
@@ -153,22 +149,16 @@ export function VideoCard({
             <button
               className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 hover:bg-black/70"
               onClick={handleMuteToggle}
-              aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+              aria-label={isMuted ? "Unmute video" : "Mute video"}
             >
-              {isMuted ? (
-                <VolumeX className="w-4 h-4" />
-              ) : (
-                <Volume2 className="w-4 h-4" />
-              )}
+              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
           </div>
         )}
 
         {/* Title Overlay */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 z-10">
-          <h3 className="text-white font-medium text-sm truncate">
-            {title}
-          </h3>
+          <h3 className="text-white font-medium text-sm truncate">{title}</h3>
         </div>
 
         {/* Video Indicator Badge */}

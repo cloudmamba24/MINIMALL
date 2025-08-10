@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 export async function GET() {
   const timestamp = new Date().toISOString();
@@ -21,15 +21,19 @@ export async function GET() {
   const healthScore = Math.round((passedChecks / totalChecks) * 100);
 
   // Determine overall status
-  let status = 'CRITICAL';
-  if (healthScore >= 80) status = 'HEALTHY';
-  else if (healthScore >= 60) status = 'DEGRADED';
-  else if (healthScore >= 40) status = 'WARNING';
+  let status = "CRITICAL";
+  if (healthScore >= 80) status = "HEALTHY";
+  else if (healthScore >= 60) status = "DEGRADED";
+  else if (healthScore >= 40) status = "WARNING";
 
   // Enterprise features status
   const enterpriseFeatures = {
     database: envCheck.DATABASE_URL,
-    r2Storage: envCheck.R2_ENDPOINT && envCheck.R2_ACCESS_KEY && envCheck.R2_SECRET && envCheck.R2_BUCKET_NAME,
+    r2Storage:
+      envCheck.R2_ENDPOINT &&
+      envCheck.R2_ACCESS_KEY &&
+      envCheck.R2_SECRET &&
+      envCheck.R2_BUCKET_NAME,
     shopifyIntegration: envCheck.SHOPIFY_STOREFRONT_ACCESS_TOKEN && envCheck.SHOPIFY_DOMAIN,
   };
 
@@ -42,14 +46,18 @@ export async function GET() {
     environmentVariables: envCheck,
     enterpriseFeatures,
     recommendations: [
-      ...(!enterpriseFeatures.database ? ['Configure DATABASE_URL for config storage and analytics'] : []),
-      ...(!enterpriseFeatures.r2Storage ? ['Configure R2 credentials for asset storage'] : []),
-      ...(!enterpriseFeatures.shopifyIntegration ? ['Configure Shopify credentials for cart functionality'] : []),
+      ...(!enterpriseFeatures.database
+        ? ["Configure DATABASE_URL for config storage and analytics"]
+        : []),
+      ...(!enterpriseFeatures.r2Storage ? ["Configure R2 credentials for asset storage"] : []),
+      ...(!enterpriseFeatures.shopifyIntegration
+        ? ["Configure Shopify credentials for cart functionality"]
+        : []),
     ],
     nextSteps: {
-      database: '/api/debug/db',
-      r2Storage: '/api/debug/r2',
-      documentation: '/docs/deployment/ENVIRONMENT-SETUP.md'
-    }
+      database: "/api/debug/db",
+      r2Storage: "/api/debug/r2",
+      documentation: "/docs/deployment/ENVIRONMENT-SETUP.md",
+    },
   });
 }

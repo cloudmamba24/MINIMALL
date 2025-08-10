@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect } from 'react';
-import { X, ShoppingBag } from 'lucide-react';
-import { useModals, useClosePostModal, useOpenProductQuickView } from '@/store/app-store';
-import { ProductTag } from './product-tag';
-import type { Category } from '@minimall/core/client';
+import { useClosePostModal, useModals, useOpenProductQuickView } from "@/store/app-store";
+import type { Category } from "@minimall/core/client";
+import { AnimatePresence, motion } from "framer-motion";
+import { ShoppingBag, X } from "lucide-react";
+import { useEffect } from "react";
+import { ProductTag } from "./product-tag";
 
 interface PostModalProps {
   post?: Category | null;
@@ -26,25 +26,25 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
   // Close modal on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         closePostModal();
       }
     };
 
     if (modals.postModal.isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [modals.postModal.isOpen, closePostModal]);
 
   if (!modals.postModal.isOpen || !post) return null;
 
-  const [cardType, cardDetails] = post.card;
+  const [_cardType, cardDetails] = post.card;
   const fadeInDuration = (animationSettings?.fadeIn ?? 200) / 1000;
   const backdropOpacity = animationSettings?.backdrop?.opacity ?? 0.8;
   const backdropBlur = animationSettings?.backdrop?.blur ?? 4;
@@ -66,7 +66,7 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: fadeInDuration }}
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4`}
+        className={"fixed inset-0 z-50 flex items-center justify-center p-4"}
         style={{
           backgroundColor: `rgba(0, 0, 0, ${backdropOpacity})`,
           backdropFilter: `blur(${backdropBlur}px)`,
@@ -96,7 +96,7 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
               alt={post.title}
               className="w-full h-full object-cover"
             />
-            
+
             {/* Product Tags */}
             {cardDetails.productTags?.map((tag, index) => (
               <ProductTag
@@ -119,9 +119,7 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
               </div>
               <h3 className="text-lg font-medium mb-2">{post.title}</h3>
               {cardDetails.description && (
-                <p className="text-gray-400 text-sm leading-relaxed">
-                  {cardDetails.description}
-                </p>
+                <p className="text-gray-400 text-sm leading-relaxed">{cardDetails.description}</p>
               )}
             </div>
 
@@ -147,8 +145,18 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
                         <p className="text-gray-400 text-xs">Tap to view details</p>
                       </div>
                       <div className="text-gray-400 group-hover:text-white transition-colors">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
                         </svg>
                       </div>
                     </button>

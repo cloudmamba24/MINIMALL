@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import * as Sentry from '@sentry/nextjs';
-import { db, performanceMetrics } from '@minimall/db';
+import { db, performanceMetrics } from "@minimall/db";
+import * as Sentry from "@sentry/nextjs";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 const performanceMetricSchema = z.object({
   configId: z.string().optional(),
-  metric: z.enum(['LCP', 'FID', 'CLS', 'FCP', 'TTFB']),
+  metric: z.enum(["LCP", "FID", "CLS", "FCP", "TTFB"]),
   value: z.number(),
-  rating: z.enum(['good', 'needs-improvement', 'poor']),
+  rating: z.enum(["good", "needs-improvement", "poor"]),
   delta: z.number(),
   id: z.string(),
   navigationType: z.string(),
@@ -15,10 +15,12 @@ const performanceMetricSchema = z.object({
   url: z.string(),
   userAgent: z.string().optional(),
   connection: z.string().optional(),
-  viewport: z.object({
-    width: z.number(),
-    height: z.number(),
-  }).optional(),
+  viewport: z
+    .object({
+      width: z.number(),
+      height: z.number(),
+    })
+    .optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -28,9 +30,9 @@ export async function POST(request: NextRequest) {
 
     // Add Sentry context
     await Sentry.withScope(async (scope) => {
-      scope.setTag('metric_type', data.metric);
-      scope.setTag('metric_rating', data.rating);
-      scope.setContext('performance_metric', {
+      scope.setTag("metric_type", data.metric);
+      scope.setTag("metric_rating", data.rating);
+      scope.setContext("performance_metric", {
         metric: data.metric,
         value: data.value,
         rating: data.rating,
@@ -59,19 +61,19 @@ export async function POST(request: NextRequest) {
 
           // Set the specific metric field based on the metric type
           switch (data.metric) {
-            case 'LCP':
+            case "LCP":
               metricData.lcp = Math.round(data.value);
               break;
-            case 'FID':
+            case "FID":
               metricData.fid = Math.round(data.value);
               break;
-            case 'CLS':
+            case "CLS":
               metricData.cls = Math.round(data.value * 1000); // Store CLS * 1000 as integer
               break;
-            case 'TTFB':
+            case "TTFB":
               metricData.ttfb = Math.round(data.value);
               break;
-            case 'FCP':
+            case "FCP":
               // FCP doesn't have its own field in the schema, but we can add it to TTFB or extend schema
               metricData.ttfb = Math.round(data.value);
               break;
@@ -79,28 +81,25 @@ export async function POST(request: NextRequest) {
 
           await db.insert(performanceMetrics).values(metricData);
         } catch (dbError) {
-          console.warn('Failed to save performance metric to database:', dbError);
+          console.warn("Failed to save performance metric to database:", dbError);
           Sentry.captureException(dbError);
         }
       }
 
       // Send poor metrics to Sentry as warnings
-      if (data.rating === 'poor') {
+      if (data.rating === "poor") {
         Sentry.captureMessage(
-          `Poor Web Vital: ${data.metric} = ${data.value}ms on ${data.configId || 'unknown'}`,
-          'warning'
+          `Poor Web Vital: ${data.metric} = ${data.value}ms on ${data.configId || "unknown"}`,
+          "warning"
         );
       }
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Failed to process performance metric:', error);
+    console.error("Failed to process performance metric:", error);
     Sentry.captureException(error);
-    return NextResponse.json(
-      { error: 'Failed to process performance metric' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Failed to process performance metric" }, { status: 400 });
   }
 }
 
@@ -109,9 +108,9 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
     },
   });
 }

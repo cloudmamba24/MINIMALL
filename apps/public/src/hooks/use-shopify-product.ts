@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { createShopifyClient, getMockProduct, type ShopifyProduct } from '@/lib/shopify-client';
-import { transformProduct, type ShopifyProduct as CoreShopifyProduct } from '@minimall/core/client';
+import { type ShopifyProduct, createShopifyClient, getMockProduct } from "@/lib/shopify-client";
+import { type ShopifyProduct as CoreShopifyProduct, transformProduct } from "@minimall/core/client";
+import { useEffect, useState } from "react";
 
 interface UseShopifyProductResult {
   product: ShopifyProduct | null;
@@ -15,7 +15,7 @@ interface UseShopifyProductResult {
  * Falls back to mock data in development when Shopify is unavailable
  */
 export function useShopifyProduct(
-  productId: string | undefined, 
+  productId: string | undefined,
   shopDomain?: string
 ): UseShopifyProductResult {
   const [product, setProduct] = useState<ShopifyProduct | null>(null);
@@ -53,20 +53,20 @@ export function useShopifyProduct(
         console.log(`Using mock data for product ${productId}`);
         const mockProduct = getMockProduct(productId);
         setProduct(mockProduct);
-        
+
         if (!mockProduct) {
           setError(`Product ${productId} not found`);
         }
       } catch (err) {
-        console.error('Error fetching product:', err);
-        
+        console.error("Error fetching product:", err);
+
         // Try mock data as final fallback
         const mockProduct = getMockProduct(productId);
         if (mockProduct) {
           setProduct(mockProduct);
-          setError('Using mock data due to API error');
+          setError("Using mock data due to API error");
         } else {
-          setError(err instanceof Error ? err.message : 'Failed to fetch product');
+          setError(err instanceof Error ? err.message : "Failed to fetch product");
           setProduct(null);
         }
       } finally {
@@ -87,6 +87,5 @@ export function useShopifyProduct(
 export function useShopDomain(): string | undefined {
   // For demo purposes, return the demo shop domain
   // In a real app, this would come from the current site config context
-  return 'demo-shop.myshopify.com';
+  return "demo-shop.myshopify.com";
 }
-

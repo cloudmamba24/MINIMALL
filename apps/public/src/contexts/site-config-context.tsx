@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, ReactNode } from 'react';
-import type { SiteConfig } from '@minimall/core/client';
+import type { SiteConfig } from "@minimall/core/client";
+import React, { createContext, useContext, type ReactNode } from "react";
 
 interface SiteConfigContextValue {
   config: SiteConfig;
@@ -21,22 +21,18 @@ export function SiteConfigProvider({ config, children }: SiteConfigProviderProps
     shopDomain: config.settings.shopDomain,
   };
 
-  return (
-    <SiteConfigContext.Provider value={value}>
-      {children}
-    </SiteConfigContext.Provider>
-  );
+  return <SiteConfigContext.Provider value={value}>{children}</SiteConfigContext.Provider>;
 }
 
 export function useSiteConfig() {
   const context = useContext(SiteConfigContext);
   if (!context) {
-    throw new Error('useSiteConfig must be used within a SiteConfigProvider');
+    throw new Error("useSiteConfig must be used within a SiteConfigProvider");
   }
   return context;
 }
 
 export function useShopDomain() {
   const context = useContext(SiteConfigContext);
-  return context?.shopDomain || 'demo-shop.myshopify.com';
+  return context?.shopDomain || "demo-shop.myshopify.com";
 }

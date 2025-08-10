@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Minus, Plus, Star, Heart } from 'lucide-react';
-import { useModals, useCloseProductQuickView, useAddToCart } from '@/store/app-store';
-import { useShopifyProduct, useShopDomain } from '@/hooks/use-shopify-product';
-import { 
-  getOptionValues, 
-  findVariantByOptions, 
-  calculateDiscountPercentage, 
-  formatPrice 
-} from '@minimall/core/client';
+import { useShopDomain, useShopifyProduct } from "@/hooks/use-shopify-product";
+import { useAddToCart, useCloseProductQuickView, useModals } from "@/store/app-store";
+import {
+  calculateDiscountPercentage,
+  findVariantByOptions,
+  formatPrice,
+  getOptionValues,
+} from "@minimall/core/client";
+import { AnimatePresence, motion } from "framer-motion";
+import { Heart, Minus, Plus, Star, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 interface ProductQuickViewProps {
   animationSettings?: {
@@ -25,7 +25,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
   const shopDomain = useShopDomain();
 
   const productId = modals.productQuickView.productId;
-  const { product, loading, error } = useShopifyProduct(productId || '', shopDomain);
+  const { product, loading, error } = useShopifyProduct(productId || "", shopDomain);
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
@@ -47,9 +47,10 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
   }, [product]);
 
   // Find selected variant based on current options
-  const selectedVariant = product && Object.keys(selectedOptions).length > 0
-    ? findVariantByOptions(product, selectedOptions)
-    : product?.variants[0];
+  const selectedVariant =
+    product && Object.keys(selectedOptions).length > 0
+      ? findVariantByOptions(product, selectedOptions)
+      : product?.variants[0];
 
   const handleAddToCart = async () => {
     if (!product || !selectedVariant) return;
@@ -58,36 +59,36 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
 
     try {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       const optionsString = selectedVariant.selectedOptions
         .map((opt: { name: string; value: string }) => opt.value)
-        .join(' / ');
+        .join(" / ");
 
       addToCart({
         id: `${product.id}-${selectedVariant.id}`,
         productId: product.id,
         variantId: selectedVariant.id,
         title: product.title,
-        price: Math.round(parseFloat(selectedVariant.price.amount) * 100),
+        price: Math.round(Number.parseFloat(selectedVariant.price.amount) * 100),
         quantity,
-        image: selectedVariant.image?.url || product.images[0]?.url || '',
+        image: selectedVariant.image?.url || product.images[0]?.url || "",
         variant: {
           title: optionsString,
           selectedOptions: selectedVariant.selectedOptions,
         },
       });
     } catch (error) {
-      console.error('Error adding to cart:', error);
+      console.error("Error adding to cart:", error);
     } finally {
       setIsAddingToCart(false);
     }
   };
 
   const handleOptionChange = (optionName: string, value: string) => {
-    setSelectedOptions(prev => ({
+    setSelectedOptions((prev) => ({
       ...prev,
-      [optionName]: value
+      [optionName]: value,
     }));
   };
 
@@ -142,12 +143,19 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
     );
   }
 
-  const currentPrice = selectedVariant?.price?.amount ? parseFloat(selectedVariant.price.amount) : 0;
-  const compareAtPrice = selectedVariant?.compareAtPrice?.amount ? parseFloat(selectedVariant.compareAtPrice.amount) : 0;
-  const discount = compareAtPrice > 0 ? calculateDiscountPercentage(compareAtPrice, currentPrice) : 0;
-  
+  const currentPrice = selectedVariant?.price?.amount
+    ? Number.parseFloat(selectedVariant.price.amount)
+    : 0;
+  const compareAtPrice = selectedVariant?.compareAtPrice?.amount
+    ? Number.parseFloat(selectedVariant.compareAtPrice.amount)
+    : 0;
+  const discount =
+    compareAtPrice > 0 ? calculateDiscountPercentage(compareAtPrice, currentPrice) : 0;
+
   // Get unique option names
-  const optionNames = [...new Set(product.variants.flatMap(v => v.selectedOptions.map(o => o.name)))];
+  const optionNames = [
+    ...new Set(product.variants.flatMap((v) => v.selectedOptions.map((o) => o.name))),
+  ];
 
   const slideInDuration = animationSettings?.slideIn || 300;
 
@@ -166,7 +174,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ duration: slideInDuration / 1000 }}
           className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="flex flex-col md:flex-row h-full">
             {/* Images Section */}
@@ -183,7 +191,11 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={selectedImage}
-                    src={product.images[selectedImage]?.url || product.images[0]?.url || '/placeholder.jpg'}
+                    src={
+                      product.images[selectedImage]?.url ||
+                      product.images[0]?.url ||
+                      "/placeholder.jpg"
+                    }
                     alt={product.images[selectedImage]?.altText || product.title}
                     className="w-full h-full object-cover"
                     initial={{ opacity: 0 }}
@@ -206,7 +218,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                       key={image.id || index}
                       onClick={() => setSelectedImage(index)}
                       className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 ${
-                        selectedImage === index ? 'border-black' : 'border-transparent'
+                        selectedImage === index ? "border-black" : "border-transparent"
                       }`}
                     >
                       <img
@@ -232,7 +244,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                         <Star
                           key={i}
                           size={16}
-                          className={i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                          className={i < 4 ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
                         />
                       ))}
                     </div>
@@ -242,9 +254,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
 
                 {/* Price */}
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl font-bold">
-                    {formatPrice(currentPrice)}
-                  </span>
+                  <span className="text-3xl font-bold">{formatPrice(currentPrice)}</span>
                   {compareAtPrice > 0 && discount > 0 && (
                     <>
                       <span className="text-xl text-gray-500 line-through">
@@ -265,7 +275,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                   {optionNames.map((optionName) => {
                     const optionValues = getOptionValues(product, optionName);
                     const selectedValue = selectedOptions[optionName];
-                    
+
                     return (
                       <div key={optionName}>
                         <label className="block text-sm font-medium mb-2">
@@ -278,8 +288,8 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                               onClick={() => handleOptionChange(optionName, value)}
                               className={`px-3 py-2 border rounded font-medium text-sm ${
                                 selectedValue === value
-                                  ? 'border-black bg-black text-white'
-                                  : 'border-gray-300 hover:border-gray-400'
+                                  ? "border-black bg-black text-white"
+                                  : "border-gray-300 hover:border-gray-400"
                               }`}
                             >
                               {value}
@@ -317,8 +327,8 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                   disabled={isAddingToCart || !selectedVariant?.availableForSale}
                   className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
                     isAddingToCart || !selectedVariant?.availableForSale
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-black hover:bg-gray-800'
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-black hover:bg-gray-800"
                   }`}
                 >
                   {isAddingToCart ? (
@@ -327,7 +337,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                       Adding to Cart...
                     </div>
                   ) : !selectedVariant?.availableForSale ? (
-                    'Out of Stock'
+                    "Out of Stock"
                   ) : (
                     `Add to Cart • ${formatPrice(currentPrice * quantity)}`
                   )}

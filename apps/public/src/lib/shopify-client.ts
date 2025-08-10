@@ -1,18 +1,18 @@
 /**
  * Shopify Client for Public App
- * 
+ *
  * Environment-aware Shopify client that uses domain from config
  * with proper error handling and caching.
  */
 
-import { 
-  createShopifyStorefrontService, 
+import {
+  type ShopifyProduct,
+  createShopifyStorefrontService,
   transformProduct,
-  type ShopifyProduct 
-} from '@minimall/core/client';
+} from "@minimall/core/client";
 
 // Re-export for components
-export type { ShopifyProduct } from '@minimall/core/client';
+export type { ShopifyProduct } from "@minimall/core/client";
 
 // Cache for Shopify service instances per domain
 const serviceCache = new Map<string, ReturnType<typeof createShopifyStorefrontService>>();
@@ -22,11 +22,11 @@ const serviceCache = new Map<string, ReturnType<typeof createShopifyStorefrontSe
  */
 function getShopifyService(domain: string, accessToken: string) {
   const cacheKey = `${domain}:${accessToken}`;
-  
+
   if (!serviceCache.has(cacheKey)) {
     serviceCache.set(cacheKey, createShopifyStorefrontService(domain, accessToken));
   }
-  
+
   return serviceCache.get(cacheKey)!;
 }
 
@@ -52,29 +52,29 @@ async function getCachedProduct(
 ): Promise<ShopifyProduct | null> {
   const cacheKey = `${domain}:${productId}`;
   const cached = productCache.get(cacheKey);
-  
+
   // Return cached if valid
   if (cached && Date.now() - cached.timestamp < cached.ttl) {
     return cached.product;
   }
-  
+
   try {
     const service = getShopifyService(domain, accessToken);
     const graphqlProduct = await service.getProduct(productId, true);
-    
+
     if (!graphqlProduct) {
       return null;
     }
-    
+
     const product = transformProduct(graphqlProduct);
-    
+
     // Cache the result
     productCache.set(cacheKey, {
       product,
       timestamp: Date.now(),
       ttl: CACHE_TTL,
     });
-    
+
     return product;
   } catch (error) {
     console.error(`Failed to fetch product ${productId} from ${domain}:`, error);
@@ -105,28 +105,27 @@ export class ShopifyClient {
    * Get multiple products by IDs
    */
   async getProducts(productIds: string[]): Promise<ShopifyProduct[]> {
-    const products = await Promise.allSettled(
-      productIds.map(id => this.getProduct(id))
-    );
-    
+    const products = await Promise.allSettled(productIds.map((id) => this.getProduct(id)));
+
     return products
-      .filter((result): result is PromiseFulfilledResult<ShopifyProduct> => 
-        result.status === 'fulfilled' && result.value !== null
+      .filter(
+        (result): result is PromiseFulfilledResult<ShopifyProduct> =>
+          result.status === "fulfilled" && result.value !== null
       )
-      .map(result => result.value);
+      .map((result) => result.value);
   }
 
   /**
    * Search products
    */
   async searchProducts(
-    query: string, 
-    first: number = 20
+    query: string,
+    first = 20
   ): Promise<{ products: ShopifyProduct[]; hasNextPage: boolean }> {
     try {
       const service = getShopifyService(this.domain, this.accessToken);
       const result = await service.searchProducts(query, first);
-      
+
       return {
         products: result.products.map(transformProduct),
         hasNextPage: result.hasNextPage,
@@ -141,13 +140,13 @@ export class ShopifyClient {
    * Get products from collection
    */
   async getCollectionProducts(
-    handle: string, 
-    first: number = 20
+    handle: string,
+    first = 20
   ): Promise<{ products: ShopifyProduct[]; hasNextPage: boolean }> {
     try {
       const service = getShopifyService(this.domain, this.accessToken);
       const result = await service.getCollectionProducts(handle, first);
-      
+
       return {
         products: result.products.map(transformProduct),
         hasNextPage: result.hasNextPage,
@@ -166,7 +165,7 @@ export class ShopifyClient {
       const service = getShopifyService(this.domain, this.accessToken);
       return await service.createCart(lines);
     } catch (error) {
-      console.error('Failed to create cart:', error);
+      console.error("Failed to create cart:", error);
       throw error;
     }
   }
@@ -179,7 +178,7 @@ export class ShopifyClient {
       const service = getShopifyService(this.domain, this.accessToken);
       return await service.addToCart(cartId, lines);
     } catch (error) {
-      console.error('Failed to add to cart:', error);
+      console.error("Failed to add to cart:", error);
       throw error;
     }
   }
@@ -192,7 +191,7 @@ export class ShopifyClient {
       const service = getShopifyService(this.domain, this.accessToken);
       return await service.getCart(cartId);
     } catch (error) {
-      console.error('Failed to get cart:', error);
+      console.error("Failed to get cart:", error);
       throw error;
     }
   }
@@ -205,11 +204,12 @@ export class ShopifyClient {
 export function createShopifyClient(shopDomain: string): ShopifyClient | null {
   // In a real app, you'd get the access token from your database
   // For now, use environment variable
-  const accessToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN || 
-                     process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+  const accessToken =
+    process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN ||
+    process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
 
   if (!accessToken) {
-    console.warn('Shopify Storefront API access token not found');
+    console.warn("Shopify Storefront API access token not found");
     return null;
   }
 
@@ -221,13 +221,13 @@ export function createShopifyClient(shopDomain: string): ShopifyClient | null {
  */
 export function normalizeShopDomain(domain: string): string {
   // Remove protocol and paths
-  const cleanDomain = domain.replace(/^https?:\/\//, '').split('/')[0] || domain;
-  
+  const cleanDomain = domain.replace(/^https?:\/\//, "").split("/")[0] || domain;
+
   // Ensure .myshopify.com suffix
-  if (!cleanDomain.endsWith('.myshopify.com')) {
+  if (!cleanDomain.endsWith(".myshopify.com")) {
     return `${cleanDomain}.myshopify.com`;
   }
-  
+
   return cleanDomain;
 }
 
@@ -236,41 +236,41 @@ export function normalizeShopDomain(domain: string): string {
  */
 export const mockProducts: ShopifyProduct[] = [
   {
-    id: 'prod_abc',
-    title: 'Essential Tee',
-    handle: 'essential-tee',
-    description: 'A comfortable and stylish essential tee made from 100% organic cotton.',
+    id: "prod_abc",
+    title: "Essential Tee",
+    handle: "essential-tee",
+    description: "A comfortable and stylish essential tee made from 100% organic cotton.",
     images: [
       {
-        id: 'img_1',
-        url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop',
-        altText: 'Essential Tee - Black',
+        id: "img_1",
+        url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop",
+        altText: "Essential Tee - Black",
         width: 600,
         height: 600,
       },
       {
-        id: 'img_2', 
-        url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop&sat=-100',
-        altText: 'Essential Tee - White',
+        id: "img_2",
+        url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop&sat=-100",
+        altText: "Essential Tee - White",
         width: 600,
         height: 600,
       },
     ],
     variants: [
       {
-        id: 'var_1',
-        title: 'Black / M',
-        price: { amount: '29.00', currencyCode: 'USD' },
-        compareAtPrice: { amount: '39.00', currencyCode: 'USD' },
+        id: "var_1",
+        title: "Black / M",
+        price: { amount: "29.00", currencyCode: "USD" },
+        compareAtPrice: { amount: "39.00", currencyCode: "USD" },
         availableForSale: true,
         selectedOptions: [
-          { name: 'Color', value: 'Black' },
-          { name: 'Size', value: 'M' },
+          { name: "Color", value: "Black" },
+          { name: "Size", value: "M" },
         ],
         image: {
-          id: 'img_1',
-          url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop',
-          altText: 'Essential Tee - Black',
+          id: "img_1",
+          url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=600&fit=crop",
+          altText: "Essential Tee - Black",
           width: 600,
           height: 600,
         },
@@ -278,15 +278,15 @@ export const mockProducts: ShopifyProduct[] = [
       },
     ],
     priceRange: {
-      minVariantPrice: { amount: '29.00', currencyCode: 'USD' },
-      maxVariantPrice: { amount: '29.00', currencyCode: 'USD' },
+      minVariantPrice: { amount: "29.00", currencyCode: "USD" },
+      maxVariantPrice: { amount: "29.00", currencyCode: "USD" },
     },
-    tags: ['cotton', 'essential', 'casual'],
-    productType: 'Apparel',
-    vendor: 'Demo Store',
+    tags: ["cotton", "essential", "casual"],
+    productType: "Apparel",
+    vendor: "Demo Store",
     availableForSale: true,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z",
   },
 ];
 
@@ -294,5 +294,5 @@ export const mockProducts: ShopifyProduct[] = [
  * Get mock product by ID (for development)
  */
 export function getMockProduct(productId: string): ShopifyProduct | null {
-  return mockProducts.find(p => p.id === productId) || null;
+  return mockProducts.find((p) => p.id === productId) || null;
 }

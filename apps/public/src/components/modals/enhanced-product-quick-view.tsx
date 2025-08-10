@@ -1,35 +1,35 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Plus, Heart, Star } from 'lucide-react';
-import Image from 'next/image';
-import { SidePanel } from '@/components/ui/enhanced-modal';
-import { useModalRouter } from '@/hooks/use-modal-router';
-import { animationPresets } from '@/lib/animation-tokens';
-import { useAddToCart } from '@/store/app-store';
-import { useShopifyProduct, useShopDomain } from '@/hooks/use-shopify-product';
-import { 
-  getOptionValues, 
-  findVariantByOptions, 
-  calculateDiscountPercentage, 
-  formatPrice 
-} from '@minimall/core/client';
+import { SidePanel } from "@/components/ui/enhanced-modal";
+import { useModalRouter } from "@/hooks/use-modal-router";
+import { useShopDomain, useShopifyProduct } from "@/hooks/use-shopify-product";
+import { animationPresets } from "@/lib/animation-tokens";
+import { useAddToCart } from "@/store/app-store";
+import {
+  calculateDiscountPercentage,
+  findVariantByOptions,
+  formatPrice,
+  getOptionValues,
+} from "@minimall/core/client";
+import { AnimatePresence, motion } from "framer-motion";
+import { Heart, Minus, Plus, Star } from "lucide-react";
+import Image from "next/image";
+import React, { useState, useEffect } from "react";
 
 /**
  * Enhanced Product Quick View
- * 
+ *
  * Slides in gracefully from the right, never disrupting the user's context.
  * Every interaction is optimized for speed and delight.
  */
 export function EnhancedProductQuickView() {
-  const { modalState, closeModal } = useModalRouter('product');
+  const { modalState, closeModal } = useModalRouter("product");
   const addToCart = useAddToCart();
   const shopDomain = useShopDomain();
-  
+
   const productId = modalState.data.id;
   const { product, loading, error } = useShopifyProduct(productId, shopDomain);
-  
+
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
@@ -51,55 +51,51 @@ export function EnhancedProductQuickView() {
   }, [product]);
 
   // Find selected variant based on current options
-  const selectedVariant = product && Object.keys(selectedOptions).length > 0
-    ? findVariantByOptions(product, selectedOptions)
-    : product?.variants[0];
+  const selectedVariant =
+    product && Object.keys(selectedOptions).length > 0
+      ? findVariantByOptions(product, selectedOptions)
+      : product?.variants[0];
 
   const handleAddToCart = async () => {
     if (!product || !selectedVariant) return;
-    
+
     setIsAddingToCart(true);
-    
+
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
     const optionsString = selectedVariant.selectedOptions
       .map((opt: { name: string; value: string }) => opt.value)
-      .join(' / ');
-    
+      .join(" / ");
+
     addToCart({
       id: `${product.id}-${selectedVariant.id}`,
       productId: product.id,
       variantId: selectedVariant.id,
       title: product.title,
-      price: Math.round(parseFloat(selectedVariant.price.amount) * 100), // Convert to cents
+      price: Math.round(Number.parseFloat(selectedVariant.price.amount) * 100), // Convert to cents
       quantity,
-      image: selectedVariant.image?.url || product.images[0]?.url || '',
+      image: selectedVariant.image?.url || product.images[0]?.url || "",
       variant: {
         title: optionsString,
         selectedOptions: selectedVariant.selectedOptions,
       },
     });
-    
+
     setIsAddingToCart(false);
   };
 
   const handleOptionChange = (optionName: string, value: string) => {
-    setSelectedOptions(prev => ({
+    setSelectedOptions((prev) => ({
       ...prev,
-      [optionName]: value
+      [optionName]: value,
     }));
   };
 
   // Show loading state
   if (loading) {
     return (
-      <SidePanel
-        isOpen={modalState.isOpen}
-        onClose={closeModal}
-        width="lg"
-        pushContent={true}
-      >
+      <SidePanel isOpen={modalState.isOpen} onClose={closeModal} width="lg" pushContent={true}>
         <div className="space-y-6 animate-pulse">
           <div className="aspect-square bg-gray-200 rounded-xl" />
           <div className="space-y-3">
@@ -115,12 +111,7 @@ export function EnhancedProductQuickView() {
   // Show error state
   if (error) {
     return (
-      <SidePanel
-        isOpen={modalState.isOpen}
-        onClose={closeModal}
-        width="lg"
-        pushContent={true}
-      >
+      <SidePanel isOpen={modalState.isOpen} onClose={closeModal} width="lg" pushContent={true}>
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <div className="text-red-500 mb-2">Error loading product</div>
@@ -133,25 +124,27 @@ export function EnhancedProductQuickView() {
 
   if (!product) return null;
 
-  const currentPrice = selectedVariant?.price?.amount ? parseFloat(selectedVariant.price.amount) : 0;
-  const compareAtPrice = selectedVariant?.compareAtPrice?.amount ? parseFloat(selectedVariant.compareAtPrice.amount) : 0;
-  const discount = compareAtPrice > 0 ? calculateDiscountPercentage(compareAtPrice, currentPrice) : 0;
-  
+  const currentPrice = selectedVariant?.price?.amount
+    ? Number.parseFloat(selectedVariant.price.amount)
+    : 0;
+  const compareAtPrice = selectedVariant?.compareAtPrice?.amount
+    ? Number.parseFloat(selectedVariant.compareAtPrice.amount)
+    : 0;
+  const discount =
+    compareAtPrice > 0 ? calculateDiscountPercentage(compareAtPrice, currentPrice) : 0;
+
   // Get unique option names and values
-  const optionNames = [...new Set(product.variants.flatMap(v => v.selectedOptions.map(o => o.name)))];
+  const optionNames = [
+    ...new Set(product.variants.flatMap((v) => v.selectedOptions.map((o) => o.name))),
+  ];
 
   return (
-    <SidePanel
-      isOpen={modalState.isOpen}
-      onClose={closeModal}
-      width="lg"
-      pushContent={true}
-    >
+    <SidePanel isOpen={modalState.isOpen} onClose={closeModal} width="lg" pushContent={true}>
       <div className="space-y-6">
         {/* Product Images */}
         <div className="space-y-4">
           {/* Main Image */}
-          <motion.div 
+          <motion.div
             className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden"
             layout
           >
@@ -162,14 +155,18 @@ export function EnhancedProductQuickView() {
                 {...animationPresets.crossFade}
               >
                 <Image
-                  src={product.images[selectedImage]?.url || product.images[0]?.url || '/placeholder.jpg'}
+                  src={
+                    product.images[selectedImage]?.url ||
+                    product.images[0]?.url ||
+                    "/placeholder.jpg"
+                  }
                   alt={product.images[selectedImage]?.altText || product.title}
                   fill
                   className="object-cover"
                 />
               </motion.div>
             </AnimatePresence>
-            
+
             {/* Like button */}
             <motion.button
               onClick={() => setIsLiked(!isLiked)}
@@ -177,13 +174,13 @@ export function EnhancedProductQuickView() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
-              <Heart 
-                size={18} 
-                className={isLiked ? 'text-red-500 fill-red-500' : 'text-gray-600'} 
+              <Heart
+                size={18}
+                className={isLiked ? "text-red-500 fill-red-500" : "text-gray-600"}
               />
             </motion.button>
           </motion.div>
-          
+
           {/* Thumbnail Images */}
           {product.images.length > 1 && (
             <div className="flex gap-3">
@@ -193,7 +190,7 @@ export function EnhancedProductQuickView() {
                   onClick={() => setSelectedImage(index)}
                   className={`
                     relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors
-                    ${selectedImage === index ? 'border-black' : 'border-transparent'}
+                    ${selectedImage === index ? "border-black" : "border-transparent"}
                   `}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -219,10 +216,8 @@ export function EnhancedProductQuickView() {
         >
           {/* Title and Rating */}
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {product.title}
-            </h2>
-            
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{product.title}</h2>
+
             {/* Reviews would come from a separate API or be part of product data */}
             <div className="flex items-center gap-2 mb-3">
               <div className="flex items-center">
@@ -230,21 +225,17 @@ export function EnhancedProductQuickView() {
                   <Star
                     key={i}
                     size={16}
-                    className={i < 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}
+                    className={i < 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
                   />
                 ))}
               </div>
-              <span className="text-sm text-gray-600">
-                4.0 (24 reviews)
-              </span>
+              <span className="text-sm text-gray-600">4.0 (24 reviews)</span>
             </div>
           </div>
 
           {/* Price */}
           <div className="flex items-center gap-3">
-            <span className="text-3xl font-bold text-gray-900">
-              {formatPrice(currentPrice)}
-            </span>
+            <span className="text-3xl font-bold text-gray-900">{formatPrice(currentPrice)}</span>
             {compareAtPrice > 0 && discount > 0 && (
               <>
                 <span className="text-xl text-gray-500 line-through">
@@ -258,9 +249,7 @@ export function EnhancedProductQuickView() {
           </div>
 
           {/* Description */}
-          <p className="text-gray-600 leading-relaxed">
-            {product.description}
-          </p>
+          <p className="text-gray-600 leading-relaxed">{product.description}</p>
 
           {/* Tags as Features */}
           {product.tags.length > 0 && (
@@ -271,7 +260,7 @@ export function EnhancedProductQuickView() {
                   className="px-2 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.3 + (index * 0.1) }}
+                  transition={{ delay: 0.3 + index * 0.1 }}
                 >
                   {tag}
                 </motion.span>
@@ -290,7 +279,7 @@ export function EnhancedProductQuickView() {
           {optionNames.map((optionName) => {
             const optionValues = getOptionValues(product, optionName);
             const selectedValue = selectedOptions[optionName];
-            
+
             return (
               <div key={optionName}>
                 <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -303,9 +292,10 @@ export function EnhancedProductQuickView() {
                       onClick={() => handleOptionChange(optionName, value)}
                       className={`
                         px-4 py-2 border rounded-lg font-medium transition-colors
-                        ${selectedValue === value
-                          ? 'border-black bg-black text-white'
-                          : 'border-gray-300 text-gray-900 hover:border-gray-400'
+                        ${
+                          selectedValue === value
+                            ? "border-black bg-black text-white"
+                            : "border-gray-300 text-gray-900 hover:border-gray-400"
                         }
                       `}
                       whileHover={{ scale: 1.05 }}
@@ -321,9 +311,7 @@ export function EnhancedProductQuickView() {
 
           {/* Quantity Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Quantity
-            </label>
+            <label className="block text-sm font-medium text-gray-900 mb-2">Quantity</label>
             <div className="flex items-center gap-3">
               <motion.button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -333,11 +321,9 @@ export function EnhancedProductQuickView() {
               >
                 <Minus size={16} />
               </motion.button>
-              
-              <span className="w-12 text-center font-medium text-lg">
-                {quantity}
-              </span>
-              
+
+              <span className="w-12 text-center font-medium text-lg">{quantity}</span>
+
               <motion.button
                 onClick={() => setQuantity(quantity + 1)}
                 className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400"
@@ -361,9 +347,10 @@ export function EnhancedProductQuickView() {
             disabled={isAddingToCart || !selectedVariant?.availableForSale}
             className={`
               w-full py-4 px-6 rounded-xl font-semibold text-white transition-colors
-              ${isAddingToCart || !selectedVariant?.availableForSale
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-black hover:bg-gray-800'
+              ${
+                isAddingToCart || !selectedVariant?.availableForSale
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-black hover:bg-gray-800"
               }
             `}
             whileHover={!isAddingToCart && selectedVariant?.availableForSale ? { scale: 1.02 } : {}}
@@ -376,7 +363,7 @@ export function EnhancedProductQuickView() {
                 Adding to Cart...
               </div>
             ) : !selectedVariant?.availableForSale ? (
-              'Out of Stock'
+              "Out of Stock"
             ) : (
               `Add to Cart • ${formatPrice(currentPrice * quantity)}`
             )}

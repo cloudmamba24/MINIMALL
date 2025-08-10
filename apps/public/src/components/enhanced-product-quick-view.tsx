@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Minus, Plus, Heart } from 'lucide-react';
-import { useAppStore } from '../store/app-store';
-import { useShopifyCart } from '../hooks/use-shopify-cart';
-import type { ShopifyProduct } from '../lib/shopify-client';
+import { AnimatePresence, motion } from "framer-motion";
+import { Heart, Minus, Plus, X } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useShopifyCart } from "../hooks/use-shopify-cart";
+import type { ShopifyProduct } from "../lib/shopify-client";
+import { useAppStore } from "../store/app-store";
 
 interface ProductOption {
   name: string;
@@ -27,19 +27,19 @@ interface ProductVariant {
 
 /**
  * Enhanced Product Quick View Modal
- * 
+ *
  * Uses the existing modal system but with URL-based routing support
  */
 export function EnhancedProductQuickView() {
   const { modals, closeProductQuickView } = useAppStore();
   const { addToShopifyCart, isLoading: isAddingToCart } = useShopifyCart();
-  
+
   const { isOpen, productId, product: initialProduct } = modals.productQuickView;
-  
+
   const [product, setProduct] = useState<ShopifyProduct | null>(initialProduct);
   const [loading, setLoading] = useState(!initialProduct);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
@@ -53,16 +53,16 @@ export function EnhancedProductQuickView() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await fetch(`/api/shopify/products/${productId}`);
         if (!response.ok) {
-          throw new Error('Product not found');
+          throw new Error("Product not found");
         }
-        
+
         const { product } = await response.json();
         setProduct(product);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load product');
+        setError(err instanceof Error ? err.message : "Failed to load product");
       } finally {
         setLoading(false);
       }
@@ -86,22 +86,23 @@ export function EnhancedProductQuickView() {
   }, [product]);
 
   // Find selected variant
-  const selectedVariant = product && Object.keys(selectedOptions).length > 0
-    ? product.variants.find((v) => 
-        (v as ProductVariant).selectedOptions.every(option => 
-          selectedOptions[option.name] === option.value
-        )
-      ) as ProductVariant
-    : product?.variants[0] as ProductVariant;
+  const selectedVariant =
+    product && Object.keys(selectedOptions).length > 0
+      ? (product.variants.find((v) =>
+          (v as ProductVariant).selectedOptions.every(
+            (option) => selectedOptions[option.name] === option.value
+          )
+        ) as ProductVariant)
+      : (product?.variants[0] as ProductVariant);
 
   const handleAddToCart = async () => {
     if (!product || !selectedVariant) return;
-    
+
     try {
       await addToShopifyCart(product, selectedVariant.id, quantity);
       // Modal automatically opens cart drawer
     } catch (error) {
-      console.error('Add to cart failed:', error);
+      console.error("Add to cart failed:", error);
     }
   };
 
@@ -117,7 +118,7 @@ export function EnhancedProductQuickView() {
 
   if (!isOpen) return null;
 
-  const formatPrice = (amount: string) => `$${parseFloat(amount).toFixed(2)}`;
+  const formatPrice = (amount: string) => `$${Number.parseFloat(amount).toFixed(2)}`;
 
   return (
     <AnimatePresence>
@@ -130,7 +131,7 @@ export function EnhancedProductQuickView() {
           className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           onClick={handleClose}
         />
-        
+
         {/* Modal */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -177,23 +178,27 @@ export function EnhancedProductQuickView() {
                 {/* Main Image */}
                 <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden">
                   <img
-                    src={product.images[selectedImage]?.url || product.images[0]?.url || '/placeholder.jpg'}
+                    src={
+                      product.images[selectedImage]?.url ||
+                      product.images[0]?.url ||
+                      "/placeholder.jpg"
+                    }
                     alt={product.images[selectedImage]?.altText || product.title}
                     className="w-full h-full object-cover"
                   />
-                  
+
                   {/* Like Button */}
                   <button
                     onClick={() => setIsLiked(!isLiked)}
                     className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center"
                   >
-                    <Heart 
-                      size={18} 
-                      className={isLiked ? 'text-red-500 fill-red-500' : 'text-gray-600'} 
+                    <Heart
+                      size={18}
+                      className={isLiked ? "text-red-500 fill-red-500" : "text-gray-600"}
                     />
                   </button>
                 </div>
-                
+
                 {/* Thumbnail Images */}
                 {product.images.length > 1 && (
                   <div className="flex gap-3 overflow-x-auto">
@@ -203,7 +208,7 @@ export function EnhancedProductQuickView() {
                         onClick={() => setSelectedImage(index)}
                         className={`
                           flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors
-                          ${selectedImage === index ? 'border-black' : 'border-transparent'}
+                          ${selectedImage === index ? "border-black" : "border-transparent"}
                         `}
                       >
                         <img
@@ -220,10 +225,8 @@ export function EnhancedProductQuickView() {
               {/* Product Info */}
               <div className="space-y-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    {product.title}
-                  </h2>
-                  
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{product.title}</h2>
+
                   <div className="flex items-center gap-3 mb-4">
                     <span className="text-2xl font-bold text-gray-900">
                       {selectedVariant && formatPrice(selectedVariant.price.amount)}
@@ -236,26 +239,30 @@ export function EnhancedProductQuickView() {
                   </div>
                 </div>
 
-                <p className="text-gray-600 leading-relaxed">
-                  {product.description}
-                </p>
+                <p className="text-gray-600 leading-relaxed">{product.description}</p>
 
                 {/* Variant Selection */}
                 {product.variants.length > 1 && (
                   <div className="space-y-4">
                     {/* Get option names */}
-                    {Array.from(new Set(product.variants.flatMap(v => 
-                      (v as ProductVariant).selectedOptions.map(o => o.name)
-                    ))).map((optionName) => {
-                      // Get values for this option
-                      const optionValues = Array.from(new Set(
-                        product.variants.flatMap(v => 
-                          (v as ProductVariant).selectedOptions
-                            .filter(o => o.name === optionName)
-                            .map(o => o.value)
+                    {Array.from(
+                      new Set(
+                        product.variants.flatMap((v) =>
+                          (v as ProductVariant).selectedOptions.map((o) => o.name)
                         )
-                      ));
-                      
+                      )
+                    ).map((optionName) => {
+                      // Get values for this option
+                      const optionValues = Array.from(
+                        new Set(
+                          product.variants.flatMap((v) =>
+                            (v as ProductVariant).selectedOptions
+                              .filter((o) => o.name === optionName)
+                              .map((o) => o.value)
+                          )
+                        )
+                      );
+
                       return (
                         <div key={optionName}>
                           <label className="block text-sm font-medium text-gray-900 mb-2">
@@ -265,12 +272,15 @@ export function EnhancedProductQuickView() {
                             {optionValues.map((value) => (
                               <button
                                 key={value}
-                                onClick={() => setSelectedOptions(prev => ({ ...prev, [optionName]: value }))}
+                                onClick={() =>
+                                  setSelectedOptions((prev) => ({ ...prev, [optionName]: value }))
+                                }
                                 className={`
                                   px-4 py-2 border rounded-lg font-medium transition-colors
-                                  ${selectedOptions[optionName] === value
-                                    ? 'border-black bg-black text-white'
-                                    : 'border-gray-300 text-gray-900 hover:border-gray-400'
+                                  ${
+                                    selectedOptions[optionName] === value
+                                      ? "border-black bg-black text-white"
+                                      : "border-gray-300 text-gray-900 hover:border-gray-400"
                                   }
                                 `}
                               >
@@ -286,9 +296,7 @@ export function EnhancedProductQuickView() {
 
                 {/* Quantity */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">
-                    Quantity
-                  </label>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">Quantity</label>
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -296,11 +304,9 @@ export function EnhancedProductQuickView() {
                     >
                       <Minus size={16} />
                     </button>
-                    
-                    <span className="w-12 text-center font-medium text-lg">
-                      {quantity}
-                    </span>
-                    
+
+                    <span className="w-12 text-center font-medium text-lg">{quantity}</span>
+
                     <button
                       onClick={() => setQuantity(quantity + 1)}
                       className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400"
@@ -316,9 +322,10 @@ export function EnhancedProductQuickView() {
                   disabled={isAddingToCart || !selectedVariant?.availableForSale}
                   className={`
                     w-full py-4 px-6 rounded-xl font-semibold text-white transition-colors
-                    ${isAddingToCart || !selectedVariant?.availableForSale
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-black hover:bg-gray-800'
+                    ${
+                      isAddingToCart || !selectedVariant?.availableForSale
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-black hover:bg-gray-800"
                     }
                   `}
                 >
@@ -328,9 +335,9 @@ export function EnhancedProductQuickView() {
                       Adding to Cart...
                     </div>
                   ) : !selectedVariant?.availableForSale ? (
-                    'Out of Stock'
+                    "Out of Stock"
                   ) : (
-                    `Add to Cart • ${selectedVariant ? formatPrice(selectedVariant.price.amount) : '$0.00'}`
+                    `Add to Cart • ${selectedVariant ? formatPrice(selectedVariant.price.amount) : "$0.00"}`
                   )}
                 </button>
               </div>

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { createShopifyClient, normalizeShopDomain } from '@/lib/shopify-client';
-import type { UICartItem } from '@/store/app-store';
+import { createShopifyClient, normalizeShopDomain } from "@/lib/shopify-client";
+import type { UICartItem } from "@/store/app-store";
 
 export interface ShopifyCartState {
   cartId: string | null;
@@ -12,7 +12,7 @@ export interface ShopifyCartState {
 
 /**
  * Shopify Cart Integration Service
- * 
+ *
  * Handles syncing local cart state with Shopify's Cart API
  * Provides seamless integration between local UI cart and Shopify checkout
  */
@@ -29,7 +29,7 @@ export class ShopifyCartIntegration {
   constructor(shopDomain: string) {
     this.shopDomain = normalizeShopDomain(shopDomain);
     this.client = createShopifyClient(this.shopDomain);
-    
+
     // Load persisted cart state
     this.loadPersistedState();
   }
@@ -39,7 +39,7 @@ export class ShopifyCartIntegration {
    */
   async getOrCreateCart(items: UICartItem[] = []): Promise<string | null> {
     if (!this.client) {
-      console.warn('Shopify client not available, skipping cart creation');
+      console.warn("Shopify client not available, skipping cart creation");
       return null;
     }
 
@@ -56,32 +56,32 @@ export class ShopifyCartIntegration {
             return this.state.cartId;
           }
         } catch (error) {
-          console.warn('Existing cart not found, creating new cart:', error);
+          console.warn("Existing cart not found, creating new cart:", error);
           this.state.cartId = null;
         }
       }
 
       // Create new cart
-      const cartLines = items.map(item => ({
+      const cartLines = items.map((item) => ({
         merchandiseId: item.variantId,
         quantity: item.quantity,
       }));
 
       const newCart = await this.client.createCart(cartLines);
-      
+
       if (newCart) {
         this.state.cartId = newCart.id;
         this.state.checkoutUrl = newCart.checkoutUrl;
         this.state.lastSyncedAt = Date.now();
         this.persistState();
-        
-        console.log('Created Shopify cart:', this.state.cartId);
+
+        console.log("Created Shopify cart:", this.state.cartId);
         return this.state.cartId;
       }
 
       return null;
     } catch (error) {
-      console.error('Failed to create/get Shopify cart:', error);
+      console.error("Failed to create/get Shopify cart:", error);
       return null;
     } finally {
       this.state.isLoading = false;
@@ -101,13 +101,13 @@ export class ShopifyCartIntegration {
       const cartId = await this.getOrCreateCart();
       if (!cartId) return false;
 
-      const cartLines = items.map(item => ({
+      const cartLines = items.map((item) => ({
         merchandiseId: item.variantId,
         quantity: item.quantity,
       }));
 
       const updatedCart = await this.client.addToCart(cartId, cartLines);
-      
+
       if (updatedCart) {
         this.state.checkoutUrl = updatedCart.checkoutUrl;
         this.state.lastSyncedAt = Date.now();
@@ -117,7 +117,7 @@ export class ShopifyCartIntegration {
 
       return false;
     } catch (error) {
-      console.error('Failed to add items to Shopify cart:', error);
+      console.error("Failed to add items to Shopify cart:", error);
       return false;
     } finally {
       this.state.isLoading = false;
@@ -137,7 +137,7 @@ export class ShopifyCartIntegration {
       const cartId = await this.getOrCreateCart(localItems);
       return cartId !== null;
     } catch (error) {
-      console.error('Failed to sync cart with Shopify:', error);
+      console.error("Failed to sync cart with Shopify:", error);
       return false;
     } finally {
       this.state.isLoading = false;
@@ -150,9 +150,7 @@ export class ShopifyCartIntegration {
   async getCheckoutUrl(localItems: UICartItem[]): Promise<string | null> {
     if (!this.client) {
       // Fallback to basic Shopify cart URL
-      const params = localItems
-        .map(item => `${item.variantId}:${item.quantity}`)
-        .join(',');
+      const params = localItems.map((item) => `${item.variantId}:${item.quantity}`).join(",");
       return `https://${this.shopDomain}/cart/${params}`;
     }
 
@@ -161,12 +159,10 @@ export class ShopifyCartIntegration {
       await this.syncCart(localItems);
       return this.state.checkoutUrl;
     } catch (error) {
-      console.error('Failed to get checkout URL:', error);
-      
+      console.error("Failed to get checkout URL:", error);
+
       // Fallback to basic URL
-      const params = localItems
-        .map(item => `${item.variantId}:${item.quantity}`)
-        .join(',');
+      const params = localItems.map((item) => `${item.variantId}:${item.quantity}`).join(",");
       return `https://${this.shopDomain}/cart/${params}`;
     }
   }
@@ -192,7 +188,7 @@ export class ShopifyCartIntegration {
    * Load persisted state from localStorage
    */
   private loadPersistedState(): void {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     try {
       const saved = localStorage.getItem(`shopify-cart-${this.shopDomain}`);
@@ -205,7 +201,7 @@ export class ShopifyCartIntegration {
         };
       }
     } catch (error) {
-      console.warn('Failed to load persisted cart state:', error);
+      console.warn("Failed to load persisted cart state:", error);
     }
   }
 
@@ -213,7 +209,7 @@ export class ShopifyCartIntegration {
    * Persist current state to localStorage
    */
   private persistState(): void {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     try {
       const toSave = {
@@ -223,7 +219,7 @@ export class ShopifyCartIntegration {
       };
       localStorage.setItem(`shopify-cart-${this.shopDomain}`, JSON.stringify(toSave));
     } catch (error) {
-      console.warn('Failed to persist cart state:', error);
+      console.warn("Failed to persist cart state:", error);
     }
   }
 }
@@ -236,11 +232,11 @@ const cartIntegrations = new Map<string, ShopifyCartIntegration>();
  */
 export function getShopifyCartIntegration(shopDomain: string): ShopifyCartIntegration {
   const normalizedDomain = normalizeShopDomain(shopDomain);
-  
+
   if (!cartIntegrations.has(normalizedDomain)) {
     cartIntegrations.set(normalizedDomain, new ShopifyCartIntegration(normalizedDomain));
   }
-  
+
   return cartIntegrations.get(normalizedDomain)!;
 }
 

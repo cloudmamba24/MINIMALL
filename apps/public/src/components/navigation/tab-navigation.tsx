@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo } from 'react';
-import { cn } from '@minimall/ui';
-import type { Category } from '@minimall/core/client';
+import type { Category } from "@minimall/core/client";
+import { cn } from "@minimall/ui";
+import { useEffect, useMemo, useState } from "react";
 
 interface TabNavigationProps {
   categories: Category[];
@@ -11,13 +11,14 @@ interface TabNavigationProps {
 }
 
 export function TabNavigation({ categories, className, onTabChange }: TabNavigationProps) {
-  const [activeTab, setActiveTab] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<string>("");
   const [isSticky, setIsSticky] = useState(false);
 
-  const visibleCategories = useMemo(() => 
-    categories
-      .filter(category => category.visible !== false)
-      .sort((a, b) => (a.order || 0) - (b.order || 0)),
+  const visibleCategories = useMemo(
+    () =>
+      categories
+        .filter((category) => category.visible !== false)
+        .sort((a, b) => (a.order || 0) - (b.order || 0)),
     [categories]
   );
 
@@ -33,7 +34,7 @@ export function TabNavigation({ categories, className, onTabChange }: TabNavigat
 
   // Handle sticky navigation on scroll
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return;
     }
 
@@ -42,8 +43,8 @@ export function TabNavigation({ categories, className, onTabChange }: TabNavigat
       setIsSticky(scrollTop > 100);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleTabClick = (categoryId: string) => {
@@ -51,7 +52,7 @@ export function TabNavigation({ categories, className, onTabChange }: TabNavigat
     onTabChange?.(categoryId);
 
     // Smooth scroll to section
-    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    if (typeof window !== "undefined" && typeof document !== "undefined") {
       const element = document.getElementById(categoryId);
       if (element) {
         const offset = 80; // Account for sticky header
@@ -60,7 +61,7 @@ export function TabNavigation({ categories, className, onTabChange }: TabNavigat
 
         window.scrollTo({
           top: offsetPosition,
-          behavior: 'smooth',
+          behavior: "smooth",
         });
       }
     }
@@ -84,15 +85,13 @@ export function TabNavigation({ categories, className, onTabChange }: TabNavigat
             <div className="flex space-x-8 py-4 min-w-max">
               {visibleCategories.map((category) => {
                 const isActive = activeTab === category.id;
-                
+
                 return (
                   <button
                     key={category.id}
                     className={cn(
                       "relative whitespace-nowrap px-1 py-2 text-sm font-medium transition-all duration-200 hover:text-primary",
-                      isActive 
-                        ? "text-primary" 
-                        : "text-muted-foreground hover:text-foreground"
+                      isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                     )}
                     onClick={() => handleTabClick(category.id)}
                     role="tab"
@@ -100,12 +99,12 @@ export function TabNavigation({ categories, className, onTabChange }: TabNavigat
                     aria-controls={`panel-${category.id}`}
                   >
                     {category.title.toUpperCase()}
-                    
+
                     {/* Active indicator */}
                     {isActive && (
                       <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
                     )}
-                    
+
                     {/* Hover indicator */}
                     <div
                       className={cn(

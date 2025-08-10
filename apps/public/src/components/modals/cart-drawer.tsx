@@ -1,9 +1,15 @@
-'use client';
+"use client";
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect } from 'react';
-import { X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
-import { useModals, useCloseCartDrawer, useCart, useUpdateQuantity, useRemoveFromCart } from '@/store/app-store';
+import {
+  useCart,
+  useCloseCartDrawer,
+  useModals,
+  useRemoveFromCart,
+  useUpdateQuantity,
+} from "@/store/app-store";
+import { AnimatePresence, motion } from "framer-motion";
+import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
+import { useEffect } from "react";
 
 interface CartDrawerProps {
   shopDomain: string;
@@ -23,39 +29,37 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
 
   // Close modal on escape key
   useEffect(() => {
-    if (typeof document === 'undefined') {
+    if (typeof document === "undefined") {
       return;
     }
 
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         closeCartDrawer();
       }
     };
 
     if (modals.cartDrawer.isOpen) {
-      document.addEventListener('keydown', handleEscape);
+      document.addEventListener("keydown", handleEscape);
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener("keydown", handleEscape);
     };
   }, [modals.cartDrawer.isOpen, closeCartDrawer]);
 
   // Build Shopify checkout URL
   const buildCheckoutUrl = () => {
     if (cart.items.length === 0) return `https://${shopDomain}/cart`;
-    
+
     // Build variant query string for Shopify
-    const variantParams = cart.items
-      .map(item => `${item.variantId}:${item.quantity}`)
-      .join(',');
-    
+    const variantParams = cart.items.map((item) => `${item.variantId}:${item.quantity}`).join(",");
+
     return `https://${shopDomain}/cart/${variantParams}`;
   };
 
   const handleCheckout = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       window.location.href = buildCheckoutUrl();
     }
   };
@@ -65,14 +69,14 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ x: '100%' }}
+        initial={{ x: "100%" }}
         animate={{ x: 0 }}
-        exit={{ x: '100%' }}
-        transition={{ 
-          type: 'spring',
+        exit={{ x: "100%" }}
+        transition={{
+          type: "spring",
           stiffness: 300,
           damping: 30,
-          duration: slideInDuration 
+          duration: slideInDuration,
         }}
         className="fixed right-0 top-0 h-full w-full max-w-md bg-black text-white z-50 overflow-y-auto border-l border-gray-800 flex flex-col"
       >
@@ -116,7 +120,7 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ delay: index * 0.1 }}
                   className={`flex gap-4 p-4 rounded-lg border border-gray-800 ${
-                    item.isNew ? 'bg-gray-900 border-gray-700' : 'bg-gray-950'
+                    item.isNew ? "bg-gray-900 border-gray-700" : "bg-gray-950"
                   }`}
                 >
                   {/* Product Image */}
@@ -140,7 +144,7 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
                     {item.variant && (
                       <p className="text-xs text-gray-400 mb-2">{item.variant.title}</p>
                     )}
-                    
+
                     <div className="flex items-center justify-between">
                       {/* Quantity Controls */}
                       <div className="flex items-center gap-2">
@@ -189,9 +193,7 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
               <span className="text-xl font-bold">${(cart.totalPrice / 100).toFixed(2)}</span>
             </div>
 
-            <p className="text-xs text-gray-400">
-              Shipping and taxes calculated at checkout
-            </p>
+            <p className="text-xs text-gray-400">Shipping and taxes calculated at checkout</p>
 
             {/* Action Buttons */}
             <div className="space-y-2">
@@ -202,7 +204,7 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
               >
                 Checkout
               </motion.button>
-              
+
               <button
                 onClick={closeCartDrawer}
                 className="w-full py-3 border border-gray-600 rounded font-medium hover:border-gray-400 transition-colors"

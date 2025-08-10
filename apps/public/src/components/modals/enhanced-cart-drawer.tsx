@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
-import Image from 'next/image';
-import { SidePanel } from '@/components/ui/enhanced-modal';
-import { useModalRouter } from '@/hooks/use-modal-router';
-import { animationPresets, animationTokens } from '@/lib/animation-tokens';
-import { 
-  useCart, 
-  useUpdateQuantity, 
-  useRemoveFromCart,
+import { SidePanel } from "@/components/ui/enhanced-modal";
+import { useModalRouter } from "@/hooks/use-modal-router";
+import { animationPresets, animationTokens } from "@/lib/animation-tokens";
+import { useShopifyCartIntegration } from "@/lib/shopify-cart-integration";
+import {
+  type UICartItem,
+  useCart,
   useClearCart,
-  type UICartItem 
-} from '@/store/app-store';
-import { useShopifyCartIntegration } from '@/lib/shopify-cart-integration';
-import { formatPrice } from '@minimall/core/client';
+  useRemoveFromCart,
+  useUpdateQuantity,
+} from "@/store/app-store";
+import { formatPrice } from "@minimall/core/client";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
 
 interface EnhancedCartDrawerProps {
   shopDomain: string;
@@ -23,18 +23,18 @@ interface EnhancedCartDrawerProps {
 
 /**
  * Enhanced Cart Drawer
- * 
+ *
  * The final checkpoint before purchase. Smooth, delightful, and optimized
  * for conversion without disrupting the shopping flow.
  */
 export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
-  const { modalState, closeModal } = useModalRouter('cart');
+  const { modalState, closeModal } = useModalRouter("cart");
   const cart = useCart();
   const updateQuantity = useUpdateQuantity();
   const removeFromCart = useRemoveFromCart();
   const clearCart = useClearCart();
   const shopifyCart = useShopifyCartIntegration(shopDomain);
-  
+
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -50,19 +50,19 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
     if (cart.items.length === 0) return;
 
     setIsCheckingOut(true);
-    
+
     try {
       // Get optimized checkout URL from Shopify integration
       const checkoutUrl = await shopifyCart.getCheckoutUrl(cart.items);
-      
+
       if (checkoutUrl) {
-        console.log('Redirecting to checkout:', checkoutUrl);
-        window.open(checkoutUrl, '_blank');
+        console.log("Redirecting to checkout:", checkoutUrl);
+        window.open(checkoutUrl, "_blank");
       } else {
-        console.error('Failed to get checkout URL');
+        console.error("Failed to get checkout URL");
       }
     } catch (error) {
-      console.error('Checkout error:', error);
+      console.error("Checkout error:", error);
     } finally {
       setIsCheckingOut(false);
     }
@@ -80,12 +80,12 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
     try {
       const success = await shopifyCart.syncCart(cart.items);
       if (success) {
-        console.log('Cart synced with Shopify');
+        console.log("Cart synced with Shopify");
       } else {
-        console.warn('Failed to sync cart with Shopify');
+        console.warn("Failed to sync cart with Shopify");
       }
     } catch (error) {
-      console.error('Cart sync error:', error);
+      console.error("Cart sync error:", error);
     } finally {
       setIsSyncing(false);
     }
@@ -94,11 +94,7 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
   const formatCartPrice = (priceInCents: number) => formatPrice(priceInCents / 100);
 
   return (
-    <SidePanel
-      isOpen={modalState.isOpen}
-      onClose={closeModal}
-      width="md"
-    >
+    <SidePanel isOpen={modalState.isOpen} onClose={closeModal} width="md">
       <div className="h-full flex flex-col">
         {/* Header */}
         <motion.div
@@ -111,12 +107,14 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
             <ShoppingBag size={24} className="text-gray-900" />
             <h2 className="text-2xl font-bold text-gray-900">Shopping Cart</h2>
           </div>
-          
+
           <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>{cart.totalItems} {cart.totalItems === 1 ? 'item' : 'items'}</span>
+            <span>
+              {cart.totalItems} {cart.totalItems === 1 ? "item" : "items"}
+            </span>
             <div className="flex items-center gap-3">
               {cart.totalItems > 0 && (
-                <button 
+                <button
                   onClick={handleSyncWithShopify}
                   disabled={isSyncing}
                   className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 flex items-center gap-1"
@@ -127,12 +125,12 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
                       Syncing...
                     </>
                   ) : (
-                    'Sync with Shopify'
+                    "Sync with Shopify"
                   )}
                 </button>
               )}
               {cart.totalItems > 0 && (
-                <button 
+                <button
                   onClick={handleClearCart}
                   className="text-red-600 hover:text-red-700 font-medium"
                 >
@@ -157,12 +155,8 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <ShoppingBag size={32} className="text-gray-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Your cart is empty
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Add some products to get started
-                </p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h3>
+                <p className="text-gray-600 mb-6">Add some products to get started</p>
                 <motion.button
                   onClick={closeModal}
                   className="px-6 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
@@ -220,10 +214,7 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
               className={`
                 w-full py-4 px-6 rounded-xl font-semibold text-white transition-colors
                 flex items-center justify-center gap-2
-                ${isCheckingOut 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-black hover:bg-gray-800'
-                }
+                ${isCheckingOut ? "bg-gray-400 cursor-not-allowed" : "bg-black hover:bg-gray-800"}
               `}
               whileHover={!isCheckingOut ? { scale: 1.02 } : {}}
               whileTap={!isCheckingOut ? { scale: 0.98 } : {}}
@@ -283,13 +274,13 @@ function CartItem({ item, index, onQuantityUpdate, onRemove }: CartItemProps) {
     <motion.div
       className="flex gap-4 p-4 bg-gray-50 rounded-xl"
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ 
-        opacity: isRemoving ? 0.5 : 1, 
-        y: 0, 
-        scale: isRemoving ? 0.95 : 1 
+      animate={{
+        opacity: isRemoving ? 0.5 : 1,
+        y: 0,
+        scale: isRemoving ? 0.95 : 1,
       }}
       exit={{ opacity: 0, x: -100, scale: 0.8 }}
-      transition={{ 
+      transition={{
         delay: index * 0.05,
         duration: animationTokens.duration.normal / 1000,
         ease: animationTokens.easing.entrance,
@@ -298,15 +289,8 @@ function CartItem({ item, index, onQuantityUpdate, onRemove }: CartItemProps) {
     >
       {/* Product Image */}
       <div className="relative w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-        {item.image && (
-          <Image
-            src={item.image}
-            alt={item.title}
-            fill
-            className="object-cover"
-          />
-        )}
-        
+        {item.image && <Image src={item.image} alt={item.title} fill className="object-cover" />}
+
         {/* New item indicator */}
         {item.isNew && (
           <motion.div
@@ -321,13 +305,13 @@ function CartItem({ item, index, onQuantityUpdate, onRemove }: CartItemProps) {
       {/* Product Details */}
       <div className="flex-1 min-w-0">
         <h4 className="font-medium text-gray-900 truncate">{item.title}</h4>
-        
+
         {/* Variants */}
         <div className="flex gap-2 mt-1 text-sm text-gray-600">
           {item.size && <span>Size: {item.size}</span>}
           {item.color && <span>Color: {item.color}</span>}
         </div>
-        
+
         {/* Price */}
         <div className="mt-2 font-semibold text-gray-900">
           {formatPrice(item.price * item.quantity)}
@@ -356,9 +340,9 @@ function CartItem({ item, index, onQuantityUpdate, onRemove }: CartItemProps) {
           >
             <Minus size={12} />
           </motion.button>
-          
+
           <span className="w-8 text-center font-medium">{item.quantity}</span>
-          
+
           <motion.button
             onClick={() => onQuantityUpdate(item.id, item.quantity + 1)}
             className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:border-gray-400"

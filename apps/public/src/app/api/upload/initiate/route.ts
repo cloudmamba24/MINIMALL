@@ -1,6 +1,6 @@
+import { getR2Service } from "@minimall/core/server";
 import { type NextRequest, NextResponse } from "next/server";
-import { getR2Service } from '@minimall/core/server';
-import { UploadSession } from '../types';
+import type { UploadSession } from "../types";
 
 interface InitiateUploadRequest {
   filename: string;
@@ -14,7 +14,7 @@ interface InitiateUploadRequest {
 export async function POST(request: NextRequest) {
   try {
     const body: InitiateUploadRequest = await request.json();
-    const { filename, size, type, uploadId, shopId = 'demo' } = body;
+    const { filename, size, type, uploadId, shopId = "demo" } = body;
 
     if (!filename || !size || !type || !uploadId) {
       return NextResponse.json(
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type (public app - images only)
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (!allowedTypes.includes(type)) {
       return NextResponse.json(
         { error: `File type ${type} not allowed. Only JPEG, PNG, WebP, and GIF are supported.` },
@@ -35,18 +35,15 @@ export async function POST(request: NextRequest) {
     // Validate file size (50MB limit for public streaming uploads)
     const maxSize = 50 * 1024 * 1024; // 50MB
     if (size > maxSize) {
-      return NextResponse.json(
-        { error: "File size exceeds 50MB limit" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "File size exceeds 50MB limit" }, { status: 400 });
     }
 
     try {
-      const r2Service = getR2Service();
+      const _r2Service = getR2Service();
 
       // Generate unique key with shop organization
       const timestamp = Date.now();
-      const extension = filename.split(".").pop() || "";
+      const _extension = filename.split(".").pop() || "";
       const fileName = `${timestamp}-${filename}`;
       const key = `uploads/${shopId}/streaming/${fileName}`;
 
@@ -60,7 +57,7 @@ export async function POST(request: NextRequest) {
         shopId,
         chunks: new Map<number, { etag: string; size: number }>(),
         createdAt: new Date(),
-        status: 'initiated'
+        status: "initiated",
       };
 
       // In production, store this in Redis or database
@@ -68,7 +65,7 @@ export async function POST(request: NextRequest) {
       globalThis.uploadSessions.set(uploadId, uploadMetadata);
 
       // Cleanup old sessions (older than 1 hour)
-      const oneHourAgo = Date.now() - (60 * 60 * 1000);
+      const oneHourAgo = Date.now() - 60 * 60 * 1000;
       for (const [id, session] of globalThis.uploadSessions.entries()) {
         if (session.createdAt.getTime() < oneHourAgo) {
           globalThis.uploadSessions.delete(id);
@@ -79,26 +76,21 @@ export async function POST(request: NextRequest) {
         success: true,
         uploadId,
         key,
-        message: "Streaming upload initiated"
+        message: "Streaming upload initiated",
       });
-
     } catch (r2Error) {
-      console.error('R2 service not available for streaming upload:', r2Error);
-      
+      console.error("R2 service not available for streaming upload:", r2Error);
+
       // Fallback: reject streaming upload if R2 not configured
       return NextResponse.json(
         { error: "Streaming upload requires R2 configuration. Use simple upload instead." },
         { status: 503 }
       );
     }
-
   } catch (error) {
     console.error("Failed to initiate streaming upload:", error);
 
-    return NextResponse.json(
-      { error: "Failed to initiate upload" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to initiate upload" }, { status: 500 });
   }
 }
 

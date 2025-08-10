@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useRef } from 'react';
-import { useAppStore } from '../store/app-store';
-import type { ShopifyProduct } from '../lib/shopify-client';
+import { useCallback, useRef, useState } from "react";
+import type { ShopifyProduct } from "../lib/shopify-client";
+import { useAppStore } from "../store/app-store";
 
 interface ShopifyCartLine {
   merchandiseId: string;
@@ -17,131 +17,134 @@ export function useShopifyCart({ shopDomain }: UseShopifyCartOptions = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [shopifyCartId, setShopifyCartId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Get app store actions
   const { addToCart: addToLocalCart, openCartDrawer } = useAppStore();
-  
+
   // Track if we've already created a Shopify cart
   const hasCreatedShopifyCart = useRef(false);
 
-  const addToShopifyCart = useCallback(async (
-    product: ShopifyProduct, 
-    variantId: string, 
-    quantity: number = 1
-  ) => {
-    setIsLoading(true);
-    setError(null);
+  const addToShopifyCart = useCallback(
+    async (product: ShopifyProduct, variantId: string, quantity = 1) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const variant = product.variants.find(v => v.id === variantId);
-      if (!variant) {
-        throw new Error('Variant not found');
-      }
-
-      // Add to local cart immediately for instant feedback
-      addToLocalCart({
-        id: `${product.id}-${variantId}`,
-        productId: product.id,
-        variantId,
-        title: product.title,
-        variant: {
-          title: variant.title,
-          selectedOptions: variant.selectedOptions || [],
-        },
-        price: parseFloat(variant.price.amount),
-        quantity,
-        image: variant.image?.url || product.images[0]?.url || '',
-      });
-
-      // Open cart drawer
-      openCartDrawer();
-
-      // Create or update Shopify cart in background
-      const lines: ShopifyCartLine[] = [{
-        merchandiseId: variantId,
-        quantity,
-      }];
-
-      let cartResponse;
-      
-      if (!shopifyCartId && !hasCreatedShopifyCart.current) {
-        // Create new cart
-        hasCreatedShopifyCart.current = true;
-        const response = await fetch('/api/shopify/cart', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            shopDomain: shopDomain || process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN,
-            lines,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to create cart');
+      try {
+        const variant = product.variants.find((v) => v.id === variantId);
+        if (!variant) {
+          throw new Error("Variant not found");
         }
 
-        cartResponse = await response.json();
-        setShopifyCartId(cartResponse.cart.id);
-        
-      } else if (shopifyCartId) {
-        // Add to existing cart
-        const response = await fetch(`/api/shopify/cart/${shopifyCartId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+        // Add to local cart immediately for instant feedback
+        addToLocalCart({
+          id: `${product.id}-${variantId}`,
+          productId: product.id,
+          variantId,
+          title: product.title,
+          variant: {
+            title: variant.title,
+            selectedOptions: variant.selectedOptions || [],
           },
-          body: JSON.stringify({
-            shopDomain: shopDomain || process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN,
-            lines,
-          }),
+          price: Number.parseFloat(variant.price.amount),
+          quantity,
+          image: variant.image?.url || product.images[0]?.url || "",
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to add to cart');
+        // Open cart drawer
+        openCartDrawer();
+
+        // Create or update Shopify cart in background
+        const lines: ShopifyCartLine[] = [
+          {
+            merchandiseId: variantId,
+            quantity,
+          },
+        ];
+
+        let cartResponse;
+
+        if (!shopifyCartId && !hasCreatedShopifyCart.current) {
+          // Create new cart
+          hasCreatedShopifyCart.current = true;
+          const response = await fetch("/api/shopify/cart", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              shopDomain: shopDomain || process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN,
+              lines,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to create cart");
+          }
+
+          cartResponse = await response.json();
+          setShopifyCartId(cartResponse.cart.id);
+        } else if (shopifyCartId) {
+          // Add to existing cart
+          const response = await fetch(`/api/shopify/cart/${shopifyCartId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              shopDomain: shopDomain || process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN,
+              lines,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to add to cart");
+          }
+
+          cartResponse = await response.json();
         }
 
-        cartResponse = await response.json();
-      }
+        // Log success but don't show to user (local cart is already updated)
+        console.log("Added to Shopify cart:", cartResponse?.cart?.id);
 
-      // Log success but don't show to user (local cart is already updated)
-      console.log('Added to Shopify cart:', cartResponse?.cart?.id);
-      
-      // Show warning if using mock data
-      if (cartResponse?.source === 'mock') {
-        console.warn('Using mock cart - configure Shopify credentials for real cart functionality');
-      }
+        // Show warning if using mock data
+        if (cartResponse?.source === "mock") {
+          console.warn(
+            "Using mock cart - configure Shopify credentials for real cart functionality"
+          );
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to add to cart";
+        setError(errorMessage);
+        console.error("Shopify cart error:", err);
 
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to add to cart';
-      setError(errorMessage);
-      console.error('Shopify cart error:', err);
-      
-      // Local cart is already updated, so user still has good experience
-      console.log('Item added to local cart despite Shopify error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [shopDomain, shopifyCartId, addToLocalCart, openCartDrawer]);
+        // Local cart is already updated, so user still has good experience
+        console.log("Item added to local cart despite Shopify error");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [shopDomain, shopifyCartId, addToLocalCart, openCartDrawer]
+  );
 
   const getCheckoutUrl = useCallback(async (): Promise<string | null> => {
     if (!shopifyCartId) {
-      console.warn('No Shopify cart ID available');
+      console.warn("No Shopify cart ID available");
       return null;
     }
 
     try {
-      const response = await fetch(`/api/shopify/cart/${shopifyCartId}?shop=${shopDomain || process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN}`);
-      
+      const response = await fetch(
+        `/api/shopify/cart/${shopifyCartId}?shop=${shopDomain || process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN}`
+      );
+
       if (!response.ok) {
-        throw new Error('Failed to get cart');
+        throw new Error("Failed to get cart");
       }
 
       const { cart } = await response.json();
       return cart.checkoutUrl;
     } catch (err) {
-      console.error('Failed to get checkout URL:', err);
+      console.error("Failed to get checkout URL:", err);
       return null;
     }
   }, [shopifyCartId, shopDomain]);

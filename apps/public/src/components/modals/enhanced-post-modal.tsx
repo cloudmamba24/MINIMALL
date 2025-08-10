@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, ShoppingBag, Eye, EyeOff } from 'lucide-react';
-import Image from 'next/image';
-import { EnhancedModal } from '@/components/ui/enhanced-modal';
-import { useModalCarousel } from '@/hooks/use-modal-router';
-import { animationPresets, animationTokens } from '@/lib/animation-tokens';
-import type { Category } from '@minimall/core/client';
+import { EnhancedModal } from "@/components/ui/enhanced-modal";
+import { useModalCarousel } from "@/hooks/use-modal-router";
+import { animationPresets, animationTokens } from "@/lib/animation-tokens";
+import type { Category } from "@minimall/core/client";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, Eye, EyeOff, ShoppingBag } from "lucide-react";
+import Image from "next/image";
+import { useMemo, useState } from "react";
 
 interface EnhancedPostModalProps {
   posts: Category[];
@@ -23,14 +23,14 @@ interface LocalProductTag {
 
 /**
  * Enhanced Post Modal with Carousel Navigation
- * 
+ *
  * The crown jewel of the "App-in-a-Tab" experience. Users can navigate
  * through posts without ever losing context, with silky smooth animations
  * and delightful micro-interactions.
  */
 export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalProps) {
   const [showProductTags, setShowProductTags] = useState(false);
-  
+
   const {
     modalState,
     currentItem: currentPost,
@@ -40,26 +40,21 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
     goToPrev,
     goToNext,
     closeModal,
-  } = useModalCarousel(
-    posts,
-    (post) => post.id,
-    'post',
-    'id'
-  );
+  } = useModalCarousel(posts, (post) => post.id, "post", "id");
 
   // Extract product tags from current post
   const productTags = useMemo((): LocalProductTag[] => {
     if (!currentPost?.children?.[0]?.card) return [];
-    
+
     const [, cardDetails] = currentPost.children[0].card;
     const coreTags = cardDetails.productTags || [];
-    
+
     // Convert core ProductTag to LocalProductTag format
-    return coreTags.map(tag => {
+    return coreTags.map((tag) => {
       const localTag: LocalProductTag = {
         productId: tag.productId,
         position: tag.position,
-        label: tag.label || 'Product',
+        label: tag.label || "Product",
       };
       // Only add price if it exists
       // In a real app, you'd look up product data here
@@ -69,10 +64,10 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
 
   // Get post image
   const postImage = useMemo(() => {
-    if (!currentPost?.children?.[0]?.card) return '';
-    
+    if (!currentPost?.children?.[0]?.card) return "";
+
     const [, cardDetails] = currentPost.children[0].card;
-    return cardDetails.image || cardDetails.imageUrl || '';
+    return cardDetails.image || cardDetails.imageUrl || "";
   }, [currentPost]);
 
   const handleProductTagClick = (productId: string) => {
@@ -113,7 +108,7 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
                 <ChevronLeft size={24} />
               </motion.button>
             )}
-            
+
             {canGoNext && (
               <motion.button
                 onClick={goToNext}
@@ -153,7 +148,7 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
               whileTap={{ scale: 0.95 }}
             >
               {showProductTags ? <EyeOff size={16} /> : <Eye size={16} />}
-              {showProductTags ? 'Hide Products' : 'View Products'}
+              {showProductTags ? "Hide Products" : "View Products"}
             </motion.button>
           )}
 
@@ -173,38 +168,39 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
                   priority
                 />
               )}
-              
+
               {/* Product tags with staggered animation */}
               <AnimatePresence>
-                {showProductTags && productTags.map((tag, index) => (
-                  <motion.button
-                    key={tag.productId}
-                    onClick={() => handleProductTagClick(tag.productId)}
-                    className="
+                {showProductTags &&
+                  productTags.map((tag, index) => (
+                    <motion.button
+                      key={tag.productId}
+                      onClick={() => handleProductTagClick(tag.productId)}
+                      className="
                       absolute w-6 h-6 bg-white rounded-full
                       flex items-center justify-center shadow-lg
                       hover:scale-110 transition-transform
                       before:absolute before:inset-0 before:bg-white before:rounded-full
                       before:animate-ping before:opacity-75
                     "
-                    style={{
-                      left: `${tag.position.x * 100}%`,
-                      top: `${tag.position.y * 100}%`,
-                      transform: 'translate(-50%, -50%)',
-                    }}
-                    initial={animationPresets.productTag.initial}
-                    animate={animationPresets.productTag.animate}
-                    exit={animationPresets.productTag.exit}
-                    transition={{
-                      ...animationPresets.productTag.transition,
-                      delay: index * (animationTokens.duration.stagger / 1000),
-                    }}
-                    whileHover={{ scale: 1.2 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <ShoppingBag size={12} className="text-black" />
-                  </motion.button>
-                ))}
+                      style={{
+                        left: `${tag.position.x * 100}%`,
+                        top: `${tag.position.y * 100}%`,
+                        transform: "translate(-50%, -50%)",
+                      }}
+                      initial={animationPresets.productTag.initial}
+                      animate={animationPresets.productTag.animate}
+                      exit={animationPresets.productTag.exit}
+                      transition={{
+                        ...animationPresets.productTag.transition,
+                        delay: index * (animationTokens.duration.stagger / 1000),
+                      }}
+                      whileHover={{ scale: 1.2 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <ShoppingBag size={12} className="text-black" />
+                    </motion.button>
+                  ))}
               </AnimatePresence>
             </motion.div>
           </AnimatePresence>
@@ -213,16 +209,13 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
         {/* Right side - Post details and products */}
         <div className="w-80 p-6 bg-gray-900 overflow-y-auto">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={currentPost.id}
-              {...animationPresets.crossFade}
-            >
+            <motion.div key={currentPost.id} {...animationPresets.crossFade}>
               {/* Post title with slide animation */}
-              <motion.h2 
+              <motion.h2
                 className="text-2xl font-bold mb-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ 
+                transition={{
                   delay: 0.1,
                   duration: animationTokens.duration.normal / 1000,
                   ease: animationTokens.easing.entrance,
@@ -230,23 +223,21 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
               >
                 {currentPost.title}
               </motion.h2>
-              
+
               {/* Product grid */}
               {productTags.length > 0 && (
                 <motion.div
                   className="space-y-3"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
+                  transition={{
                     delay: 0.2,
                     duration: animationTokens.duration.normal / 1000,
                     ease: animationTokens.easing.entrance,
                   }}
                 >
-                  <h3 className="text-lg font-semibold text-gray-300 mb-3">
-                    Featured Products
-                  </h3>
-                  
+                  <h3 className="text-lg font-semibold text-gray-300 mb-3">Featured Products</h3>
+
                   {productTags.map((tag, index) => (
                     <motion.button
                       key={tag.productId}
@@ -258,8 +249,8 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
                       "
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ 
-                        delay: 0.3 + (index * 0.1),
+                      transition={{
+                        delay: 0.3 + index * 0.1,
                         duration: animationTokens.duration.fast / 1000,
                         ease: animationTokens.easing.entrance,
                       }}
@@ -269,25 +260,23 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
                       <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
                         <ShoppingBag size={16} className="text-black" />
                       </div>
-                      
+
                       <div className="flex-1">
                         <div className="font-medium">{tag.label}</div>
-                        {tag.price && (
-                          <div className="text-sm text-gray-400">{tag.price}</div>
-                        )}
+                        {tag.price && <div className="text-sm text-gray-400">{tag.price}</div>}
                       </div>
                     </motion.button>
                   ))}
                 </motion.div>
               )}
-              
+
               {/* Post description if available */}
               {currentPost.children?.[0] && (
                 <motion.div
                   className="mt-6 pt-6 border-t border-gray-700"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
+                  transition={{
                     delay: 0.4,
                     duration: animationTokens.duration.normal / 1000,
                     ease: animationTokens.easing.entrance,
