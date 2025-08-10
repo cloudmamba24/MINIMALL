@@ -4,43 +4,64 @@ import type { SiteConfig } from "@minimall/core/client";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-// Client-safe config loading using API route
+// Direct config loading using server functions - avoids circular API calls during build
 async function loadConfigWithCache(configId: string, draftVersion?: string): Promise<SiteConfig> {
-  const searchParams = new URLSearchParams();
-  if (draftVersion) {
-    searchParams.set("draft", draftVersion);
-  }
-
-  const apiUrl = `/api/config/${configId}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
-
+  // Import server functions dynamically to avoid bundling issues
   try {
-    const response = await fetch(
-      new URL(
-        apiUrl,
-        process.env.NODE_ENV === "development"
-          ? "http://localhost:3000"
-          : process.env.VERCEL_URL
-            ? `https://${process.env.VERCEL_URL}`
-            : "https://minimall-public.vercel.app"
-      ).toString(),
-      {
-        next: { revalidate: 300 }, // 5 minutes cache
-      }
-    );
+    const { 
+      edgeCache, 
+      r2Service,
+      createDefaultSiteConfig,
+      createEnhancedSiteConfig 
+    } = await import("@minimall/core/server");
 
-    if (!response.ok) {
-      throw new Error(`Failed to load config: ${response.status} ${response.statusText}`);
+    const cacheKey = `config:${configId}${draftVersion ? `:${draftVersion}` : ""}`;
+    
+    // Try edge cache first
+    const cached = edgeCache.get<SiteConfig>(cacheKey);
+    if (cached) {
+      console.log(`Cache HIT for ${cacheKey}`);
+      return cached;
     }
 
-    const config = await response.json();
-    console.log(
-      `Successfully loaded config via API for: ${configId}${draftVersion ? ` (draft: ${draftVersion})` : ""}`
-    );
+    console.log(`Cache MISS for ${cacheKey}, fetching from R2`);
 
-    return config;
-  } catch (error) {
-    console.error(`Failed to load config via API for ${configId}:`, error);
-    throw error;
+    try {
+      // Try R2 first
+      const config = await r2Service.getConfig(configId, draftVersion);
+      edgeCache.set(cacheKey, config, 300);
+      console.log(`R2 SUCCESS: Cached config ${cacheKey} for 300s`);
+      return config;
+    } catch (error) {
+      console.warn(`R2 FAILED for ${cacheKey}:`, error instanceof Error ? error.message : "Unknown error");
+
+      // Fallback strategy
+      if (configId === "demo") {
+        const shopDomain = "demo-shop.myshopify.com";
+        const accessToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN || process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+        
+        try {
+          if (accessToken) {
+            return await createEnhancedSiteConfig(shopDomain, accessToken);
+          } else {
+            return createDefaultSiteConfig(shopDomain);
+          }
+        } catch {
+          return createDefaultSiteConfig(shopDomain);
+        }
+      }
+
+      if (process.env.NODE_ENV === "development") {
+        console.log(`DEV MODE: Serving demo config for ${configId}`);
+        const demoConfig = createDefaultSiteConfig("demo-shop.myshopify.com");
+        return { ...demoConfig, id: configId };
+      }
+
+      throw new Error(`Configuration not found: ${configId}`);
+    }
+  } catch (importError) {
+    console.error("Failed to import server functions:", importError);
+    throw new Error(`Configuration not found: ${configId}`);
   }
 }
 
@@ -54,8 +75,8 @@ interface PageProps {
   }>;
 }
 
-// Use Edge runtime for optimal performance
-export const runtime = "edge";
+// Use Node.js runtime for server-side operations compatibility
+export const runtime = "nodejs";
 
 // Enable static generation with ISR - 300s matches the spec
 export const revalidate = 300; // 5 minutes
