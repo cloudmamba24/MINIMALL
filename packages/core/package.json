@@ -19,6 +19,11 @@
 			"import": "./dist/server.js",
 			"require": "./dist/server.js",
 			"types": "./dist/server.d.ts"
+		},
+		"./demo-data": {
+			"import": "./dist/demo-data.js",
+			"require": "./dist/demo-data.js",
+			"types": "./dist/demo-data.d.ts"
 		}
 	},
 	"scripts": {

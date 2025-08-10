@@ -6,32 +6,12 @@ import {
   r2Procedure,
 } from '../trpc';
 
-// Import drizzle ORM
-let eq: any;
-let and: any;
-let desc: any;
-try {
-  const drizzleModule = require('drizzle-orm');
-  eq = drizzleModule.eq;
-  and = drizzleModule.and;
-  desc = drizzleModule.desc;
-} catch {
-  console.warn('Drizzle ORM not available');
-}
+// Import drizzle ORM and schema dynamically
+import { eq, and, desc } from 'drizzle-orm';
+import { configs, configVersions } from '@minimall/db';
 
-// Import schema
-let configs: any;
-let configVersions: any;
-try {
-  const schemaModule = require('@minimall/db/schema');
-  configs = schemaModule.configs;
-  configVersions = schemaModule.configVersions;
-} catch {
-  console.warn('Database schema not available');
-}
-
-// Import types
-interface SiteConfig {
+// Import types - flexible config interface for database storage
+interface StoredConfig {
   id?: string;
   [key: string]: any;
 }
@@ -68,7 +48,7 @@ export const configsRouter = createTRPCRouter({
             const versionData = version
               ? config.versions?.[0]
               : config.currentVersion;
-            return versionData?.data as SiteConfig;
+            return versionData?.data as StoredConfig;
           }
         } catch (error) {
           console.warn('Database config fetch failed:', error);
@@ -76,11 +56,13 @@ export const configsRouter = createTRPCRouter({
       }
 
       // Try R2 storage as fallback
-      try {
-        const r2Config = await ctx.r2.getConfig(configId, version);
-        return r2Config;
-      } catch (error) {
-        console.warn('R2 config fetch failed:', error);
+      if (ctx.r2) {
+        try {
+          const r2Config = await ctx.r2.getConfig(configId, version);
+          return r2Config;
+        } catch (error) {
+          console.warn('R2 config fetch failed:', error);
+        }
       }
 
       // Final fallback to demo data
@@ -143,11 +125,13 @@ export const configsRouter = createTRPCRouter({
         .where(eq(configs.id, configId));
 
       // Also save to R2 as backup
-      try {
-        await ctx.r2.saveConfig(configId, config);
-      } catch (r2Error) {
-        console.warn('R2 backup failed:', r2Error);
-        // Continue without R2 - database is primary
+      if (ctx.r2) {
+        try {
+          await ctx.r2.saveConfig(configId, config);
+        } catch (r2Error) {
+          console.warn('R2 backup failed:', r2Error);
+          // Continue without R2 - database is primary
+        }
       }
 
       return { success: true, version: newVersion[0] };
@@ -252,13 +236,15 @@ export const configsRouter = createTRPCRouter({
           .where(eq(configs.id, configId));
 
         // Update R2 backup
-        try {
-          await ctx.r2.saveConfig(
-            configId,
-            publishedVersion[0].data as SiteConfig
-          );
-        } catch (r2Error) {
-          console.warn('R2 backup update failed:', r2Error);
+        if (ctx.r2) {
+          try {
+            await ctx.r2.saveConfig(
+              configId,
+              publishedVersion[0].data as StoredConfig
+            );
+          } catch (r2Error) {
+            console.warn('R2 backup update failed:', r2Error);
+          }
         }
       }
 
