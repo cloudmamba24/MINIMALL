@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import type { Category, LayoutConfig } from "@minimall/core";
 import { motion } from "framer-motion";
-import { Category, LayoutConfig } from "@minimall/core";
-import { cn } from "../../lib/utils";
+import { useEffect, useRef, useState } from "react";
 import { safeArrayAccess } from "../../lib/type-utils";
+import { cn } from "../../lib/utils";
 
 interface MasonryRendererProps {
   category: Category;
@@ -19,11 +19,11 @@ interface MasonryItem {
   loaded: boolean;
 }
 
-export function MasonryRenderer({ 
-  category, 
-  layout, 
+export function MasonryRenderer({
+  category,
+  layout,
   onTileClick,
-  className 
+  className,
 }: MasonryRendererProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [masonryItems, setMasonryItems] = useState<MasonryItem[]>([]);
@@ -33,14 +33,14 @@ export function MasonryRenderer({
   // Calculate responsive columns
   const getColumns = () => {
     if (!containerRef.current) return layout.columns;
-    
+
     const containerWidth = containerRef.current.offsetWidth;
     const { responsive } = layout;
-    
+
     if (responsive?.lg && containerWidth >= 1024) return responsive.lg.columns || layout.columns;
     if (responsive?.md && containerWidth >= 768) return responsive.md.columns || layout.columns;
     if (responsive?.sm && containerWidth >= 640) return responsive.sm.columns || layout.columns;
-    
+
     return layout.columns;
   };
 
@@ -65,22 +65,22 @@ export function MasonryRenderer({
       }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [columns]);
 
   // Filter items based on media type
   const getFilteredItems = () => {
     if (!category.children) return [];
-    
+
     return category.children.filter((item) => {
-      if (layout.mediaFilter === 'all') return true;
-      
+      if (layout.mediaFilter === "all") return true;
+
       const cardDetails = item.card[1];
-      if (layout.mediaFilter === 'photo') {
+      if (layout.mediaFilter === "photo") {
         return cardDetails.image || cardDetails.imageUrl;
       }
-      if (layout.mediaFilter === 'video') {
+      if (layout.mediaFilter === "video") {
         return cardDetails.videoUrl;
       }
       return true;
@@ -92,7 +92,7 @@ export function MasonryRenderer({
     return new Promise((resolve) => {
       const cardDetails = item.card[1];
       const imageUrl = cardDetails.imageUrl || cardDetails.image;
-      
+
       if (!imageUrl) {
         resolve(200); // Default height
         return;
@@ -101,7 +101,8 @@ export function MasonryRenderer({
       const img = new Image();
       img.onload = () => {
         const containerWidth = containerRef.current?.offsetWidth || 300;
-        const columnWidth = (containerWidth - (layout.gutter * (columns - 1)) - (layout.outerMargin * 2)) / columns;
+        const columnWidth =
+          (containerWidth - layout.gutter * (columns - 1) - layout.outerMargin * 2) / columns;
         const naturalHeight = (img.naturalHeight / img.naturalWidth) * columnWidth;
         resolve(Math.max(naturalHeight, 100)); // Minimum height of 100px
       };
@@ -114,7 +115,7 @@ export function MasonryRenderer({
   const calculateMasonryLayout = async () => {
     const filteredItems = getFilteredItems();
     const items: MasonryItem[] = [];
-    
+
     for (const item of filteredItems) {
       const height = await calculateImageHeight(item);
       items.push({
@@ -123,7 +124,7 @@ export function MasonryRenderer({
         loaded: true,
       });
     }
-    
+
     setMasonryItems(items);
   };
 
@@ -135,7 +136,7 @@ export function MasonryRenderer({
   const getShortestColumn = (heights: number[]) => {
     let shortestIndex = 0;
     let shortestHeight = safeArrayAccess(heights, 0) || 0;
-    
+
     for (let i = 1; i < heights.length; i++) {
       const height = safeArrayAccess(heights, i) || 0;
       if (height < shortestHeight) {
@@ -143,7 +144,7 @@ export function MasonryRenderer({
         shortestIndex = i;
       }
     }
-    
+
     return shortestIndex;
   };
 
@@ -164,29 +165,30 @@ export function MasonryRenderer({
     if (!containerRef.current || !masonryItems[index]) return {};
 
     const containerWidth = containerRef.current.offsetWidth;
-    const columnWidth = (containerWidth - (layout.gutter * (columns - 1)) - (layout.outerMargin * 2)) / columns;
-    
+    const columnWidth =
+      (containerWidth - layout.gutter * (columns - 1) - layout.outerMargin * 2) / columns;
+
     // Find which column this item should go in
-    let tempHeights = [...columnHeights];
+    const tempHeights = [...columnHeights];
     let itemColumn = 0;
-    
+
     for (let i = 0; i <= index; i++) {
       itemColumn = getShortestColumn(tempHeights);
       if (i === index) break;
-      
+
       const currentHeight = safeArrayAccess(tempHeights, itemColumn);
       const currentItem = safeArrayAccess(masonryItems, i);
-      
+
       if (currentHeight !== undefined && currentItem) {
         tempHeights[itemColumn] = currentHeight + currentItem.height + layout.gutter;
       }
     }
-    
+
     const x = itemColumn * (columnWidth + layout.gutter);
     const y = safeArrayAccess(tempHeights, itemColumn) || 0;
-    
+
     return {
-      position: 'absolute' as const,
+      position: "absolute" as const,
       left: `${x}px`,
       top: `${y}px`,
       width: `${columnWidth}px`,
@@ -198,19 +200,19 @@ export function MasonryRenderer({
   // Calculate total container height
   const getContainerHeight = () => {
     if (masonryItems.length === 0) return 400;
-    
-    let tempHeights = new Array(columns).fill(0);
-    
+
+    const tempHeights = new Array(columns).fill(0);
+
     masonryItems.forEach((masonryItem) => {
       const shortestColumn = getShortestColumn(tempHeights);
       tempHeights[shortestColumn] += masonryItem.height + layout.gutter;
     });
-    
+
     return Math.max(...tempHeights) + layout.outerMargin * 2;
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={cn("relative w-full", className)}
       style={{
@@ -222,16 +224,16 @@ export function MasonryRenderer({
         const { item } = masonryItem;
         const cardDetails = item.card[1];
         const isHovered = hoveredIndex === index;
-        
+
         return (
           <motion.div
             key={`${item.id}-${index}`}
             className="overflow-hidden cursor-pointer"
             style={getItemStyles(index)}
             initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ 
-              opacity: 1, 
-              scale: layout.hoverZoom && isHovered ? 1.02 : 1 
+            animate={{
+              opacity: 1,
+              scale: layout.hoverZoom && isHovered ? 1.02 : 1,
             }}
             transition={{
               opacity: { duration: 0.5, delay: index * 0.1 },
@@ -262,18 +264,15 @@ export function MasonryRenderer({
 
             {/* Overlay */}
             {cardDetails.overlay && (
-              <div 
-                className={cn(
-                  "absolute text-white font-medium",
-                  {
-                    'top-2 left-2': cardDetails.overlay.position === 'top-left',
-                    'top-2 right-2': cardDetails.overlay.position === 'top-right',
-                    'bottom-2 left-2': cardDetails.overlay.position === 'bottom-left',
-                    'bottom-2 right-2': cardDetails.overlay.position === 'bottom-right',
-                    'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2': 
-                      cardDetails.overlay.position === 'center',
-                  }
-                )}
+              <div
+                className={cn("absolute text-white font-medium", {
+                  "top-2 left-2": cardDetails.overlay.position === "top-left",
+                  "top-2 right-2": cardDetails.overlay.position === "top-right",
+                  "bottom-2 left-2": cardDetails.overlay.position === "bottom-left",
+                  "bottom-2 right-2": cardDetails.overlay.position === "bottom-right",
+                  "top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2":
+                    cardDetails.overlay.position === "center",
+                })}
               >
                 <span className="bg-black/50 px-2 py-1 rounded text-sm">
                   {cardDetails.overlay.text}
@@ -303,7 +302,7 @@ export function MasonryRenderer({
                 style={{
                   left: `${tag.position.x * 100}%`,
                   top: `${tag.position.y * 100}%`,
-                  transform: 'translate(-50%, -50%)',
+                  transform: "translate(-50%, -50%)",
                 }}
               >
                 {tag.label && (

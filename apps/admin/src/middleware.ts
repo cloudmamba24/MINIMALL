@@ -51,10 +51,10 @@ export async function middleware(request: NextRequest) {
       // For now, just check if token exists - proper validation happens in API routes
       // Mock session structure for middleware compatibility
       const shopParam = request.nextUrl.searchParams.get("shop");
-      session = { 
+      session = {
         valid: true,
         shop: shopParam || "demo.myshopify.com",
-        scope: "read_products,write_products"
+        scope: "read_products,write_products",
       };
     }
 

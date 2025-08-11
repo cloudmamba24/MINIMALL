@@ -201,7 +201,10 @@ export class WebhookHandler {
     const { shop, payload } = context;
 
     // GDPR compliance: Handle customer data request
-    console.log(`Customer data request for shop ${shop}, customer:`, (payload as Record<string, unknown>).customer);
+    console.log(
+      `Customer data request for shop ${shop}, customer:`,
+      (payload as Record<string, unknown>).customer
+    );
 
     // TODO: Implement GDPR data export
     // - Collect all customer data from analytics

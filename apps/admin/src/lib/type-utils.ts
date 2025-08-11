@@ -7,13 +7,13 @@
  */
 export function conditionalProps<T extends Record<string, any>>(props: T): Partial<T> {
   const result: Partial<T> = {};
-  
+
   for (const [key, value] of Object.entries(props)) {
     if (value !== undefined && value !== null) {
       (result as any)[key] = value;
     }
   }
-  
+
   return result;
 }
 
@@ -34,7 +34,11 @@ export function safeOptionalProp<T>(value: T | null): T | undefined {
 /**
  * Safe object property access with fallback
  */
-export function safeProp<T, K extends keyof T>(obj: T | undefined, key: K, fallback?: T[K]): T[K] | undefined {
+export function safeProp<T, K extends keyof T>(
+  obj: T | undefined,
+  key: K,
+  fallback?: T[K]
+): T[K] | undefined {
   return obj?.[key] ?? fallback;
 }
 
@@ -43,12 +47,12 @@ export function safeProp<T, K extends keyof T>(obj: T | undefined, key: K, fallb
  */
 export function filterDefinedProps<T extends Record<string, any>>(obj: T): Partial<T> {
   const result: Partial<T> = {};
-  
+
   Object.entries(obj).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
+    if (value !== undefined && value !== null && value !== "") {
       (result as any)[key] = value;
     }
   });
-  
+
   return result;
 }

@@ -1,16 +1,16 @@
 "use client";
 
 import type { SiteConfig } from "@minimall/core/client";
+import { useCart } from "../hooks/use-cart";
 import { useRenderMode } from "../hooks/use-mobile-detection";
+import { conditionalProps } from "../lib/type-utils";
+import { cn } from "../lib/utils";
 import { EnhancedProductQuickView } from "./enhanced-product-quick-view";
 import { InstagramRenderer } from "./instagram-renderer";
 import { Renderer } from "./renderer";
 import { LayoutSwitch } from "./renderers/LayoutSwitch";
-import { UTMTracker } from "./tracking/UTMTracker";
 import { PixelDispatcher } from "./tracking/PixelDispatcher";
-import { cn } from "../lib/utils";
-import { conditionalProps } from "../lib/type-utils";
-import { useCart } from "../hooks/use-cart";
+import { UTMTracker } from "./tracking/UTMTracker";
 import "../styles/instagram-native.css";
 
 interface UnifiedRendererProps {
@@ -46,20 +46,25 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
     <>
       {/* UTM Tracking - Initialize on page load */}
       <UTMTracker configId={config.id} />
-      
+
       {/* Analytics Pixels */}
       {config.settings.pixels && (
-        <PixelDispatcher 
-          pixels={config.settings.pixels} 
-          configId={config.id}
-        />
+        <PixelDispatcher pixels={config.settings.pixels} configId={config.id} />
       )}
 
       {/* Main Content Rendering */}
       {renderMode === "instagram-native" ? (
-        <MobileNativeRenderer config={config} onAddToCart={addToCart} {...conditionalProps({ className })} />
+        <MobileNativeRenderer
+          config={config}
+          onAddToCart={addToCart}
+          {...conditionalProps({ className })}
+        />
       ) : (
-        <DesktopLayoutRenderer config={config} onAddToCart={addToCart} {...conditionalProps({ className })} />
+        <DesktopLayoutRenderer
+          config={config}
+          onAddToCart={addToCart}
+          {...conditionalProps({ className })}
+        />
       )}
 
       {/* Shared Components */}
@@ -72,14 +77,18 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
  * Mobile-Native Renderer
  * Enhanced Instagram-style experience with gesture support
  */
-function MobileNativeRenderer({ 
-  config, 
-  className, 
-  onAddToCart 
-}: { 
-  config: SiteConfig; 
+function MobileNativeRenderer({
+  config,
+  className,
+  onAddToCart,
+}: {
+  config: SiteConfig;
   className?: string;
-  onAddToCart: (productId: string, variantId?: string, quantity?: number) => Promise<{ success: boolean; error?: any }>;
+  onAddToCart: (
+    productId: string,
+    variantId?: string,
+    quantity?: number
+  ) => Promise<{ success: boolean; error?: any }>;
 }) {
   return (
     <div className={cn("instagram-native", className)}>
@@ -111,13 +120,13 @@ function MobileNativeRenderer({
             <LayoutSwitch
               category={category}
               configId={config.id}
-              {...conditionalProps({ 
+              {...conditionalProps({
                 experiments: config.settings.experiments,
-                className: "instagram-grid"
+                className: "instagram-grid",
               })}
               onTileClick={(clickedCategory, clickIndex) => {
                 // Mobile-native modal handling
-                console.log('Mobile tile clicked:', clickedCategory.id, clickIndex);
+                console.log("Mobile tile clicked:", clickedCategory.id, clickIndex);
                 // TODO: Implement mobile modal with swipe gestures
               }}
               onAddToCart={onAddToCart}
@@ -136,14 +145,18 @@ function MobileNativeRenderer({
  * Desktop Layout Renderer
  * Advanced layout system with full feature set
  */
-function DesktopLayoutRenderer({ 
-  config, 
-  className, 
-  onAddToCart 
-}: { 
-  config: SiteConfig; 
+function DesktopLayoutRenderer({
+  config,
+  className,
+  onAddToCart,
+}: {
+  config: SiteConfig;
   className?: string;
-  onAddToCart: (productId: string, variantId?: string, quantity?: number) => Promise<{ success: boolean; error?: any }>;
+  onAddToCart: (
+    productId: string,
+    variantId?: string,
+    quantity?: number
+  ) => Promise<{ success: boolean; error?: any }>;
 }) {
   return (
     <div className={className}>
@@ -155,13 +168,13 @@ function DesktopLayoutRenderer({
               <LayoutSwitch
                 category={category}
                 configId={config.id}
-                {...conditionalProps({ 
+                {...conditionalProps({
                   experiments: config.settings.experiments,
-                  className: "desktop-layout"
+                  className: "desktop-layout",
                 })}
                 onTileClick={(clickedCategory, clickIndex) => {
                   // Desktop modal handling
-                  console.log('Desktop tile clicked:', clickedCategory.id, clickIndex);
+                  console.log("Desktop tile clicked:", clickedCategory.id, clickIndex);
                   // TODO: Implement desktop modal system
                 }}
                 onAddToCart={onAddToCart}

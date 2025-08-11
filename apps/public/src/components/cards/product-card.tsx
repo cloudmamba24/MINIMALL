@@ -1,9 +1,9 @@
 "use client";
 
+import { useShopDomain, useShopifyProduct } from "@/hooks/use-shopify-product";
+import type { ShopifyProduct } from "@/lib/shopify-client";
 import { formatPrice } from "@minimall/core/client";
 import { ExternalLink, Heart, ShoppingCart, cn } from "@minimall/ui";
-import { useShopifyProduct, useShopDomain } from "@/hooks/use-shopify-product";
-import { type ShopifyProduct } from "@/lib/shopify-client";
 import Image from "next/image";
 import { useState, useTransition } from "react";
 
@@ -28,8 +28,11 @@ export function ProductCard({
 }: ProductCardProps) {
   // Use the proper hook for fetching product data
   const fallbackShopDomain = useShopDomain();
-  const { product, loading, error } = useShopifyProduct(productId, shopDomain || fallbackShopDomain);
-  
+  const { product, loading, error } = useShopifyProduct(
+    productId,
+    shopDomain || fallbackShopDomain
+  );
+
   const [imageLoading, setImageLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [isPending, startTransition] = useTransition();

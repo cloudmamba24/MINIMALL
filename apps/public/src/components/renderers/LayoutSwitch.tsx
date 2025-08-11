@@ -1,14 +1,18 @@
 "use client";
 
+import { type Category, type LayoutConfig, SiteConfig } from "@minimall/core";
 import { useEffect, useMemo } from "react";
-import { Category, LayoutConfig, SiteConfig } from "@minimall/core";
+import {
+  type ExperimentContext,
+  routeExperiment,
+  trackExperimentExposure,
+} from "../../lib/experiment-router";
+import { conditionalProps } from "../../lib/type-utils";
+import { UTMUtils } from "../tracking/UTMTracker";
 import { GridRenderer } from "./GridRenderer";
 import { MasonryRenderer } from "./MasonryRenderer";
 import { SliderRenderer } from "./SliderRenderer";
 import { StoriesRenderer } from "./StoriesRenderer";
-import { routeExperiment, trackExperimentExposure, ExperimentContext } from "../../lib/experiment-router";
-import { UTMUtils } from "../tracking/UTMTracker";
-import { conditionalProps } from "../../lib/type-utils";
 
 interface LayoutSwitchProps {
   category: Category;
@@ -21,35 +25,35 @@ interface LayoutSwitchProps {
 
 // Default layout configuration
 const DEFAULT_LAYOUT: LayoutConfig = {
-  preset: 'grid',
+  preset: "grid",
   rows: 2,
   columns: 2,
   gutter: 8,
   outerMargin: 16,
   borderRadius: 8,
   hoverZoom: true,
-  aspect: '1:1',
-  mediaFilter: 'all',
+  aspect: "1:1",
+  mediaFilter: "all",
   blockId: `block_${Math.random().toString(36).substr(2, 9)}`,
 };
 
-export function LayoutSwitch({ 
-  category, 
-  onTileClick, 
+export function LayoutSwitch({
+  category,
+  onTileClick,
   onAddToCart,
   className,
   configId,
-  experiments = []
+  experiments = [],
 }: LayoutSwitchProps) {
   // Get user context for experiment routing
   const experimentContext = useMemo((): ExperimentContext | null => {
     if (!configId) return null;
-    
+
     const sessionData = UTMUtils.getSessionData(configId);
     return {
       configId,
-      sessionId: sessionData?.sessionId || 'anonymous',
-      device: (sessionData?.device as ExperimentContext['device']) || 'desktop',
+      sessionId: sessionData?.sessionId || "anonymous",
+      device: (sessionData?.device as ExperimentContext["device"]) || "desktop",
       metadata: {},
     };
   }, [configId]);
@@ -57,7 +61,7 @@ export function LayoutSwitch({
   // Route experiment and get final layout configuration
   const { finalLayout, experimentResult } = useMemo(() => {
     const baseLayout = category.layout || DEFAULT_LAYOUT;
-    
+
     // Ensure blockId exists for analytics
     if (!baseLayout.blockId) {
       baseLayout.blockId = `block_${Math.random().toString(36).substr(2, 9)}`;
@@ -65,7 +69,9 @@ export function LayoutSwitch({
 
     // Check for active experiments
     if (experimentContext && experiments.length > 0) {
-      const result = routeExperiment(category.id, ['default'], { configId: experimentContext.configId });
+      const result = routeExperiment(category.id, ["default"], {
+        configId: experimentContext.configId,
+      });
       if (result) {
         return {
           finalLayout: baseLayout, // Use base layout since experiments are simplified
@@ -83,13 +89,17 @@ export function LayoutSwitch({
   // Track experiment exposure
   useEffect(() => {
     if (experimentResult && experimentContext) {
-      trackExperimentExposure(experimentResult.key || 'default', experimentResult.variant || 'default', experimentResult.metadata);
+      trackExperimentExposure(
+        experimentResult.key || "default",
+        experimentResult.variant || "default",
+        experimentResult.metadata
+      );
     }
   }, [experimentResult, experimentContext]);
 
   // Dispatch to appropriate renderer based on preset
   switch (finalLayout.preset) {
-    case 'grid':
+    case "grid":
       return (
         <GridRenderer
           category={category}
@@ -98,7 +108,7 @@ export function LayoutSwitch({
         />
       );
 
-    case 'masonry':
+    case "masonry":
       return (
         <MasonryRenderer
           category={category}
@@ -107,7 +117,7 @@ export function LayoutSwitch({
         />
       );
 
-    case 'slider':
+    case "slider":
       return (
         <SliderRenderer
           category={category}
@@ -116,7 +126,7 @@ export function LayoutSwitch({
         />
       );
 
-    case 'stories':
+    case "stories":
       return (
         <StoriesRenderer
           category={category}
@@ -130,8 +140,8 @@ export function LayoutSwitch({
       console.warn(`Unknown layout preset: ${finalLayout.preset}. Falling back to grid.`);
       return (
         <GridRenderer
-          category={{ ...category, layout: { ...finalLayout, preset: 'grid' } }}
-          layout={{ ...finalLayout, preset: 'grid' }}
+          category={{ ...category, layout: { ...finalLayout, preset: "grid" } }}
+          layout={{ ...finalLayout, preset: "grid" }}
           {...conditionalProps({ className, onTileClick })}
         />
       );

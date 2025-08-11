@@ -1,6 +1,6 @@
+import { logger } from "@minimall/core/server";
 import { analyticsEvents, db } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
-import { logger } from "@minimall/core/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -9,17 +9,17 @@ import { z } from "zod";
  */
 function detectDevice(userAgent: string | null): "mobile" | "tablet" | "desktop" {
   if (!userAgent) return "desktop";
-  
+
   const ua = userAgent.toLowerCase();
-  
+
   if (ua.includes("mobile") || ua.includes("android") || ua.includes("iphone")) {
     return "mobile";
   }
-  
+
   if (ua.includes("tablet") || ua.includes("ipad")) {
     return "tablet";
   }
-  
+
   return "desktop";
 }
 
@@ -143,9 +143,12 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ success: true }, {
-      headers: buildCorsHeaders(origin, allowedOrigins),
-    });
+    return NextResponse.json(
+      { success: true },
+      {
+        headers: buildCorsHeaders(origin, allowedOrigins),
+      }
+    );
   } catch (error) {
     console.error("Failed to process analytics event:", error);
     Sentry.captureException(error);

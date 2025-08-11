@@ -15,7 +15,7 @@ import { formatPrice } from "@minimall/core/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useState, memo } from "react";
+import { memo, useState } from "react";
 
 interface EnhancedCartDrawerProps {
   shopDomain: string;
@@ -265,7 +265,12 @@ interface CartItemProps {
   onRemove: (itemId: string) => void;
 }
 
-const CartItem = memo(function CartItem({ item, index, onQuantityUpdate, onRemove }: CartItemProps) {
+const CartItem = memo(function CartItem({
+  item,
+  index,
+  onQuantityUpdate,
+  onRemove,
+}: CartItemProps) {
   const [isRemoving, setIsRemoving] = useState(false);
 
   const handleRemove = async () => {

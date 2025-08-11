@@ -1,24 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import type { Category, LayoutConfig, LayoutPreset, SocialLayoutPreset } from "@minimall/core";
 import { Button, Card, cn } from "@minimall/ui";
-import { 
-  Settings, 
-  Eye, 
-  Save, 
-  Copy, 
-  Calendar,
-  Rocket,
-  Grid3X3,
-  LayoutGrid,
+import {
   ArrowRight,
-  Images
+  Calendar,
+  Copy,
+  Eye,
+  Grid3X3,
+  Images,
+  LayoutGrid,
+  Rocket,
+  Save,
+  Settings,
 } from "lucide-react";
-import { Category, LayoutConfig, LayoutPreset, SocialLayoutPreset } from "@minimall/core";
-import { PresetPicker } from "./PresetPicker";
+import { useEffect, useState } from "react";
 import { LayoutKnobs } from "./LayoutKnobs";
-import { TemplateDrawer } from "./TemplateDrawer";
 import { LivePreview } from "./LivePreview";
+import { PresetPicker } from "./PresetPicker";
+import { TemplateDrawer } from "./TemplateDrawer";
 
 interface EditorPanelProps {
   category: Category;
@@ -39,22 +39,22 @@ export function EditorPanel({
   onSchedule,
   className,
 }: EditorPanelProps) {
-  const [activeTab, setActiveTab] = useState<'layout' | 'content' | 'templates'>('layout');
+  const [activeTab, setActiveTab] = useState<"layout" | "content" | "templates">("layout");
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
 
   // Default layout if none exists
   const defaultLayout: LayoutConfig = {
-    preset: 'grid',
+    preset: "grid",
     rows: 2,
     columns: 2,
     gutter: 8,
     outerMargin: 16,
     borderRadius: 8,
     hoverZoom: true,
-    aspect: '1:1',
-    mediaFilter: 'all',
+    aspect: "1:1",
+    mediaFilter: "all",
     blockId: `block_${Math.random().toString(36).substr(2, 9)}`,
   };
 
@@ -96,16 +96,26 @@ export function EditorPanel({
 
   const getPresetIcon = (preset: LayoutPreset | SocialLayoutPreset) => {
     switch (preset) {
-      case 'grid': return <Grid3X3 className="w-4 h-4" />;
-      case 'masonry': return <LayoutGrid className="w-4 h-4" />;
-      case 'slider': return <ArrowRight className="w-4 h-4" />;
-      case 'stories': return <Images className="w-4 h-4" />;
-      case 'instagram-grid': return <Grid3X3 className="w-4 h-4" />;
-      case 'tiktok-vertical': return <ArrowRight className="w-4 h-4" />;
-      case 'pinterest-masonry': return <LayoutGrid className="w-4 h-4" />;
-      case 'twitter-timeline': return <LayoutGrid className="w-4 h-4" />;
-      case 'stories-horizontal': return <Images className="w-4 h-4" />;
-      default: return <Grid3X3 className="w-4 h-4" />;
+      case "grid":
+        return <Grid3X3 className="w-4 h-4" />;
+      case "masonry":
+        return <LayoutGrid className="w-4 h-4" />;
+      case "slider":
+        return <ArrowRight className="w-4 h-4" />;
+      case "stories":
+        return <Images className="w-4 h-4" />;
+      case "instagram-grid":
+        return <Grid3X3 className="w-4 h-4" />;
+      case "tiktok-vertical":
+        return <ArrowRight className="w-4 h-4" />;
+      case "pinterest-masonry":
+        return <LayoutGrid className="w-4 h-4" />;
+      case "twitter-timeline":
+        return <LayoutGrid className="w-4 h-4" />;
+      case "stories-horizontal":
+        return <Images className="w-4 h-4" />;
+      default:
+        return <Grid3X3 className="w-4 h-4" />;
     }
   };
 
@@ -115,15 +125,15 @@ export function EditorPanel({
 
   const getFilteredItemCount = () => {
     if (!category.children) return 0;
-    
+
     return category.children.filter((item) => {
-      if (currentLayout.mediaFilter === 'all') return true;
-      
+      if (currentLayout.mediaFilter === "all") return true;
+
       const cardDetails = item.card[1];
-      if (currentLayout.mediaFilter === 'photo') {
+      if (currentLayout.mediaFilter === "photo") {
         return cardDetails.image || cardDetails.imageUrl;
       }
-      if (currentLayout.mediaFilter === 'video') {
+      if (currentLayout.mediaFilter === "video") {
         return cardDetails.videoUrl;
       }
       return true;
@@ -140,7 +150,9 @@ export function EditorPanel({
             <h2 className="text-lg font-semibold text-gray-900">Gallery Editor</h2>
             <div className="flex items-center space-x-2">
               {getPresetIcon(currentLayout.preset)}
-              <span className={`px-2 py-1 text-xs rounded ${hasUnsavedChanges ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-800"}`}>
+              <span
+                className={`px-2 py-1 text-xs rounded ${hasUnsavedChanges ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-800"}`}
+              >
                 {hasUnsavedChanges ? "Unsaved" : "Saved"}
               </span>
             </div>
@@ -153,8 +165,8 @@ export function EditorPanel({
         {/* Tabs */}
         <div className="flex border-b border-gray-200">
           {[
-            { id: 'layout', label: 'Layout', icon: <Settings className="w-4 h-4" /> },
-            { id: 'templates', label: 'Templates', icon: <LayoutGrid className="w-4 h-4" /> },
+            { id: "layout", label: "Layout", icon: <Settings className="w-4 h-4" /> },
+            { id: "templates", label: "Templates", icon: <LayoutGrid className="w-4 h-4" /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -174,7 +186,7 @@ export function EditorPanel({
 
         {/* Tab Content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {activeTab === 'layout' && (
+          {activeTab === "layout" && (
             <>
               {/* Preset Picker */}
               <div>
@@ -189,15 +201,12 @@ export function EditorPanel({
               {/* Layout Controls */}
               <div>
                 <h3 className="text-sm font-medium text-gray-900 mb-3">Layout Settings</h3>
-                <LayoutKnobs
-                  layout={currentLayout}
-                  onLayoutChange={handleLayoutUpdate}
-                />
+                <LayoutKnobs layout={currentLayout} onLayoutChange={handleLayoutUpdate} />
               </div>
             </>
           )}
 
-          {activeTab === 'templates' && (
+          {activeTab === "templates" && (
             <div>
               <h3 className="text-sm font-medium text-gray-900 mb-3">Gallery Templates</h3>
               <TemplateDrawer
@@ -222,40 +231,22 @@ export function EditorPanel({
               <Save className="w-4 h-4 mr-2" />
               Save Draft
             </Button>
-            <Button
-              onClick={() => setIsPreviewMode(!isPreviewMode)}
-              variant="outline"
-              size="icon"
-            >
+            <Button onClick={() => setIsPreviewMode(!isPreviewMode)} variant="outline" size="icon">
               <Eye className="w-4 h-4" />
             </Button>
           </div>
 
-          <Button
-            onClick={handlePublish}
-            className="w-full"
-            disabled={!hasUnsavedChanges}
-          >
+          <Button onClick={handlePublish} className="w-full" disabled={!hasUnsavedChanges}>
             <Rocket className="w-4 h-4 mr-2" />
             Publish Changes
           </Button>
 
           <div className="flex space-x-2">
-            <Button
-              onClick={onDuplicate}
-              variant="outline"
-              className="flex-1"
-              size="sm"
-            >
+            <Button onClick={onDuplicate} variant="outline" className="flex-1" size="sm">
               <Copy className="w-4 h-4 mr-2" />
               Duplicate
             </Button>
-            <Button
-              onClick={onSchedule}
-              variant="outline"
-              className="flex-1"
-              size="sm"
-            >
+            <Button onClick={onSchedule} variant="outline" className="flex-1" size="sm">
               <Calendar className="w-4 h-4 mr-2" />
               Schedule
             </Button>
@@ -267,11 +258,7 @@ export function EditorPanel({
       <div className="flex-1 bg-gray-100">
         <div className="h-full p-4">
           <Card className="h-full">
-            <LivePreview
-              category={category}
-              isPreviewMode={isPreviewMode}
-              className="h-full"
-            />
+            <LivePreview category={category} isPreviewMode={isPreviewMode} className="h-full" />
           </Card>
         </div>
       </div>

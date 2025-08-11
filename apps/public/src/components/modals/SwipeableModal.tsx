@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef, ReactNode } from "react";
-import { motion, useMotionValue, useTransform, PanInfo, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import { AnimatePresence, type PanInfo, motion, useMotionValue, useTransform } from "framer-motion";
+import { ChevronLeft, ChevronRight, Heart, X } from "lucide-react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "../../lib/utils";
 import { PixelUtils } from "../tracking/PixelDispatcher";
 import "../../styles/instagram-native.css";
@@ -24,7 +24,7 @@ interface SwipeableModalProps {
 
 /**
  * SwipeableModal - Mobile-Native Modal with Gesture Support
- * 
+ *
  * Features:
  * - Swipe-to-close (down gesture)
  * - Swipe navigation (left/right for multiple items)
@@ -50,11 +50,11 @@ export function SwipeableModal({
 }: SwipeableModalProps) {
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   // Motion values for swipe gestures
   const y = useMotionValue(0);
   const x = useMotionValue(0);
-  
+
   // Transform opacity based on drag distance
   const opacity = useTransform(y, [0, 100], [1, 0.7]);
   const scale = useTransform(y, [0, 100], [1, 0.95]);
@@ -62,47 +62,47 @@ export function SwipeableModal({
   // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = 'var(--removed-body-scroll-bar-size, 0px)';
-      
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = "var(--removed-body-scroll-bar-size, 0px)";
+
       // Track modal open event
       if (configId && blockId) {
-        PixelUtils.dispatch('modal_open', {
+        PixelUtils.dispatch("modal_open", {
           block_id: blockId,
-          modal_type: 'product_quick_view',
+          modal_type: "product_quick_view",
         });
       }
     } else {
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
     }
 
     return () => {
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
     };
   }, [isOpen, configId, blockId]);
 
   // Handle escape key
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isOpen) {
+      if (event.key === "Escape" && isOpen) {
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
   // Handle vertical drag (swipe to close)
   const handleDragEnd = (event: any, info: PanInfo) => {
     setIsDragging(false);
-    
+
     const { offset, velocity } = info;
     const dragThreshold = 100;
     const velocityThreshold = 500;
-    
+
     // Close modal if dragged down significantly or with enough velocity
     if (offset.y > dragThreshold || velocity.y > velocityThreshold) {
       onClose();
@@ -115,11 +115,11 @@ export function SwipeableModal({
   // Handle horizontal swipe for navigation
   const handleHorizontalSwipe = (event: any, info: PanInfo) => {
     if (!showNavigation) return;
-    
+
     const { offset, velocity } = info;
     const swipeThreshold = 50;
     const velocityThreshold = 300;
-    
+
     if (Math.abs(offset.x) > swipeThreshold || Math.abs(velocity.x) > velocityThreshold) {
       if (offset.x > 0 && onPrevious && currentIndex > 0) {
         onPrevious();
@@ -127,7 +127,7 @@ export function SwipeableModal({
         onNext();
       }
     }
-    
+
     // Reset position
     x.set(0);
   };
@@ -151,7 +151,7 @@ export function SwipeableModal({
           {/* Backdrop */}
           <motion.div
             className="absolute inset-0"
-            style={{ background: 'var(--ig-backdrop)' }}
+            style={{ background: "var(--ig-backdrop)" }}
             onClick={handleBackdropClick}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -186,7 +186,7 @@ export function SwipeableModal({
               <div className="instagram-story-progress">
                 {Array.from({ length: totalItems }).map((_, index) => (
                   <div key={index} className="instagram-story-progress-bar">
-                    <div 
+                    <div
                       className={cn(
                         "instagram-story-progress-fill",
                         index <= currentIndex && "active"
@@ -200,23 +200,15 @@ export function SwipeableModal({
             {/* Header */}
             <div className="instagram-modal-header">
               <div className="flex-1">
-                {title && (
-                  <h2 className="text-white font-semibold truncate">
-                    {title}
-                  </h2>
-                )}
+                {title && <h2 className="text-white font-semibold truncate">{title}</h2>}
                 {showNavigation && totalItems > 1 && (
-                  <p className="text-xs" style={{ color: 'var(--ig-text-secondary)' }}>
+                  <p className="text-xs" style={{ color: "var(--ig-text-secondary)" }}>
                     {currentIndex + 1} of {totalItems}
                   </p>
                 )}
               </div>
 
-              <button
-                onClick={onClose}
-                className="instagram-modal-close"
-                aria-label="Close modal"
-              >
+              <button onClick={onClose} className="instagram-modal-close" aria-label="Close modal">
                 <X />
               </button>
             </div>
@@ -259,7 +251,6 @@ export function SwipeableModal({
             >
               {children}
             </motion.div>
-
           </motion.div>
         </motion.div>
       )}
@@ -274,7 +265,7 @@ export function useSwipeableModal(items: any[] = []) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const openModal = (index: number = 0) => {
+  const openModal = (index = 0) => {
     setCurrentIndex(Math.max(0, Math.min(index, items.length - 1)));
     setIsOpen(true);
   };

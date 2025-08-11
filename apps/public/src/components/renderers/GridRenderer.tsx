@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import type { Category, LayoutConfig } from "@minimall/core";
 import { motion } from "framer-motion";
-import { Category, LayoutConfig } from "@minimall/core";
+import { useState } from "react";
 import { cn } from "../../lib/utils";
 import { ProductOverlay } from "../ui/ProductOverlay";
 
@@ -14,52 +14,56 @@ interface GridRendererProps {
   className?: string;
 }
 
-export function GridRenderer({ 
-  category, 
-  layout, 
+export function GridRenderer({
+  category,
+  layout,
   onTileClick,
   onAddToCart,
-  className 
+  className,
 }: GridRendererProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   // Calculate responsive grid styles
   const getGridStyles = () => {
     const { rows, columns, gutter, outerMargin } = layout;
-    
+
     return {
-      display: 'grid',
+      display: "grid",
       gridTemplateColumns: `repeat(${columns}, 1fr)`,
       gridTemplateRows: `repeat(${rows}, 1fr)`,
       gap: `${gutter}px`,
       padding: `${outerMargin}px`,
-      width: '100%',
-      height: '100%',
+      width: "100%",
+      height: "100%",
     };
   };
 
   // Calculate aspect ratio for tiles
   const getAspectRatio = () => {
     switch (layout.aspect) {
-      case '1:1': return '1';
-      case '4:5': return '4/5';
-      case '9:16': return '9/16';
-      default: return 'auto';
+      case "1:1":
+        return "1";
+      case "4:5":
+        return "4/5";
+      case "9:16":
+        return "9/16";
+      default:
+        return "auto";
     }
   };
 
   // Filter items based on media type
   const getFilteredItems = () => {
     if (!category.children) return [];
-    
+
     return category.children.filter((item) => {
-      if (layout.mediaFilter === 'all') return true;
-      
+      if (layout.mediaFilter === "all") return true;
+
       const cardDetails = item.card[1];
-      if (layout.mediaFilter === 'photo') {
+      if (layout.mediaFilter === "photo") {
         return cardDetails.image || cardDetails.imageUrl;
       }
-      if (layout.mediaFilter === 'video') {
+      if (layout.mediaFilter === "video") {
         return cardDetails.videoUrl;
       }
       return true;
@@ -83,14 +87,11 @@ export function GridRenderer({
   };
 
   return (
-    <div 
-      className={cn("w-full h-full", className)}
-      style={getGridStyles()}
-    >
+    <div className={cn("w-full h-full", className)} style={getGridStyles()}>
       {displayItems.map((item, index) => {
         const cardDetails = item.card[1];
         const isHovered = hoveredIndex === index;
-        
+
         return (
           <motion.div
             key={`${item.id}-${index}`}
@@ -132,18 +133,15 @@ export function GridRenderer({
 
             {/* Overlay */}
             {cardDetails.overlay && (
-              <div 
-                className={cn(
-                  "absolute text-white font-medium",
-                  {
-                    'top-2 left-2': cardDetails.overlay.position === 'top-left',
-                    'top-2 right-2': cardDetails.overlay.position === 'top-right',
-                    'bottom-2 left-2': cardDetails.overlay.position === 'bottom-left',
-                    'bottom-2 right-2': cardDetails.overlay.position === 'bottom-right',
-                    'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2': 
-                      cardDetails.overlay.position === 'center',
-                  }
-                )}
+              <div
+                className={cn("absolute text-white font-medium", {
+                  "top-2 left-2": cardDetails.overlay.position === "top-left",
+                  "top-2 right-2": cardDetails.overlay.position === "top-right",
+                  "bottom-2 left-2": cardDetails.overlay.position === "bottom-left",
+                  "bottom-2 right-2": cardDetails.overlay.position === "bottom-right",
+                  "top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2":
+                    cardDetails.overlay.position === "center",
+                })}
               >
                 <span className="bg-black/50 px-2 py-1 rounded text-sm">
                   {cardDetails.overlay.text}
@@ -171,7 +169,7 @@ export function GridRenderer({
                 key={tagIndex}
                 tag={tag}
                 tagIndex={tagIndex}
-                onAddToCart={onAddToCart || (() => console.log('No cart handler provided'))}
+                onAddToCart={onAddToCart || (() => console.log("No cart handler provided"))}
               />
             ))}
           </motion.div>

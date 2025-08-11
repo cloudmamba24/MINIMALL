@@ -50,8 +50,7 @@ export function CartDrawer({ shopDomain, animationSettings }: CartDrawerProps) {
 
   // Build Shopify checkout URL
   const buildCheckoutUrl = () => {
-    if (cart.items.length === 0)
-      return `https://${shopDomain}/cart`;
+    if (cart.items.length === 0) return `https://${shopDomain}/cart`;
 
     // Build variant query string for Shopify
     const variantParams = cart.items.map((item) => `${item.variantId}:${item.quantity}`).join(",");

@@ -56,18 +56,18 @@ export function EnhancedProductQuickView() {
 
         // Use Shopify client directly instead of non-existent API
         const { ShopifyClient } = await import("../lib/shopify-client");
-        
+
         // Get shop domain and access token from config or environment
         const shopDomain = "demo-shop.myshopify.com"; // This should come from config context
         const accessToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN;
-        
+
         if (!accessToken) {
           throw new Error("Shopify access token not configured");
         }
 
         const client = new ShopifyClient(shopDomain, accessToken);
         const product = await client.getProduct(productId);
-        
+
         if (!product) {
           throw new Error("Product not found");
         }

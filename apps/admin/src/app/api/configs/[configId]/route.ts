@@ -1,4 +1,4 @@
-import { type SiteConfig, getR2Service, edgeCache } from "@minimall/core";
+import { type SiteConfig, edgeCache, getR2Service } from "@minimall/core";
 import { configVersions, configs, db } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { desc, eq } from "drizzle-orm";
@@ -175,7 +175,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         ];
         const invalidatedCount = edgeCache.invalidateByTags(tagsToInvalidate);
         console.log(`Invalidated ${invalidatedCount} cache entries for config: ${configId}`);
-        
       } catch (dbError) {
         console.error("Failed to save to database:", dbError);
         return NextResponse.json(
@@ -184,10 +183,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         );
       }
     } else {
-      return NextResponse.json(
-        { error: "Database not available" },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: "Database not available" }, { status: 503 });
     }
 
     // Add Sentry context

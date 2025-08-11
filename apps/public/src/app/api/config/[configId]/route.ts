@@ -66,7 +66,10 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
       const config = await r2Service.getConfig(configId, draftVersion);
 
       // Cache successful R2 fetch for 300s (5 minutes as per spec) with tags
-      const tags = [`config:${configId}`, `config:${configId}:${draftVersion ? 'draft' : 'published'}`];
+      const tags = [
+        `config:${configId}`,
+        `config:${configId}:${draftVersion ? "draft" : "published"}`,
+      ];
       edgeCache.set(cacheKey, config, 300, tags);
 
       return config;

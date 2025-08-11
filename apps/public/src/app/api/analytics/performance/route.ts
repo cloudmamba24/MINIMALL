@@ -1,6 +1,6 @@
+import { logger } from "@minimall/core/server";
 import { db, performanceMetrics } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
-import { logger } from "@minimall/core/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -77,14 +77,11 @@ export async function POST(request: NextRequest) {
       });
 
       // Log in debug/dev only
-      logger.debug(
-        `Performance Metric: ${data.metric} = ${data.value}ms (${data.rating})`,
-        {
-          configId: data.configId,
-          url: data.url,
-          timestamp: data.timestamp,
-        },
-      );
+      logger.debug(`Performance Metric: ${data.metric} = ${data.value}ms (${data.rating})`, {
+        configId: data.configId,
+        url: data.url,
+        timestamp: data.timestamp,
+      });
 
       // Save to database
       if (db && data.configId) {
@@ -139,9 +136,12 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ success: true }, {
-      headers: buildCorsHeaders(origin, allowedOrigins),
-    });
+    return NextResponse.json(
+      { success: true },
+      {
+        headers: buildCorsHeaders(origin, allowedOrigins),
+      }
+    );
   } catch (error) {
     console.error("Failed to process performance metric:", error);
     Sentry.captureException(error);

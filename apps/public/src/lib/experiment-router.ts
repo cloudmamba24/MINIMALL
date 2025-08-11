@@ -6,7 +6,7 @@
 export interface ExperimentContext {
   configId: string;
   sessionId: string;
-  device: 'mobile' | 'tablet' | 'desktop';
+  device: "mobile" | "tablet" | "desktop";
   key?: string;
   variant?: string;
   metadata: Record<string, unknown>;
@@ -17,16 +17,16 @@ export interface ExperimentContext {
  */
 export function routeExperiment(
   experimentKey: string,
-  variants: string[] = ['default'],
+  variants: string[] = ["default"],
   context?: Record<string, unknown>
 ): ExperimentContext {
   // For now, always return the first variant (usually 'default')
   return {
-    configId: 'default-config',
-    sessionId: 'anonymous',
-    device: 'desktop',
+    configId: "default-config",
+    sessionId: "anonymous",
+    device: "desktop",
     key: experimentKey,
-    variant: variants[0] || 'default',
+    variant: variants[0] || "default",
     metadata: context || {},
   };
 }
@@ -39,10 +39,10 @@ export function trackExperimentExposure(
   variant: string,
   metadata?: Record<string, unknown>
 ): void {
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     console.log(`[Experiment] ${experimentKey}: ${variant}`, metadata);
   }
-  
+
   // In production, this could send to analytics service
   // For now, it's a no-op to prevent build failures
 }
@@ -50,10 +50,7 @@ export function trackExperimentExposure(
 /**
  * Get experiment variant for a given key
  */
-export function getExperimentVariant(
-  experimentKey: string,
-  defaultVariant = 'default'
-): string {
+export function getExperimentVariant(experimentKey: string, defaultVariant = "default"): string {
   // Simplified - always return default variant
   return defaultVariant;
 }

@@ -1,6 +1,6 @@
 /**
  * Performance Monitoring Utilities
- * 
+ *
  * Advanced Web Vitals tracking, performance budgets, and real user monitoring
  * for production optimization of the MINIMALL platform.
  */
@@ -75,10 +75,13 @@ const PERFORMANCE_THRESHOLDS = {
 /**
  * Get performance rating for a metric
  */
-export function getPerformanceRating(metricName: string, value: number): "good" | "needs-improvement" | "poor" {
+export function getPerformanceRating(
+  metricName: string,
+  value: number
+): "good" | "needs-improvement" | "poor" {
   const thresholds = PERFORMANCE_THRESHOLDS[metricName as keyof typeof PERFORMANCE_THRESHOLDS];
   if (!thresholds) return "good";
-  
+
   if (value <= thresholds.good) return "good";
   if (value <= thresholds.poor) return "needs-improvement";
   return "poor";
@@ -95,16 +98,21 @@ export function initializePerformanceMonitoring(
     customMetrics?: string[];
   } = {}
 ): void {
-  const { apiEndpoint = "/api/performance", sampleRate = 0.1, debug = false, customMetrics = [] } = options;
-  
+  const {
+    apiEndpoint = "/api/performance",
+    sampleRate = 0.1,
+    debug = false,
+    customMetrics = [],
+  } = options;
+
   // Only monitor a sample of sessions to reduce overhead
   if (Math.random() > sampleRate) {
     if (debug) console.log("[Performance] Skipping monitoring for this session");
     return;
   }
-  
+
   if (typeof window === "undefined") return; // Server-side guard
-  
+
   const session: Partial<PerformanceSession> = {
     id: generateSessionId(),
     url: window.location.href,
@@ -124,22 +132,22 @@ export function initializePerformanceMonitoring(
     domInteractiveTime: 0,
     resourceTimings: [],
   };
-  
+
   // Track Web Vitals
   trackWebVitals(session, debug);
-  
+
   // Track custom metrics
   trackCustomMetrics(session, customMetrics);
-  
+
   // Track page load timing
   trackPageLoadTiming(session);
-  
+
   // Track resource timing
   trackResourceTiming(session);
-  
+
   // Track errors
   trackErrors(session);
-  
+
   // Send data on page unload or after a delay
   scheduleDataTransmission(session, apiEndpoint, debug);
 }
@@ -149,14 +157,14 @@ export function initializePerformanceMonitoring(
  */
 function trackWebVitals(session: Partial<PerformanceSession>, debug: boolean): void {
   if (!session.metrics) return;
-  
+
   // Track LCP (Largest Contentful Paint)
   if ("PerformanceObserver" in window) {
     try {
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         const lastEntry = entries[entries.length - 1];
-        
+
         if (lastEntry && session.metrics) {
           const metric: PerformanceMetric = {
             name: "LCP",
@@ -166,23 +174,23 @@ function trackWebVitals(session: Partial<PerformanceSession>, debug: boolean): v
             url: window.location.href,
             deviceType: getDeviceType(),
           };
-          
+
           session.metrics.LCP = metric;
           if (debug) console.log("[Performance] LCP:", metric);
         }
       });
-      
+
       lcpObserver.observe({ type: "largest-contentful-paint", buffered: true });
     } catch (error) {
       if (debug) console.warn("[Performance] LCP tracking failed:", error);
     }
-    
+
     // Track FID (First Input Delay)
     try {
       const fidObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         const firstEntry = entries[0];
-        
+
         if (firstEntry && session.metrics) {
           const fidValue = (firstEntry as any).processingStart - firstEntry.startTime;
           const metric: PerformanceMetric = {
@@ -193,17 +201,17 @@ function trackWebVitals(session: Partial<PerformanceSession>, debug: boolean): v
             url: window.location.href,
             deviceType: getDeviceType(),
           };
-          
+
           session.metrics.FID = metric;
           if (debug) console.log("[Performance] FID:", metric);
         }
       });
-      
+
       fidObserver.observe({ type: "first-input", buffered: true });
     } catch (error) {
       if (debug) console.warn("[Performance] FID tracking failed:", error);
     }
-    
+
     // Track CLS (Cumulative Layout Shift)
     try {
       let clsValue = 0;
@@ -213,7 +221,7 @@ function trackWebVitals(session: Partial<PerformanceSession>, debug: boolean): v
             clsValue += (entry as any).value;
           }
         }
-        
+
         if (session.metrics) {
           const metric: PerformanceMetric = {
             name: "CLS",
@@ -223,25 +231,25 @@ function trackWebVitals(session: Partial<PerformanceSession>, debug: boolean): v
             url: window.location.href,
             deviceType: getDeviceType(),
           };
-          
+
           session.metrics.CLS = metric;
           if (debug) console.log("[Performance] CLS:", metric);
         }
       });
-      
+
       clsObserver.observe({ type: "layout-shift", buffered: true });
     } catch (error) {
       if (debug) console.warn("[Performance] CLS tracking failed:", error);
     }
   }
-  
+
   // Track FCP and TTFB using Navigation Timing
   if ("performance" in window && window.performance.getEntriesByType) {
     setTimeout(() => {
       const navEntries = window.performance.getEntriesByType("navigation");
       if (navEntries.length > 0 && session.metrics) {
         const navTiming = navEntries[0] as PerformanceNavigationTiming;
-        
+
         // TTFB
         const ttfb = navTiming.responseStart - navTiming.requestStart;
         session.metrics.TTFB = {
@@ -252,10 +260,10 @@ function trackWebVitals(session: Partial<PerformanceSession>, debug: boolean): v
           url: window.location.href,
           deviceType: getDeviceType(),
         };
-        
+
         // FCP (approximated)
         const paintEntries = window.performance.getEntriesByType("paint");
-        const fcpEntry = paintEntries.find(entry => entry.name === "first-contentful-paint");
+        const fcpEntry = paintEntries.find((entry) => entry.name === "first-contentful-paint");
         if (fcpEntry) {
           session.metrics.FCP = {
             name: "FCP",
@@ -266,7 +274,7 @@ function trackWebVitals(session: Partial<PerformanceSession>, debug: boolean): v
             deviceType: getDeviceType(),
           };
         }
-        
+
         if (debug) {
           console.log("[Performance] TTFB:", session.metrics.TTFB);
           console.log("[Performance] FCP:", session.metrics.FCP);
@@ -281,7 +289,7 @@ function trackWebVitals(session: Partial<PerformanceSession>, debug: boolean): v
  */
 function trackCustomMetrics(session: Partial<PerformanceSession>, customMetrics: string[]): void {
   if (!session.customMetrics) return;
-  
+
   for (const metricName of customMetrics) {
     // Track custom timing marks
     if ("performance" in window && window.performance.getEntriesByName) {
@@ -310,20 +318,24 @@ function trackPageLoadTiming(session: Partial<PerformanceSession>): void {
 function trackResourceTiming(session: Partial<PerformanceSession>): void {
   if ("performance" in window && window.performance.getEntriesByType) {
     setTimeout(() => {
-      const resourceEntries = window.performance.getEntriesByType("resource") as PerformanceResourceTiming[];
-      
+      const resourceEntries = window.performance.getEntriesByType(
+        "resource"
+      ) as PerformanceResourceTiming[];
+
       // Filter and limit resource entries to avoid large payloads
       const importantResources = resourceEntries
-        .filter(entry => {
+        .filter((entry) => {
           // Focus on important resources
-          return entry.initiatorType === "img" || 
-                 entry.initiatorType === "script" || 
-                 entry.initiatorType === "css" ||
-                 entry.name.includes(".js") ||
-                 entry.name.includes(".css");
+          return (
+            entry.initiatorType === "img" ||
+            entry.initiatorType === "script" ||
+            entry.initiatorType === "css" ||
+            entry.name.includes(".js") ||
+            entry.name.includes(".css")
+          );
         })
         .slice(0, 20); // Limit to 20 resources
-      
+
       if (session.resourceTimings) {
         session.resourceTimings = importantResources;
       }
@@ -336,7 +348,7 @@ function trackResourceTiming(session: Partial<PerformanceSession>): void {
  */
 function trackErrors(session: Partial<PerformanceSession>): void {
   if (!session.errors) return;
-  
+
   // Track uncaught errors
   window.addEventListener("error", (event) => {
     session.errors!.push({
@@ -345,7 +357,7 @@ function trackErrors(session: Partial<PerformanceSession>): void {
       timestamp: new Date(),
     });
   });
-  
+
   // Track unhandled promise rejections
   window.addEventListener("unhandledrejection", (event) => {
     session.errors!.push({
@@ -365,13 +377,10 @@ function scheduleDataTransmission(
 ): void {
   const transmitData = () => {
     if (debug) console.log("[Performance] Transmitting session data:", session);
-    
+
     // Use sendBeacon for reliability during page unload
     if ("navigator" in window && navigator.sendBeacon) {
-      const success = navigator.sendBeacon(
-        apiEndpoint,
-        JSON.stringify(session)
-      );
+      const success = navigator.sendBeacon(apiEndpoint, JSON.stringify(session));
       if (debug) console.log("[Performance] Beacon sent:", success);
     } else {
       // Fallback to fetch with keepalive
@@ -380,16 +389,16 @@ function scheduleDataTransmission(
         body: JSON.stringify(session),
         headers: { "Content-Type": "application/json" },
         keepalive: true,
-      }).catch(error => {
+      }).catch((error) => {
         if (debug) console.warn("[Performance] Failed to send data:", error);
       });
     }
   };
-  
+
   // Send data on page unload
   window.addEventListener("beforeunload", transmitData);
   window.addEventListener("pagehide", transmitData);
-  
+
   // Also send data after a delay to capture metrics
   setTimeout(transmitData, 5000); // 5 seconds
 }
@@ -399,16 +408,16 @@ function scheduleDataTransmission(
  */
 function getDeviceType(): "desktop" | "mobile" | "tablet" {
   if (typeof window === "undefined") return "desktop";
-  
+
   const width = window.innerWidth || document.documentElement.clientWidth;
   const userAgent = navigator.userAgent.toLowerCase();
-  
+
   if (width <= 768 || /mobile|android|iphone/.test(userAgent)) {
     return "mobile";
   } else if (width <= 1024 || /tablet|ipad/.test(userAgent)) {
     return "tablet";
   }
-  
+
   return "desktop";
 }
 
@@ -431,7 +440,11 @@ export function markPerformance(name: string): void {
 /**
  * Measure performance between two marks
  */
-export function measurePerformance(name: string, startMark?: string, endMark?: string): number | null {
+export function measurePerformance(
+  name: string,
+  startMark?: string,
+  endMark?: string
+): number | null {
   if ("performance" in window && window.performance.measure) {
     try {
       window.performance.measure(name, startMark, endMark);
@@ -454,27 +467,28 @@ export function checkPerformanceBudget(
   budgets: PerformanceBudget[]
 ): Array<{ budget: PerformanceBudget; status: "pass" | "warning" | "fail"; currentValue: number }> {
   const results = [];
-  
+
   for (const budget of budgets) {
     const metric = metrics[budget.metric as keyof WebVitalsMetrics];
     if (!metric) continue;
-    
+
     const currentValue = metric.value;
     let status: "pass" | "warning" | "fail" = "pass";
-    
+
     if (currentValue > budget.threshold) {
       status = "fail";
-    } else if (currentValue > budget.threshold * 0.8) { // Warning at 80% of threshold
+    } else if (currentValue > budget.threshold * 0.8) {
+      // Warning at 80% of threshold
       status = "warning";
     }
-    
+
     results.push({
       budget,
       status,
       currentValue,
     });
   }
-  
+
   return results;
 }
 
@@ -496,33 +510,33 @@ export function getDefaultPerformanceBudgets(): PerformanceBudget[] {
  */
 export function calculatePerformanceScore(metrics: WebVitalsMetrics): number {
   const scores = [];
-  
+
   // Core Web Vitals have higher weights
   if (metrics.LCP) {
     const lcpScore = metrics.LCP.value <= 2500 ? 100 : metrics.LCP.value <= 4000 ? 50 : 0;
     scores.push(lcpScore * 0.25); // 25% weight
   }
-  
+
   if (metrics.FID) {
     const fidScore = metrics.FID.value <= 100 ? 100 : metrics.FID.value <= 300 ? 50 : 0;
     scores.push(fidScore * 0.25); // 25% weight
   }
-  
+
   if (metrics.CLS) {
     const clsScore = metrics.CLS.value <= 0.1 ? 100 : metrics.CLS.value <= 0.25 ? 50 : 0;
     scores.push(clsScore * 0.25); // 25% weight
   }
-  
+
   if (metrics.FCP) {
     const fcpScore = metrics.FCP.value <= 1800 ? 100 : metrics.FCP.value <= 3000 ? 50 : 0;
     scores.push(fcpScore * 0.15); // 15% weight
   }
-  
+
   if (metrics.TTFB) {
     const ttfbScore = metrics.TTFB.value <= 800 ? 100 : metrics.TTFB.value <= 1800 ? 50 : 0;
     scores.push(ttfbScore * 0.1); // 10% weight
   }
-  
+
   return scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) : 0;
 }
 
@@ -531,36 +545,36 @@ export function calculatePerformanceScore(metrics: WebVitalsMetrics): number {
  */
 export function getPerformanceRecommendations(metrics: WebVitalsMetrics): string[] {
   const recommendations: string[] = [];
-  
+
   if (metrics.LCP && metrics.LCP.rating !== "good") {
     recommendations.push(
       "Optimize Largest Contentful Paint by reducing server response times, preloading critical resources, and optimizing images"
     );
   }
-  
+
   if (metrics.FID && metrics.FID.rating !== "good") {
     recommendations.push(
       "Improve First Input Delay by reducing JavaScript execution time, removing unused code, and using code splitting"
     );
   }
-  
+
   if (metrics.CLS && metrics.CLS.rating !== "good") {
     recommendations.push(
       "Fix Cumulative Layout Shift by setting explicit dimensions on images and videos, avoiding dynamic content insertion"
     );
   }
-  
+
   if (metrics.FCP && metrics.FCP.rating !== "good") {
     recommendations.push(
       "Speed up First Contentful Paint by optimizing the critical rendering path and reducing render-blocking resources"
     );
   }
-  
+
   if (metrics.TTFB && metrics.TTFB.rating !== "good") {
     recommendations.push(
       "Reduce Time to First Byte by optimizing server performance, using CDN, and enabling caching"
     );
   }
-  
+
   return recommendations;
 }

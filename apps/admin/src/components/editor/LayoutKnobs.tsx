@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import {
+  ASPECT_RATIOS,
+  type AspectRatio,
+  type LayoutConfig,
+  MEDIA_FILTERS,
+  type MediaFilter,
+} from "@minimall/core";
 import { Button, cn } from "@minimall/ui";
-import { 
-  Monitor, 
-  Tablet, 
-  Smartphone, 
-  RotateCcw,
-  Info
-} from "lucide-react";
-import { LayoutConfig, AspectRatio, MediaFilter, ASPECT_RATIOS, MEDIA_FILTERS } from "@minimall/core";
+import { Info, Monitor, RotateCcw, Smartphone, Tablet } from "lucide-react";
+import { useState } from "react";
 
 interface LayoutKnobsProps {
   layout: LayoutConfig;
@@ -17,16 +17,12 @@ interface LayoutKnobsProps {
   className?: string;
 }
 
-export function LayoutKnobs({
-  layout,
-  onLayoutChange,
-  className,
-}: LayoutKnobsProps) {
-  const [activeDevice, setActiveDevice] = useState<'base' | 'sm' | 'md' | 'lg'>('base');
+export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsProps) {
+  const [activeDevice, setActiveDevice] = useState<"base" | "sm" | "md" | "lg">("base");
 
   // Get the current responsive config for the active device
   const getCurrentConfig = () => {
-    if (activeDevice === 'base') {
+    if (activeDevice === "base") {
       return {
         rows: layout.rows,
         columns: layout.columns,
@@ -34,7 +30,7 @@ export function LayoutKnobs({
         outerMargin: layout.outerMargin,
       };
     }
-    
+
     const responsive = layout.responsive?.[activeDevice] || {};
     return {
       rows: responsive.rows ?? layout.rows,
@@ -48,7 +44,7 @@ export function LayoutKnobs({
 
   // Update configuration for the active device
   const updateConfig = (updates: Partial<typeof currentConfig>) => {
-    if (activeDevice === 'base') {
+    if (activeDevice === "base") {
       onLayoutChange(updates);
     } else {
       const newResponsive = {
@@ -64,7 +60,7 @@ export function LayoutKnobs({
 
   // Reset to default values
   const resetToDefaults = () => {
-    if (activeDevice === 'base') {
+    if (activeDevice === "base") {
       onLayoutChange({
         rows: 2,
         columns: 2,
@@ -72,8 +68,8 @@ export function LayoutKnobs({
         outerMargin: 16,
         borderRadius: 8,
         hoverZoom: true,
-        aspect: '1:1',
-        mediaFilter: 'all',
+        aspect: "1:1",
+        mediaFilter: "all",
       });
     } else {
       const newResponsive = { ...layout.responsive };
@@ -84,26 +80,35 @@ export function LayoutKnobs({
 
   // Check if current device has custom settings
   const hasCustomSettings = () => {
-    if (activeDevice === 'base') return false;
+    if (activeDevice === "base") return false;
     return layout.responsive?.[activeDevice] !== undefined;
   };
 
   const getDeviceIcon = (device: string) => {
     switch (device) {
-      case 'lg': return <Monitor className="w-4 h-4" />;
-      case 'md': return <Tablet className="w-4 h-4" />;
-      case 'sm': return <Smartphone className="w-4 h-4" />;
-      default: return <Monitor className="w-4 h-4" />;
+      case "lg":
+        return <Monitor className="w-4 h-4" />;
+      case "md":
+        return <Tablet className="w-4 h-4" />;
+      case "sm":
+        return <Smartphone className="w-4 h-4" />;
+      default:
+        return <Monitor className="w-4 h-4" />;
     }
   };
 
   const getDeviceLabel = (device: string) => {
     switch (device) {
-      case 'base': return 'Base';
-      case 'sm': return 'Mobile';
-      case 'md': return 'Tablet';
-      case 'lg': return 'Desktop';
-      default: return device;
+      case "base":
+        return "Base";
+      case "sm":
+        return "Mobile";
+      case "md":
+        return "Tablet";
+      case "lg":
+        return "Desktop";
+      default:
+        return device;
     }
   };
 
@@ -128,10 +133,10 @@ export function LayoutKnobs({
 
         <div className="flex space-x-1 p-1 bg-gray-100 rounded-lg">
           {[
-            { id: 'base', label: 'Base' },
-            { id: 'sm', label: 'SM' },
-            { id: 'md', label: 'MD' },
-            { id: 'lg', label: 'LG' },
+            { id: "base", label: "Base" },
+            { id: "sm", label: "SM" },
+            { id: "md", label: "MD" },
+            { id: "lg", label: "LG" },
           ].map((device) => (
             <button
               key={device.id}
@@ -143,9 +148,9 @@ export function LayoutKnobs({
                   : "text-gray-600 hover:text-gray-900"
               )}
             >
-              {device.id !== 'base' && getDeviceIcon(device.id)}
+              {device.id !== "base" && getDeviceIcon(device.id)}
               <span>{device.label}</span>
-              {device.id !== 'base' && hasCustomSettings() && device.id === activeDevice && (
+              {device.id !== "base" && hasCustomSettings() && device.id === activeDevice && (
                 <span className="bg-gray-100 text-gray-600 px-1 py-0.5 text-xs rounded">
                   Custom
                 </span>
@@ -160,13 +165,11 @@ export function LayoutKnobs({
         {/* Grid Dimensions */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Rows
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Rows</label>
             <input
               type="range"
               value={currentConfig.rows}
-              onChange={(e) => updateConfig({ rows: parseInt(e.target.value) })}
+              onChange={(e) => updateConfig({ rows: Number.parseInt(e.target.value) })}
               min={1}
               max={6}
               step={1}
@@ -176,13 +179,11 @@ export function LayoutKnobs({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Columns
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Columns</label>
             <input
               type="range"
               value={currentConfig.columns}
-              onChange={(e) => updateConfig({ columns: parseInt(e.target.value) })}
+              onChange={(e) => updateConfig({ columns: Number.parseInt(e.target.value) })}
               min={1}
               max={4}
               step={1}
@@ -195,13 +196,11 @@ export function LayoutKnobs({
         {/* Spacing */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Gutter
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Gutter</label>
             <input
               type="range"
               value={currentConfig.gutter}
-              onChange={(e) => updateConfig({ gutter: parseInt(e.target.value) })}
+              onChange={(e) => updateConfig({ gutter: Number.parseInt(e.target.value) })}
               min={0}
               max={32}
               step={2}
@@ -211,13 +210,11 @@ export function LayoutKnobs({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Margin
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Margin</label>
             <input
               type="range"
               value={currentConfig.outerMargin}
-              onChange={(e) => updateConfig({ outerMargin: parseInt(e.target.value) })}
+              onChange={(e) => updateConfig({ outerMargin: Number.parseInt(e.target.value) })}
               min={0}
               max={64}
               step={4}
@@ -229,17 +226,15 @@ export function LayoutKnobs({
       </div>
 
       {/* Base settings only (not responsive) */}
-      {activeDevice === 'base' && (
+      {activeDevice === "base" && (
         <div className="space-y-4">
           {/* Border Radius */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Border Radius
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Border Radius</label>
             <input
               type="range"
               value={layout.borderRadius}
-              onChange={(e) => onLayoutChange({ borderRadius: parseInt(e.target.value) })}
+              onChange={(e) => onLayoutChange({ borderRadius: Number.parseInt(e.target.value) })}
               min={0}
               max={24}
               step={2}
@@ -250,9 +245,7 @@ export function LayoutKnobs({
 
           {/* Aspect Ratio */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Aspect Ratio
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Aspect Ratio</label>
             <select
               value={layout.aspect}
               onChange={(e) => onLayoutChange({ aspect: e.target.value as AspectRatio })}
@@ -260,7 +253,7 @@ export function LayoutKnobs({
             >
               {ASPECT_RATIOS.map((ratio) => (
                 <option key={ratio} value={ratio}>
-                  {ratio === 'auto' ? 'Auto' : ratio}
+                  {ratio === "auto" ? "Auto" : ratio}
                 </option>
               ))}
             </select>
@@ -268,9 +261,7 @@ export function LayoutKnobs({
 
           {/* Media Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Media Filter
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Media Filter</label>
             <select
               value={layout.mediaFilter}
               onChange={(e) => onLayoutChange({ mediaFilter: e.target.value as MediaFilter })}
@@ -287,9 +278,7 @@ export function LayoutKnobs({
           {/* Hover Zoom */}
           <div className="flex items-center justify-between">
             <div>
-              <label className="text-sm font-medium text-gray-700">
-                Hover Zoom
-              </label>
+              <label className="text-sm font-medium text-gray-700">Hover Zoom</label>
               <p className="text-xs text-gray-500">Scale items on hover</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -306,17 +295,17 @@ export function LayoutKnobs({
       )}
 
       {/* Info box for responsive settings */}
-      {activeDevice !== 'base' && (
+      {activeDevice !== "base" && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <div className="flex items-start space-x-2">
             <Info className="w-4 h-4 text-blue-600 mt-0.5" />
             <div className="text-xs text-blue-800">
               <p className="font-medium">Responsive Override</p>
               <p>
-                Settings for {getDeviceLabel(activeDevice)} devices. 
-                {hasCustomSettings() 
-                  ? ' Custom values will override base settings.' 
-                  : ' No custom settings - inheriting from base.'}
+                Settings for {getDeviceLabel(activeDevice)} devices.
+                {hasCustomSettings()
+                  ? " Custom values will override base settings."
+                  : " No custom settings - inheriting from base."}
               </p>
             </div>
           </div>

@@ -78,7 +78,6 @@ const nextConfig = {
     SHOPIFY_API_KEY: process.env.SHOPIFY_API_KEY,
   },
 
-
   // Webpack configuration
   webpack: (config, { isServer }) => {
     // Shopify Polaris compatibility

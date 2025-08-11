@@ -1,23 +1,23 @@
 "use client";
 
+import type { SocialAnalytics, SocialPlatform, SocialPost } from "@minimall/core";
 import { cn } from "@minimall/ui";
-import { 
-  TrendingUp, 
-  Heart, 
-  MessageCircle, 
-  Share, 
-  Eye,
-  Instagram,
-  Music,
-  Twitter,
-  Hash,
-  Users,
-  ShoppingCart,
-  DollarSign,
-  Calendar
-} from "lucide-react";
 import { motion } from "framer-motion";
-import { SocialPost, SocialAnalytics, SocialPlatform } from "@minimall/core";
+import {
+  Calendar,
+  DollarSign,
+  Eye,
+  Hash,
+  Heart,
+  Instagram,
+  MessageCircle,
+  Music,
+  Share,
+  ShoppingCart,
+  TrendingUp,
+  Twitter,
+  Users,
+} from "lucide-react";
 
 interface SocialMediaDashboardProps {
   posts: SocialPost[];
@@ -36,24 +36,27 @@ interface SocialMetrics {
   totalRevenue: number;
   avgEngagementRate: number;
   topPlatform: SocialPlatform;
-  platformBreakdown: Record<SocialPlatform, {
-    posts: number;
-    engagement: number;
-    revenue: number;
-  }>;
+  platformBreakdown: Record<
+    SocialPlatform,
+    {
+      posts: number;
+      engagement: number;
+      revenue: number;
+    }
+  >;
 }
 
-export function SocialMediaDashboard({ 
-  posts, 
-  analytics, 
+export function SocialMediaDashboard({
+  posts,
+  analytics,
   className,
-  dateRange 
+  dateRange,
 }: SocialMediaDashboardProps) {
   // Calculate social media metrics
   const metrics = calculateSocialMetrics(posts, analytics);
   const topPosts = getTopPerformingPosts(posts, analytics);
   const trendingHashtags = getTrendingHashtags(posts);
-  
+
   return (
     <div className={cn("space-y-6", className)}>
       {/* Header */}
@@ -158,15 +161,15 @@ interface MetricCardProps {
   value: string;
   icon: React.ReactNode;
   trend: number;
-  color: 'blue' | 'red' | 'green' | 'yellow';
+  color: "blue" | "red" | "green" | "yellow";
 }
 
 function MetricCard({ title, value, icon, trend, color }: MetricCardProps) {
   const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600 border-blue-200',
-    red: 'bg-red-50 text-red-600 border-red-200',
-    green: 'bg-green-50 text-green-600 border-green-200',
-    yellow: 'bg-yellow-50 text-yellow-600 border-yellow-200',
+    blue: "bg-blue-50 text-blue-600 border-blue-200",
+    red: "bg-red-50 text-red-600 border-red-200",
+    green: "bg-green-50 text-green-600 border-green-200",
+    yellow: "bg-yellow-50 text-yellow-600 border-yellow-200",
   };
 
   return (
@@ -176,15 +179,15 @@ function MetricCard({ title, value, icon, trend, color }: MetricCardProps) {
       transition={{ duration: 0.2 }}
     >
       <div className="flex items-center justify-between">
-        <div className={cn('p-2 rounded-lg border', colorClasses[color])}>
-          {icon}
-        </div>
+        <div className={cn("p-2 rounded-lg border", colorClasses[color])}>{icon}</div>
         {trend !== 0 && (
-          <div className={cn(
-            'flex items-center gap-1 text-xs px-2 py-1 rounded-full',
-            trend > 0 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
-          )}>
-            <TrendingUp className={cn('w-3 h-3', trend < 0 && 'rotate-180')} />
+          <div
+            className={cn(
+              "flex items-center gap-1 text-xs px-2 py-1 rounded-full",
+              trend > 0 ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50"
+            )}
+          >
+            <TrendingUp className={cn("w-3 h-3", trend < 0 && "rotate-180")} />
             {Math.abs(trend)}%
           </div>
         )}
@@ -207,24 +210,24 @@ interface PlatformMetricProps {
 function PlatformMetric({ platform, posts, engagement, revenue }: PlatformMetricProps) {
   const platformConfig = {
     instagram: {
-      name: 'Instagram',
+      name: "Instagram",
       icon: <Instagram className="w-5 h-5" />,
-      color: 'from-purple-500 to-pink-500',
+      color: "from-purple-500 to-pink-500",
     },
     tiktok: {
-      name: 'TikTok',
+      name: "TikTok",
       icon: <Music className="w-5 h-5" />,
-      color: 'from-black to-red-500',
+      color: "from-black to-red-500",
     },
     twitter: {
-      name: 'Twitter',
+      name: "Twitter",
       icon: <Twitter className="w-5 h-5" />,
-      color: 'from-blue-400 to-blue-600',
+      color: "from-blue-400 to-blue-600",
     },
     manual: {
-      name: 'Manual Upload',
+      name: "Manual Upload",
       icon: <Hash className="w-5 h-5" />,
-      color: 'from-gray-400 to-gray-600',
+      color: "from-gray-400 to-gray-600",
     },
   };
 
@@ -234,7 +237,7 @@ function PlatformMetric({ platform, posts, engagement, revenue }: PlatformMetric
   return (
     <div className="flex items-center justify-between p-4 rounded-lg border bg-gray-50">
       <div className="flex items-center gap-3">
-        <div className={cn('p-2 rounded-lg bg-gradient-to-r text-white', config.color)}>
+        <div className={cn("p-2 rounded-lg bg-gradient-to-r text-white", config.color)}>
           {config.icon}
         </div>
         <div>
@@ -260,7 +263,7 @@ interface TopPostCardProps {
 
 function TopPostCard({ post }: TopPostCardProps) {
   const engagement = post.engagement.likes + post.engagement.comments + post.engagement.shares;
-  
+
   return (
     <motion.div
       className="border rounded-lg overflow-hidden bg-white"
@@ -270,23 +273,17 @@ function TopPostCard({ post }: TopPostCardProps) {
       {/* Media Preview */}
       <div className="aspect-square bg-gray-100 relative">
         {post.mediaUrls[0] && (
-          <img 
-            src={post.mediaUrls[0]} 
-            alt={post.caption}
-            className="w-full h-full object-cover"
-          />
+          <img src={post.mediaUrls[0]} alt={post.caption} className="w-full h-full object-cover" />
         )}
         <div className="absolute top-2 left-2">
           <PlatformBadge platform={post.platform} />
         </div>
       </div>
-      
+
       {/* Content */}
       <div className="p-4">
-        <p className="text-sm text-gray-900 line-clamp-2 mb-2">
-          {post.caption || 'No caption'}
-        </p>
-        
+        <p className="text-sm text-gray-900 line-clamp-2 mb-2">{post.caption || "No caption"}</p>
+
         <div className="flex items-center justify-between text-xs text-gray-600">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
@@ -304,13 +301,13 @@ function TopPostCard({ post }: TopPostCardProps) {
           </div>
           <span>@{post.author.username}</span>
         </div>
-        
+
         {/* Revenue */}
         {post.performance.revenue > 0 && (
           <div className="mt-2 pt-2 border-t">
             <div className="flex items-center gap-1 text-xs text-green-600">
-              <DollarSign className="w-3 h-3" />
-              ${(post.performance.revenue / 100).toFixed(2)} revenue
+              <DollarSign className="w-3 h-3" />${(post.performance.revenue / 100).toFixed(2)}{" "}
+              revenue
             </div>
           </div>
         )}
@@ -321,17 +318,20 @@ function TopPostCard({ post }: TopPostCardProps) {
 
 function PlatformBadge({ platform }: { platform: SocialPlatform }) {
   const config = {
-    instagram: { icon: <Instagram className="w-3 h-3" />, color: 'bg-gradient-to-r from-purple-500 to-pink-500' },
-    tiktok: { icon: <Music className="w-3 h-3" />, color: 'bg-black' },
-    twitter: { icon: <Twitter className="w-3 h-3" />, color: 'bg-blue-500' },
-    manual: { icon: <Hash className="w-3 h-3" />, color: 'bg-gray-500' },
+    instagram: {
+      icon: <Instagram className="w-3 h-3" />,
+      color: "bg-gradient-to-r from-purple-500 to-pink-500",
+    },
+    tiktok: { icon: <Music className="w-3 h-3" />, color: "bg-black" },
+    twitter: { icon: <Twitter className="w-3 h-3" />, color: "bg-blue-500" },
+    manual: { icon: <Hash className="w-3 h-3" />, color: "bg-gray-500" },
   };
 
   const platformConfig = config[platform];
   if (!platformConfig) return null;
 
   return (
-    <div className={cn('p-1 rounded text-white text-xs', platformConfig.color)}>
+    <div className={cn("p-1 rounded text-white text-xs", platformConfig.color)}>
       {platformConfig.icon}
     </div>
   );
@@ -340,25 +340,32 @@ function PlatformBadge({ platform }: { platform: SocialPlatform }) {
 // Helper functions
 function calculateSocialMetrics(posts: SocialPost[], analytics: SocialAnalytics[]): SocialMetrics {
   const totalPosts = posts.length;
-  const totalEngagement = posts.reduce((sum, post) => 
-    sum + post.engagement.likes + post.engagement.comments + post.engagement.shares, 0
+  const totalEngagement = posts.reduce(
+    (sum, post) => sum + post.engagement.likes + post.engagement.comments + post.engagement.shares,
+    0
   );
   const totalReach = analytics.reduce((sum, metric) => sum + metric.reach, 0);
   const totalRevenue = analytics.reduce((sum, metric) => sum + metric.revenue, 0);
-  
-  const platformBreakdown = posts.reduce((acc, post) => {
-    if (!acc[post.platform]) {
-      acc[post.platform] = { posts: 0, engagement: 0, revenue: 0 };
-    }
-    acc[post.platform].posts++;
-    acc[post.platform].engagement += post.engagement.likes + post.engagement.comments + post.engagement.shares;
-    acc[post.platform].revenue += post.performance.revenue;
-    return acc;
-  }, {} as Record<SocialPlatform, { posts: number; engagement: number; revenue: number }>);
-  
-  const topPlatform = Object.entries(platformBreakdown)
-    .sort(([,a], [,b]) => b.engagement - a.engagement)[0]?.[0] as SocialPlatform || 'instagram';
-  
+
+  const platformBreakdown = posts.reduce(
+    (acc, post) => {
+      if (!acc[post.platform]) {
+        acc[post.platform] = { posts: 0, engagement: 0, revenue: 0 };
+      }
+      acc[post.platform].posts++;
+      acc[post.platform].engagement +=
+        post.engagement.likes + post.engagement.comments + post.engagement.shares;
+      acc[post.platform].revenue += post.performance.revenue;
+      return acc;
+    },
+    {} as Record<SocialPlatform, { posts: number; engagement: number; revenue: number }>
+  );
+
+  const topPlatform =
+    (Object.entries(platformBreakdown).sort(
+      ([, a], [, b]) => b.engagement - a.engagement
+    )[0]?.[0] as SocialPlatform) || "instagram";
+
   return {
     totalPosts,
     totalEngagement,
@@ -382,13 +389,13 @@ function getTopPerformingPosts(posts: SocialPost[], analytics: SocialAnalytics[]
 
 function getTrendingHashtags(posts: SocialPost[]): { tag: string; count: number }[] {
   const hashtagCounts = new Map<string, number>();
-  
-  posts.forEach(post => {
-    post.hashtags.forEach(hashtag => {
+
+  posts.forEach((post) => {
+    post.hashtags.forEach((hashtag) => {
       hashtagCounts.set(hashtag, (hashtagCounts.get(hashtag) || 0) + 1);
     });
   });
-  
+
   return Array.from(hashtagCounts.entries())
     .map(([tag, count]) => ({ tag, count }))
     .sort((a, b) => b.count - a.count);

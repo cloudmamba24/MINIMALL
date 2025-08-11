@@ -1,7 +1,7 @@
 "use client";
 
+import type { PixelSettings } from "@minimall/core";
 import { useEffect, useRef } from "react";
-import { PixelSettings } from "@minimall/core";
 import { UTMUtils } from "./UTMTracker";
 
 interface PixelDispatcherProps {
@@ -11,7 +11,7 @@ interface PixelDispatcherProps {
 
 /**
  * PixelDispatcher - Multi-Platform Analytics Pixel Integration
- * 
+ *
  * Features:
  * - Facebook Pixel (Meta)
  * - Google Analytics 4
@@ -71,7 +71,7 @@ function initializePixels(pixels: PixelSettings, configId: string) {
 
     // Custom pixels
     if (pixels.custom?.length) {
-      pixels.custom.forEach(customPixel => {
+      pixels.custom.forEach((customPixel) => {
         initializeCustomPixel(customPixel, configId);
       });
     }
@@ -82,7 +82,6 @@ function initializePixels(pixels: PixelSettings, configId: string) {
     if (process.env.NODE_ENV === "development") {
       console.log("[PixelDispatcher] Initialized pixels for config:", configId);
     }
-
   } catch (error) {
     console.error("[PixelDispatcher] Failed to initialize pixels:", error);
   }
@@ -95,24 +94,26 @@ function initializeFacebookPixel(pixelId: string, configId: string) {
   if ((window as any).fbq) return; // Already initialized
 
   // Facebook Pixel Code
-  const fbq = function(event: string, data?: any) {
-    (fbq as any).callMethod ? (fbq as any).callMethod.apply(fbq, arguments) : (fbq as any).queue.push(arguments);
+  const fbq = (event: string, data?: any) => {
+    (fbq as any).callMethod
+      ? (fbq as any).callMethod.apply(fbq, arguments)
+      : (fbq as any).queue.push(arguments);
   };
   (fbq as any).push = fbq;
   (fbq as any).loaded = true;
-  (fbq as any).version = '2.0';
+  (fbq as any).version = "2.0";
   (fbq as any).queue = [];
   (window as any).fbq = fbq;
 
   // Load Facebook Pixel script
-  const script = document.createElement('script');
+  const script = document.createElement("script");
   script.async = true;
-  script.src = 'https://connect.facebook.net/en_US/fbevents.js';
+  script.src = "https://connect.facebook.net/en_US/fbevents.js";
   document.head.appendChild(script);
 
   // Initialize pixel
-  (window as any).fbq('init', pixelId);
-  (window as any).fbq('track', 'PageView');
+  (window as any).fbq("init", pixelId);
+  (window as any).fbq("track", "PageView");
 
   if (process.env.NODE_ENV === "development") {
     console.log("[PixelDispatcher] Facebook Pixel initialized:", pixelId);
@@ -126,7 +127,7 @@ function initializeGoogleAnalytics(measurementId: string, configId: string) {
   if ((window as any).gtag) return; // Already initialized
 
   // Google Analytics 4 Code
-  const script1 = document.createElement('script');
+  const script1 = document.createElement("script");
   script1.async = true;
   script1.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
   document.head.appendChild(script1);
@@ -137,11 +138,11 @@ function initializeGoogleAnalytics(measurementId: string, configId: string) {
   }
   (window as any).gtag = gtag;
 
-  gtag('js', new Date());
-  gtag('config', measurementId, {
+  gtag("js", new Date());
+  gtag("config", measurementId, {
     custom_map: {
-      custom_parameter_1: 'minimall_config_id',
-    }
+      custom_parameter_1: "minimall_config_id",
+    },
   });
 
   if (process.env.NODE_ENV === "development") {
@@ -156,19 +157,19 @@ function initializeTikTokPixel(pixelId: string, configId: string) {
   if ((window as any).ttq) return; // Already initialized
 
   // TikTok Pixel Code
-  const ttq = function(event: string, data?: any) {
+  const ttq = (event: string, data?: any) => {
     (ttq as any).methods = (ttq as any).methods || [];
     (ttq as any).methods.push(arguments);
   };
-  (ttq as any).version = '1.1';
+  (ttq as any).version = "1.1";
   (ttq as any).queue = [];
   (ttq as any).loaded = false;
   (window as any).ttq = ttq;
 
   // Load TikTok Pixel script
-  const script = document.createElement('script');
+  const script = document.createElement("script");
   script.async = true;
-  script.src = 'https://analytics.tiktok.com/i18n/pixel/events.js';
+  script.src = "https://analytics.tiktok.com/i18n/pixel/events.js";
   document.head.appendChild(script);
 
   // Initialize pixel
@@ -187,23 +188,23 @@ function initializePinterestPixel(tagId: string, configId: string) {
   if ((window as any).pintrk) return; // Already initialized
 
   // Pinterest Pixel Code
-  const pintrk = function(event: string, data?: any) {
+  const pintrk = (event: string, data?: any) => {
     (pintrk as any).queue = (pintrk as any).queue || [];
     (pintrk as any).queue.push(Array.prototype.slice.call(arguments));
   };
   (pintrk as any).queue = [];
-  (pintrk as any).version = '3.0';
+  (pintrk as any).version = "3.0";
   (window as any).pintrk = pintrk;
 
   // Load Pinterest Pixel script
-  const script = document.createElement('script');
+  const script = document.createElement("script");
   script.async = true;
-  script.src = 'https://s.pinimg.com/ct/core.js';
+  script.src = "https://s.pinimg.com/ct/core.js";
   document.head.appendChild(script);
 
   // Initialize pixel
-  (window as any).pintrk('load', tagId, { em: '<user_email_address>' });
-  (window as any).pintrk('page');
+  (window as any).pintrk("load", tagId, { em: "<user_email_address>" });
+  (window as any).pintrk("page");
 
   if (process.env.NODE_ENV === "development") {
     console.log("[PixelDispatcher] Pinterest Pixel initialized:", tagId);
@@ -217,21 +218,23 @@ function initializeSnapchatPixel(pixelId: string, configId: string) {
   if ((window as any).snaptr) return; // Already initialized
 
   // Snapchat Pixel Code
-  const snaptr = function(event: string, data?: any) {
-    (snaptr as any).handleRequest ? (snaptr as any).handleRequest.apply(snaptr, arguments) : (snaptr as any).queue.push(arguments);
+  const snaptr = (event: string, data?: any) => {
+    (snaptr as any).handleRequest
+      ? (snaptr as any).handleRequest.apply(snaptr, arguments)
+      : (snaptr as any).queue.push(arguments);
   };
   (snaptr as any).queue = [];
   (window as any).snaptr = snaptr;
 
   // Load Snapchat Pixel script
-  const script = document.createElement('script');
+  const script = document.createElement("script");
   script.async = true;
-  script.src = 'https://sc-static.net/scevent.min.js';
+  script.src = "https://sc-static.net/scevent.min.js";
   document.head.appendChild(script);
 
   // Initialize pixel
-  (window as any).snaptr('init', pixelId, {});
-  (window as any).snaptr('track', 'PAGE_VIEW');
+  (window as any).snaptr("init", pixelId, {});
+  (window as any).snaptr("track", "PAGE_VIEW");
 
   if (process.env.NODE_ENV === "development") {
     console.log("[PixelDispatcher] Snapchat Pixel initialized:", pixelId);
@@ -241,11 +244,14 @@ function initializeSnapchatPixel(pixelId: string, configId: string) {
 /**
  * Initialize custom pixel
  */
-function initializeCustomPixel(customPixel: { name: string; id: string; type: 'script' | 'pixel' | 'tag' }, configId: string) {
+function initializeCustomPixel(
+  customPixel: { name: string; id: string; type: "script" | "pixel" | "tag" },
+  configId: string
+) {
   try {
-    if (customPixel.type === 'script') {
+    if (customPixel.type === "script") {
       // Load custom script
-      const script = document.createElement('script');
+      const script = document.createElement("script");
       script.async = true;
       script.src = customPixel.id; // Assuming id is the script URL
       document.head.appendChild(script);
@@ -286,7 +292,7 @@ function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
     if (pixels.facebook && (window as any).fbq) {
       try {
         const fbEventName = mapEventToFacebook(eventName);
-        (window as any).fbq('track', fbEventName, enhancedEventData);
+        (window as any).fbq("track", fbEventName, enhancedEventData);
       } catch (error) {
         console.warn("[PixelDispatcher] Facebook event failed:", error);
       }
@@ -296,7 +302,7 @@ function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
     if (pixels.google && (window as any).gtag) {
       try {
         const gaEventName = mapEventToGoogle(eventName);
-        (window as any).gtag('event', gaEventName, {
+        (window as any).gtag("event", gaEventName, {
           ...enhancedEventData,
           custom_parameter_1: configId,
         });
@@ -319,7 +325,7 @@ function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
     if (pixels.pinterest && (window as any).pintrk) {
       try {
         const pinterestEventName = mapEventToPinterest(eventName);
-        (window as any).pintrk('track', pinterestEventName, enhancedEventData);
+        (window as any).pintrk("track", pinterestEventName, enhancedEventData);
       } catch (error) {
         console.warn("[PixelDispatcher] Pinterest event failed:", error);
       }
@@ -329,7 +335,7 @@ function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
     if (pixels.snapchat && (window as any).snaptr) {
       try {
         const snapchatEventName = mapEventToSnapchat(eventName);
-        (window as any).snaptr('track', snapchatEventName, enhancedEventData);
+        (window as any).snaptr("track", snapchatEventName, enhancedEventData);
       } catch (error) {
         console.warn("[PixelDispatcher] Snapchat event failed:", error);
       }
@@ -345,62 +351,62 @@ function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
  */
 function mapEventToFacebook(eventName: string): string {
   const mapping: Record<string, string> = {
-    'view_item': 'ViewContent',
-    'add_to_cart': 'AddToCart',
-    'begin_checkout': 'InitiateCheckout',
-    'purchase': 'Purchase',
-    'tile_click': 'ViewContent',
-    'quick_view_open': 'ViewContent',
+    view_item: "ViewContent",
+    add_to_cart: "AddToCart",
+    begin_checkout: "InitiateCheckout",
+    purchase: "Purchase",
+    tile_click: "ViewContent",
+    quick_view_open: "ViewContent",
   };
-  return mapping[eventName] || 'CustomEvent';
+  return mapping[eventName] || "CustomEvent";
 }
 
 function mapEventToGoogle(eventName: string): string {
   const mapping: Record<string, string> = {
-    'view_item': 'view_item',
-    'add_to_cart': 'add_to_cart',
-    'begin_checkout': 'begin_checkout',
-    'purchase': 'purchase',
-    'tile_click': 'select_content',
-    'quick_view_open': 'view_item',
+    view_item: "view_item",
+    add_to_cart: "add_to_cart",
+    begin_checkout: "begin_checkout",
+    purchase: "purchase",
+    tile_click: "select_content",
+    quick_view_open: "view_item",
   };
   return mapping[eventName] || eventName;
 }
 
 function mapEventToTikTok(eventName: string): string {
   const mapping: Record<string, string> = {
-    'view_item': 'ViewContent',
-    'add_to_cart': 'AddToCart',
-    'begin_checkout': 'InitiateCheckout',
-    'purchase': 'CompletePayment',
-    'tile_click': 'ClickButton',
-    'quick_view_open': 'ViewContent',
+    view_item: "ViewContent",
+    add_to_cart: "AddToCart",
+    begin_checkout: "InitiateCheckout",
+    purchase: "CompletePayment",
+    tile_click: "ClickButton",
+    quick_view_open: "ViewContent",
   };
-  return mapping[eventName] || 'CustomEvent';
+  return mapping[eventName] || "CustomEvent";
 }
 
 function mapEventToPinterest(eventName: string): string {
   const mapping: Record<string, string> = {
-    'view_item': 'pagevisit',
-    'add_to_cart': 'addtocart',
-    'begin_checkout': 'checkout',
-    'purchase': 'checkout',
-    'tile_click': 'custom',
-    'quick_view_open': 'viewcategory',
+    view_item: "pagevisit",
+    add_to_cart: "addtocart",
+    begin_checkout: "checkout",
+    purchase: "checkout",
+    tile_click: "custom",
+    quick_view_open: "viewcategory",
   };
-  return mapping[eventName] || 'custom';
+  return mapping[eventName] || "custom";
 }
 
 function mapEventToSnapchat(eventName: string): string {
   const mapping: Record<string, string> = {
-    'view_item': 'VIEW_CONTENT',
-    'add_to_cart': 'ADD_CART',
-    'begin_checkout': 'START_CHECKOUT',
-    'purchase': 'PURCHASE',
-    'tile_click': 'CLICK_CONTENT',
-    'quick_view_open': 'VIEW_CONTENT',
+    view_item: "VIEW_CONTENT",
+    add_to_cart: "ADD_CART",
+    begin_checkout: "START_CHECKOUT",
+    purchase: "PURCHASE",
+    tile_click: "CLICK_CONTENT",
+    quick_view_open: "VIEW_CONTENT",
   };
-  return mapping[eventName] || 'CUSTOM_EVENT';
+  return mapping[eventName] || "CUSTOM_EVENT";
 }
 
 /**
@@ -420,7 +426,7 @@ export const PixelUtils = {
    * Track tile click with block attribution
    */
   trackTileClick(configId: string, blockId: string, categoryId: string, itemId: string) {
-    this.dispatch('tile_click', {
+    this.dispatch("tile_click", {
       block_id: blockId,
       category_id: categoryId,
       item_id: itemId,
@@ -431,7 +437,7 @@ export const PixelUtils = {
    * Track quick view open
    */
   trackQuickView(configId: string, productId: string, blockId?: string) {
-    this.dispatch('quick_view_open', {
+    this.dispatch("quick_view_open", {
       product_id: productId,
       block_id: blockId,
     });
@@ -440,13 +446,20 @@ export const PixelUtils = {
   /**
    * Track add to cart with attribution
    */
-  trackAddToCart(configId: string, productId: string, variantId: string, quantity: number, price: number, blockId?: string) {
-    this.dispatch('add_to_cart', {
+  trackAddToCart(
+    configId: string,
+    productId: string,
+    variantId: string,
+    quantity: number,
+    price: number,
+    blockId?: string
+  ) {
+    this.dispatch("add_to_cart", {
       product_id: productId,
       variant_id: variantId,
       quantity,
       value: price / 100, // Convert cents to dollars
-      currency: 'USD',
+      currency: "USD",
       block_id: blockId,
     });
   },
@@ -455,9 +468,9 @@ export const PixelUtils = {
    * Track checkout initiation
    */
   trackBeginCheckout(configId: string, cartValue: number, items: any[]) {
-    this.dispatch('begin_checkout', {
+    this.dispatch("begin_checkout", {
       value: cartValue / 100, // Convert cents to dollars
-      currency: 'USD',
+      currency: "USD",
       num_items: items.length,
       items,
     });
@@ -467,10 +480,10 @@ export const PixelUtils = {
    * Track purchase completion
    */
   trackPurchase(configId: string, orderId: string, revenue: number, items: any[]) {
-    this.dispatch('purchase', {
+    this.dispatch("purchase", {
       transaction_id: orderId,
       value: revenue / 100, // Convert cents to dollars
-      currency: 'USD',
+      currency: "USD",
       items,
     });
   },

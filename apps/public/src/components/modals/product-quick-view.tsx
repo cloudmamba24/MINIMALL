@@ -58,7 +58,6 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
     setIsAddingToCart(true);
 
     try {
-
       const optionsString = selectedVariant.selectedOptions
         .map((opt: { name: string; value: string }) => opt.value)
         .join(" / ");

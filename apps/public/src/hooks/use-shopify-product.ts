@@ -1,7 +1,7 @@
 "use client";
 
-import { type ShopifyProduct, ShopifyClient, getMockProduct } from "@/lib/shopify-client";
 import { useSiteConfig } from "@/contexts/site-config-context";
+import { ShopifyClient, type ShopifyProduct, getMockProduct } from "@/lib/shopify-client";
 import { useEffect, useState } from "react";
 
 interface UseShopifyProductResult {
@@ -22,12 +22,12 @@ export function useShopifyProduct(
   const [product, setProduct] = useState<ShopifyProduct | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Get config from context (may not be available in all contexts)
   let siteConfig = null;
   let configShopDomain = overrideShopDomain;
   let configAccessToken = null;
-  
+
   try {
     const config = useSiteConfig();
     siteConfig = config.config;
@@ -53,8 +53,11 @@ export function useShopifyProduct(
         // Try to get real Shopify data with proper token resolution
         if (configShopDomain) {
           const { createShopifyClient } = await import("@/lib/shopify-client");
-          const client = await createShopifyClient(configShopDomain, configAccessToken || undefined);
-          
+          const client = await createShopifyClient(
+            configShopDomain,
+            configAccessToken || undefined
+          );
+
           if (client) {
             const shopifyProduct = await client.getProduct(productId);
             if (shopifyProduct) {

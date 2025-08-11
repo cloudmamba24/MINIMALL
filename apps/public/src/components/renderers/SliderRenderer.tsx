@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
+import type { Category, LayoutConfig } from "@minimall/core";
+import { type PanInfo, motion, useMotionValue, useTransform } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Category, LayoutConfig } from "@minimall/core";
-import { cn } from "../../lib/utils";
+import { useEffect, useRef, useState } from "react";
 import { conditionalProps } from "../../lib/type-utils";
+import { cn } from "../../lib/utils";
 
 interface SliderRendererProps {
   category: Category;
@@ -14,29 +14,24 @@ interface SliderRendererProps {
   className?: string;
 }
 
-export function SliderRenderer({ 
-  category, 
-  layout, 
-  onTileClick,
-  className 
-}: SliderRendererProps) {
+export function SliderRenderer({ category, layout, onTileClick, className }: SliderRendererProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
-  
+
   // Filter items based on media type
   const getFilteredItems = () => {
     if (!category.children) return [];
-    
+
     return category.children.filter((item) => {
-      if (layout.mediaFilter === 'all') return true;
-      
+      if (layout.mediaFilter === "all") return true;
+
       const cardDetails = item.card[1];
-      if (layout.mediaFilter === 'photo') {
+      if (layout.mediaFilter === "photo") {
         return cardDetails.image || cardDetails.imageUrl;
       }
-      if (layout.mediaFilter === 'video') {
+      if (layout.mediaFilter === "video") {
         return cardDetails.videoUrl;
       }
       return true;
@@ -49,14 +44,14 @@ export function SliderRenderer({
   // Calculate how many items to show per slide
   const getItemsPerSlide = () => {
     if (!containerRef.current) return layout.columns;
-    
+
     const containerWidth = containerRef.current.offsetWidth;
     const { responsive } = layout;
-    
+
     if (responsive?.lg && containerWidth >= 1024) return responsive.lg.columns || layout.columns;
     if (responsive?.md && containerWidth >= 768) return responsive.md.columns || layout.columns;
     if (responsive?.sm && containerWidth >= 640) return responsive.sm.columns || layout.columns;
-    
+
     return layout.columns;
   };
 
@@ -67,8 +62,8 @@ export function SliderRenderer({
       setItemsPerSlide(getItemsPerSlide());
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [layout.columns, layout.responsive]);
 
   const maxIndex = Math.max(0, totalItems - itemsPerSlide);
@@ -76,11 +71,11 @@ export function SliderRenderer({
   // Calculate slide width
   const getSlideWidth = () => {
     if (!containerRef.current) return 300;
-    return containerRef.current.offsetWidth - (layout.outerMargin * 2);
+    return containerRef.current.offsetWidth - layout.outerMargin * 2;
   };
 
   const slideWidth = getSlideWidth();
-  const itemWidth = (slideWidth - (layout.gutter * (itemsPerSlide - 1))) / itemsPerSlide;
+  const itemWidth = (slideWidth - layout.gutter * (itemsPerSlide - 1)) / itemsPerSlide;
 
   // Transform x value to slide position
   const slideX = useTransform(x, [0, -slideWidth * maxIndex], [0, -slideWidth * maxIndex]);
@@ -107,7 +102,7 @@ export function SliderRenderer({
   // Handle drag
   const handleDragEnd = (event: any, info: PanInfo) => {
     setIsDragging(false);
-    
+
     const threshold = slideWidth / 4;
     const velocity = info.velocity.x;
     const offset = info.offset.x;
@@ -128,10 +123,14 @@ export function SliderRenderer({
   // Calculate aspect ratio for tiles
   const getAspectRatio = () => {
     switch (layout.aspect) {
-      case '1:1': return '1';
-      case '4:5': return '4/5';
-      case '9:16': return '9/16';
-      default: return 'auto';
+      case "1:1":
+        return "1";
+      case "4:5":
+        return "4/5";
+      case "9:16":
+        return "9/16";
+      default:
+        return "auto";
     }
   };
 
@@ -142,7 +141,7 @@ export function SliderRenderer({
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={cn("relative w-full overflow-hidden", className)}
       style={{ padding: `${layout.outerMargin}px` }}
@@ -165,7 +164,7 @@ export function SliderRenderer({
       >
         {filteredItems.map((item, index) => {
           const cardDetails = item.card[1];
-          
+
           return (
             <motion.div
               key={`${item.id}-${index}`}
@@ -200,18 +199,15 @@ export function SliderRenderer({
 
               {/* Overlay */}
               {cardDetails.overlay && (
-                <div 
-                  className={cn(
-                    "absolute text-white font-medium z-10",
-                    {
-                      'top-2 left-2': cardDetails.overlay.position === 'top-left',
-                      'top-2 right-2': cardDetails.overlay.position === 'top-right',
-                      'bottom-2 left-2': cardDetails.overlay.position === 'bottom-left',
-                      'bottom-2 right-2': cardDetails.overlay.position === 'bottom-right',
-                      'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2': 
-                        cardDetails.overlay.position === 'center',
-                    }
-                  )}
+                <div
+                  className={cn("absolute text-white font-medium z-10", {
+                    "top-2 left-2": cardDetails.overlay.position === "top-left",
+                    "top-2 right-2": cardDetails.overlay.position === "top-right",
+                    "bottom-2 left-2": cardDetails.overlay.position === "bottom-left",
+                    "bottom-2 right-2": cardDetails.overlay.position === "bottom-right",
+                    "top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2":
+                      cardDetails.overlay.position === "center",
+                  })}
                 >
                   <span className="bg-black/50 px-2 py-1 rounded text-sm">
                     {cardDetails.overlay.text}
@@ -227,7 +223,7 @@ export function SliderRenderer({
                   style={{
                     left: `${tag.position.x * 100}%`,
                     top: `${tag.position.y * 100}%`,
-                    transform: 'translate(-50%, -50%)',
+                    transform: "translate(-50%, -50%)",
                   }}
                 >
                   {tag.label && (
@@ -279,13 +275,10 @@ export function SliderRenderer({
           {Array.from({ length: maxIndex + 1 }).map((_, index) => (
             <button
               key={index}
-              className={cn(
-                "w-2 h-2 rounded-full transition-all",
-                {
-                  "bg-gray-800": index === currentIndex,
-                  "bg-gray-400 hover:bg-gray-600": index !== currentIndex,
-                }
-              )}
+              className={cn("w-2 h-2 rounded-full transition-all", {
+                "bg-gray-800": index === currentIndex,
+                "bg-gray-400 hover:bg-gray-600": index !== currentIndex,
+              })}
               onClick={() => goToSlide(index)}
             />
           ))}
@@ -298,8 +291,8 @@ export function SliderRenderer({
           <motion.div
             className="bg-gray-800 h-1 rounded-full"
             initial={{ width: 0 }}
-            animate={{ 
-              width: `${((currentIndex + 1) / (maxIndex + 1)) * 100}%` 
+            animate={{
+              width: `${((currentIndex + 1) / (maxIndex + 1)) * 100}%`,
             }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           />

@@ -400,7 +400,11 @@ export const socialAnalytics = pgTable(
     configIdIdx: index("social_analytics_config_id_idx").on(table.configId),
     shopDomainIdx: index("social_analytics_shop_domain_idx").on(table.shopDomain),
     dateIdx: index("social_analytics_date_idx").on(table.date),
-    uniquePostDate: index("social_analytics_unique_post_date").on(table.postId, table.date, table.hour),
+    uniquePostDate: index("social_analytics_unique_post_date").on(
+      table.postId,
+      table.date,
+      table.hour
+    ),
   })
 );
 

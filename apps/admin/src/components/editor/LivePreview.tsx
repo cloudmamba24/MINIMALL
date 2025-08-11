@@ -1,17 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import type { Category } from "@minimall/core";
 import { Button, cn } from "@minimall/ui";
-import { 
-  Monitor, 
-  Tablet, 
-  Smartphone, 
-  RotateCcw,
-  ExternalLink,
-  Eye,
-  EyeOff
-} from "lucide-react";
-import { Category } from "@minimall/core";
+import { ExternalLink, Eye, EyeOff, Monitor, RotateCcw, Smartphone, Tablet } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 // TODO: Move LayoutSwitch to a shared package instead of importing from public app
 // import { LayoutSwitch } from "../../../public/src/components/renderers/LayoutSwitch";
 
@@ -21,41 +13,37 @@ interface LivePreviewProps {
   className?: string;
 }
 
-type PreviewDevice = 'desktop' | 'tablet' | 'mobile';
+type PreviewDevice = "desktop" | "tablet" | "mobile";
 
 const DEVICE_CONFIGS = {
   desktop: {
-    name: 'Desktop',
+    name: "Desktop",
     icon: <Monitor className="w-4 h-4" />,
-    width: '100%',
-    maxWidth: '1200px',
-    height: '600px',
+    width: "100%",
+    maxWidth: "1200px",
+    height: "600px",
     scale: 1,
   },
   tablet: {
-    name: 'Tablet',
+    name: "Tablet",
     icon: <Tablet className="w-4 h-4" />,
-    width: '768px',
-    maxWidth: '768px',
-    height: '500px',
+    width: "768px",
+    maxWidth: "768px",
+    height: "500px",
     scale: 0.8,
   },
   mobile: {
-    name: 'Mobile',
+    name: "Mobile",
     icon: <Smartphone className="w-4 h-4" />,
-    width: '375px',
-    maxWidth: '375px',
-    height: '600px',
+    width: "375px",
+    maxWidth: "375px",
+    height: "600px",
     scale: 0.7,
   },
 } as const;
 
-export function LivePreview({ 
-  category, 
-  isPreviewMode = false,
-  className 
-}: LivePreviewProps) {
-  const [currentDevice, setCurrentDevice] = useState<PreviewDevice>('desktop');
+export function LivePreview({ category, isPreviewMode = false, className }: LivePreviewProps) {
+  const [currentDevice, setCurrentDevice] = useState<PreviewDevice>("desktop");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showOverlay, setShowOverlay] = useState(!isPreviewMode);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -85,11 +73,11 @@ export function LivePreview({
       <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200">
         <div className="flex items-center space-x-3">
           <h3 className="font-medium text-gray-900">Live Preview</h3>
-          <span className={`px-2 py-1 text-xs rounded ${
-            isPreviewMode 
-              ? "bg-blue-100 text-blue-700" 
-              : "bg-gray-100 text-gray-600"
-          }`}>
+          <span
+            className={`px-2 py-1 text-xs rounded ${
+              isPreviewMode ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"
+            }`}
+          >
             {isPreviewMode ? "Interactive" : "Design Mode"}
           </span>
         </div>
@@ -115,27 +103,18 @@ export function LivePreview({
           </div>
 
           {/* Preview controls */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowOverlay(!showOverlay)}
-          >
+          <Button variant="outline" size="sm" onClick={() => setShowOverlay(!showOverlay)}>
             {showOverlay ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
             <RotateCcw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />
           </Button>
 
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.open(getPreviewUrl(), '_blank')}
+            onClick={() => window.open(getPreviewUrl(), "_blank")}
           >
             <ExternalLink className="w-4 h-4" />
           </Button>
@@ -155,12 +134,12 @@ export function LivePreview({
             }}
           >
             {/* Device Frame (for mobile/tablet) */}
-            {currentDevice !== 'desktop' && (
+            {currentDevice !== "desktop" && (
               <div className="absolute inset-0 pointer-events-none">
                 {/* Mobile/tablet bezel */}
                 <div className="absolute inset-0 border-8 border-gray-800 rounded-2xl" />
                 {/* Home indicator (mobile) */}
-                {currentDevice === 'mobile' && (
+                {currentDevice === "mobile" && (
                   <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gray-800 rounded-full" />
                 )}
               </div>
@@ -171,10 +150,10 @@ export function LivePreview({
               ref={previewRef}
               className={cn(
                 "relative w-full h-full overflow-auto bg-white",
-                currentDevice !== 'desktop' && "rounded-xl m-2"
+                currentDevice !== "desktop" && "rounded-xl m-2"
               )}
               style={{
-                height: currentDevice !== 'desktop' ? 'calc(100% - 16px)' : '100%',
+                height: currentDevice !== "desktop" ? "calc(100% - 16px)" : "100%",
               }}
             >
               {isPreviewMode ? (
@@ -232,9 +211,9 @@ export function LivePreview({
             </div>
 
             {/* Device info overlay */}
-            {currentDevice !== 'desktop' && (
+            {currentDevice !== "desktop" && (
               <div className="absolute top-4 left-4 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                {deviceConfig.width} × {parseInt(deviceConfig.height)}
+                {deviceConfig.width} × {Number.parseInt(deviceConfig.height)}
               </div>
             )}
           </div>
@@ -255,11 +234,9 @@ export function LivePreview({
               </>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-2">
-            {category.children && (
-              <span>{category.children.length} items</span>
-            )}
+            {category.children && <span>{category.children.length} items</span>}
           </div>
         </div>
       </div>

@@ -1,17 +1,17 @@
 import { getR2Service } from "@minimall/core";
-import { NextRequest, NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
+import { type NextRequest, NextResponse } from "next/server";
 import {
-  extractSocialMediaContent,
-  downloadMediaFromUrl,
-  validateSocialMediaUrl,
   type SocialMediaPost,
+  downloadMediaFromUrl,
+  extractSocialMediaContent,
+  validateSocialMediaUrl,
 } from "../../../../lib/social-extractors";
 import { conditionalProps } from "../../../../lib/type-utils";
 
 /**
  * Social Media Import API Endpoint
- * 
+ *
  * Handles importing content from social media platforms:
  * - Extract post metadata and media URLs
  * - Download media content with proper handling
@@ -44,16 +44,19 @@ interface ImportResult {
 export async function POST(request: NextRequest) {
   try {
     const r2Service = getR2Service();
-    const body = await request.json() as ImportRequest;
-    const { url, folder = "social-imports", generateTags = true, downloadMedia = true, processImages = false } = body;
-    
+    const body = (await request.json()) as ImportRequest;
+    const {
+      url,
+      folder = "social-imports",
+      generateTags = true,
+      downloadMedia = true,
+      processImages = false,
+    } = body;
+
     if (!url) {
-      return NextResponse.json(
-        { error: "URL is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
-    
+
     // Validate social media URL
     const urlValidation = validateSocialMediaUrl(url);
     if (!urlValidation.valid) {
@@ -62,9 +65,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     // Import from social media platform
-    
+
     // Extract social media content
     const extractionResult = await extractSocialMediaContent(url);
     if (!extractionResult.success || !extractionResult.post) {
@@ -73,17 +76,17 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     const post = extractionResult.post;
     // Extracted media items for processing
-    
+
     // Download and upload media if requested
     let assets: ImportResult["assets"] = [];
-    
+
     if (downloadMedia && r2Service) {
       assets = await downloadAndUploadMedia(r2Service, post, folder, processImages);
     }
-    
+
     // Add Sentry tracking
     Sentry.addBreadcrumb({
       category: "social-import",
@@ -97,7 +100,7 @@ export async function POST(request: NextRequest) {
       },
       level: "info",
     });
-    
+
     const result: ImportResult = {
       success: true,
       post: {
@@ -109,20 +112,19 @@ export async function POST(request: NextRequest) {
       },
       ...(assets && assets.length > 0 && { assets }),
     };
-    
+
     return NextResponse.json(result);
-    
   } catch (error) {
     console.error("[SocialImport] Import failed:", error);
-    
+
     Sentry.captureException(error, {
       tags: { operation: "social-import" },
     });
-    
+
     return NextResponse.json(
-      { 
+      {
         success: false,
-        error: error instanceof Error ? error.message : "Social media import failed" 
+        error: error instanceof Error ? error.message : "Social media import failed",
       },
       { status: 500 }
     );
@@ -141,33 +143,33 @@ async function downloadAndUploadMedia(
   if (!r2Service) {
     throw new Error("R2 service not configured");
   }
-  
+
   const assets: ImportResult["assets"] = [];
   const timestamp = Date.now();
-  
+
   for (let i = 0; i < post.media.length; i++) {
     const mediaItem = post.media[i];
-    
+
     if (!mediaItem) {
       console.warn(`[SocialImport] Media item ${i + 1} is undefined, skipping`);
       continue;
     }
-    
+
     try {
       // Processing media file
-      
+
       // Download media content
       const downloadResult = await downloadMediaFromUrl(mediaItem.url);
       if (!downloadResult.success || !downloadResult.buffer) {
         console.warn(`[SocialImport] Failed to download media: ${downloadResult.error}`);
         continue;
       }
-      
+
       // Generate filename
       const extension = getFileExtension(downloadResult.contentType || "", mediaItem.type);
       const filename = `${post.platform}-${post.id}-${i + 1}-${timestamp}.${extension}`;
       const key = `${folder}/${filename}`;
-      
+
       // Prepare metadata
       const baseMetadata = {
         originalUrl: mediaItem.url,
@@ -179,7 +181,7 @@ async function downloadAndUploadMedia(
         extractedAt: post.extractedAt.toISOString(),
         mediaType: mediaItem.type,
       };
-      
+
       const metadata = {
         ...baseMetadata,
         ...conditionalProps({
@@ -192,11 +194,11 @@ async function downloadAndUploadMedia(
           }),
         }),
       };
-      
+
       // Process images if requested
       let finalBuffer = downloadResult.buffer;
       let processedMetadata = metadata;
-      
+
       if (processImages && mediaItem.type === "image") {
         try {
           const processedResult = await processImageForSocial(downloadResult.buffer, post.platform);
@@ -216,12 +218,12 @@ async function downloadAndUploadMedia(
           console.warn("[SocialImport] Image processing failed, using original:", error);
         }
       }
-      
+
       // Upload to R2
       await r2Service.putObject(key, finalBuffer, {
         metadata: processedMetadata,
       });
-      
+
       const asset = {
         id: key,
         url: r2Service.getObjectUrl(key),
@@ -230,23 +232,25 @@ async function downloadAndUploadMedia(
         size: finalBuffer.length,
         metadata: processedMetadata,
       };
-      
+
       assets.push(asset);
       console.log(`[SocialImport] Uploaded ${filename} (${formatFileSize(finalBuffer.length)})`);
-      
     } catch (error) {
       console.error(`[SocialImport] Failed to process media ${i + 1}:`, error);
       // Continue with other media items
     }
   }
-  
+
   return assets;
 }
 
 /**
  * Process image for social media optimization
  */
-async function processImageForSocial(buffer: Buffer, platform: string): Promise<{
+async function processImageForSocial(
+  buffer: Buffer,
+  platform: string
+): Promise<{
   success: boolean;
   buffer?: Buffer;
   metadata?: Record<string, string>;
@@ -255,12 +259,12 @@ async function processImageForSocial(buffer: Buffer, platform: string): Promise<
   try {
     // Import image processing utilities
     const { processImage } = await import("../../../../lib/image-processing");
-    
+
     // Platform-specific processing options
     const options = getSocialProcessingOptions(platform);
-    
+
     const result = await processImage(buffer, options);
-    
+
     return {
       success: true,
       buffer: result.original.buffer,
@@ -294,7 +298,7 @@ function getSocialProcessingOptions(platform: string) {
         sharpen: true,
         enhance: true,
       };
-    
+
     case "tiktok":
       return {
         aspectRatio: "9:16" as const, // Vertical format
@@ -302,7 +306,7 @@ function getSocialProcessingOptions(platform: string) {
         quality: 80,
         sharpen: true,
       };
-    
+
     case "twitter":
       return {
         aspectRatio: "16:9" as const, // Wide format
@@ -310,7 +314,7 @@ function getSocialProcessingOptions(platform: string) {
         quality: 85,
         progressive: true,
       };
-    
+
     default:
       return {
         format: "webp" as const,
@@ -325,41 +329,41 @@ function getSocialProcessingOptions(platform: string) {
  */
 function generateContentTags(post: SocialMediaPost): string[] {
   const generatedTags: string[] = [];
-  
+
   // Platform-specific tags
   generatedTags.push(post.platform);
-  
+
   // Content type tags
-  const hasImages = post.media.some(m => m.type === "image");
-  const hasVideos = post.media.some(m => m.type === "video");
-  
+  const hasImages = post.media.some((m) => m.type === "image");
+  const hasVideos = post.media.some((m) => m.type === "video");
+
   if (hasImages) generatedTags.push("image-content");
   if (hasVideos) generatedTags.push("video-content");
-  
+
   // Multiple media tag
   if (post.media.length > 1) generatedTags.push("gallery");
-  
+
   // Engagement level tags
   if (post.engagement) {
     const { likes = 0, views = 0, comments = 0 } = post.engagement;
-    
+
     if (likes > 1000) generatedTags.push("viral");
     if (likes > 100) generatedTags.push("popular");
     if (comments > 50) generatedTags.push("engaging");
     if (views > 10000) generatedTags.push("trending");
   }
-  
+
   // Content analysis tags (simplified)
   const text = (post.caption || post.description || "").toLowerCase();
-  
+
   if (text.includes("sale") || text.includes("discount")) generatedTags.push("promotional");
   if (text.includes("new") || text.includes("launch")) generatedTags.push("product-launch");
   if (text.includes("tutorial") || text.includes("how-to")) generatedTags.push("educational");
   if (text.includes("behind") || text.includes("bts")) generatedTags.push("behind-the-scenes");
-  
+
   // Author verification tag
   if (post.author.verified) generatedTags.push("verified-creator");
-  
+
   return [...new Set(generatedTags)]; // Remove duplicates
 }
 
@@ -374,7 +378,7 @@ function getFileExtension(contentType: string, mediaType: "image" | "video"): st
   if (contentType.includes("mp4")) return "mp4";
   if (contentType.includes("webm")) return "webm";
   if (contentType.includes("mov")) return "mov";
-  
+
   // Fallback based on media type
   return mediaType === "video" ? "mp4" : "jpg";
 }
@@ -397,23 +401,20 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const url = searchParams.get("url");
-    
+
     if (!url) {
-      return NextResponse.json(
-        { error: "URL parameter is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "URL parameter is required" }, { status: 400 });
     }
-    
+
     const validation = validateSocialMediaUrl(url);
-    
+
     if (!validation.valid) {
       return NextResponse.json({
         valid: false,
         error: validation.error,
       });
     }
-    
+
     // Return platform info and extraction preview
     return NextResponse.json({
       valid: true,
@@ -422,12 +423,8 @@ export async function GET(request: NextRequest) {
       canExtract: true,
       estimatedMedia: 1, // Simplified estimate
     });
-    
   } catch (error) {
-    return NextResponse.json(
-      { error: "URL validation failed" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "URL validation failed" }, { status: 500 });
   }
 }
 
@@ -439,6 +436,6 @@ function getPlatformDisplayName(platform: string): string {
     youtube: "YouTube",
     pinterest: "Pinterest",
   };
-  
+
   return names[platform] || platform;
 }

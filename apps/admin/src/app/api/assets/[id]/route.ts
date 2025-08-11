@@ -13,7 +13,7 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const r2Service = getR2Service();
-    
+
     if (!r2Service) {
       return NextResponse.json({ error: "R2 service not configured" }, { status: 503 });
     }

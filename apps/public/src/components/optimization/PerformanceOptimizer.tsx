@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, ReactNode } from "react";
 import { motion } from "framer-motion";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 /**
  * Virtual List Component for Large Gallery Rendering
@@ -19,7 +19,7 @@ export function VirtualList({
   itemHeight,
   containerHeight,
   renderItem,
-  overscan = 3
+  overscan = 3,
 }: VirtualListProps) {
   const [scrollTop, setScrollTop] = useState(0);
   const scrollElementRef = useRef<HTMLDivElement>(null);
@@ -43,10 +43,10 @@ export function VirtualList({
   return (
     <div
       ref={scrollElementRef}
-      style={{ height: containerHeight, overflow: 'auto' }}
+      style={{ height: containerHeight, overflow: "auto" }}
       onScroll={handleScroll}
     >
-      <div style={{ height: totalHeight, position: 'relative' }}>
+      <div style={{ height: totalHeight, position: "relative" }}>
         <div
           style={{
             transform: `translateY(${visibleStartWithOverscan * itemHeight}px)`,
@@ -81,7 +81,7 @@ export function LazyImage({
   className,
   placeholder = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 200'%3E%3Crect width='300' height='200' fill='%23f0f0f0'/%3E%3C/svg%3E",
   onLoad,
-  priority = false
+  priority = false,
 }: LazyImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
@@ -98,7 +98,7 @@ export function LazyImage({
           observer.disconnect();
         }
       },
-      { rootMargin: '100px' }
+      { rootMargin: "100px" }
     );
 
     if (imgRef.current) {
@@ -120,11 +120,9 @@ export function LazyImage({
           <img
             src={src}
             alt={alt}
-            className={`transition-opacity duration-300 ${
-              isLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"}`}
             onLoad={handleLoad}
-            loading={priority ? 'eager' : 'lazy'}
+            loading={priority ? "eager" : "lazy"}
           />
           {!isLoaded && (
             <img
@@ -135,13 +133,7 @@ export function LazyImage({
           )}
         </>
       )}
-      {!isInView && (
-        <img
-          src={placeholder}
-          alt=""
-          className="w-full h-full object-cover"
-        />
-      )}
+      {!isInView && <img src={placeholder} alt="" className="w-full h-full object-cover" />}
     </div>
   );
 }
@@ -185,13 +177,13 @@ export function TouchButton({
   onClick,
   className = "",
   disabled = false,
-  hapticFeedback = true
+  hapticFeedback = true,
 }: TouchButtonProps) {
   const handleClick = () => {
     if (disabled) return;
 
     // Haptic feedback on supported devices
-    if (hapticFeedback && 'vibrate' in navigator) {
+    if (hapticFeedback && "vibrate" in navigator) {
       navigator.vibrate(10);
     }
 
@@ -206,8 +198,8 @@ export function TouchButton({
       whileTap={{ scale: disabled ? 1 : 0.95 }}
       transition={{ duration: 0.1 }}
       style={{
-        minHeight: '44px', // iOS recommended touch target size
-        minWidth: '44px',
+        minHeight: "44px", // iOS recommended touch target size
+        minWidth: "44px",
       }}
     >
       {children}
@@ -218,7 +210,7 @@ export function TouchButton({
 /**
  * Debounced Scroll Handler
  */
-export function useDebounceScroll(callback: (scrollY: number) => void, delay: number = 100) {
+export function useDebounceScroll(callback: (scrollY: number) => void, delay = 100) {
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
@@ -232,10 +224,10 @@ export function useDebounceScroll(callback: (scrollY: number) => void, delay: nu
       }, delay);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -248,8 +240,8 @@ export function useDebounceScroll(callback: (scrollY: number) => void, delay: nu
  */
 export function useViewport() {
   const [viewport, setViewport] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 0,
-    height: typeof window !== 'undefined' ? window.innerHeight : 0,
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
 
   useEffect(() => {
@@ -260,8 +252,8 @@ export function useViewport() {
       });
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return {
@@ -278,17 +270,17 @@ export function useViewport() {
 export function calculateImageSizes(containerWidth: number, columns: number): string {
   const gutter = 8; // Typical gutter size
   const margin = 16; // Typical margin
-  
-  const availableWidth = containerWidth - (margin * 2) - (gutter * (columns - 1));
+
+  const availableWidth = containerWidth - margin * 2 - gutter * (columns - 1);
   const itemWidth = Math.floor(availableWidth / columns);
-  
+
   // Generate responsive sizes attribute
   return [
     `(max-width: 640px) ${Math.min(itemWidth, containerWidth)}px`,
     `(max-width: 768px) ${Math.min(itemWidth * 1.2, containerWidth)}px`,
     `(max-width: 1024px) ${Math.min(itemWidth * 1.5, containerWidth)}px`,
-    `${itemWidth}px`
-  ].join(', ');
+    `${itemWidth}px`,
+  ].join(", ");
 }
 
 /**
@@ -303,7 +295,7 @@ export function usePerformanceMonitor(configId: string) {
   }>({});
 
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') return;
+    if (process.env.NODE_ENV !== "development") return;
 
     // Largest Contentful Paint
     const lcpObserver = new PerformanceObserver((list) => {
@@ -338,11 +330,11 @@ export function usePerformanceMonitor(configId: string) {
     });
 
     try {
-      lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
-      fidObserver.observe({ entryTypes: ['first-input'] });
-      clsObserver.observe({ entryTypes: ['layout-shift'] });
+      lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
+      fidObserver.observe({ entryTypes: ["first-input"] });
+      clsObserver.observe({ entryTypes: ["layout-shift"] });
     } catch (error) {
-      console.warn('[Performance] Observer not supported:', error);
+      console.warn("[Performance] Observer not supported:", error);
     }
 
     return () => {
@@ -359,41 +351,41 @@ export function usePerformanceMonitor(configId: string) {
  * Connection-Aware Image Quality
  */
 export function useAdaptiveImageQuality() {
-  const [quality, setQuality] = useState<'high' | 'medium' | 'low'>('high');
+  const [quality, setQuality] = useState<"high" | "medium" | "low">("high");
 
   useEffect(() => {
     const connection = (navigator as any).connection;
-    
+
     if (connection) {
       const updateQuality = () => {
-        if (connection.effectiveType === '4g') {
-          setQuality('high');
-        } else if (connection.effectiveType === '3g') {
-          setQuality('medium');
+        if (connection.effectiveType === "4g") {
+          setQuality("high");
+        } else if (connection.effectiveType === "3g") {
+          setQuality("medium");
         } else {
-          setQuality('low');
+          setQuality("low");
         }
       };
 
       updateQuality();
-      connection.addEventListener('change', updateQuality);
+      connection.addEventListener("change", updateQuality);
 
       return () => {
-        connection.removeEventListener('change', updateQuality);
+        connection.removeEventListener("change", updateQuality);
       };
     }
   }, []);
 
   const getQualityParams = (baseUrl: string) => {
     const qualityMap = {
-      high: { q: 85, f: 'auto' },
-      medium: { q: 70, f: 'auto' },
-      low: { q: 50, f: 'webp' },
+      high: { q: 85, f: "auto" },
+      medium: { q: 70, f: "auto" },
+      low: { q: 50, f: "webp" },
     };
 
     const params = qualityMap[quality];
-    const separator = baseUrl.includes('?') ? '&' : '?';
-    
+    const separator = baseUrl.includes("?") ? "&" : "?";
+
     return `${baseUrl}${separator}q=${params.q}&f=${params.f}`;
   };
 

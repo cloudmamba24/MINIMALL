@@ -15,18 +15,15 @@ import {
   Thumbnail,
 } from "@shopify/polaris";
 import {
-  ImportIcon,
-  LinkIcon,
-  ViewIcon,
   // DownloadIcon, // This icon doesn't exist in Polaris icons
   ImageIcon,
+  ImportIcon,
+  LinkIcon,
   PlayIcon,
+  ViewIcon,
 } from "@shopify/polaris-icons";
 import React, { useState, useCallback } from "react";
-import {
-  getSupportedPlatforms,
-  type SocialMediaPost,
-} from "../../lib/social-extractors";
+import { type SocialMediaPost, getSupportedPlatforms } from "../../lib/social-extractors";
 import { DragDropUrlImport } from "./DragDropUrlImport";
 
 interface SocialImporterProps {
@@ -61,14 +58,14 @@ export function SocialImporter({
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [step, setStep] = useState<"input" | "preview" | "import" | "complete">("input");
-  
+
   // Form state
   const [url, setUrl] = useState("");
   const [urlError, setUrlError] = useState<string | null>(null);
   const [downloadMedia, setDownloadMedia] = useState(true);
   const [processImages, setProcessImages] = useState(true);
   const [generateTags, setGenerateTags] = useState(true);
-  
+
   // Preview state
   const [previewPost, setPreviewPost] = useState<SocialMediaPost | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
@@ -79,11 +76,11 @@ export function SocialImporter({
     try {
       const response = await fetch(`/api/social/import?url=${encodeURIComponent(urlToValidate)}`);
       const data = await response.json();
-      
+
       if (!data.valid) {
         return false;
       }
-      
+
       console.log(`[SocialImporter] URL validated for ${data.platform}`);
       return true;
     } catch (error) {
@@ -93,7 +90,7 @@ export function SocialImporter({
 
   const extractContent = useCallback(async () => {
     setLoading(true);
-    
+
     try {
       const response = await fetch("/api/social/import", {
         method: "POST",
@@ -106,14 +103,14 @@ export function SocialImporter({
           generateTags,
         }),
       });
-      
+
       const data: ImportResult = await response.json();
-      
+
       if (!data.success) {
         setUrlError(data.error || "Failed to extract content");
         return;
       }
-      
+
       setPreviewPost(data.post || null);
       setStep("preview");
     } catch (error) {
@@ -125,10 +122,10 @@ export function SocialImporter({
 
   const importContent = useCallback(async () => {
     if (!previewPost) return;
-    
+
     setImporting(true);
     setStep("import");
-    
+
     try {
       const response = await fetch("/api/social/import", {
         method: "POST",
@@ -141,18 +138,18 @@ export function SocialImporter({
           generateTags,
         }),
       });
-      
+
       const data: ImportResult = await response.json();
-      
+
       if (!data.success) {
         setUrlError(data.error || "Import failed");
         setStep("preview");
         return;
       }
-      
+
       setImportResult(data);
       setStep("complete");
-      
+
       if (data.assets) {
         onImportComplete(data.assets);
       }
@@ -164,13 +161,16 @@ export function SocialImporter({
     }
   }, [url, folder, downloadMedia, processImages, generateTags, previewPost, onImportComplete]);
 
-  const handleUrlSubmit = useCallback(async (urls: string[]) => {
-    if (urls.length > 0 && urls[0]) {
-      setUrl(urls[0]); // For now, take the first URL
-      setStep("preview");
-      await extractContent();
-    }
-  }, [extractContent]);
+  const handleUrlSubmit = useCallback(
+    async (urls: string[]) => {
+      if (urls.length > 0 && urls[0]) {
+        setUrl(urls[0]); // For now, take the first URL
+        setStep("preview");
+        await extractContent();
+      }
+    },
+    [extractContent]
+  );
 
   const handleNext = useCallback(async () => {
     switch (step) {
@@ -247,24 +247,24 @@ export function SocialImporter({
 
   const getSecondaryActions = () => {
     const actions = [];
-    
+
     if (step === "preview" || step === "import") {
       actions.push({
         content: "Back",
         onAction: handleBack,
       });
     }
-    
+
     actions.push({
       content: "Cancel",
       onAction: handleClose,
     });
-    
+
     return actions;
   };
 
   const primaryAction = getPrimaryAction();
-  
+
   return (
     <Modal
       open={open}
@@ -283,10 +283,10 @@ export function SocialImporter({
               onValidateUrl={validateUrl}
               loading={loading}
               error={urlError}
-              acceptedDomains={supportedPlatforms.map(p => p.platform.replace(/^(www\.)?/, ''))}
+              acceptedDomains={supportedPlatforms.map((p) => p.platform.replace(/^(www\.)?/, ""))}
               placeholder="Drop Instagram, TikTok, Twitter, YouTube, or Pinterest URLs here"
             />
-            
+
             {/* Import Options */}
             <Card>
               <div className="p-4">
@@ -300,7 +300,7 @@ export function SocialImporter({
                     onChange={setDownloadMedia}
                     helpText="Download and store images/videos in your asset library"
                   />
-                  
+
                   <Checkbox
                     label="Process images"
                     checked={processImages}
@@ -308,7 +308,7 @@ export function SocialImporter({
                     disabled={!downloadMedia}
                     helpText="Optimize images for web with format conversion and compression"
                   />
-                  
+
                   <Checkbox
                     label="Generate content tags"
                     checked={generateTags}
@@ -335,29 +335,25 @@ export function SocialImporter({
                       <Text variant="headingMd" as="h3">
                         @{previewPost.author.username}
                       </Text>
-                      {previewPost.author.verified && (
-                        <Badge tone="info">Verified</Badge>
-                      )}
+                      {previewPost.author.verified && <Badge tone="info">Verified</Badge>}
                       <Badge>{previewPost.platform}</Badge>
                     </div>
-                    
+
                     {previewPost.caption && (
                       <Text variant="bodyMd" as="p" truncate>
                         {previewPost.caption}
                       </Text>
                     )}
-                    
+
                     {previewPost.hashtags.length > 0 && (
                       <div className="mt-2 flex gap-2 flex-wrap">
                         {previewPost.hashtags.slice(0, 5).map((tag, index) => (
                           <Badge key={`hashtag-${index}`}>
-                            {`#${Array.isArray(tag) ? tag.join(' ') : String(tag)}`}
+                            {`#${Array.isArray(tag) ? tag.join(" ") : String(tag)}`}
                           </Badge>
                         ))}
                         {previewPost.hashtags.length > 5 && (
-                          <Badge>
-                            {`+${previewPost.hashtags.length - 5} more`}
-                          </Badge>
+                          <Badge>{`+${previewPost.hashtags.length - 5} more`}</Badge>
                         )}
                       </div>
                     )}
@@ -372,7 +368,7 @@ export function SocialImporter({
                 <Text variant="headingMd" as="h3">
                   Media ({previewPost.media.length})
                 </Text>
-                
+
                 <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
                   {previewPost.media.map((media, index) => (
                     <div
@@ -395,18 +391,16 @@ export function SocialImporter({
                           </div>
                         </div>
                       )}
-                      
+
                       <div className="absolute top-2 left-2">
                         <Badge tone={media.type === "image" ? "info" : "success"}>
                           {media.type}
                         </Badge>
                       </div>
-                      
+
                       {media.width && media.height && (
                         <div className="absolute bottom-2 right-2">
-                          <Badge>
-                            {`${media.width} × ${media.height}`}
-                          </Badge>
+                          <Badge>{`${media.width} × ${media.height}`}</Badge>
                         </div>
                       )}
                     </div>
@@ -422,7 +416,7 @@ export function SocialImporter({
                   <Text variant="headingMd" as="h3">
                     Engagement
                   </Text>
-                  
+
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
                     {previewPost.engagement.likes && (
                       <div className="text-center">
@@ -434,7 +428,7 @@ export function SocialImporter({
                         </Text>
                       </div>
                     )}
-                    
+
                     {previewPost.engagement.views && (
                       <div className="text-center">
                         <Text variant="headingLg" as="p">
@@ -445,7 +439,7 @@ export function SocialImporter({
                         </Text>
                       </div>
                     )}
-                    
+
                     {previewPost.engagement.comments && (
                       <div className="text-center">
                         <Text variant="headingLg" as="p">
@@ -456,7 +450,7 @@ export function SocialImporter({
                         </Text>
                       </div>
                     )}
-                    
+
                     {previewPost.engagement.shares && (
                       <div className="text-center">
                         <Text variant="headingLg" as="p">
@@ -494,11 +488,11 @@ export function SocialImporter({
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <ImportIcon className="w-8 h-8 text-green-600" />
                 </div>
-                
+
                 <Text variant="headingLg" as="h2">
                   Import Complete!
                 </Text>
-                
+
                 <Text variant="bodyMd" tone="subdued" as="p">
                   Successfully imported {importResult.assets?.length || 0} media files
                 </Text>
@@ -512,19 +506,15 @@ export function SocialImporter({
                   <Text variant="headingMd" as="h3">
                     Imported Assets
                   </Text>
-                  
+
                   <div className="mt-4 space-y-3">
                     {importResult.assets.map((asset) => (
                       <div
                         key={asset.id}
                         className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg"
                       >
-                        <Thumbnail
-                          source={asset.url}
-                          alt={asset.filename}
-                          size="small"
-                        />
-                        
+                        <Thumbnail source={asset.url} alt={asset.filename} size="small" />
+
                         <div className="flex-1">
                           <Text variant="bodyMd" as="p">
                             {asset.filename}
@@ -538,13 +528,8 @@ export function SocialImporter({
                             </Text>
                           </div>
                         </div>
-                        
-                        <Button
-                          size="slim"
-                          icon={ViewIcon}
-                          url={asset.url}
-                          external
-                        >
+
+                        <Button size="slim" icon={ViewIcon} url={asset.url} external>
                           View
                         </Button>
                       </div>

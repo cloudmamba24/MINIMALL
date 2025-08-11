@@ -8,15 +8,11 @@ import { notFound } from "next/navigation";
 async function loadConfigWithCache(configId: string, draftVersion?: string): Promise<SiteConfig> {
   // Import server functions dynamically to avoid bundling issues
   try {
-    const { 
-      edgeCache, 
-      getR2Service,
-      createDefaultSiteConfig,
-      createEnhancedSiteConfig 
-    } = await import("@minimall/core/server");
+    const { edgeCache, getR2Service, createDefaultSiteConfig, createEnhancedSiteConfig } =
+      await import("@minimall/core/server");
 
     const cacheKey = `config:${configId}${draftVersion ? `:${draftVersion}` : ""}`;
-    
+
     // Try edge cache first
     const cached = edgeCache.get<SiteConfig>(cacheKey);
     if (cached) {
@@ -34,13 +30,18 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
       console.log(`R2 SUCCESS: Cached config ${cacheKey} for 300s`);
       return config;
     } catch (error) {
-      console.warn(`R2 FAILED for ${cacheKey}:`, error instanceof Error ? error.message : "Unknown error");
+      console.warn(
+        `R2 FAILED for ${cacheKey}:`,
+        error instanceof Error ? error.message : "Unknown error"
+      );
 
       // Fallback strategy
       if (configId === "demo") {
         const shopDomain = "demo-shop.myshopify.com";
-        const accessToken = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN || process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
-        
+        const accessToken =
+          process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN ||
+          process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+
         try {
           if (accessToken) {
             return await createEnhancedSiteConfig(shopDomain, accessToken);
@@ -53,7 +54,9 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
       }
 
       // Production fallback for missing configs
-      console.log(`CONFIG FALLBACK: Serving demo config for ${configId} due to storage unavailability`);
+      console.log(
+        `CONFIG FALLBACK: Serving demo config for ${configId} due to storage unavailability`
+      );
       const demoConfig = createDefaultSiteConfig("demo-shop.myshopify.com");
       return { ...demoConfig, id: configId };
     }

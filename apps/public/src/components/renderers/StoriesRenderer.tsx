@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
-import { Category, LayoutConfig } from "@minimall/core";
-import { cn } from "../../lib/utils";
+import type { Category, LayoutConfig } from "@minimall/core";
+import { type PanInfo, motion, useMotionValue, useTransform } from "framer-motion";
+import { Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { safeArrayAccess } from "../../lib/type-utils";
+import { cn } from "../../lib/utils";
 
 interface StoriesRendererProps {
   category: Category;
@@ -14,11 +14,11 @@ interface StoriesRendererProps {
   className?: string;
 }
 
-export function StoriesRenderer({ 
-  category, 
-  layout, 
+export function StoriesRenderer({
+  category,
+  layout,
   onTileClick,
-  className 
+  className,
 }: StoriesRendererProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -28,22 +28,22 @@ export function StoriesRenderer({
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
   const y = useMotionValue(0);
-  
+
   // Story duration (5 seconds per story)
   const STORY_DURATION = 5000;
 
   // Filter items based on media type
   const getFilteredItems = () => {
     if (!category.children) return [];
-    
+
     return category.children.filter((item) => {
-      if (layout.mediaFilter === 'all') return true;
-      
+      if (layout.mediaFilter === "all") return true;
+
       const cardDetails = item.card[1];
-      if (layout.mediaFilter === 'photo') {
+      if (layout.mediaFilter === "photo") {
         return cardDetails.image || cardDetails.imageUrl;
       }
-      if (layout.mediaFilter === 'video') {
+      if (layout.mediaFilter === "video") {
         return cardDetails.videoUrl;
       }
       return true;
@@ -106,7 +106,7 @@ export function StoriesRenderer({
   // Handle vertical drag
   const handleDragEnd = (event: any, info: PanInfo) => {
     setIsDragging(false);
-    
+
     const threshold = 100;
     const velocity = info.velocity.y;
     const offset = info.offset.y;
@@ -118,7 +118,7 @@ export function StoriesRenderer({
         goToPrevious();
       }
     }
-    
+
     // Reset position
     y.set(0);
   };
@@ -175,12 +175,12 @@ export function StoriesRenderer({
   const cardDetails = currentItem.card[1];
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={cn("relative w-full h-full overflow-hidden bg-black", className)}
-      style={{ 
+      style={{
         borderRadius: `${layout.borderRadius}px`,
-        aspectRatio: layout.aspect === 'auto' ? '9/16' : layout.aspect,
+        aspectRatio: layout.aspect === "auto" ? "9/16" : layout.aspect,
       }}
     >
       {/* Progress bars */}
@@ -190,11 +190,8 @@ export function StoriesRenderer({
             <div
               className="bg-white rounded-full h-1 transition-all duration-100"
               style={{
-                width: index === currentIndex 
-                  ? `${progress}%` 
-                  : index < currentIndex 
-                    ? '100%' 
-                    : '0%'
+                width:
+                  index === currentIndex ? `${progress}%` : index < currentIndex ? "100%" : "0%",
               }}
             />
           </div>
@@ -241,7 +238,7 @@ export function StoriesRenderer({
           {cardDetails.description && (
             <p className="text-sm opacity-90 mb-4">{cardDetails.description}</p>
           )}
-          
+
           {/* Call-to-action */}
           {cardDetails.link && (
             <motion.button
@@ -263,7 +260,7 @@ export function StoriesRenderer({
             style={{
               left: `${tag.position.x * 100}%`,
               top: `${tag.position.y * 100}%`,
-              transform: 'translate(-50%, -50%)',
+              transform: "translate(-50%, -50%)",
             }}
             whileHover={{ scale: 1.2 }}
             whileTap={{ scale: 0.9 }}
@@ -297,11 +294,7 @@ export function StoriesRenderer({
           whileTap={{ scale: 0.9 }}
           onClick={togglePlayPause}
         >
-          {isPlaying ? (
-            <Pause className="w-4 h-4" />
-          ) : (
-            <Play className="w-4 h-4" />
-          )}
+          {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
         </motion.button>
 
         {/* Mute/Unmute (only for videos) */}
@@ -312,11 +305,7 @@ export function StoriesRenderer({
             whileTap={{ scale: 0.9 }}
             onClick={toggleMute}
           >
-            {isMuted ? (
-              <VolumeX className="w-4 h-4" />
-            ) : (
-              <Volume2 className="w-4 h-4" />
-            )}
+            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
           </motion.button>
         )}
       </div>
@@ -339,7 +328,7 @@ export function StoriesRenderer({
             ← Previous
           </motion.div>
         </div>
-        
+
         {/* Right tap area hint */}
         <div className="absolute right-0 top-0 w-1/2 h-full flex items-center justify-end pr-4">
           <motion.div

@@ -321,7 +321,10 @@ export function AssetManager({
         {uploading.length > 0 && (
           <div className="mt-4 space-y-2">
             {uploading.map((upload) => (
-              <div key={upload.file.name + upload.file.size} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+              <div
+                key={upload.file.name + upload.file.size}
+                className="flex items-center gap-2 p-2 bg-gray-50 rounded"
+              >
                 <Text variant="bodySm" as="span">
                   {upload.file.name}
                 </Text>

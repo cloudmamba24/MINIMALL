@@ -1,7 +1,7 @@
 "use client";
 
+import type { UTMParameters } from "@minimall/core";
 import { useEffect, useRef } from "react";
-import { UTMParameters } from "@minimall/core";
 import { createUTMParams } from "../../lib/type-utils";
 
 interface UTMTrackerProps {
@@ -10,7 +10,7 @@ interface UTMTrackerProps {
 
 /**
  * UTMTracker - Persistent UTM Parameter Management
- * 
+ *
  * Features:
  * - Captures UTM parameters on page entry
  * - Persists UTM data in localStorage for session duration
@@ -40,11 +40,11 @@ function initializeUTMTracking(configId: string) {
   try {
     const utmData = captureUTMParameters();
     const sessionData = getOrCreateSession(configId);
-    
+
     // Store UTM data if we have any parameters
     if (hasUTMData(utmData)) {
       storeUTMData(configId, utmData, sessionData.sessionId);
-      
+
       if (process.env.NODE_ENV === "development") {
         console.log("[UTMTracker] UTM parameters captured:", utmData);
       }
@@ -60,7 +60,6 @@ function initializeUTMTracking(configId: string) {
 
     // Track page view with UTM data
     trackPageView(configId);
-    
   } catch (error) {
     console.error("[UTMTracker] Failed to initialize UTM tracking:", error);
   }
@@ -89,7 +88,7 @@ function hasUTMData(utm: UTMParameters): boolean {
 function getOrCreateSession(configId: string) {
   const sessionKey = `minimall_session_${configId}`;
   const existing = localStorage.getItem(sessionKey);
-  
+
   if (existing) {
     try {
       const parsed = JSON.parse(existing);
@@ -97,7 +96,7 @@ function getOrCreateSession(configId: string) {
       const now = Date.now();
       const sessionAge = now - parsed.createdAt;
       const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-      
+
       if (sessionAge < maxAge) {
         return parsed;
       }
@@ -105,7 +104,7 @@ function getOrCreateSession(configId: string) {
       console.warn("[UTMTracker] Failed to parse existing session:", error);
     }
   }
-  
+
   // Create new session
   const sessionData = {
     sessionId: generateSessionId(),
@@ -115,7 +114,7 @@ function getOrCreateSession(configId: string) {
     userAgent: navigator.userAgent,
     referrer: document.referrer || undefined,
   };
-  
+
   localStorage.setItem(sessionKey, JSON.stringify(sessionData));
   return sessionData;
 }
@@ -132,9 +131,9 @@ function storeUTMData(configId: string, utm: UTMParameters, sessionId: string) {
     url: window.location.href,
     referrer: document.referrer || undefined,
   };
-  
+
   localStorage.setItem(utmKey, JSON.stringify(utmData));
-  
+
   // Also update the global UTM context for immediate use
   if (typeof window !== "undefined") {
     (window as any).__MINIMALL_UTM__ = utmData;
@@ -148,14 +147,14 @@ function getStoredUTMData(configId: string) {
   try {
     const utmKey = `minimall_utm_${configId}`;
     const stored = localStorage.getItem(utmKey);
-    
+
     if (stored) {
       const parsed = JSON.parse(stored);
       // Check if UTM data is still valid (7 days)
       const now = Date.now();
       const utmAge = now - parsed.capturedAt;
       const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-      
+
       if (utmAge < maxAge) {
         return parsed;
       } else {
@@ -166,7 +165,7 @@ function getStoredUTMData(configId: string) {
   } catch (error) {
     console.warn("[UTMTracker] Failed to retrieve stored UTM data:", error);
   }
-  
+
   return null;
 }
 
@@ -182,9 +181,9 @@ function generateSessionId(): string {
  */
 function getDeviceType(): "mobile" | "tablet" | "desktop" {
   if (typeof window === "undefined") return "desktop";
-  
+
   const width = window.innerWidth;
-  
+
   if (width <= 768) return "mobile";
   if (width <= 1024) return "tablet";
   return "desktop";
@@ -196,7 +195,7 @@ function getDeviceType(): "mobile" | "tablet" | "desktop" {
 function trackPageView(configId: string) {
   const utmData = getStoredUTMData(configId);
   const sessionData = getOrCreateSession(configId);
-  
+
   // Send page view event to analytics
   const event = {
     event: "page_view",
@@ -208,7 +207,7 @@ function trackPageView(configId: string) {
     device: sessionData.device,
     utm: utmData?.utm || {},
   };
-  
+
   // Send to analytics endpoint (fire and forget)
   fetch("/api/analytics/events", {
     method: "POST",
@@ -247,7 +246,7 @@ export const UTMUtils = {
   trackEvent(configId: string, eventName: string, properties: Record<string, any> = {}) {
     const utmData = getStoredUTMData(configId);
     const sessionData = getOrCreateSession(configId);
-    
+
     const event = {
       event: eventName,
       configId,
@@ -257,7 +256,7 @@ export const UTMUtils = {
       device: sessionData.device,
       utm: utmData?.utm || {},
     };
-    
+
     // Send to analytics endpoint
     return fetch("/api/analytics/events", {
       method: "POST",
@@ -278,7 +277,7 @@ export const UTMUtils = {
   getCartAttributes(configId: string) {
     const utmData = getStoredUTMData(configId);
     const sessionData = getOrCreateSession(configId);
-    
+
     return {
       minimall_config_id: configId,
       minimall_session_id: sessionData.sessionId,
@@ -299,10 +298,10 @@ export const UTMUtils = {
     try {
       const utmKey = `minimall_utm_${configId}`;
       const sessionKey = `minimall_session_${configId}`;
-      
+
       localStorage.removeItem(utmKey);
       localStorage.removeItem(sessionKey);
-      
+
       if (typeof window !== "undefined") {
         delete (window as any).__MINIMALL_UTM__;
       }

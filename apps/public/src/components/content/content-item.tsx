@@ -88,14 +88,14 @@ export function ContentItem({
 
   if (href) {
     return (
-      <a 
-        href={href} 
+      <a
+        href={href}
         className="block transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg"
         tabIndex={0}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
+          if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            window.open(href, '_blank', 'noopener,noreferrer');
+            window.open(href, "_blank", "noopener,noreferrer");
           }
         }}
       >

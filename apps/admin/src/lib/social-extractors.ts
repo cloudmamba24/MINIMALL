@@ -1,12 +1,12 @@
 /**
  * Social Media Content Extractors
- * 
+ *
  * Utilities for extracting media content and metadata from popular social platforms
  * including Instagram, TikTok, and other social media URLs for MINIMALL platform.
  */
 
 import { z } from "zod";
-import { safeOptionalProp, conditionalProps } from "./type-utils";
+import { conditionalProps, safeOptionalProp } from "./type-utils";
 
 export interface SocialMediaPost {
   id: string;
@@ -59,14 +59,14 @@ export async function extractSocialMediaContent(url: string): Promise<Extraction
   try {
     const validUrl = urlSchema.parse(url);
     const platform = detectPlatform(validUrl);
-    
+
     if (!platform) {
       return {
         success: false,
         error: "Unsupported platform or invalid URL format",
       };
     }
-    
+
     switch (platform) {
       case "instagram":
         return await extractInstagramPost(validUrl);
@@ -97,13 +97,13 @@ export async function extractSocialMediaContent(url: string): Promise<Extraction
  */
 function detectPlatform(url: string): SocialMediaPost["platform"] | null {
   const hostname = new URL(url).hostname.toLowerCase();
-  
+
   if (hostname.includes("instagram.com")) return "instagram";
   if (hostname.includes("tiktok.com")) return "tiktok";
   if (hostname.includes("twitter.com") || hostname.includes("x.com")) return "twitter";
   if (hostname.includes("youtube.com") || hostname.includes("youtu.be")) return "youtube";
   if (hostname.includes("pinterest.com")) return "pinterest";
-  
+
   return null;
 }
 
@@ -118,7 +118,7 @@ async function extractInstagramPost(url: string, accessToken?: string): Promise<
     if (!postId) {
       return { success: false, error: "Invalid Instagram URL format" };
     }
-    
+
     // If no access token provided, return error with instructions
     if (!accessToken) {
       return {
@@ -126,41 +126,43 @@ async function extractInstagramPost(url: string, accessToken?: string): Promise<
         error: "Instagram access token required. Please connect your Instagram account first.",
       };
     }
-    
+
     // Use real Instagram Basic Display API
     const { createInstagramAPI } = await import("@minimall/core/services/instagram-api");
     const config = {
-      clientId: process.env.INSTAGRAM_CLIENT_ID || '',
-      clientSecret: process.env.INSTAGRAM_CLIENT_SECRET || '',
-      redirectUri: process.env.INSTAGRAM_REDIRECT_URI || '',
+      clientId: process.env.INSTAGRAM_CLIENT_ID || "",
+      clientSecret: process.env.INSTAGRAM_CLIENT_SECRET || "",
+      redirectUri: process.env.INSTAGRAM_REDIRECT_URI || "",
       accessToken,
     };
-    
+
     const instagramAPI = createInstagramAPI(config);
-    
+
     try {
       // Get media details from Instagram API
       const mediaDetails = await instagramAPI.getMediaDetails(postId, accessToken);
-      
+
       // Convert to our format
       const extractedPost: SocialMediaPost = {
         id: mediaDetails.id,
         platform: "instagram",
         url: mediaDetails.permalink,
-        caption: mediaDetails.caption || '',
-        hashtags: extractHashtagsFromText(mediaDetails.caption || ''),
-        mentions: extractMentionsFromText(mediaDetails.caption || ''),
+        caption: mediaDetails.caption || "",
+        hashtags: extractHashtagsFromText(mediaDetails.caption || ""),
+        mentions: extractMentionsFromText(mediaDetails.caption || ""),
         author: {
           username: mediaDetails.username,
           displayName: mediaDetails.username,
           verified: false, // Basic Display API doesn't provide this
         },
-        media: [{
-          type: mediaDetails.media_type === 'VIDEO' ? 'video' : 'image',
-          url: mediaDetails.media_url,
-          thumbnailUrl: mediaDetails.thumbnail_url || mediaDetails.media_url,
-          ...(mediaDetails.caption && { altText: mediaDetails.caption }),
-        }],
+        media: [
+          {
+            type: mediaDetails.media_type === "VIDEO" ? "video" : "image",
+            url: mediaDetails.media_url,
+            thumbnailUrl: mediaDetails.thumbnail_url || mediaDetails.media_url,
+            ...(mediaDetails.caption && { altText: mediaDetails.caption }),
+          },
+        ],
         engagement: {
           likes: mediaDetails.like_count || 0,
           comments: mediaDetails.comments_count || 0,
@@ -172,15 +174,15 @@ async function extractInstagramPost(url: string, accessToken?: string): Promise<
           extractionMethod: "instagram_api",
         },
       };
-      
+
       return {
         success: true,
         post: extractedPost,
-        downloadUrls: extractedPost.media.map(m => m.url),
+        downloadUrls: extractedPost.media.map((m) => m.url),
       };
     } catch (apiError) {
       // Fallback to simulated data if API fails
-      console.warn('Instagram API failed, using simulated data:', apiError);
+      console.warn("Instagram API failed, using simulated data:", apiError);
       return getFallbackInstagramPost(postId, url);
     }
   } catch (error) {
@@ -200,7 +202,7 @@ async function extractTikTokPost(url: string): Promise<ExtractionResult> {
     if (!postId) {
       return { success: false, error: "Invalid TikTok URL format" };
     }
-    
+
     // Simulated TikTok extraction
     const simulatedPost: SocialMediaPost = {
       id: postId,
@@ -237,11 +239,11 @@ async function extractTikTokPost(url: string): Promise<ExtractionResult> {
         extractionMethod: "simulated",
       },
     };
-    
+
     return {
       success: true,
       post: simulatedPost,
-      downloadUrls: simulatedPost.media.map(m => m.url),
+      downloadUrls: simulatedPost.media.map((m) => m.url),
     };
   } catch (error) {
     return {
@@ -260,7 +262,7 @@ async function extractTwitterPost(url: string): Promise<ExtractionResult> {
     if (!postId) {
       return { success: false, error: "Invalid Twitter URL format" };
     }
-    
+
     // Simulated Twitter extraction
     const simulatedPost: SocialMediaPost = {
       id: postId,
@@ -294,11 +296,11 @@ async function extractTwitterPost(url: string): Promise<ExtractionResult> {
         extractionMethod: "simulated",
       },
     };
-    
+
     return {
       success: true,
       post: simulatedPost,
-      downloadUrls: simulatedPost.media.map(m => m.url),
+      downloadUrls: simulatedPost.media.map((m) => m.url),
     };
   } catch (error) {
     return {
@@ -317,7 +319,7 @@ async function extractYouTubePost(url: string): Promise<ExtractionResult> {
     if (!videoId) {
       return { success: false, error: "Invalid YouTube URL format" };
     }
-    
+
     // Simulated YouTube extraction
     const simulatedPost: SocialMediaPost = {
       id: videoId,
@@ -353,11 +355,11 @@ async function extractYouTubePost(url: string): Promise<ExtractionResult> {
         extractionMethod: "simulated",
       },
     };
-    
+
     return {
       success: true,
       post: simulatedPost,
-      downloadUrls: simulatedPost.media.map(m => m.url),
+      downloadUrls: simulatedPost.media.map((m) => m.url),
     };
   } catch (error) {
     return {
@@ -376,7 +378,7 @@ async function extractPinterestPost(url: string): Promise<ExtractionResult> {
     if (!pinId) {
       return { success: false, error: "Invalid Pinterest URL format" };
     }
-    
+
     // Simulated Pinterest extraction
     const simulatedPost: SocialMediaPost = {
       id: pinId,
@@ -410,11 +412,11 @@ async function extractPinterestPost(url: string): Promise<ExtractionResult> {
         extractionMethod: "simulated",
       },
     };
-    
+
     return {
       success: true,
       post: simulatedPost,
-      downloadUrls: simulatedPost.media.map(m => m.url),
+      downloadUrls: simulatedPost.media.map((m) => m.url),
     };
   } catch (error) {
     return {
@@ -432,12 +434,12 @@ function extractInstagramPostId(url: string): string | null {
     /instagram\.com\/p\/([A-Za-z0-9_-]+)/,
     /instagram\.com\/reel\/([A-Za-z0-9_-]+)/,
   ];
-  
+
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match && match[1]) return match[1];
   }
-  
+
   return null;
 }
 
@@ -450,12 +452,12 @@ function extractTikTokPostId(url: string): string | null {
     /tiktok\.com\/[^/]+\/video\/(\d+)/,
     /vm\.tiktok\.com\/([A-Za-z0-9]+)/,
   ];
-  
+
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match && match[1]) return match[1];
   }
-  
+
   return null;
 }
 
@@ -463,16 +465,13 @@ function extractTikTokPostId(url: string): string | null {
  * Extract Twitter post ID from URL
  */
 function extractTwitterPostId(url: string): string | null {
-  const patterns = [
-    /twitter\.com\/[^/]+\/status\/(\d+)/,
-    /x\.com\/[^/]+\/status\/(\d+)/,
-  ];
-  
+  const patterns = [/twitter\.com\/[^/]+\/status\/(\d+)/, /x\.com\/[^/]+\/status\/(\d+)/];
+
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match && match[1]) return match[1];
   }
-  
+
   return null;
 }
 
@@ -485,12 +484,12 @@ function extractYouTubeVideoId(url: string): string | null {
     /youtu\.be\/([A-Za-z0-9_-]+)/,
     /youtube\.com\/embed\/([A-Za-z0-9_-]+)/,
   ];
-  
+
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match && match[1]) return match[1];
   }
-  
+
   return null;
 }
 
@@ -498,16 +497,13 @@ function extractYouTubeVideoId(url: string): string | null {
  * Extract Pinterest pin ID from URL
  */
 function extractPinterestPinId(url: string): string | null {
-  const patterns = [
-    /pinterest\.com\/pin\/(\d+)/,
-    /pin\.it\/([A-Za-z0-9]+)/,
-  ];
-  
+  const patterns = [/pinterest\.com\/pin\/(\d+)/, /pin\.it\/([A-Za-z0-9]+)/];
+
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match && match[1]) return match[1];
   }
-  
+
   return null;
 }
 
@@ -518,13 +514,13 @@ export function extractHashtags(text: string): string[] {
   const hashtagRegex = /#(\w+)/g;
   const hashtags: string[] = [];
   let match;
-  
+
   while ((match = hashtagRegex.exec(text)) !== null) {
     if (match[1]) {
       hashtags.push(match[1]);
     }
   }
-  
+
   return [...new Set(hashtags)]; // Remove duplicates
 }
 
@@ -574,11 +570,11 @@ function getFallbackInstagramPost(postId: string, url: string): ExtractionResult
       note: "Connect your Instagram account to import actual post content",
     },
   };
-  
+
   return {
     success: true,
     post: fallbackPost,
-    downloadUrls: fallbackPost.media.map(m => m.url),
+    downloadUrls: fallbackPost.media.map((m) => m.url),
   };
 }
 
@@ -589,20 +585,23 @@ export function extractMentions(text: string): string[] {
   const mentionRegex = /@(\w+)/g;
   const mentions: string[] = [];
   let match;
-  
+
   while ((match = mentionRegex.exec(text)) !== null) {
     if (match[1]) {
       mentions.push(match[1]);
     }
   }
-  
+
   return [...new Set(mentions)]; // Remove duplicates
 }
 
 /**
  * Download media from URL with proper headers and error handling
  */
-export async function downloadMediaFromUrl(url: string, timeout = 30000): Promise<{
+export async function downloadMediaFromUrl(
+  url: string,
+  timeout = 30000
+): Promise<{
   success: boolean;
   buffer?: Buffer;
   contentType?: string;
@@ -611,27 +610,28 @@ export async function downloadMediaFromUrl(url: string, timeout = 30000): Promis
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
-    
+
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "image/*,video/*,*/*",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "image/*,video/*,*/*",
       },
     });
-    
+
     clearTimeout(timeoutId);
-    
+
     if (!response.ok) {
       return {
         success: false,
         error: `HTTP ${response.status}: ${response.statusText}`,
       };
     }
-    
+
     const buffer = Buffer.from(await response.arrayBuffer());
     const contentType = response.headers.get("content-type");
-    
+
     return {
       success: true,
       buffer,
@@ -656,14 +656,14 @@ export function validateSocialMediaUrl(url: string): {
   try {
     const validUrl = urlSchema.parse(url);
     const platform = detectPlatform(validUrl);
-    
+
     if (!platform) {
       return {
         valid: false,
         error: "Unsupported social media platform",
       };
     }
-    
+
     return {
       valid: true,
       platform,

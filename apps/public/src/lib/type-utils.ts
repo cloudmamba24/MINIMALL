@@ -7,13 +7,13 @@
  */
 export function conditionalProps<T extends Record<string, any>>(props: T): Partial<T> {
   const result: Partial<T> = {};
-  
+
   for (const [key, value] of Object.entries(props)) {
     if (value !== undefined && value !== null) {
       (result as any)[key] = value;
     }
   }
-  
+
   return result;
 }
 
@@ -34,7 +34,11 @@ export function safeArrayAccess<T>(array: T[], index: number): T | undefined {
 /**
  * Safe object property access with fallback
  */
-export function safeProp<T, K extends keyof T>(obj: T | undefined, key: K, fallback?: T[K]): T[K] | undefined {
+export function safeProp<T, K extends keyof T>(
+  obj: T | undefined,
+  key: K,
+  fallback?: T[K]
+): T[K] | undefined {
   return obj?.[key] ?? fallback;
 }
 
@@ -43,22 +47,22 @@ export function safeProp<T, K extends keyof T>(obj: T | undefined, key: K, fallb
  */
 export function createUTMParams(searchParams: URLSearchParams): Record<string, string> {
   const result: Record<string, string> = {};
-  
+
   const utmFields = [
-    { key: 'source', param: 'utm_source' },
-    { key: 'medium', param: 'utm_medium' },
-    { key: 'campaign', param: 'utm_campaign' },
-    { key: 'term', param: 'utm_term' },
-    { key: 'content', param: 'utm_content' },
+    { key: "source", param: "utm_source" },
+    { key: "medium", param: "utm_medium" },
+    { key: "campaign", param: "utm_campaign" },
+    { key: "term", param: "utm_term" },
+    { key: "content", param: "utm_content" },
   ];
-  
+
   utmFields.forEach(({ key, param }) => {
     const value = searchParams.get(param);
     if (value) {
       result[key] = value;
     }
   });
-  
+
   return result;
 }
 
@@ -74,13 +78,13 @@ export function createAttributionData(input: {
   const result: Record<string, any> = {
     configId: input.configId,
   };
-  
+
   // Only add properties that have actual values
   Object.entries(input).forEach(([key, value]) => {
-    if (key !== 'configId' && value !== undefined && value !== null && value !== '') {
+    if (key !== "configId" && value !== undefined && value !== null && value !== "") {
       result[key] = value;
     }
   });
-  
+
   return result;
 }

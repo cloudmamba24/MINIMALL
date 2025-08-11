@@ -1,4 +1,4 @@
-import { type SiteConfig, getR2Service, edgeCache } from "@minimall/core";
+import { type SiteConfig, edgeCache, getR2Service } from "@minimall/core";
 import { configVersions, configs, db } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { and, desc, eq } from "drizzle-orm";
@@ -98,33 +98,30 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
     }
 
     // Invalidate edge cache for published config
-    const tagsToInvalidate = [
-      `config:${configId}`,
-      `config:${configId}:published`
-    ];
+    const tagsToInvalidate = [`config:${configId}`, `config:${configId}:published`];
     const invalidatedCount = edgeCache.invalidateByTags(tagsToInvalidate);
     console.log(`Invalidated ${invalidatedCount} published cache entries for config: ${configId}`);
 
     // Trigger cache invalidation on the public app
     try {
-      const publicAppUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      const publicAppUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
       const revalidateResponse = await fetch(`${publicAppUrl}/api/config/revalidate`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.INTERNAL_API_TOKEN || 'dev-token'}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.INTERNAL_API_TOKEN || "dev-token"}`,
         },
         body: JSON.stringify({ configId }),
       });
 
       if (!revalidateResponse.ok) {
-        console.warn('Cache invalidation failed:', await revalidateResponse.text());
+        console.warn("Cache invalidation failed:", await revalidateResponse.text());
         // Don't fail the publish if cache invalidation fails
       } else {
         console.log(`Cache invalidated successfully for config: ${configId}`);
       }
     } catch (cacheError) {
-      console.warn('Cache invalidation request failed:', cacheError);
+      console.warn("Cache invalidation request failed:", cacheError);
       // Don't fail the publish if cache invalidation fails
     }
 
