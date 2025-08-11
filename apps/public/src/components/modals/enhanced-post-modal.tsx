@@ -85,7 +85,7 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
       size="xl"
       className="bg-black text-white"
     >
-      <div className="flex h-[80vh]">
+      <div className="flex h-[82vh] max-h-[82vh]">
         {/* Left side - Image with product tags */}
         <div className="flex-1 relative bg-gray-900">
           {/* Navigation arrows */}
@@ -130,7 +130,7 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
           </AnimatePresence>
 
           {/* Post counter */}
-          <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-black/50 backdrop-blur-sm rounded-full text-sm">
+          <div className="absolute top-3 left-3 z-10 px-3 py-1 bg-black/50 backdrop-blur-sm rounded-full text-xs md:text-sm">
             {currentIndex + 1} / {posts.length}
           </div>
 

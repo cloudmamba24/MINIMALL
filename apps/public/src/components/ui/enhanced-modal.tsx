@@ -151,10 +151,10 @@ export function SidePanel({
   }, [isOpen, onClose, closeOnEscape]);
 
   const widthClasses = {
-    sm: "w-80",
-    md: "w-96",
-    lg: "w-[28rem]",
-  };
+    sm: "sm:w-80",
+    md: "sm:w-96",
+    lg: "sm:w-[28rem]",
+  } as const;
 
   return (
     <AnimatePresence mode="wait">
@@ -172,7 +172,7 @@ export function SidePanel({
             className={`
               fixed top-0 right-0 h-full bg-white shadow-2xl z-50
               overflow-hidden flex flex-col
-              ${widthClasses[width]}
+              w-full ${widthClasses[width]}
               ${className}
             `}
             {...animationPresets.panelSlideIn}

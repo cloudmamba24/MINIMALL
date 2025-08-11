@@ -98,7 +98,7 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
   const formatCartPrice = (priceInCents: number) => formatPrice(priceInCents / 100);
 
   return (
-    <SidePanel isOpen={modalState.isOpen} onClose={closeModal} width="md">
+    <SidePanel isOpen={modalState.isOpen} onClose={closeModal} width="lg">
       <div className="h-full flex flex-col">
         {/* Header */}
         <motion.div
@@ -148,7 +148,7 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
         </motion.div>
 
         {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto py-4">
+        <div className="flex-1 overflow-y-auto py-4 smooth-scroll">
           <AnimatePresence mode="popLayout">
             {cart.items.length === 0 ? (
               // Empty Cart State

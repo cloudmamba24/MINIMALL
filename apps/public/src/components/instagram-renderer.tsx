@@ -117,7 +117,7 @@ export function InstagramRenderer({ config, className = "" }: InstagramRendererP
         ease: animationTokens.easing.entrance,
       }}
     >
-      <div className="container mx-auto px-4 py-8 max-w-lg">
+      <div className="container mx-auto px-3 md:px-4 py-6 md:py-8 max-w-xl md:max-w-2xl lg:max-w-5xl">
         {/* Brand Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -215,7 +215,7 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
 
   // Instagram-style grid (2 columns, square aspect ratio)
   return (
-    <div className="grid grid-cols-2 gap-1 w-full max-w-md mx-auto">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5 md:gap-2 w-full max-w-sm md:max-w-2xl lg:max-w-4xl mx-auto">
       {category.children.map((child, index) => {
         const [cardType, cardDetails] = child.card;
 
@@ -237,7 +237,7 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
               },
             }}
             whileTap={{ scale: 0.98 }}
-            className="relative aspect-square"
+            className="relative aspect-square md:aspect-[4/5] lg:aspect-square"
           >
             <button
               type="button"
