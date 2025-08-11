@@ -184,8 +184,8 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
                       before:animate-ping before:opacity-75
                     "
                       style={{
-                        left: `${tag.position.x * 100}%",
-                        top: "${tag.position.y * 100}%`,
+                        left: `${tag.position.x * 100}%`,
+                        top: `${tag.position.y * 100}%`,
                         transform: "translate(-50%, -50%)",
                       }}
                       initial={animationPresets.productTag.initial}
