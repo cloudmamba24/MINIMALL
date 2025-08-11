@@ -298,10 +298,12 @@ let webhookHandlerInstance: WebhookHandler | null = null;
 
 export function getWebhookHandler(): WebhookHandler {
   if (!webhookHandlerInstance) {
-    const secretKey = process.env.SHOPIFY_API_SECRET;
+    const secretKey = process.env.SHOPIFY_WEBHOOK_SECRET || process.env.SHOPIFY_API_SECRET;
 
     if (!secretKey) {
-      throw new Error("SHOPIFY_API_SECRET environment variable is required for webhook handling");
+      throw new Error(
+        "Missing webhook secret: set SHOPIFY_WEBHOOK_SECRET (preferred) or SHOPIFY_API_SECRET"
+      );
     }
 
     webhookHandlerInstance = new WebhookHandler(secretKey);
