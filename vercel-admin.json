@@ -3,13 +3,8 @@
   "name": "minimall-admin",
   "buildCommand": "npx turbo build --filter=@minimall/admin --force",
   "outputDirectory": "apps/admin/.next",
-  "installCommand": "npm ci",
+  "installCommand": "npm ci --legacy-peer-deps",
   "framework": "nextjs",
-  "functions": {
-    "apps/admin/src/app/api/**/*.ts": {
-      "runtime": "@vercel/node"
-    }
-  },
   "rewrites": [
     {
       "source": "/admin/:path*",
