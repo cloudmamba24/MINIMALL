@@ -3,15 +3,18 @@ import {
 	ASPECT_RATIOS,
 	DEVICE_TYPES,
 	LAYOUT_PRESETS,
-	SOCIAL_LAYOUT_PRESETS,
 	MEDIA_FILTERS,
+	SOCIAL_LAYOUT_PRESETS,
 	TEMPLATE_CATEGORIES,
 } from "../types";
 
 // Basic validation schemas
 const LayoutPresetSchema = z.enum(LAYOUT_PRESETS);
 const SocialLayoutPresetSchema = z.enum(SOCIAL_LAYOUT_PRESETS);
-const UnionLayoutPresetSchema = z.union([LayoutPresetSchema, SocialLayoutPresetSchema]);
+const UnionLayoutPresetSchema = z.union([
+	LayoutPresetSchema,
+	SocialLayoutPresetSchema,
+]);
 const AspectRatioSchema = z.enum(ASPECT_RATIOS);
 const MediaFilterSchema = z.enum(MEDIA_FILTERS);
 const DeviceTypeSchema = z.enum(DEVICE_TYPES);

@@ -605,7 +605,7 @@ export interface RevenueAttribution extends AttributionData {
 }
 
 // Social Media Types
-export type SocialPlatform = 'instagram' | 'tiktok' | 'twitter' | 'manual';
+export type SocialPlatform = "instagram" | "tiktok" | "twitter" | "manual";
 
 export interface SocialPost {
 	id: string;
@@ -677,7 +677,7 @@ export interface SocialPerformance {
 export interface SocialConnection {
 	id: string;
 	shopDomain: string;
-	platform: Exclude<SocialPlatform, 'manual'>;
+	platform: Exclude<SocialPlatform, "manual">;
 	platformUserId: string;
 	username: string;
 	displayName?: string;
@@ -756,7 +756,7 @@ export interface SocialImportResult {
 // Enhanced Layout Types for Social Media
 export interface SocialLayoutConfig extends LayoutConfig {
 	socialFeatures: {
-		showCaptions: 'hover' | 'always' | 'never';
+		showCaptions: "hover" | "always" | "never";
 		showEngagement: boolean;
 		showUsernames: boolean;
 		showTimestamps: boolean;
@@ -786,13 +786,18 @@ export interface SocialCategory extends Category {
 }
 
 // Social Media Preset Constants
-export const SOCIAL_PLATFORMS = ['instagram', 'tiktok', 'twitter', 'manual'] as const;
+export const SOCIAL_PLATFORMS = [
+	"instagram",
+	"tiktok",
+	"twitter",
+	"manual",
+] as const;
 export const SOCIAL_LAYOUT_PRESETS = [
-	'instagram-grid',
-	'tiktok-vertical', 
-	'pinterest-masonry',
-	'twitter-timeline',
-	'stories-horizontal'
+	"instagram-grid",
+	"tiktok-vertical",
+	"pinterest-masonry",
+	"twitter-timeline",
+	"stories-horizontal",
 ] as const;
 
 export type SocialLayoutPreset = (typeof SOCIAL_LAYOUT_PRESETS)[number];

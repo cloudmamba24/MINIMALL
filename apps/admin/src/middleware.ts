@@ -1,8 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-// Use edge runtime for middleware
-export const runtime = "edge";
-
 // Define public routes that don't require authentication
 const publicRoutes = [
   "/",
