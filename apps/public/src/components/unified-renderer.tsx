@@ -1,11 +1,13 @@
 "use client";
 
-import type { SiteConfig } from "@minimall/core/client";
+import type { Category, SiteConfig } from "@minimall/core/client";
 import { useCart } from "../hooks/use-cart";
+import { useModalRouter } from "../hooks/use-modal-router";
 import { useRenderMode } from "../hooks/use-mobile-detection";
 import { conditionalProps } from "../lib/type-utils";
 import { cn } from "../lib/utils";
 import { EnhancedProductQuickView } from "./enhanced-product-quick-view";
+import { EnhancedPostModal } from "./modals/enhanced-post-modal";
 import { InstagramRenderer } from "./instagram-renderer";
 import { Renderer } from "./renderer";
 import { LayoutSwitch } from "./renderers/LayoutSwitch";
@@ -36,6 +38,13 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
   const detectedMode = useRenderMode();
   const renderMode = forceMode || detectedMode;
   const { addToCart } = useCart();
+  const { openModal: openPostModal } = useModalRouter("post");
+  const { openModal: openProductModal } = useModalRouter("product");
+
+  // Flatten all post items across categories for the modal carousel
+  const allPosts: Category[] = (config.categories || [])
+    .flatMap((category) => category.children || [])
+    .filter(Boolean) as Category[];
 
   // Development debug logging
   if (process.env.NODE_ENV === "development") {
@@ -57,18 +66,26 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
         <MobileNativeRenderer
           config={config}
           onAddToCart={addToCart}
+          onOpenPost={(postId) => openPostModal({ id: postId })}
           {...conditionalProps({ className })}
         />
       ) : (
         <DesktopLayoutRenderer
           config={config}
           onAddToCart={addToCart}
+          onOpenPost={(postId) => openPostModal({ id: postId })}
           {...conditionalProps({ className })}
         />
       )}
 
       {/* Shared Components */}
       <EnhancedProductQuickView />
+
+      {/* Global Post Modal bound to URL; opens with any grid tile click */}
+      <EnhancedPostModal
+        posts={allPosts}
+        onProductClick={(productId) => openProductModal({ id: productId })}
+      />
     </>
   );
 }
@@ -81,6 +98,7 @@ function MobileNativeRenderer({
   config,
   className,
   onAddToCart,
+  onOpenPost,
 }: {
   config: SiteConfig;
   className?: string;
@@ -89,6 +107,7 @@ function MobileNativeRenderer({
     variantId?: string,
     quantity?: number
   ) => Promise<{ success: boolean; error?: any }>;
+  onOpenPost: (postId: string) => void;
 }) {
   return (
     <div className={cn("instagram-native", className)}>
@@ -124,10 +143,8 @@ function MobileNativeRenderer({
                 experiments: config.settings.experiments,
                 className: "instagram-grid",
               })}
-              onTileClick={(clickedCategory, clickIndex) => {
-                // Mobile-native modal handling
-                console.log("Mobile tile clicked:", clickedCategory.id, clickIndex);
-                // TODO: Implement mobile modal with swipe gestures
+              onTileClick={(clickedCategory) => {
+                if (clickedCategory?.id) onOpenPost(clickedCategory.id);
               }}
               onAddToCart={onAddToCart}
             />
@@ -149,6 +166,7 @@ function DesktopLayoutRenderer({
   config,
   className,
   onAddToCart,
+  onOpenPost,
 }: {
   config: SiteConfig;
   className?: string;
@@ -157,6 +175,7 @@ function DesktopLayoutRenderer({
     variantId?: string,
     quantity?: number
   ) => Promise<{ success: boolean; error?: any }>;
+  onOpenPost: (postId: string) => void;
 }) {
   return (
     <div className={className}>
@@ -172,10 +191,8 @@ function DesktopLayoutRenderer({
                   experiments: config.settings.experiments,
                   className: "desktop-layout",
                 })}
-                onTileClick={(clickedCategory, clickIndex) => {
-                  // Desktop modal handling
-                  console.log("Desktop tile clicked:", clickedCategory.id, clickIndex);
-                  // TODO: Implement desktop modal system
+                onTileClick={(clickedCategory) => {
+                  if (clickedCategory?.id) onOpenPost(clickedCategory.id);
                 }}
                 onAddToCart={onAddToCart}
               />
