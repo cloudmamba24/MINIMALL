@@ -1,6 +1,6 @@
 import { configVersions, configs, db } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
-import { and, eq, lte } from "drizzle-orm";
+import { and, eq, lte, gte } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 
 /**
@@ -31,11 +31,12 @@ export async function POST(request: NextRequest) {
   try {
     // Verify this is a legitimate cron request
     const authHeader = request.headers.get("authorization");
+    const urlToken = request.nextUrl.searchParams.get("token");
     const cronSecret = process.env.CRON_SECRET;
 
     if (!cronSecret) {
       console.warn("CRON_SECRET not configured - skipping auth check");
-    } else if (authHeader !== `Bearer ${cronSecret}`) {
+    } else if (authHeader !== `Bearer ${cronSecret}` && urlToken !== cronSecret) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -61,6 +62,7 @@ export async function POST(request: NextRequest) {
       .where(
         and(
           lte(configVersions.scheduledAt, now),
+          gte(configVersions.scheduledAt, fifteenMinutesAgo),
           // Only get versions that haven't been published yet
           eq(configVersions.isPublished, false)
         )
@@ -243,9 +245,10 @@ async function invalidateConfigCache(configId: string): Promise<void> {
 // Allow GET for testing/health checks
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
+  const urlToken = request.nextUrl.searchParams.get("token");
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}` && urlToken !== cronSecret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
