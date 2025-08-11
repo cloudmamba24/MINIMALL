@@ -8,7 +8,7 @@ import { conditionalProps } from "../lib/type-utils";
 import { cn } from "../lib/utils";
 import { EnhancedProductQuickView } from "./enhanced-product-quick-view";
 import { EnhancedPostModal } from "./modals/enhanced-post-modal";
-import { InstagramRenderer } from "./instagram-renderer";
+import { InstagramTab } from "./instagram/instagram-tab";
 import { Renderer } from "./renderer";
 import { LayoutSwitch } from "./renderers/LayoutSwitch";
 import { ShopTab } from "./shop/shop-tab";
@@ -17,6 +17,8 @@ import { PixelDispatcher } from "./tracking/PixelDispatcher";
 import { UTMTracker } from "./tracking/UTMTracker";
 import { SiteConfigProvider } from "@/contexts/site-config-context";
 import "../styles/instagram-native.css";
+import { BrandHeader } from "./brand/brand-header";
+import { LinkTabs, type Tab } from "./navigation/link-tabs";
 
 interface UnifiedRendererProps {
   config: SiteConfig;
@@ -44,10 +46,9 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
   const { openModal: openPostModal } = useModalRouter("post");
   const { openModal: openProductModal } = useModalRouter("product");
 
-  // Flatten all post items across categories for the modal carousel
-  const allPosts: Category[] = (config.categories || [])
-    .flatMap((category) => category.children || [])
-    .filter(Boolean) as Category[];
+  // Flatten all post items across categories for the modal carousel (Instagram content only for 1:1 demo parity)
+  const instagramCategory = (config.categories || []).find((c) => c.title.toLowerCase() === "instagram");
+  const allPosts: Category[] = (instagramCategory?.children || []) as Category[];
 
   // Development debug logging
   if (process.env.NODE_ENV === "development") {
@@ -64,36 +65,63 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
         <PixelDispatcher pixels={config.settings.pixels} configId={config.id} />
       )}
 
-      {/* Main Content Rendering */}
+      {/* Main Content Rendering (single orchestrator with tabs) */}
       <SiteConfigProvider config={config}>
-        {renderMode === "instagram-native" ? (
-          <MobileNativeRenderer
-            config={config}
-            onAddToCart={addToCart}
-            onOpenPost={(postId) => openPostModal({ id: postId })}
-            {...conditionalProps({ className })}
-          />
-        ) : (
-          <DesktopLayoutRenderer
-            config={config}
-            onAddToCart={addToCart}
-            onOpenPost={(postId) => openPostModal({ id: postId })}
-            {...conditionalProps({ className })}
-          />
-        )}
+        <div className={cn("min-h-screen bg-black text-white", className)}>
+          <div className="container mx-auto px-3 md:px-4 py-6 md:py-8 max-w-xl md:max-w-2xl lg:max-w-5xl">
+            {/* Brand Header */}
+            {config.settings.brand && (
+              <div className="mb-6 md:mb-8">
+                <BrandHeader
+                  title={config.settings.brand.name}
+                  {...(config.settings.brand.subtitle && { subtitle: config.settings.brand.subtitle })}
+                  {...(config.settings.brand.logo && { logo: config.settings.brand.logo })}
+                  {...(config.settings.brand.socialLinks && { socialLinks: config.settings.brand.socialLinks })}
+                  {...(config.settings.brand.ctaButton && { ctaButton: config.settings.brand.ctaButton })}
+                />
+              </div>
+            )}
+
+            {/* Tabs */}
+            {(() => {
+              const instagramContent = (
+                <InstagramTab
+                  config={config}
+                  onOpenPost={(postId) => openPostModal({ id: postId })}
+                />
+              );
+              const shopCategory = config.categories.find((c) => c.title.toLowerCase() === "shop");
+              const lookbookCategory = config.categories.find((c) => c.title.toLowerCase() === "lookbook");
+
+              const tabs: Tab[] = [
+                { id: "instagram", label: "INSTAGRAM", content: instagramContent },
+                ...(shopCategory
+                  ? [{ id: "shop", label: "SHOP", content: (
+                      <ShopTab
+                        category={shopCategory}
+                        onProductClick={(productId) => openPostModal({ id: productId })}
+                      />
+                    ) }] as Tab[]
+                  : []),
+                ...(lookbookCategory
+                  ? [{ id: "lookbook", label: "LOOKBOOK", content: (
+                      <LookbookSection
+                        category={lookbookCategory}
+                        onHotspotClick={(productId) => openPostModal({ id: productId })}
+                      />
+                    ) }] as Tab[]
+                  : []),
+              ];
+
+              return <LinkTabs tabs={tabs} />;
+            })()}
+          </div>
+        </div>
       </SiteConfigProvider>
 
       {/* Shared Components */}
       <EnhancedProductQuickView />
-      {/* Cart Drawer for a cohesive flow */}
-      {/* If you want this URL-bound too, we can wire useModalRouter("cart") calls on add-to-cart */}
-      {/* import and render EnhancedCartDrawer when needed */}
-
-      {/* Global Post Modal bound to URL; opens with any grid tile click */}
-      <EnhancedPostModal
-        posts={allPosts}
-        onProductClick={(productId) => openProductModal({ id: productId })}
-      />
+      <EnhancedPostModal posts={allPosts} onProductClick={(productId) => openProductModal({ id: productId })} />
     </>
   );
 }
@@ -141,31 +169,8 @@ function MobileNativeRenderer({
       )}
 
       {/* Use layout system for categories that have layout config */}
-      {config.categories.map((category, index) => (
-        <div key={category.id}>
-          {category.title.toLowerCase() === "shop" ? (
-            <ShopTab category={category} onProductClick={(pid) => onOpenPost(pid)} />
-          ) : category.title.toLowerCase() === "lookbook" ? (
-            <LookbookSection category={category} onHotspotClick={(pid) => onOpenPost(pid)} />
-          ) : category.layout ? (
-            <LayoutSwitch
-              category={category}
-              configId={config.id}
-              {...conditionalProps({
-                experiments: config.settings.experiments,
-                className: "instagram-grid",
-              })}
-              onTileClick={(clickedCategory) => {
-                if (clickedCategory?.id) onOpenPost(clickedCategory.id);
-              }}
-              onAddToCart={onAddToCart}
-            />
-          ) : (
-            // Fallback to existing InstagramRenderer for categories without layout
-            <InstagramRenderer config={config} className={className || undefined} />
-          )}
-        </div>
-      ))}
+      {/* Active tab content rendered by UnifiedRenderer; Instagram-only here */}
+      <InstagramTab config={config} onOpenPost={(id) => onOpenPost(id)} />
     </div>
   );
 }
@@ -191,40 +196,8 @@ function DesktopLayoutRenderer({
 }) {
   return (
     <div className={className}>
-      {config.categories.map((category) => (
-        <div key={category.id} className="mb-12">
-          {category.title.toLowerCase() === "shop" ? (
-            <div>
-              <h2 className="text-2xl font-bold mb-6 text-gray-900">{category.title}</h2>
-              <ShopTab category={category} onProductClick={(pid) => onOpenPost(pid)} />
-            </div>
-          ) : category.title.toLowerCase() === "lookbook" ? (
-            <div>
-              <h2 className="text-2xl font-bold mb-6 text-gray-900">{category.title}</h2>
-              <LookbookSection category={category} onHotspotClick={(pid) => onOpenPost(pid)} />
-            </div>
-          ) : category.layout ? (
-            <div>
-              <h2 className="text-2xl font-bold mb-6 text-gray-900">{category.title}</h2>
-              <LayoutSwitch
-                category={category}
-                configId={config.id}
-                {...conditionalProps({
-                  experiments: config.settings.experiments,
-                  className: "desktop-layout",
-                })}
-                onTileClick={(clickedCategory) => {
-                  if (clickedCategory?.id) onOpenPost(clickedCategory.id);
-                }}
-                onAddToCart={onAddToCart}
-              />
-            </div>
-          ) : (
-            // Fallback to existing Renderer
-            <Renderer config={config} className={className || undefined} />
-          )}
-        </div>
-      ))}
+      {/* Active tab content rendered by UnifiedRenderer; Instagram-only here */}
+      <InstagramTab config={config} onOpenPost={(id) => onOpenPost(id)} />
     </div>
   );
 }
