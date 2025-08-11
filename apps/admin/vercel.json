@@ -2,7 +2,7 @@
   "$schema": "https://vercel.com/schema/vercel.json",
   "name": "minimall-admin",
   "buildCommand": "npx turbo build --filter=@minimall/admin --force",
-  "outputDirectory": "apps/admin/.next",
+  "outputDirectory": ".next",
   "installCommand": "npm ci --legacy-peer-deps",
   "framework": "nextjs",
   "rewrites": [

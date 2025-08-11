@@ -2,7 +2,7 @@
   "$schema": "https://vercel.com/schema/vercel.json",
   "name": "minimall-public",
   "buildCommand": "npx turbo build --filter=@minimall/public --force",
-  "outputDirectory": "apps/public/.next",
+  "outputDirectory": ".next",
   "installCommand": "npm ci --legacy-peer-deps",
   "framework": "nextjs",
   "headers": [
