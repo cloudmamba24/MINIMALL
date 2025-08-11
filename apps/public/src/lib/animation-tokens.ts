@@ -95,7 +95,7 @@ export const _animationPresets = {
     },
   },
 
-  // Panel slide in from right
+  // Panel slide in from right (350ms in, 300ms out)
   panelSlideIn: {
     initial: {
       x: "100%",
@@ -104,14 +104,18 @@ export const _animationPresets = {
     animate: {
       x: 0,
       opacity: animationTokens.opacity.visible,
+      transition: {
+        duration: animationTokens.duration.normal / 1000,
+        ease: animationTokens.easing.slide,
+      },
     },
     exit: {
       x: "100%",
       opacity: animationTokens.opacity.hidden,
-    },
-    transition: {
-      duration: animationTokens.duration.slow / 1000,
-      ease: animationTokens.easing.slide,
+      transition: {
+        duration: animationTokens.duration.backdrop / 1000,
+        ease: animationTokens.easing.slide,
+      },
     },
   },
 

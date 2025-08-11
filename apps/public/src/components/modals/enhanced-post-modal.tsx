@@ -85,7 +85,21 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
       size="xl"
       className="bg-black text-white"
     >
-      <div className="flex h-[82vh] max-h-[82vh]">
+      <div
+        className="flex h-[82vh] max-h-[82vh]"
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft" && canGoPrev) {
+            e.preventDefault();
+            goToPrev();
+          } else if (e.key === "ArrowRight" && canGoNext) {
+            e.preventDefault();
+            goToNext();
+          }
+        }}
+        tabIndex={-1}
+        role="group"
+        aria-roledescription="Lightbox navigation"
+      >
         {/* Left side - Image with product tags */}
         <div className="flex-1 relative bg-gray-900">
           {/* Navigation arrows */}
@@ -152,22 +166,62 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
             </motion.button>
           )}
 
-          {/* Main image with crossfade animation */}
+          {/* Main media (image or video) with crossfade animation */}
           <AnimatePresence mode="wait">
             <motion.div
               key={currentPost.id}
               className="relative w-full h-full"
               {...animationPresets.crossFade}
             >
-              {postImage && (
-                <Image
-                  src={postImage}
-                  alt={currentPost.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              )}
+              {(() => {
+                // Detect video from card details
+                const [, cardDetails] = currentPost.children?.[0]?.card || [];
+                const details = (cardDetails || {}) as Record<string, any>;
+                const videoUrl = details.videoUrl as string | undefined;
+                if (videoUrl) {
+                  return (
+                    <video
+                      className="w-full h-full object-cover"
+                      controls
+                      playsInline
+                      preload="metadata"
+                      poster={details.poster || postImage || undefined}
+                      onLoadedMetadata={(e) => {
+                        // Respect reduced motion by not autoplaying
+                        if (
+                          typeof window !== 'undefined' &&
+                          window.matchMedia &&
+                          window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                        ) {
+                          return;
+                        }
+                        try { (e.currentTarget as HTMLVideoElement).play().catch(() => {}); } catch {}
+                      }}
+                      onKeyDown={(e) => {
+                        const v = e.currentTarget as HTMLVideoElement;
+                        if (e.code === 'Space') {
+                          e.preventDefault();
+                          try { v.paused ? v.play() : v.pause(); } catch {}
+                        }
+                      }}
+                    >
+                      <source src={videoUrl} />
+                    </video>
+                  );
+                }
+                if (postImage) {
+                  return (
+                    <Image
+                      src={postImage}
+                      alt={currentPost.title}
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                  );
+                }
+                return null;
+              })()}
 
               {/* Product tags with staggered animation */}
               <AnimatePresence>

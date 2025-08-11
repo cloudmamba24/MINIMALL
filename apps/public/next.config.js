@@ -76,6 +76,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' https://vercel.live",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https://cdn.shopify.com https://images.unsplash.com",
+              "media-src 'self' https://cdn.shopify.com", // allow video/audio from existing hosts only
               "font-src 'self'",
               "connect-src 'self' https://*.shopify.com https://*.r2.cloudflarestorage.com https://vercel.live",
               "frame-ancestors 'none'",

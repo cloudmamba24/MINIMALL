@@ -2,6 +2,7 @@
 
 import { animationPresets, animationTokens } from "@/lib/animation-tokens";
 import { AnimatePresence, motion } from "framer-motion";
+import FocusTrap from "focus-trap-react";
 import { X } from "lucide-react";
 import { type ReactNode, useEffect } from "react";
 
@@ -59,6 +60,23 @@ export function EnhancedModal({
     };
   }, [isOpen]);
 
+  // Focus management: trap and restore focus to previously focused element
+  useEffect(() => {
+    if (!isOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    // Move focus to modal container when opened
+    const container = document.getElementById("enhanced-modal-container");
+    if (container) {
+      // Delay to ensure element is mounted
+      setTimeout(() => container.focus(), 0);
+    }
+    return () => {
+      if (previouslyFocused && typeof previouslyFocused.focus === "function") {
+        previouslyFocused.focus();
+      }
+    };
+  }, [isOpen]);
+
   const sizeClasses = {
     sm: "max-w-md",
     md: "max-w-lg",
@@ -79,8 +97,15 @@ export function EnhancedModal({
           />
 
           {/* Modal container */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
+          <FocusTrap active={isOpen} focusTrapOptions={{ allowOutsideClick: true }}>
+            <div
+              id="enhanced-modal-container"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              role="dialog"
+              aria-modal="true"
+              tabIndex={-1}
+            >
+              <motion.div
               className={`
                 relative bg-white rounded-xl shadow-2xl
                 max-h-[90vh] overflow-hidden
@@ -88,7 +113,7 @@ export function EnhancedModal({
                 ${className}
               `}
               {...animationPresets.modalEntrance}
-            >
+              >
               {/* Close button */}
               {showCloseButton && (
                 <motion.button
@@ -107,10 +132,11 @@ export function EnhancedModal({
                 </motion.button>
               )}
 
-              {/* Modal content */}
-              <div className="relative max-h-[90vh] overflow-auto">{children}</div>
-            </motion.div>
-          </div>
+                {/* Modal content */}
+                <div className="relative max-h-[90vh] overflow-auto">{children}</div>
+              </motion.div>
+            </div>
+          </FocusTrap>
         </>
       )}
     </AnimatePresence>

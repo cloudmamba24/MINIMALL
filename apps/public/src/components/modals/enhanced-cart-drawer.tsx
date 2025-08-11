@@ -56,6 +56,12 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
       const checkoutUrl = await shopifyCart.getCheckoutUrl(cart.items);
 
       if (checkoutUrl) {
+        try {
+          const { createAnalytics } = await import("@/lib/enhanced-analytics");
+          const analytics = createAnalytics("cart");
+          analytics.trackBeginCheckout({ configId: "cart", value: cart.totalPrice, items: cart.items });
+          analytics.trackCheckoutUrlGenerated({ configId: "cart" });
+        } catch {}
         if (process.env.NODE_ENV === "development") {
           console.log("Redirecting to checkout:", checkoutUrl);
         }

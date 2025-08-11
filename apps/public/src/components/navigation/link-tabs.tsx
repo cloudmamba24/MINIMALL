@@ -1,7 +1,8 @@
 "use client";
 
 import { useTabGestures } from "@/hooks/use-gesture-handler";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Tab as HeadlessTab } from "@headlessui/react";
 
 export interface Tab {
   id: string;
@@ -61,43 +62,41 @@ export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
     }
   };
 
+  const selectedIndex = Math.max(0, contentTabs.findIndex((t) => t.id === activeTab));
+
   return (
     <div className={`w-full ${className}`} {...gestureProps}>
-      {/* Tab Navigation */}
-      <div className="flex justify-center mb-8">
-        <div className="flex space-x-8">
-          {tabs.map((tab) => (
-            <button
-              type="button"
-              key={tab.id}
-              onClick={() => handleTabClick(tab)}
-              className={`
-                text-sm font-medium tracking-wide transition-colors duration-200
-                ${
-                  activeTab === tab.id && !tab.isAction
+      <HeadlessTab.Group selectedIndex={selectedIndex} onChange={(idx) => {
+        const tab = contentTabs[idx];
+        if (tab) setActiveTab(tab.id);
+      }}>
+        <div className="flex justify-center mb-8">
+          <HeadlessTab.List className="flex space-x-8" role="tablist">
+            {tabs.map((tab) => (
+              <HeadlessTab
+                key={tab.id}
+                as="button"
+                onClick={() => handleTabClick(tab)}
+                className={({ selected }) => `text-sm font-medium tracking-wide transition-colors duration-200 ${
+                  selected && !tab.isAction
                     ? "text-white border-b-2 border-white pb-1"
                     : "text-gray-400 hover:text-gray-200"
-                }
-                ${tab.isAction ? "hover:text-white" : ""}
-              `}
-            >
-              {tab.label}
-            </button>
-          ))}
+                } ${tab.isAction ? "hover:text-white" : ""}`}
+              >
+                {tab.label}
+              </HeadlessTab>
+            ))}
+          </HeadlessTab.List>
         </div>
-      </div>
-
-      {/* Gesture hint */}
-      {contentTabs.length > 1 && (
-        <div className="text-center mb-4">
-          <p className="text-xs text-gray-500">Swipe left or right to navigate between tabs</p>
+        {contentTabs.length > 1 && (
+          <div className="text-center mb-4">
+            <p className="text-xs text-gray-500">Swipe left or right to navigate between tabs</p>
+          </div>
+        )}
+        <div className="transition-opacity duration-300">
+          {contentTabs.find((tab) => tab.id === activeTab)?.content}
         </div>
-      )}
-
-      {/* Tab Content */}
-      <div className="transition-opacity duration-300">
-        {contentTabs.find((tab) => tab.id === activeTab)?.content}
-      </div>
+      </HeadlessTab.Group>
     </div>
   );
 }

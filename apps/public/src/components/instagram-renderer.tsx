@@ -2,10 +2,11 @@
 
 import { useModalRouter } from "@/hooks/use-modal-router";
 import { animationTokens } from "@/lib/animation-tokens";
+import { createAnalytics, createImpressionTracker } from "@/lib/enhanced-analytics";
 import { useCart } from "@/store/app-store";
 import type { Category, SiteConfig } from "@minimall/core/client";
 import { motion } from "framer-motion";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BrandHeader } from "./brand/brand-header";
 import { ContentItem } from "./content/content-item";
 import { EnhancedCartDrawer } from "./modals/enhanced-cart-drawer";
@@ -36,6 +37,7 @@ export function InstagramRenderer({ config, className = "" }: InstagramRendererP
   }
 
   const { settings } = config;
+  const analytics = useMemo(() => createAnalytics(config.id), [config.id]);
   const cart = useCart();
 
   // Enhanced modal routing
@@ -171,6 +173,8 @@ interface InstagramGridProps {
 
 const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: InstagramGridProps) {
   const [, categoryTypeDetails] = category.categoryType;
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const analytics = useMemo(() => createAnalytics(category.id), [category.id]);
 
   if (!category.children || category.children.length === 0) {
     return (
@@ -213,10 +217,68 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
     );
   }
 
+  // Client-side pagination for infinite scroll
+  const items = category.children;
+  const [visibleCount, setVisibleCount] = useState(Math.min(24, items.length));
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && !isLoadingMore && visibleCount < items.length) {
+          setIsLoadingMore(true);
+          // Simulate async load and smooth UX
+          setTimeout(() => {
+            setVisibleCount((c) => Math.min(c + 12, items.length));
+            setIsLoadingMore(false);
+          }, 300);
+        }
+      },
+      { rootMargin: "200px 0px" }
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [isLoadingMore, visibleCount, items.length]);
+
+  // Pause videos when tiles go offscreen
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return;
+    const videos = Array.from(root.querySelectorAll("video")) as HTMLVideoElement[];
+    if (videos.length === 0) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const v = entry.target as HTMLVideoElement;
+          if (!entry.isIntersecting) {
+            try { v.pause(); } catch {}
+          }
+        }
+      },
+      { threshold: 0.2 }
+    );
+    videos.forEach((v) => io.observe(v));
+    return () => io.disconnect();
+  }, [visibleCount]);
+
+  // Track impressions for tiles entering viewport
+  useEffect(() => {
+    if (!gridRef.current) return;
+    const io = createImpressionTracker(analytics, 0.5);
+    const cards = Array.from(gridRef.current.querySelectorAll('[data-item-id]')) as HTMLElement[];
+    cards.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [analytics, visibleCount]);
+
   // Instagram-style grid (2 columns, square aspect ratio)
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-1.5 md:gap-2 w-full max-w-sm md:max-w-2xl lg:max-w-4xl mx-auto">
-      {category.children.map((child, index) => {
+    <div ref={(el) => { containerRef.current = el; gridRef.current = el; }} className="grid grid-cols-2 md:grid-cols-3 gap-1.5 md:gap-2 w-full max-w-sm md:max-w-2xl lg:max-w-4xl mx-auto">
+      {items.slice(0, visibleCount).map((child, index) => {
         const [cardType, cardDetails] = child.card;
 
         return (
@@ -238,10 +300,15 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
             }}
             whileTap={{ scale: 0.98 }}
             className="relative aspect-square md:aspect-[4/5] lg:aspect-square"
+            data-item-id={child.id}
+            data-category-id={category.id}
           >
             <button
               type="button"
-              onClick={() => openPostModal(child.id, child)}
+              onClick={() => {
+                analytics.trackTileClick({ configId: category.id, itemId: child.id, categoryId: category.id });
+                openPostModal(child.id, child);
+              }}
               className="w-full h-full relative overflow-hidden bg-gray-800 group"
             >
               <InstagramContentItem
@@ -254,6 +321,17 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
           </motion.div>
         );
       })}
+
+      {/* Skeletons when loading more */}
+      {isLoadingMore &&
+        Array.from({ length: Math.min(12, items.length - visibleCount) }).map((_, i) => (
+          <div key={`skeleton-${i}`} className="relative aspect-square md:aspect-[4/5] lg:aspect-square">
+            <div className="w-full h-full loading-shimmer rounded-sm" />
+          </div>
+        ))}
+
+      {/* Sentinel for infinite scroll */}
+      <div ref={sentinelRef} className="col-span-full h-6" />
     </div>
   );
 });
@@ -277,14 +355,41 @@ function InstagramContentItem({
 }: InstagramContentItemProps) {
   // Cast cardDetails for type safety
   const details = cardDetails as Record<string, any>;
+  const isVideo = cardType === "video" || Boolean(details.videoUrl);
+
   const content = (
     <div className={`relative w-full h-full overflow-hidden bg-gray-800 group ${className}`}>
-      {/* Background Image */}
-      <img
-        src={details.image || details.imageUrl || ""}
-        alt={child.title || "Content item"}
-        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-      />
+      {/* Background Media: image or video */}
+      {isVideo ? (
+        <video
+          className="w-full h-full object-cover"
+          muted
+          playsInline
+          preload="metadata"
+          poster={details.poster || details.image || details.imageUrl || undefined}
+          onMouseEnter={(e) => {
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            // Autoplay on hover for desktop
+            try { (e.currentTarget as HTMLVideoElement).play().catch(() => {}); } catch {}
+          }}
+          onMouseLeave={(e) => {
+            try { (e.currentTarget as HTMLVideoElement).pause(); } catch {}
+          }}
+          // On mobile, user taps to toggle play/pause
+          onClick={(e) => {
+            const v = e.currentTarget as HTMLVideoElement;
+            try { v.paused ? v.play() : v.pause(); } catch {}
+          }}
+        >
+          {details.videoUrl && <source src={details.videoUrl} />}
+        </video>
+      ) : (
+        <img
+          src={details.image || details.imageUrl || ""}
+          alt={child.title || "Content item"}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+        />
+      )}
 
       {/* Instagram-style overlay effects */}
       {showInstagramEffects && (
@@ -359,7 +464,7 @@ function InstagramContentItem({
       )}
 
       {/* Video Play Icon */}
-      {cardType === "video" && (
+      {isVideo && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
             <svg

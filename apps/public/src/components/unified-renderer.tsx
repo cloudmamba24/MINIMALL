@@ -11,8 +11,11 @@ import { EnhancedPostModal } from "./modals/enhanced-post-modal";
 import { InstagramRenderer } from "./instagram-renderer";
 import { Renderer } from "./renderer";
 import { LayoutSwitch } from "./renderers/LayoutSwitch";
+import { ShopTab } from "./shop/shop-tab";
+import { LookbookSection } from "./lookbook/lookbook-section";
 import { PixelDispatcher } from "./tracking/PixelDispatcher";
 import { UTMTracker } from "./tracking/UTMTracker";
+import { SiteConfigProvider } from "@/contexts/site-config-context";
 import "../styles/instagram-native.css";
 
 interface UnifiedRendererProps {
@@ -62,21 +65,23 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
       )}
 
       {/* Main Content Rendering */}
-      {renderMode === "instagram-native" ? (
-        <MobileNativeRenderer
-          config={config}
-          onAddToCart={addToCart}
-          onOpenPost={(postId) => openPostModal({ id: postId })}
-          {...conditionalProps({ className })}
-        />
-      ) : (
-        <DesktopLayoutRenderer
-          config={config}
-          onAddToCart={addToCart}
-          onOpenPost={(postId) => openPostModal({ id: postId })}
-          {...conditionalProps({ className })}
-        />
-      )}
+      <SiteConfigProvider config={config}>
+        {renderMode === "instagram-native" ? (
+          <MobileNativeRenderer
+            config={config}
+            onAddToCart={addToCart}
+            onOpenPost={(postId) => openPostModal({ id: postId })}
+            {...conditionalProps({ className })}
+          />
+        ) : (
+          <DesktopLayoutRenderer
+            config={config}
+            onAddToCart={addToCart}
+            onOpenPost={(postId) => openPostModal({ id: postId })}
+            {...conditionalProps({ className })}
+          />
+        )}
+      </SiteConfigProvider>
 
       {/* Shared Components */}
       <EnhancedProductQuickView />
@@ -138,7 +143,11 @@ function MobileNativeRenderer({
       {/* Use layout system for categories that have layout config */}
       {config.categories.map((category, index) => (
         <div key={category.id}>
-          {category.layout ? (
+          {category.title.toLowerCase() === "shop" ? (
+            <ShopTab category={category} onProductClick={(pid) => onOpenPost(pid)} />
+          ) : category.title.toLowerCase() === "lookbook" ? (
+            <LookbookSection category={category} onHotspotClick={(pid) => onOpenPost(pid)} />
+          ) : category.layout ? (
             <LayoutSwitch
               category={category}
               configId={config.id}
@@ -184,7 +193,17 @@ function DesktopLayoutRenderer({
     <div className={className}>
       {config.categories.map((category) => (
         <div key={category.id} className="mb-12">
-          {category.layout ? (
+          {category.title.toLowerCase() === "shop" ? (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-gray-900">{category.title}</h2>
+              <ShopTab category={category} onProductClick={(pid) => onOpenPost(pid)} />
+            </div>
+          ) : category.title.toLowerCase() === "lookbook" ? (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-gray-900">{category.title}</h2>
+              <LookbookSection category={category} onHotspotClick={(pid) => onOpenPost(pid)} />
+            </div>
+          ) : category.layout ? (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-gray-900">{category.title}</h2>
               <LayoutSwitch

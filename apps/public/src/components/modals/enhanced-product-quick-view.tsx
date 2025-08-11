@@ -14,7 +14,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { Heart, Minus, Plus, Star } from "lucide-react";
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 /**
  * Enhanced Product Quick View
@@ -33,32 +33,32 @@ export function EnhancedProductQuickView() {
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   // Initialize selected options when product loads
+  // Do not preselect variant; require explicit user selection for clarity
   useEffect(() => {
-    if (product && product.variants.length > 0) {
-      const firstVariant = product.variants[0];
-      if (firstVariant) {
-        const options: Record<string, string> = {};
-        firstVariant.selectedOptions.forEach((option: { name: string; value: string }) => {
-          options[option.name] = option.value;
-        });
-        setSelectedOptions(options);
-      }
-    }
+    setValidationMessage(null);
   }, [product]);
 
   // Find selected variant based on current options
-  const selectedVariant =
-    product && Object.keys(selectedOptions).length > 0
+  const selectedVariant = useMemo(() => {
+    if (!product) return null;
+    return Object.keys(selectedOptions).length > 0
       ? findVariantByOptions(product, selectedOptions)
-      : product?.variants[0];
+      : null;
+  }, [product, selectedOptions]);
 
   const handleAddToCart = async () => {
-    if (!product || !selectedVariant) return;
+    if (!product) return;
+
+    if (!selectedVariant) {
+      setValidationMessage("Please select a size/variant");
+      return;
+    }
 
     setIsAddingToCart(true);
 
@@ -83,6 +83,17 @@ export function EnhancedProductQuickView() {
     setIsAddingToCart(false);
     // Optimistically reveal the cart drawer for a cohesive flow
     openCartModal({ open: "true" });
+    try {
+      const { createAnalytics } = await import("@/lib/enhanced-analytics");
+      const analytics = createAnalytics("quickview");
+      analytics.trackAddToCart({
+        configId: "quickview",
+        productId: product.id,
+        variantId: selectedVariant.id,
+        quantity,
+        value: Math.round(Number.parseFloat(selectedVariant.price.amount) * 100),
+      });
+    } catch {}
   };
 
   const handleOptionChange = (optionName: string, value: string) => {
@@ -138,32 +149,47 @@ export function EnhancedProductQuickView() {
     ...new Set(product.variants.flatMap((v) => v.selectedOptions.map((o) => o.name))),
   ];
 
+  // Detect if the current media is video by extension
+  const isCurrentMediaVideo = useMemo(() => {
+    const url = product.images[selectedImage]?.url || "";
+    return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
+  }, [product, selectedImage]);
+
   return (
     <SidePanel isOpen={modalState.isOpen} onClose={closeModal} width="lg" pushContent={true}>
       <div className="space-y-6">
         {/* Product Images */}
         <div className="space-y-4">
           {/* Main Image */}
-          <motion.div
-            className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden"
-            layout
-          >
+          <motion.div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden" layout>
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedImage}
                 className="relative w-full h-full"
                 {...animationPresets.crossFade}
               >
-                <Image
-                  src={
-                    product.images[selectedImage]?.url ||
-                    product.images[0]?.url ||
-                    "/placeholder.jpg"
-                  }
-                  alt={product.images[selectedImage]?.altText || product.title}
-                  fill
-                  className="object-cover"
-                />
+                {isCurrentMediaVideo ? (
+                  <video
+                    className="w-full h-full object-cover"
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster={product.images[selectedImage]?.url}
+                  >
+                    <source src={product.images[selectedImage]?.url} />
+                  </video>
+                ) : (
+                  <Image
+                    src={
+                      product.images[selectedImage]?.url ||
+                      product.images[0]?.url ||
+                      "/placeholder.jpg"
+                    }
+                    alt={product.images[selectedImage]?.altText || product.title}
+                    fill
+                    className="object-cover"
+                  />
+                )}
               </motion.div>
             </AnimatePresence>
 
@@ -195,12 +221,20 @@ export function EnhancedProductQuickView() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Image
-                    src={image.url}
-                    alt={image.altText || `${product.title} ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
+                  {/\.(mp4|webm|ogg)(\?.*)?$/i.test(image.url) ? (
+                    <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <Image
+                      src={image.url}
+                      alt={image.altText || `${product.title} ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  )}
                 </motion.button>
               ))}
             </div>
@@ -309,6 +343,13 @@ export function EnhancedProductQuickView() {
             );
           })}
 
+          {/* Validation message for missing selection */}
+          {validationMessage && (
+            <div className="text-red-600 text-sm" role="status" aria-live="polite">
+              {validationMessage}
+            </div>
+          )}
+
           {/* Quantity Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">Quantity</label>
@@ -344,11 +385,11 @@ export function EnhancedProductQuickView() {
         >
           <motion.button
             onClick={handleAddToCart}
-            disabled={isAddingToCart || !selectedVariant?.availableForSale}
+            disabled={isAddingToCart || (selectedVariant ? !selectedVariant.availableForSale : false)}
             className={`
               w-full py-4 px-6 rounded-xl font-semibold text-white transition-colors
               ${
-                isAddingToCart || !selectedVariant?.availableForSale
+                isAddingToCart || (selectedVariant ? !selectedVariant.availableForSale : false)
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-black hover:bg-gray-800"
               }
@@ -362,7 +403,7 @@ export function EnhancedProductQuickView() {
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 Adding to Cart...
               </div>
-            ) : !selectedVariant?.availableForSale ? (
+            ) : selectedVariant && !selectedVariant.availableForSale ? (
               "Out of Stock"
             ) : (
               `Add to Cart • ${formatPrice(currentPrice * quantity)}`
