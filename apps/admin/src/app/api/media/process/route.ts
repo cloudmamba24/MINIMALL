@@ -8,6 +8,9 @@ import {
   validateImageFile,
 } from "../../../../lib/image-processing";
 
+// Ensure Node.js runtime (sharp requires Node, not Edge)
+export const runtime = "nodejs";
+
 /**
  * Image Processing API Endpoint
  *

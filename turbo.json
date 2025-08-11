@@ -27,7 +27,8 @@
         "NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
         "SENTRY_DSN",
         "NEXT_PUBLIC_SENTRY_DSN",
-        "STOREFRONT_API_TOKEN"
+        "STOREFRONT_API_TOKEN",
+        "NEXT_PUBLIC_APP_ENV"
       ]
     },
     "dev": {
