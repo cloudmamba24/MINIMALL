@@ -24,6 +24,7 @@ import React, { useState, useEffect } from "react";
  */
 export function EnhancedProductQuickView() {
   const { modalState, closeModal } = useModalRouter("product");
+  const { openModal: openCartModal } = useModalRouter("cart");
   const addToCart = useAddToCart();
   const shopDomain = useShopDomain();
 
@@ -80,6 +81,8 @@ export function EnhancedProductQuickView() {
     });
 
     setIsAddingToCart(false);
+    // Optimistically reveal the cart drawer for a cohesive flow
+    openCartModal({ open: "true" });
   };
 
   const handleOptionChange = (optionName: string, value: string) => {

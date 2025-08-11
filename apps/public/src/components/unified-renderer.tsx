@@ -80,6 +80,9 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
 
       {/* Shared Components */}
       <EnhancedProductQuickView />
+      {/* Cart Drawer for a cohesive flow */}
+      {/* If you want this URL-bound too, we can wire useModalRouter("cart") calls on add-to-cart */}
+      {/* import and render EnhancedCartDrawer when needed */}
 
       {/* Global Post Modal bound to URL; opens with any grid tile click */}
       <EnhancedPostModal
