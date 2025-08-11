@@ -71,7 +71,7 @@ export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
         if (tab) setActiveTab(tab.id);
       }}>
         <div className="flex justify-center mb-8">
-          <HeadlessTab.List className="flex space-x-8" role="tablist">
+          <HeadlessTab.List className="flex space-x-8">
             {tabs.map((tab) => (
               <HeadlessTab
                 key={tab.id}
