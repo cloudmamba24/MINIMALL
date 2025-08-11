@@ -7,7 +7,7 @@
   "framework": "nextjs",
   "functions": {
     "apps/public/src/app/api/**/*.ts": {
-      "runtime": "@vercel/node"
+      "runtime": "nodejs20.x"
     }
   },
   "headers": [
