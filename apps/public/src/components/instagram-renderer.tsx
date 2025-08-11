@@ -229,7 +229,7 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        if (entry.isIntersecting && !isLoadingMore && visibleCount < items.length) {
+        if (entry && entry.isIntersecting && !isLoadingMore && visibleCount < items.length) {
           setIsLoadingMore(true);
           // Simulate async load and smooth UX
           setTimeout(() => {
