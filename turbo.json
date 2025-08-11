@@ -4,7 +4,7 @@
   "globalEnv": [
     "NEXT_PUBLIC_APP_ENV"
   ],
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
