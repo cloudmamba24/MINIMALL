@@ -5,6 +5,7 @@ export * from "./auth/shopify-auth";
 export * from "./auth/rate-limiter";
 export * from "./auth/csrf";
 export * from "./r2";
+export * from "./logger";
 
 // Server-only services that require database access
 export * from "./lib/shop-service";

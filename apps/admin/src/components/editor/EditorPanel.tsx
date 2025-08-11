@@ -14,7 +14,7 @@ import {
   ArrowRight,
   Images
 } from "lucide-react";
-import { Category, LayoutConfig, LayoutPreset } from "@minimall/core";
+import { Category, LayoutConfig, LayoutPreset, SocialLayoutPreset } from "@minimall/core";
 import { PresetPicker } from "./PresetPicker";
 import { LayoutKnobs } from "./LayoutKnobs";
 import { TemplateDrawer } from "./TemplateDrawer";
@@ -76,8 +76,8 @@ export function EditorPanel({
     onCategoryUpdate(newCategory);
   };
 
-  const handlePresetChange = (preset: LayoutPreset) => {
-    handleLayoutUpdate({ preset });
+  const handlePresetChange = (preset: LayoutPreset | SocialLayoutPreset) => {
+    handleLayoutUpdate({ preset: preset as LayoutPreset });
   };
 
   const handleSave = () => {
@@ -94,12 +94,17 @@ export function EditorPanel({
     }
   };
 
-  const getPresetIcon = (preset: LayoutPreset) => {
+  const getPresetIcon = (preset: LayoutPreset | SocialLayoutPreset) => {
     switch (preset) {
       case 'grid': return <Grid3X3 className="w-4 h-4" />;
       case 'masonry': return <LayoutGrid className="w-4 h-4" />;
       case 'slider': return <ArrowRight className="w-4 h-4" />;
       case 'stories': return <Images className="w-4 h-4" />;
+      case 'instagram-grid': return <Grid3X3 className="w-4 h-4" />;
+      case 'tiktok-vertical': return <ArrowRight className="w-4 h-4" />;
+      case 'pinterest-masonry': return <LayoutGrid className="w-4 h-4" />;
+      case 'twitter-timeline': return <LayoutGrid className="w-4 h-4" />;
+      case 'stories-horizontal': return <Images className="w-4 h-4" />;
       default: return <Grid3X3 className="w-4 h-4" />;
     }
   };
@@ -177,6 +182,7 @@ export function EditorPanel({
                 <PresetPicker
                   currentPreset={currentLayout.preset}
                   onPresetChange={handlePresetChange}
+                  showSocialPresets={true}
                 />
               </div>
 

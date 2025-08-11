@@ -3,12 +3,15 @@ import {
 	ASPECT_RATIOS,
 	DEVICE_TYPES,
 	LAYOUT_PRESETS,
+	SOCIAL_LAYOUT_PRESETS,
 	MEDIA_FILTERS,
 	TEMPLATE_CATEGORIES,
 } from "../types";
 
 // Basic validation schemas
 const LayoutPresetSchema = z.enum(LAYOUT_PRESETS);
+const SocialLayoutPresetSchema = z.enum(SOCIAL_LAYOUT_PRESETS);
+const UnionLayoutPresetSchema = z.union([LayoutPresetSchema, SocialLayoutPresetSchema]);
 const AspectRatioSchema = z.enum(ASPECT_RATIOS);
 const MediaFilterSchema = z.enum(MEDIA_FILTERS);
 const DeviceTypeSchema = z.enum(DEVICE_TYPES);
@@ -16,7 +19,7 @@ const TemplateCategorySchema = z.enum(TEMPLATE_CATEGORIES);
 
 // Layout configuration with safe ranges
 export const LayoutConfigSchema = z.object({
-	preset: LayoutPresetSchema,
+	preset: UnionLayoutPresetSchema,
 	rows: z.number().int().min(1).max(6),
 	columns: z.number().int().min(1).max(4),
 	gutter: z.number().int().min(0).max(32),
@@ -151,7 +154,7 @@ export const EnhancedAnalyticsEventSchema = z.object({
 		})
 		.optional(),
 	blockId: z.string().optional(),
-	layoutPreset: LayoutPresetSchema.optional(),
+	layoutPreset: UnionLayoutPresetSchema.optional(),
 	variantId: z.string().optional(),
 	experimentKey: z.string().optional(),
 	device: DeviceTypeSchema,
@@ -171,7 +174,7 @@ export const UTMParametersSchema = z.object({
 export const AttributionDataSchema = z.object({
 	configId: z.string().min(1),
 	blockId: z.string().min(1),
-	layoutPreset: LayoutPresetSchema,
+	layoutPreset: UnionLayoutPresetSchema,
 	experimentKey: z.string().optional(),
 	utm: UTMParametersSchema,
 	sessionId: z.string().min(1),

@@ -23,7 +23,8 @@
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "setup": "npm install && npm run db:push",
     "reset": "npm run clean && npm install",
-    "analyze": "turbo analyze"
+    "analyze": "turbo analyze",
+    "ci": "npm run type-check && npm run lint && npm run build && npm run test"
   },
   "workspaces": ["apps/*", "packages/*"],
   "devDependencies": {

@@ -57,6 +57,15 @@
   color: var(--ig-text-primary);
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  
+  /* Native momentum scrolling for iOS */
+  -webkit-overflow-scrolling: touch;
+  
+  /* Smooth scroll behavior */
+  scroll-behavior: smooth;
+  
+  /* Prevent scroll bounce on edges (iOS) */
+  overscroll-behavior: none;
 }
 
 /* Instagram Native Grid Layout */
@@ -66,6 +75,15 @@
   gap: var(--ig-gap-xs);
   padding: var(--ig-gap-xs);
   background-color: var(--ig-black);
+  
+  /* Enhanced scrolling physics */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-snap-type: y proximity;
+  
+  /* Momentum preservation */
+  overflow-y: auto;
+  will-change: scroll-position;
 }
 
 @media (min-width: 640px) {
@@ -82,7 +100,19 @@
   border-radius: var(--ig-border-radius);
   overflow: hidden;
   cursor: pointer;
+  
+  /* Native-feeling touch interactions */
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  
+  /* Smooth transforms */
   transition: transform var(--ig-transition-fast);
+  will-change: transform;
+  
+  /* Scroll snap alignment */
+  scroll-snap-align: start;
 }
 
 .instagram-tile:active {
@@ -306,6 +336,16 @@
   padding: var(--ig-gap-md);
   overflow-x: auto;
   scrollbar-width: none;
+  
+  /* Enhanced horizontal scrolling */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  
+  /* Performance optimization */
+  will-change: scroll-position;
+  transform: translateZ(0);
 }
 
 .instagram-stories::-webkit-scrollbar {
@@ -320,6 +360,14 @@
   background: var(--ig-story-gradient);
   padding: 2px;
   cursor: pointer;
+  
+  /* Scroll snap alignment */
+  scroll-snap-align: start;
+  
+  /* Native touch interactions */
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .instagram-story-inner {
@@ -383,6 +431,93 @@
 .instagram-touch-feedback.active::after {
   width: 100px;
   height: 100px;
+}
+
+/* Enhanced modal with native feel */
+.instagram-modal-enhanced {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ig-z-modal);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  
+  /* iOS-style safe area handling */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.instagram-modal-sheet {
+  background: white;
+  border-radius: 16px 16px 0 0;
+  max-height: 85vh;
+  width: 100%;
+  max-width: 500px;
+  
+  /* Native iOS sheet feel */
+  box-shadow: 
+    0 0 0 0.5px rgba(0, 0, 0, 0.04),
+    0 1px 1px rgba(0, 0, 0, 0.05),
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    0 16px 32px rgba(0, 0, 0, 0.04);
+    
+  /* Performance optimizations */
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.instagram-swipe-handle {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 2px;
+  cursor: grab;
+  transition: background-color 0.2s ease;
+}
+
+.instagram-swipe-handle:active {
+  cursor: grabbing;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Product overlay specific styles */
+.instagram-product-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  
+  /* Touch optimizations */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.instagram-product-sheet {
+  background: white;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  padding: 20px 16px 16px;
+  max-height: 70vh;
+  overflow-y: auto;
+  
+  /* iOS-style momentum scrolling */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  
+  /* Native feel */
+  box-shadow: 
+    0 -2px 16px rgba(0, 0, 0, 0.1),
+    0 -4px 32px rgba(0, 0, 0, 0.05);
 }
 
 /* Animations */

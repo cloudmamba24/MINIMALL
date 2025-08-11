@@ -1,92 +1,38 @@
 # 📖 MINIMALL Documentation
 
-Welcome to the MINIMALL platform documentation. This directory contains all the guides, references, and resources you need to understand, deploy, and maintain the platform.
+**MINIMALL** is a dual-deployment Shopify embedded app that transforms e-commerce stores into social media link-in-bio platforms, allowing merchants to import and display Instagram posts, TikTok videos, and manual uploads with original captions, hashtags, and engagement metrics.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
 
-If you're new to MINIMALL or want to get up and running quickly:
+- **yourdomain.com**: Public link-in-bio app with social media content
+- **admin.yourdomain.com**: Shopify embedded admin interface
 
-👉 **[Deployment Quick Start Guide](./deployment/quick-start/)**
+## 🚀 Quick Setup
 
-## 📂 Documentation Structure
+1. **Environment**: Use the comprehensive `.env.local` file in the project root with all required variables
+2. **Database**: Set up PostgreSQL and run `npm run db:push`
+3. **Social APIs**: Configure Instagram Basic Display API (required), TikTok API (optional)
+4. **Shopify**: Create app in Shopify Partners with proper OAuth scopes
+5. **Deploy**: `npm run build` for both apps
 
-### 🚀 [Deployment](./deployment/)
-Everything you need to deploy MINIMALL to production.
+## 🔗 Social Media Integration
 
-- **[Quick Start](./deployment/quick-start/)** - Get deployed in 60 minutes
-  - [Deployment Guide](./deployment/quick-start/DEPLOYMENT-GUIDE.md) - Complete step-by-step instructions
-  - [Quick Start Checklist](./deployment/quick-start/QUICK-START-CHECKLIST.md) - Streamlined checklist
-  - [Environment Template](./deployment/quick-start/ENVIRONMENT-TEMPLATE.env) - All required variables
+- **Instagram**: Real post importing via Instagram Basic Display API
+- **TikTok**: Video importing (requires business verification)  
+- **Manual**: Direct upload with caption/hashtag support
+- **Layouts**: Instagram Grid, TikTok Vertical, Pinterest Masonry, Stories modes
 
-### 🛠️ [Development](./development/)
-Resources for local development and contributing.
+## 🛠️ Development
 
-- [Development Guide](./development/DEVELOPMENT.md) - Local setup and development workflow
-- [Safe Improvements](./development/SAFE-IMPROVEMENTS.md) - Guidelines for making changes
+```bash
+npm install
+npm run dev:admin    # http://localhost:3001
+npm run dev:public   # http://localhost:3000
+```
 
-### 🔧 [Troubleshooting](./troubleshooting/)
-Solutions for common issues and debugging guides.
+## 📡 API Endpoints
 
-- [Troubleshooting Guide](./troubleshooting/TROUBLESHOOTING.md) - Common issues and solutions
-- [Diagnostic Methodology](./troubleshooting/DIAGNOSTIC-METHODOLOGY.md) - Systematic debugging approach
-
-### 🔨 [Fixes](./fixes/)
-Historical documentation of major fixes and improvements.
-
-- [Build System Overhaul](./fixes/BUILD-SYSTEM-OVERHAUL.md) - Major build system improvements
-- [Comprehensive Fix Plan](./fixes/COMPREHENSIVE-FIX-PLAN.md) - Systematic issue resolution
-- [Deployment Warning Fixes](./fixes/DEPLOYMENT-WARNING-FIXES.md) - Deployment issue resolutions
-- [React Error 185 Fix](./fixes/REACT_ERROR_185_FIX.md) - Specific React error resolution
-
-### 📝 [Changelog](./changelog/)
-Version history and release notes.
-
-- [Changelog](./changelog/CHANGELOG.md) - Complete version history
-
-### 📚 [Reference](./reference/)
-Technical references and specifications.
-
-- [Build System Technical Reference](./BUILD-SYSTEM-TECHNICAL-REFERENCE.md) - Build system details
-- [API Documentation](./api/) - API specifications
-- [Context Files](./reference/ContextFiles/) - Project context and requirements
-
-### 🎨 [Assets](./assets/)
-Screenshots, diagrams, and visual resources.
-
-- [Reference Media](./assets/Reference%20Media/) - Screenshots and visual references
-
-## 🗂️ Related Directories
-
-### [Stories](../stories/)
-Storybook stories and component documentation.
-
-### [Scripts](../scripts/)
-Utility scripts for development and maintenance.
-
-## 📖 How to Use This Documentation
-
-1. **New to MINIMALL?** Start with [Deployment Quick Start](./deployment/quick-start/)
-2. **Setting up locally?** Check [Development Guide](./development/DEVELOPMENT.md)
-3. **Having issues?** Try [Troubleshooting](./troubleshooting/TROUBLESHOOTING.md)
-4. **Need technical details?** Browse [Reference](./reference/) materials
-
-## 🤝 Contributing to Documentation
-
-When adding new documentation:
-
-1. **Place files in appropriate folders** based on their purpose
-2. **Update this README** to include new content
-3. **Follow existing naming conventions** (UPPERCASE for markdown files)
-4. **Include proper headers and navigation** in your documents
-
-## 📋 Documentation Standards
-
-- **Use clear, descriptive titles**
-- **Include table of contents for long documents**
-- **Provide step-by-step instructions where applicable**
-- **Include code examples and screenshots when helpful**
-- **Keep information current and accurate**
-
----
-
-**Need help?** Start with the [Quick Start Guide](./deployment/quick-start/QUICK-START-CHECKLIST.md) or browse the specific section that matches your needs.
+- `/api/debug/instagram` - Test Instagram API connection
+- `/api/debug/tiktok` - Test TikTok API connection  
+- `/api/debug/social-import` - Test social import flow
+- `/api/debug/health` - Full system health check

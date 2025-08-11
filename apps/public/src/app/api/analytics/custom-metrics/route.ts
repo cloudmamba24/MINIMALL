@@ -1,5 +1,6 @@
 import { analyticsEvents, db } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
+import { logger } from "@minimall/core/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -13,8 +14,43 @@ const customMetricSchema = z.object({
   sessionId: z.string().optional(),
 });
 
+function parseAllowedOrigins(): string[] {
+  const raw = process.env.ANALYTICS_ALLOWED_ORIGINS || "";
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function buildCorsHeaders(origin: string | null, allowedOrigins: string[]): HeadersInit {
+  if (allowedOrigins.length === 0) {
+    return {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    };
+  }
+  const allowed = origin && allowedOrigins.includes(origin);
+  return allowed
+    ? {
+        "Access-Control-Allow-Origin": origin,
+        Vary: "Origin",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      }
+    : {};
+}
+
 export async function POST(request: NextRequest) {
   try {
+    const allowedOrigins = parseAllowedOrigins();
+    const origin = request.headers.get("origin");
+    if (allowedOrigins.length > 0 && (!origin || !allowedOrigins.includes(origin))) {
+      return new NextResponse("Forbidden", {
+        status: 403,
+        headers: buildCorsHeaders(origin, allowedOrigins),
+      });
+    }
     const body = await request.json();
     const data = customMetricSchema.parse(body);
 
@@ -28,8 +64,8 @@ export async function POST(request: NextRequest) {
         url: data.url,
       });
 
-      // Log custom metrics
-      console.log(`Custom Metric: ${data.name} = ${data.duration}ms`, {
+      // Log custom metrics in debug/dev only
+      logger.debug(`Custom Metric: ${data.name} = ${data.duration}ms`, {
         configId: data.configId,
         url: data.url,
         timestamp: data.timestamp,
@@ -70,7 +106,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, {
+      headers: buildCorsHeaders(origin, allowedOrigins),
+    });
   } catch (error) {
     console.error("Failed to process custom metric:", error);
     Sentry.captureException(error);
@@ -78,13 +116,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
+export async function OPTIONS(request: NextRequest) {
+  const allowedOrigins = parseAllowedOrigins();
+  const origin = request.headers.get("origin");
+  const headers = buildCorsHeaders(origin, allowedOrigins);
+  if (allowedOrigins.length > 0 && (!origin || !allowedOrigins.includes(origin))) {
+    return new NextResponse(null, { status: 204, headers });
+  }
+  return new NextResponse(null, { status: 200, headers });
 }

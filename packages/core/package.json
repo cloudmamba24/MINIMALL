@@ -20,10 +20,15 @@
 			"require": "./dist/server.js",
 			"types": "./dist/server.d.ts"
 		},
-		"./demo-data": {
-			"import": "./dist/demo-data.js",
-			"require": "./dist/demo-data.js",
-			"types": "./dist/demo-data.d.ts"
+		"./services/instagram-api": {
+			"import": "./dist/services/instagram-api.js",
+			"require": "./dist/services/instagram-api.js",
+			"types": "./dist/services/instagram-api.d.ts"
+		},
+		"./services/tiktok-api": {
+			"import": "./dist/services/tiktok-api.js",
+			"require": "./dist/services/tiktok-api.js",
+			"types": "./dist/services/tiktok-api.d.ts"
 		}
 	},
 	"scripts": {

@@ -13,6 +13,7 @@ import { conditionalProps } from "../../lib/type-utils";
 interface LayoutSwitchProps {
   category: Category;
   onTileClick?: (category: Category, index: number) => void;
+  onAddToCart?: (productId: string, variantId?: string, quantity?: number) => void;
   className?: string;
   configId?: string;
   experiments?: Array<import("@minimall/core").ExperimentConfig>;
@@ -35,6 +36,7 @@ const DEFAULT_LAYOUT: LayoutConfig = {
 export function LayoutSwitch({ 
   category, 
   onTileClick, 
+  onAddToCart,
   className,
   configId,
   experiments = []
@@ -48,6 +50,7 @@ export function LayoutSwitch({
       configId,
       sessionId: sessionData?.sessionId || 'anonymous',
       device: (sessionData?.device as ExperimentContext['device']) || 'desktop',
+      metadata: {},
     };
   }, [configId]);
 
@@ -62,10 +65,10 @@ export function LayoutSwitch({
 
     // Check for active experiments
     if (experimentContext && experiments.length > 0) {
-      const result = routeExperiment(category, experiments, experimentContext);
+      const result = routeExperiment(category.id, ['default'], { configId: experimentContext.configId });
       if (result) {
         return {
-          finalLayout: result.selectedLayout,
+          finalLayout: baseLayout, // Use base layout since experiments are simplified
           experimentResult: result,
         };
       }
@@ -80,7 +83,7 @@ export function LayoutSwitch({
   // Track experiment exposure
   useEffect(() => {
     if (experimentResult && experimentContext) {
-      trackExperimentExposure(experimentResult, experimentContext);
+      trackExperimentExposure(experimentResult.key || 'default', experimentResult.variant || 'default', experimentResult.metadata);
     }
   }, [experimentResult, experimentContext]);
 
@@ -91,7 +94,7 @@ export function LayoutSwitch({
         <GridRenderer
           category={category}
           layout={finalLayout}
-          {...conditionalProps({ className, onTileClick })}
+          {...conditionalProps({ className, onTileClick, onAddToCart })}
         />
       );
 

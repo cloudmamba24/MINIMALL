@@ -27,6 +27,7 @@ import {
   getSupportedPlatforms,
   type SocialMediaPost,
 } from "../../lib/social-extractors";
+import { DragDropUrlImport } from "./DragDropUrlImport";
 
 interface SocialImporterProps {
   open: boolean;
@@ -74,33 +75,21 @@ export function SocialImporter({
 
   const supportedPlatforms = getSupportedPlatforms();
 
-  const validateUrl = useCallback(async () => {
-    if (!url.trim()) {
-      setUrlError("URL is required");
-      return false;
-    }
-    
-    setLoading(true);
-    setUrlError(null);
-    
+  const validateUrl = useCallback(async (urlToValidate: string) => {
     try {
-      const response = await fetch(`/api/social/import?url=${encodeURIComponent(url)}`);
+      const response = await fetch(`/api/social/import?url=${encodeURIComponent(urlToValidate)}`);
       const data = await response.json();
       
       if (!data.valid) {
-        setUrlError(data.error || "Invalid social media URL");
         return false;
       }
       
       console.log(`[SocialImporter] URL validated for ${data.platform}`);
       return true;
     } catch (error) {
-      setUrlError("Failed to validate URL");
       return false;
-    } finally {
-      setLoading(false);
     }
-  }, [url]);
+  }, []);
 
   const extractContent = useCallback(async () => {
     setLoading(true);
@@ -175,18 +164,21 @@ export function SocialImporter({
     }
   }, [url, folder, downloadMedia, processImages, generateTags, previewPost, onImportComplete]);
 
+  const handleUrlSubmit = useCallback(async (urls: string[]) => {
+    if (urls.length > 0 && urls[0]) {
+      setUrl(urls[0]); // For now, take the first URL
+      setStep("preview");
+      await extractContent();
+    }
+  }, [extractContent]);
+
   const handleNext = useCallback(async () => {
     switch (step) {
-      case "input":
-        if (await validateUrl()) {
-          await extractContent();
-        }
-        break;
       case "preview":
         await importContent();
         break;
     }
-  }, [step, validateUrl, extractContent, importContent]);
+  }, [step, importContent]);
 
   const handleBack = useCallback(() => {
     switch (step) {
@@ -230,12 +222,7 @@ export function SocialImporter({
   const getPrimaryAction = () => {
     switch (step) {
       case "input":
-        return {
-          content: loading ? "Validating..." : "Preview Content",
-          onAction: handleNext,
-          loading,
-          disabled: !url.trim() || !!urlError,
-        };
+        return undefined; // No primary action for input step with drag & drop
       case "preview":
         return {
           content: importing ? "Importing..." : "Import Media",
@@ -276,85 +263,58 @@ export function SocialImporter({
     return actions;
   };
 
+  const primaryAction = getPrimaryAction();
+  
   return (
     <Modal
       open={open}
       onClose={handleClose}
       title="Import from Social Media"
       size="large"
-      primaryAction={getPrimaryAction()}
+      {...(primaryAction && { primaryAction })}
       secondaryActions={getSecondaryActions()}
     >
       <Modal.Section>
         {step === "input" && (
           <div className="space-y-6">
-            {/* URL Input */}
-            <Card>
-              <div className="p-4">
-                <FormLayout>
-                  <TextField
-                    label="Social Media URL"
-                    value={url}
-                    onChange={setUrl}
-                    placeholder="https://www.instagram.com/p/ABC123/"
-                    prefix={<LinkIcon />}
-                    {...(urlError && { error: urlError })}
-                    autoComplete="off"
-                    helpText="Paste a link from Instagram, TikTok, Twitter, YouTube, or Pinterest"
-                  />
-                  
-                  <div className="space-y-3">
-                    <Checkbox
-                      label="Download media files"
-                      checked={downloadMedia}
-                      onChange={setDownloadMedia}
-                      helpText="Download and store images/videos in your asset library"
-                    />
-                    
-                    <Checkbox
-                      label="Process images"
-                      checked={processImages}
-                      onChange={setProcessImages}
-                      disabled={!downloadMedia}
-                      helpText="Optimize images for web with format conversion and compression"
-                    />
-                    
-                    <Checkbox
-                      label="Generate content tags"
-                      checked={generateTags}
-                      onChange={setGenerateTags}
-                      helpText="Automatically generate tags based on content analysis"
-                    />
-                  </div>
-                </FormLayout>
-              </div>
-            </Card>
-
-            {/* Supported Platforms */}
+            {/* Enhanced Drag & Drop URL Import */}
+            <DragDropUrlImport
+              onUrlSubmit={handleUrlSubmit}
+              onValidateUrl={validateUrl}
+              loading={loading}
+              error={urlError}
+              acceptedDomains={supportedPlatforms.map(p => p.platform.replace(/^(www\.)?/, ''))}
+              placeholder="Drop Instagram, TikTok, Twitter, YouTube, or Pinterest URLs here"
+            />
+            
+            {/* Import Options */}
             <Card>
               <div className="p-4">
                 <Text variant="headingMd" as="h3">
-                  Supported Platforms
+                  Import Options
                 </Text>
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {supportedPlatforms.map((platform) => (
-                    <div
-                      key={platform.platform}
-                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg"
-                    >
-                      <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                        <ImportIcon />
-                      </div>
-                      <div className="flex-1">
-                        <Text variant="bodyMd" as="p">
-                          {platform.name}
-                        </Text>
-                        <Text variant="bodySm" tone="subdued" as="p">
-                          {platform.example}
-                        </Text>
-                      </div>
-                    </div>
-                  ))}
+                <div className="mt-4 space-y-3">
+                  <Checkbox
+                    label="Download media files"
+                    checked={downloadMedia}
+                    onChange={setDownloadMedia}
+                    helpText="Download and store images/videos in your asset library"
+                  />
+                  
+                  <Checkbox
+                    label="Process images"
+                    checked={processImages}
+                    onChange={setProcessImages}
+                    disabled={!downloadMedia}
+                    helpText="Optimize images for web with format conversion and compression"
+                  />
+                  
+                  <Checkbox
+                    label="Generate content tags"
+                    checked={generateTags}
+                    onChange={setGenerateTags}
+                    helpText="Automatically generate tags based on content analysis"
+                  />
                 </div>
               </div>
             </Card>
@@ -469,7 +429,7 @@ export function SocialImporter({
                         <Text variant="headingLg" as="p">
                           {previewPost.engagement.likes.toLocaleString()}
                         </Text>
-                        <Text variant="bodySm" tone="subdued">
+                        <Text variant="bodySm" tone="subdued" as="p">
                           Likes
                         </Text>
                       </div>
@@ -480,7 +440,7 @@ export function SocialImporter({
                         <Text variant="headingLg" as="p">
                           {previewPost.engagement.views.toLocaleString()}
                         </Text>
-                        <Text variant="bodySm" tone="subdued">
+                        <Text variant="bodySm" tone="subdued" as="p">
                           Views
                         </Text>
                       </div>
@@ -491,7 +451,7 @@ export function SocialImporter({
                         <Text variant="headingLg" as="p">
                           {previewPost.engagement.comments.toLocaleString()}
                         </Text>
-                        <Text variant="bodySm" tone="subdued">
+                        <Text variant="bodySm" tone="subdued" as="p">
                           Comments
                         </Text>
                       </div>
@@ -502,7 +462,7 @@ export function SocialImporter({
                         <Text variant="headingLg" as="p">
                           {previewPost.engagement.shares.toLocaleString()}
                         </Text>
-                        <Text variant="bodySm" tone="subdued">
+                        <Text variant="bodySm" tone="subdued" as="p">
                           Shares
                         </Text>
                       </div>
@@ -573,7 +533,7 @@ export function SocialImporter({
                             <Badge tone={asset.type === "image" ? "info" : "success"}>
                               {asset.type}
                             </Badge>
-                            <Text variant="bodySm" tone="subdued">
+                            <Text variant="bodySm" tone="subdued" as="span">
                               {formatFileSize(asset.size)}
                             </Text>
                           </div>

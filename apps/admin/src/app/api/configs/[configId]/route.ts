@@ -121,9 +121,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const validatedConfig = configSchema.parse(config);
     validatedConfig.updatedAt = new Date().toISOString();
 
-    // Atomic save operation: Database + R2 with rollback on failure
+    // Atomic save operation: Database only; R2 writes happen exclusively on publish
     let versionId: string | null = null;
-    
+
     if (db) {
       try {
         // Use transaction for atomic database operations
@@ -165,27 +165,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
           return newVersionId;
         });
-        
         versionId = result;
-        
-        // After successful database save, attempt R2 save
-        const r2Service = getR2Service();
-        if (r2Service) {
-          try {
-            await r2Service.saveConfig(configId, validatedConfig as unknown as SiteConfig);
-          } catch (r2Error) {
-            console.error("Failed to save to R2:", r2Error);
-            // R2 failure is not critical for editor functionality, continue
-          }
-        } else {
-          console.warn("R2 service not available - config saved to database only");
-        }
 
         // Invalidate edge cache for this config
         const tagsToInvalidate = [
           `config:${configId}`,
           `config:${configId}:draft`,
-          `config:${configId}:published`
+          `config:${configId}:published`,
         ];
         const invalidatedCount = edgeCache.invalidateByTags(tagsToInvalidate);
         console.log(`Invalidated ${invalidatedCount} cache entries for config: ${configId}`);

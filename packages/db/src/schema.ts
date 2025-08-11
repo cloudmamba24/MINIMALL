@@ -286,6 +286,124 @@ export const revenueAttributions = pgTable(
   })
 );
 
+// Social media posts table
+export const socialPosts = pgTable(
+  "social_posts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    configId: text("config_id")
+      .references(() => configs.id, { onDelete: "cascade" })
+      .notNull(),
+    shopDomain: text("shop_domain")
+      .references(() => shops.shopDomain, { onDelete: "cascade" })
+      .notNull(),
+    platform: varchar("platform", { length: 20 }).notNull(), // 'instagram' | 'tiktok' | 'twitter' | 'manual'
+    originalUrl: text("original_url"), // null for manual uploads
+    postId: text("post_id"), // Platform-specific post ID
+    caption: text("caption").notNull(),
+    hashtags: jsonb("hashtags").default([]).notNull(), // string[]
+    mentions: jsonb("mentions").default([]).notNull(), // string[]
+    mediaUrls: jsonb("media_urls").notNull(), // string[] - R2 URLs
+    mediaMetadata: jsonb("media_metadata").default({}), // dimensions, duration, etc.
+    engagement: jsonb("engagement").default({}).notNull(), // likes, comments, shares, views
+    author: jsonb("author").notNull(), // { username, displayName, avatarUrl, verified }
+    publishedAt: timestamp("published_at", { withTimezone: true }), // Original post date
+    importedAt: timestamp("imported_at", { withTimezone: true }).defaultNow().notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    productTags: jsonb("product_tags").default([]).notNull(), // Product[] - tagged products
+    performance: jsonb("performance").default({}).notNull(), // click-through rates, conversions
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    configIdIdx: index("social_posts_config_id_idx").on(table.configId),
+    shopDomainIdx: index("social_posts_shop_domain_idx").on(table.shopDomain),
+    platformIdx: index("social_posts_platform_idx").on(table.platform),
+    originalUrlIdx: index("social_posts_original_url_idx").on(table.originalUrl),
+    publishedAtIdx: index("social_posts_published_at_idx").on(table.publishedAt),
+    isActiveIdx: index("social_posts_is_active_idx").on(table.isActive),
+  })
+);
+
+// Social media connections table - OAuth tokens for social platforms
+export const socialConnections = pgTable(
+  "social_connections",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    shopDomain: text("shop_domain")
+      .references(() => shops.shopDomain, { onDelete: "cascade" })
+      .notNull(),
+    platform: varchar("platform", { length: 20 }).notNull(), // 'instagram' | 'tiktok' | 'twitter'
+    platformUserId: text("platform_user_id").notNull(), // User ID on the platform
+    username: text("username").notNull(),
+    displayName: text("display_name"),
+    avatarUrl: text("avatar_url"),
+    accessToken: text("access_token").notNull(),
+    refreshToken: text("refresh_token"),
+    tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true }),
+    scopes: jsonb("scopes").default([]).notNull(), // string[] - granted permissions
+    isActive: boolean("is_active").default(true).notNull(),
+    lastSyncAt: timestamp("last_sync_at", { withTimezone: true }),
+    syncSettings: jsonb("sync_settings").default({}).notNull(), // auto-import settings
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    shopDomainIdx: index("social_connections_shop_domain_idx").on(table.shopDomain),
+    platformIdx: index("social_connections_platform_idx").on(table.platform),
+    platformUserIdIdx: index("social_connections_platform_user_id_idx").on(table.platformUserId),
+    isActiveIdx: index("social_connections_is_active_idx").on(table.isActive),
+    uniquePlatformUser: index("social_connections_unique_platform_user").on(
+      table.shopDomain,
+      table.platform,
+      table.platformUserId
+    ),
+  })
+);
+
+// Social media analytics table - enhanced social metrics
+export const socialAnalytics = pgTable(
+  "social_analytics",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    postId: uuid("post_id")
+      .references(() => socialPosts.id, { onDelete: "cascade" })
+      .notNull(),
+    configId: text("config_id")
+      .references(() => configs.id, { onDelete: "cascade" })
+      .notNull(),
+    shopDomain: text("shop_domain")
+      .references(() => shops.shopDomain, { onDelete: "cascade" })
+      .notNull(),
+    // Social engagement metrics
+    impressions: integer("impressions").default(0).notNull(),
+    reach: integer("reach").default(0).notNull(),
+    profileVisits: integer("profile_visits").default(0).notNull(),
+    websiteClicks: integer("website_clicks").default(0).notNull(),
+    // Commerce metrics
+    productViews: integer("product_views").default(0).notNull(),
+    addToCarts: integer("add_to_carts").default(0).notNull(),
+    checkouts: integer("checkouts").default(0).notNull(),
+    purchases: integer("purchases").default(0).notNull(),
+    revenue: integer("revenue").default(0).notNull(), // in cents
+    // Attribution data
+    firstTouch: boolean("first_touch").default(false).notNull(),
+    lastTouch: boolean("last_touch").default(false).notNull(),
+    influenceScore: integer("influence_score").default(0).notNull(), // 0-100 scale
+    // Time-based metrics
+    date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD
+    hour: integer("hour"), // 0-23 for hourly breakdown
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    postIdIdx: index("social_analytics_post_id_idx").on(table.postId),
+    configIdIdx: index("social_analytics_config_id_idx").on(table.configId),
+    shopDomainIdx: index("social_analytics_shop_domain_idx").on(table.shopDomain),
+    dateIdx: index("social_analytics_date_idx").on(table.date),
+    uniquePostDate: index("social_analytics_unique_post_date").on(table.postId, table.date, table.hour),
+  })
+);
+
 // Relations
 export const configsRelations = relations(configs, ({ many, one }) => ({
   shop: one(shops, {
@@ -301,6 +419,8 @@ export const configsRelations = relations(configs, ({ many, one }) => ({
   analyticsEvents: many(analyticsEvents),
   sessions: many(sessions),
   revenueAttributions: many(revenueAttributions),
+  socialPosts: many(socialPosts),
+  socialAnalytics: many(socialAnalytics),
 }));
 
 export const configVersionsRelations = relations(configVersions, ({ one }) => ({
@@ -340,6 +460,9 @@ export const shopsRelations = relations(shops, ({ many }) => ({
   assets: many(assets),
   usageRollups: many(usageRollups),
   revenueAttributions: many(revenueAttributions),
+  socialPosts: many(socialPosts),
+  socialConnections: many(socialConnections),
+  socialAnalytics: many(socialAnalytics),
 }));
 
 export const assetsRelations = relations(assets, ({ one }) => ({
@@ -367,6 +490,40 @@ export const revenueAttributionsRelations = relations(revenueAttributions, ({ on
   }),
 }));
 
+export const socialPostsRelations = relations(socialPosts, ({ one, many }) => ({
+  config: one(configs, {
+    fields: [socialPosts.configId],
+    references: [configs.id],
+  }),
+  shop: one(shops, {
+    fields: [socialPosts.shopDomain],
+    references: [shops.shopDomain],
+  }),
+  analytics: many(socialAnalytics),
+}));
+
+export const socialConnectionsRelations = relations(socialConnections, ({ one }) => ({
+  shop: one(shops, {
+    fields: [socialConnections.shopDomain],
+    references: [shops.shopDomain],
+  }),
+}));
+
+export const socialAnalyticsRelations = relations(socialAnalytics, ({ one }) => ({
+  post: one(socialPosts, {
+    fields: [socialAnalytics.postId],
+    references: [socialPosts.id],
+  }),
+  config: one(configs, {
+    fields: [socialAnalytics.configId],
+    references: [configs.id],
+  }),
+  shop: one(shops, {
+    fields: [socialAnalytics.shopDomain],
+    references: [shops.shopDomain],
+  }),
+}));
+
 // Export all tables for migrations and queries
 export const schema = {
   configs,
@@ -381,6 +538,9 @@ export const schema = {
   assets,
   usageRollups,
   revenueAttributions,
+  socialPosts,
+  socialConnections,
+  socialAnalytics,
 };
 
 // Type exports for TypeScript inference
@@ -408,3 +568,9 @@ export type UsageRollup = typeof usageRollups.$inferSelect;
 export type NewUsageRollup = typeof usageRollups.$inferInsert;
 export type RevenueAttribution = typeof revenueAttributions.$inferSelect;
 export type NewRevenueAttribution = typeof revenueAttributions.$inferInsert;
+export type SocialPost = typeof socialPosts.$inferSelect;
+export type NewSocialPost = typeof socialPosts.$inferInsert;
+export type SocialConnection = typeof socialConnections.$inferSelect;
+export type NewSocialConnection = typeof socialConnections.$inferInsert;
+export type SocialAnalytics = typeof socialAnalytics.$inferSelect;
+export type NewSocialAnalytics = typeof socialAnalytics.$inferInsert;

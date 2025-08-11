@@ -84,8 +84,11 @@ export async function processImage(
 ): Promise<ProcessingResult> {
   const startTime = Date.now();
   
-  // Validate options
-  const validOptions = processingOptionsSchema.parse(options);
+  // Validate options and remove undefined values for exactOptionalPropertyTypes
+  const cleanedOptions = Object.fromEntries(
+    Object.entries(options).filter(([_, value]) => value !== undefined)
+  ) as ProcessingOptions;
+  const validOptions = processingOptionsSchema.parse(cleanedOptions);
   
   // Get image metadata
   const image = sharp(inputBuffer);
@@ -100,10 +103,10 @@ export async function processImage(
   const originalSize = inputBuffer.length;
   
   // Process main image
-  const processedMain = await processMainImage(image, validOptions, metadata);
+  const processedMain = await processMainImage(image, cleanedOptions, metadata);
   
   // Generate responsive variants
-  const variants = await generateVariants(inputBuffer, validOptions, metadata);
+  const variants = await generateVariants(inputBuffer, cleanedOptions, metadata);
   
   const processingTime = Date.now() - startTime;
   const totalSize = processedMain.size + variants.reduce((sum, v) => sum + v.size, 0);
@@ -120,10 +123,8 @@ export async function processImage(
       compressionRatio: originalSize / totalSize,
       processingTime,
       aspectRatio,
-      ...conditionalProps({
-        dominantColors,
-        hasTransparency: metadata.hasAlpha,
-      }),
+      ...(dominantColors && { dominantColors }),
+      ...(metadata.hasAlpha !== undefined && { hasTransparency: metadata.hasAlpha }),
     },
   };
 }
@@ -235,7 +236,6 @@ async function generateVariants(
           size: info.size,
           quality,
           variant: `${size}w-${density}x`,
-          targetSize: size,
           density,
         });
       } catch (error) {

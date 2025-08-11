@@ -435,7 +435,7 @@ export interface ModalSettings {
 
 // Enhanced Layout System Types
 export interface LayoutConfig {
-	preset: LayoutPreset;
+	preset: LayoutPreset | SocialLayoutPreset;
 	rows: number; // 1-6
 	columns: number; // 1-4
 	gutter: number; // 0-32 px
@@ -603,3 +603,196 @@ export interface RevenueAttribution extends AttributionData {
 	price: number; // in cents
 	revenue: number; // in cents (price * quantity)
 }
+
+// Social Media Types
+export type SocialPlatform = 'instagram' | 'tiktok' | 'twitter' | 'manual';
+
+export interface SocialPost {
+	id: string;
+	configId: string;
+	shopDomain: string;
+	platform: SocialPlatform;
+	originalUrl?: string; // null for manual uploads
+	postId?: string; // Platform-specific post ID
+	caption: string;
+	hashtags: string[];
+	mentions: string[];
+	mediaUrls: string[]; // R2 URLs
+	mediaMetadata: SocialMediaMetadata;
+	engagement: SocialEngagement;
+	author: SocialAuthor;
+	publishedAt?: string; // Original post date
+	importedAt: string;
+	isActive: boolean;
+	productTags: ProductTag[];
+	performance: SocialPerformance;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface SocialMediaMetadata {
+	dimensions?: {
+		width: number;
+		height: number;
+	};
+	duration?: number; // for videos
+	aspectRatio?: string;
+	fileSize?: number;
+	format?: string;
+	thumbnail?: string; // for videos
+}
+
+export interface SocialEngagement {
+	likes: number;
+	comments: number;
+	shares: number;
+	views: number;
+	saves?: number; // Instagram specific
+	engagementRate?: number; // calculated
+}
+
+export interface SocialAuthor {
+	username: string;
+	displayName?: string;
+	avatarUrl?: string;
+	verified?: boolean;
+	followerCount?: number;
+	bio?: string;
+}
+
+export interface SocialPerformance {
+	impressions: number;
+	reach: number;
+	profileVisits: number;
+	websiteClicks: number;
+	productViews: number;
+	addToCarts: number;
+	checkouts: number;
+	purchases: number;
+	revenue: number; // in cents
+	clickThroughRate: number;
+	conversionRate: number;
+}
+
+export interface SocialConnection {
+	id: string;
+	shopDomain: string;
+	platform: Exclude<SocialPlatform, 'manual'>;
+	platformUserId: string;
+	username: string;
+	displayName?: string;
+	avatarUrl?: string;
+	accessToken: string;
+	refreshToken?: string;
+	tokenExpiresAt?: string;
+	scopes: string[];
+	isActive: boolean;
+	lastSyncAt?: string;
+	syncSettings: SocialSyncSettings;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface SocialSyncSettings {
+	autoImport: boolean;
+	importInterval: number; // minutes
+	maxPostsPerSync: number;
+	includeStories?: boolean;
+	includeReels?: boolean;
+	hashtagFilters?: string[]; // only import posts with these hashtags
+	mentionFilters?: string[]; // only import posts with these mentions
+	minimumEngagement?: number; // minimum likes to import
+}
+
+export interface SocialAnalytics {
+	id: string;
+	postId: string;
+	configId: string;
+	shopDomain: string;
+	// Social engagement metrics
+	impressions: number;
+	reach: number;
+	profileVisits: number;
+	websiteClicks: number;
+	// Commerce metrics
+	productViews: number;
+	addToCarts: number;
+	checkouts: number;
+	purchases: number;
+	revenue: number; // in cents
+	// Attribution data
+	firstTouch: boolean;
+	lastTouch: boolean;
+	influenceScore: number; // 0-100 scale
+	// Time-based metrics
+	date: string; // YYYY-MM-DD
+	hour?: number; // 0-23 for hourly breakdown
+	createdAt: string;
+}
+
+// Social Media Import Types
+export interface SocialImportRequest {
+	url: string;
+	platform: SocialPlatform;
+	configId: string;
+	options?: SocialImportOptions;
+}
+
+export interface SocialImportOptions {
+	downloadMedia: boolean;
+	tagProducts: boolean;
+	extractHashtags: boolean;
+	extractMentions: boolean;
+	generateThumbnail: boolean; // for videos
+}
+
+export interface SocialImportResult {
+	success: boolean;
+	post?: SocialPost;
+	error?: string;
+	warnings?: string[];
+}
+
+// Enhanced Layout Types for Social Media
+export interface SocialLayoutConfig extends LayoutConfig {
+	socialFeatures: {
+		showCaptions: 'hover' | 'always' | 'never';
+		showEngagement: boolean;
+		showUsernames: boolean;
+		showTimestamps: boolean;
+		platformBadges: boolean;
+		hashtagHighlight: boolean;
+	};
+	filterOptions: {
+		byPlatform: boolean;
+		byHashtag: boolean;
+		byDate: boolean;
+		byEngagement: boolean;
+	};
+}
+
+// Social-Enhanced Category Types
+export interface SocialCategory extends Category {
+	socialFilters?: {
+		platforms?: SocialPlatform[];
+		hashtags?: string[];
+		mentions?: string[];
+		dateRange?: {
+			start: string;
+			end: string;
+		};
+		minEngagement?: number;
+	};
+}
+
+// Social Media Preset Constants
+export const SOCIAL_PLATFORMS = ['instagram', 'tiktok', 'twitter', 'manual'] as const;
+export const SOCIAL_LAYOUT_PRESETS = [
+	'instagram-grid',
+	'tiktok-vertical', 
+	'pinterest-masonry',
+	'twitter-timeline',
+	'stories-horizontal'
+] as const;
+
+export type SocialLayoutPreset = (typeof SOCIAL_LAYOUT_PRESETS)[number];

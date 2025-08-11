@@ -10,6 +10,7 @@ import { UTMTracker } from "./tracking/UTMTracker";
 import { PixelDispatcher } from "./tracking/PixelDispatcher";
 import { cn } from "../lib/utils";
 import { conditionalProps } from "../lib/type-utils";
+import { useCart } from "../hooks/use-cart";
 import "../styles/instagram-native.css";
 
 interface UnifiedRendererProps {
@@ -34,6 +35,7 @@ interface UnifiedRendererProps {
 export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendererProps) {
   const detectedMode = useRenderMode();
   const renderMode = forceMode || detectedMode;
+  const { addToCart } = useCart();
 
   // Development debug logging
   if (process.env.NODE_ENV === "development") {
@@ -55,9 +57,9 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
 
       {/* Main Content Rendering */}
       {renderMode === "instagram-native" ? (
-        <MobileNativeRenderer config={config} {...conditionalProps({ className })} />
+        <MobileNativeRenderer config={config} onAddToCart={addToCart} {...conditionalProps({ className })} />
       ) : (
-        <DesktopLayoutRenderer config={config} {...conditionalProps({ className })} />
+        <DesktopLayoutRenderer config={config} onAddToCart={addToCart} {...conditionalProps({ className })} />
       )}
 
       {/* Shared Components */}
@@ -70,7 +72,15 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
  * Mobile-Native Renderer
  * Enhanced Instagram-style experience with gesture support
  */
-function MobileNativeRenderer({ config, className }: { config: SiteConfig; className?: string }) {
+function MobileNativeRenderer({ 
+  config, 
+  className, 
+  onAddToCart 
+}: { 
+  config: SiteConfig; 
+  className?: string;
+  onAddToCart: (productId: string, variantId?: string, quantity?: number) => Promise<{ success: boolean; error?: any }>;
+}) {
   return (
     <div className={cn("instagram-native", className)}>
       {/* Instagram-style brand header */}
@@ -110,6 +120,7 @@ function MobileNativeRenderer({ config, className }: { config: SiteConfig; class
                 console.log('Mobile tile clicked:', clickedCategory.id, clickIndex);
                 // TODO: Implement mobile modal with swipe gestures
               }}
+              onAddToCart={onAddToCart}
             />
           ) : (
             // Fallback to existing InstagramRenderer for categories without layout
@@ -125,7 +136,15 @@ function MobileNativeRenderer({ config, className }: { config: SiteConfig; class
  * Desktop Layout Renderer
  * Advanced layout system with full feature set
  */
-function DesktopLayoutRenderer({ config, className }: { config: SiteConfig; className?: string }) {
+function DesktopLayoutRenderer({ 
+  config, 
+  className, 
+  onAddToCart 
+}: { 
+  config: SiteConfig; 
+  className?: string;
+  onAddToCart: (productId: string, variantId?: string, quantity?: number) => Promise<{ success: boolean; error?: any }>;
+}) {
   return (
     <div className={className}>
       {config.categories.map((category) => (
@@ -145,6 +164,7 @@ function DesktopLayoutRenderer({ config, className }: { config: SiteConfig; clas
                   console.log('Desktop tile clicked:', clickedCategory.id, clickIndex);
                   // TODO: Implement desktop modal system
                 }}
+                onAddToCart={onAddToCart}
               />
             </div>
           ) : (

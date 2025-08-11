@@ -10,7 +10,7 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
   try {
     const { 
       edgeCache, 
-      r2Service,
+      getR2Service,
       createDefaultSiteConfig,
       createEnhancedSiteConfig 
     } = await import("@minimall/core/server");
@@ -28,7 +28,8 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
 
     try {
       // Try R2 first
-      const config = await r2Service.getConfig(configId, draftVersion);
+      const r2 = getR2Service();
+      const config = await r2!.getConfig(configId, draftVersion);
       edgeCache.set(cacheKey, config, 300);
       console.log(`R2 SUCCESS: Cached config ${cacheKey} for 300s`);
       return config;

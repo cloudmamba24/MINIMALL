@@ -4,11 +4,13 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Category, LayoutConfig } from "@minimall/core";
 import { cn } from "../../lib/utils";
+import { ProductOverlay } from "../ui/ProductOverlay";
 
 interface GridRendererProps {
   category: Category;
   layout: LayoutConfig;
   onTileClick?: (category: Category, index: number) => void;
+  onAddToCart?: (productId: string, variantId?: string, quantity?: number) => void;
   className?: string;
 }
 
@@ -16,6 +18,7 @@ export function GridRenderer({
   category, 
   layout, 
   onTileClick,
+  onAddToCart,
   className 
 }: GridRendererProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -162,23 +165,14 @@ export function GridRenderer({
               </motion.div>
             )}
 
-            {/* Product Tags */}
+            {/* Enhanced Product Tags with One-Tap Overlay */}
             {cardDetails.productTags?.map((tag, tagIndex) => (
-              <div
+              <ProductOverlay
                 key={tagIndex}
-                className="absolute w-3 h-3 bg-white rounded-full border-2 border-black shadow-lg animate-pulse"
-                style={{
-                  left: `${tag.position.x * 100}%`,
-                  top: `${tag.position.y * 100}%`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                {tag.label && (
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                    {tag.label}
-                  </div>
-                )}
-              </div>
+                tag={tag}
+                tagIndex={tagIndex}
+                onAddToCart={onAddToCart || (() => console.log('No cart handler provided'))}
+              />
             ))}
           </motion.div>
         );
