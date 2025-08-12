@@ -101,8 +101,11 @@ export async function GET(request: NextRequest) {
     // Create session token
     const sessionToken = shopifyAuth.createSessionToken(session);
 
-    // Create response with redirect to admin app with session in URL for embedded apps
-    const redirectUrl = new URL(`${process.env.NEXT_PUBLIC_APP_URL}/admin`);
+    // Create response with redirect to Admin home (root). Avoid 404 if /admin route doesn't exist.
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${url.protocol}//${url.host}`;
+    const redirectUrl = new URL(baseUrl);
+    redirectUrl.pathname = "/";
+    // Preserve context for embedded/hosted scenarios
     redirectUrl.searchParams.set("shop", shop);
     redirectUrl.searchParams.set("host", Buffer.from(`${shop}/admin`).toString("base64"));
 
