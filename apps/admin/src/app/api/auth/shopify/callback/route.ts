@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
       path: "/",
       // Add additional security flags
       ...(process.env.NODE_ENV === "production" && {
-        domain: new URL(process.env.NEXT_PUBLIC_APP_URL || "").hostname,
+        domain: new URL(request.url).hostname,
       }),
     });
 
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 7, // Reduced to 7 days
       path: "/",
       ...(process.env.NODE_ENV === "production" && {
-        domain: new URL(process.env.NEXT_PUBLIC_APP_URL || "").hostname,
+        domain: new URL(request.url).hostname,
       }),
     });
 
