@@ -1,8 +1,8 @@
 "use client";
 
 import { animationPresets, animationTokens } from "@/lib/animation-tokens";
-import { AnimatePresence, motion } from "framer-motion";
 import FocusTrap from "focus-trap-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { type ReactNode, useEffect } from "react";
 
@@ -106,31 +106,31 @@ export function EnhancedModal({
               tabIndex={-1}
             >
               <motion.div
-              className={`
+                className={`
                 relative bg-white rounded-xl shadow-2xl
                 max-h-[90vh] overflow-hidden
                 ${sizeClasses[size]}
                 ${className}
               `}
-              {...animationPresets.modalEntrance}
+                {...animationPresets.modalEntrance}
               >
-              {/* Close button */}
-              {showCloseButton && (
-                <motion.button
-                  onClick={onClose}
-                  className="
+                {/* Close button */}
+                {showCloseButton && (
+                  <motion.button
+                    onClick={onClose}
+                    className="
                     absolute top-4 right-4 z-10
                     w-8 h-8 rounded-full
                     bg-gray-100 hover:bg-gray-200
                     flex items-center justify-center
                     transition-colors duration-200
                   "
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <X size={16} className="text-gray-600" />
-                </motion.button>
-              )}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <X size={16} className="text-gray-600" />
+                  </motion.button>
+                )}
 
                 {/* Modal content */}
                 <div className="relative max-h-[90vh] overflow-auto">{children}</div>

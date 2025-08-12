@@ -48,7 +48,7 @@ export function SwipeableModal({
   blockId,
   className,
 }: SwipeableModalProps) {
-  const [isDragging, setIsDragging] = useState(false);
+  const [_isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Motion values for swipe gestures
@@ -96,7 +96,7 @@ export function SwipeableModal({
   }, [isOpen, onClose]);
 
   // Handle vertical drag (swipe to close)
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (_event: any, info: PanInfo) => {
     setIsDragging(false);
 
     const { offset, velocity } = info;
@@ -113,7 +113,7 @@ export function SwipeableModal({
   };
 
   // Handle horizontal swipe for navigation
-  const handleHorizontalSwipe = (event: any, info: PanInfo) => {
+  const handleHorizontalSwipe = (_event: any, info: PanInfo) => {
     if (!showNavigation) return;
 
     const { offset, velocity } = info;

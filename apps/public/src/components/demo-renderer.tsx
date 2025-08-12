@@ -52,7 +52,7 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
     openCartModal({ open: "true" });
   }, [openCartModal]);
 
-  // Ultra-stable tabs creation using config.id instead of categories array
+  // Tabs derived from categories and cart state
   const tabs = useMemo(() => {
     const categoryTabs = config.categories.map((category) => ({
       id: category.id,
@@ -69,7 +69,7 @@ export function DemoRenderer({ config, className = "" }: DemoRendererProps) {
     };
 
     return [...categoryTabs, cartTab];
-  }, [config.id, cart.totalItems, handleCartModal]); // Use config.id instead of categories array
+  }, [config.categories, cart.totalItems, handleCartModal]);
 
   // Memoize rendered tabs to prevent infinite re-renders
   const renderedTabs = useMemo(

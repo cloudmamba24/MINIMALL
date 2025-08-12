@@ -457,7 +457,7 @@ export function createImpressionTracker(
 
           if (blockId) {
             const impressionData: any = {
-              configId: analytics["configId"],
+              configId: analytics.configId,
               blockId,
               layoutPreset,
             };

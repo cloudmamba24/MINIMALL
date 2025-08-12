@@ -68,8 +68,6 @@ export function VideoCard({
         className
       )}
       onClick={handleVideoClick}
-      role="button"
-      tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -132,6 +130,7 @@ export function VideoCard({
         {/* Play/Pause Button Overlay */}
         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
           <button
+            type="button"
             className="w-16 h-16 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 hover:bg-black/70 hover:scale-110"
             onClick={(e) => {
               e.stopPropagation();
@@ -147,6 +146,7 @@ export function VideoCard({
         {videoUrl && !videoError && !showThumbnail && (
           <div className="absolute bottom-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
+              type="button"
               className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white transition-all duration-200 hover:bg-black/70"
               onClick={handleMuteToggle}
               aria-label={isMuted ? "Unmute video" : "Mute video"}

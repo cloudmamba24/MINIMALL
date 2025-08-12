@@ -90,11 +90,11 @@ function initializePixels(pixels: PixelSettings, configId: string) {
 /**
  * Initialize Facebook Pixel
  */
-function initializeFacebookPixel(pixelId: string, configId: string) {
+function initializeFacebookPixel(pixelId: string, _configId: string) {
   if ((window as any).fbq) return; // Already initialized
 
   // Facebook Pixel Code
-  const fbq = (event: string, data?: any) => {
+  const fbq = (_event: string, _data?: any) => {
     (fbq as any).callMethod
       ? (fbq as any).callMethod.apply(fbq, arguments)
       : (fbq as any).queue.push(arguments);
@@ -123,7 +123,7 @@ function initializeFacebookPixel(pixelId: string, configId: string) {
 /**
  * Initialize Google Analytics 4
  */
-function initializeGoogleAnalytics(measurementId: string, configId: string) {
+function initializeGoogleAnalytics(measurementId: string, _configId: string) {
   if ((window as any).gtag) return; // Already initialized
 
   // Google Analytics 4 Code
@@ -133,7 +133,7 @@ function initializeGoogleAnalytics(measurementId: string, configId: string) {
   document.head.appendChild(script1);
 
   (window as any).dataLayer = (window as any).dataLayer || [];
-  function gtag(type: string, ...args: any[]) {
+  function gtag(_type: string, ..._args: any[]) {
     (window as any).dataLayer.push(arguments);
   }
   (window as any).gtag = gtag;
@@ -153,11 +153,11 @@ function initializeGoogleAnalytics(measurementId: string, configId: string) {
 /**
  * Initialize TikTok Pixel
  */
-function initializeTikTokPixel(pixelId: string, configId: string) {
+function initializeTikTokPixel(pixelId: string, _configId: string) {
   if ((window as any).ttq) return; // Already initialized
 
   // TikTok Pixel Code
-  const ttq = (event: string, data?: any) => {
+  const ttq = (_event: string, _data?: any) => {
     (ttq as any).methods = (ttq as any).methods || [];
     (ttq as any).methods.push(arguments);
   };
@@ -184,11 +184,11 @@ function initializeTikTokPixel(pixelId: string, configId: string) {
 /**
  * Initialize Pinterest Pixel
  */
-function initializePinterestPixel(tagId: string, configId: string) {
+function initializePinterestPixel(tagId: string, _configId: string) {
   if ((window as any).pintrk) return; // Already initialized
 
   // Pinterest Pixel Code
-  const pintrk = (event: string, data?: any) => {
+  const pintrk = (_event: string, _data?: any) => {
     (pintrk as any).queue = (pintrk as any).queue || [];
     (pintrk as any).queue.push(Array.prototype.slice.call(arguments));
   };
@@ -214,11 +214,11 @@ function initializePinterestPixel(tagId: string, configId: string) {
 /**
  * Initialize Snapchat Pixel
  */
-function initializeSnapchatPixel(pixelId: string, configId: string) {
+function initializeSnapchatPixel(pixelId: string, _configId: string) {
   if ((window as any).snaptr) return; // Already initialized
 
   // Snapchat Pixel Code
-  const snaptr = (event: string, data?: any) => {
+  const snaptr = (_event: string, _data?: any) => {
     (snaptr as any).handleRequest
       ? (snaptr as any).handleRequest.apply(snaptr, arguments)
       : (snaptr as any).queue.push(arguments);
@@ -246,7 +246,7 @@ function initializeSnapchatPixel(pixelId: string, configId: string) {
  */
 function initializeCustomPixel(
   customPixel: { name: string; id: string; type: "script" | "pixel" | "tag" },
-  configId: string
+  _configId: string
 ) {
   try {
     if (customPixel.type === "script") {
@@ -425,7 +425,7 @@ export const PixelUtils = {
   /**
    * Track tile click with block attribution
    */
-  trackTileClick(configId: string, blockId: string, categoryId: string, itemId: string) {
+  trackTileClick(_configId: string, blockId: string, categoryId: string, itemId: string) {
     this.dispatch("tile_click", {
       block_id: blockId,
       category_id: categoryId,
@@ -436,7 +436,7 @@ export const PixelUtils = {
   /**
    * Track quick view open
    */
-  trackQuickView(configId: string, productId: string, blockId?: string) {
+  trackQuickView(_configId: string, productId: string, blockId?: string) {
     this.dispatch("quick_view_open", {
       product_id: productId,
       block_id: blockId,
@@ -447,7 +447,7 @@ export const PixelUtils = {
    * Track add to cart with attribution
    */
   trackAddToCart(
-    configId: string,
+    _configId: string,
     productId: string,
     variantId: string,
     quantity: number,
@@ -467,7 +467,7 @@ export const PixelUtils = {
   /**
    * Track checkout initiation
    */
-  trackBeginCheckout(configId: string, cartValue: number, items: any[]) {
+  trackBeginCheckout(_configId: string, cartValue: number, items: any[]) {
     this.dispatch("begin_checkout", {
       value: cartValue / 100, // Convert cents to dollars
       currency: "USD",
@@ -479,7 +479,7 @@ export const PixelUtils = {
   /**
    * Track purchase completion
    */
-  trackPurchase(configId: string, orderId: string, revenue: number, items: any[]) {
+  trackPurchase(_configId: string, orderId: string, revenue: number, items: any[]) {
     this.dispatch("purchase", {
       transaction_id: orderId,
       value: revenue / 100, // Convert cents to dollars

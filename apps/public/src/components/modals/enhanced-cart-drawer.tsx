@@ -59,7 +59,11 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
         try {
           const { createAnalytics } = await import("@/lib/enhanced-analytics");
           const analytics = createAnalytics("cart");
-          analytics.trackBeginCheckout({ configId: "cart", value: cart.totalPrice, items: cart.items });
+          analytics.trackBeginCheckout({
+            configId: "cart",
+            value: cart.totalPrice,
+            items: cart.items,
+          });
           analytics.trackCheckoutUrlGenerated({ configId: "cart" });
         } catch {}
         if (process.env.NODE_ENV === "development") {

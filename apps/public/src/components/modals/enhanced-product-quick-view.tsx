@@ -161,7 +161,10 @@ export function EnhancedProductQuickView() {
         {/* Product Images */}
         <div className="space-y-4">
           {/* Main Image */}
-          <motion.div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden" layout>
+          <motion.div
+            className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden"
+            layout
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedImage}
@@ -385,7 +388,9 @@ export function EnhancedProductQuickView() {
         >
           <motion.button
             onClick={handleAddToCart}
-            disabled={isAddingToCart || (selectedVariant ? !selectedVariant.availableForSale : false)}
+            disabled={
+              isAddingToCart || (selectedVariant ? !selectedVariant.availableForSale : false)
+            }
             className={`
               w-full py-4 px-6 rounded-xl font-semibold text-white transition-colors
               ${

@@ -157,10 +157,9 @@ function getStoredUTMData(configId: string) {
 
       if (utmAge < maxAge) {
         return parsed;
-      } else {
-        // Clean up expired UTM data
-        localStorage.removeItem(utmKey);
       }
+      // Clean up expired UTM data
+      localStorage.removeItem(utmKey);
     }
   } catch (error) {
     console.warn("[UTMTracker] Failed to retrieve stored UTM data:", error);
@@ -303,7 +302,7 @@ export const UTMUtils = {
       localStorage.removeItem(sessionKey);
 
       if (typeof window !== "undefined") {
-        delete (window as any).__MINIMALL_UTM__;
+        (window as any).__MINIMALL_UTM__ = undefined;
       }
     } catch (error) {
       console.warn("[UTMTracker] Failed to cleanup:", error);

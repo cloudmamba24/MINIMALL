@@ -37,7 +37,7 @@ export function InstagramRenderer({ config, className = "" }: InstagramRendererP
   }
 
   const { settings } = config;
-  const analytics = useMemo(() => createAnalytics(config.id), [config.id]);
+  const _analytics = useMemo(() => createAnalytics(config.id), [config.id]);
   const cart = useCart();
 
   // Enhanced modal routing
@@ -229,7 +229,7 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        if (entry && entry.isIntersecting && !isLoadingMore && visibleCount < items.length) {
+        if (entry?.isIntersecting && !isLoadingMore && visibleCount < items.length) {
           setIsLoadingMore(true);
           // Simulate async load and smooth UX
           setTimeout(() => {
@@ -256,7 +256,9 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
         for (const entry of entries) {
           const v = entry.target as HTMLVideoElement;
           if (!entry.isIntersecting) {
-            try { v.pause(); } catch {}
+            try {
+              v.pause();
+            } catch {}
           }
         }
       },
@@ -270,14 +272,20 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
   useEffect(() => {
     if (!gridRef.current) return;
     const io = createImpressionTracker(analytics, 0.5);
-    const cards = Array.from(gridRef.current.querySelectorAll('[data-item-id]')) as HTMLElement[];
+    const cards = Array.from(gridRef.current.querySelectorAll("[data-item-id]")) as HTMLElement[];
     cards.forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, [analytics, visibleCount]);
 
   // Instagram-style grid (2 columns, square aspect ratio)
   return (
-    <div ref={(el) => { containerRef.current = el; gridRef.current = el; }} className="grid grid-cols-2 md:grid-cols-3 gap-1.5 md:gap-2 w-full max-w-sm md:max-w-2xl lg:max-w-4xl mx-auto">
+    <div
+      ref={(el) => {
+        containerRef.current = el;
+        gridRef.current = el;
+      }}
+      className="grid grid-cols-2 md:grid-cols-3 gap-1.5 md:gap-2 w-full max-w-sm md:max-w-2xl lg:max-w-4xl mx-auto"
+    >
       {items.slice(0, visibleCount).map((child, index) => {
         const [cardType, cardDetails] = child.card;
 
@@ -306,7 +314,11 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
             <button
               type="button"
               onClick={() => {
-                analytics.trackTileClick({ configId: category.id, itemId: child.id, categoryId: category.id });
+                analytics.trackTileClick({
+                  configId: category.id,
+                  itemId: child.id,
+                  categoryId: category.id,
+                });
                 openPostModal(child.id, child);
               }}
               className="w-full h-full relative overflow-hidden bg-gray-800 group"
@@ -325,7 +337,10 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
       {/* Skeletons when loading more */}
       {isLoadingMore &&
         Array.from({ length: Math.min(12, items.length - visibleCount) }).map((_, i) => (
-          <div key={`skeleton-${i}`} className="relative aspect-square md:aspect-[4/5] lg:aspect-square">
+          <div
+            key={`skeleton-${i}`}
+            className="relative aspect-square md:aspect-[4/5] lg:aspect-square"
+          >
             <div className="w-full h-full loading-shimmer rounded-sm" />
           </div>
         ))}
@@ -368,17 +383,23 @@ function InstagramContentItem({
           preload="metadata"
           poster={details.poster || details.image || details.imageUrl || undefined}
           onMouseEnter={(e) => {
-            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
             // Autoplay on hover for desktop
-            try { (e.currentTarget as HTMLVideoElement).play().catch(() => {}); } catch {}
+            try {
+              (e.currentTarget as HTMLVideoElement).play().catch(() => {});
+            } catch {}
           }}
           onMouseLeave={(e) => {
-            try { (e.currentTarget as HTMLVideoElement).pause(); } catch {}
+            try {
+              (e.currentTarget as HTMLVideoElement).pause();
+            } catch {}
           }}
           // On mobile, user taps to toggle play/pause
           onClick={(e) => {
             const v = e.currentTarget as HTMLVideoElement;
-            try { v.paused ? v.play() : v.pause(); } catch {}
+            try {
+              v.paused ? v.play() : v.pause();
+            } catch {}
           }}
         >
           {details.videoUrl && <source src={details.videoUrl} />}

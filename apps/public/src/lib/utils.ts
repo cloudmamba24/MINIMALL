@@ -78,7 +78,7 @@ export function capitalize(str: string): string {
  */
 export function truncate(str: string, maxLength: number): string {
   if (str.length <= maxLength) return str;
-  return str.slice(0, maxLength) + "...";
+  return `${str.slice(0, maxLength)}...`;
 }
 
 /**
@@ -94,7 +94,7 @@ export function generateId(): string {
 export function deepClone<T>(obj: T): T {
   if (obj === null || typeof obj !== "object") return obj;
   if (obj instanceof Date) return new Date(obj.getTime()) as any;
-  if (obj instanceof Array) return obj.map((item) => deepClone(item)) as any;
+  if (Array.isArray(obj)) return obj.map((item) => deepClone(item)) as any;
   if (typeof obj === "object") {
     const copy: any = {};
     Object.keys(obj).forEach((key) => {

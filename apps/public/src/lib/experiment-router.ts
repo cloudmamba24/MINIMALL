@@ -50,7 +50,7 @@ export function trackExperimentExposure(
 /**
  * Get experiment variant for a given key
  */
-export function getExperimentVariant(experimentKey: string, defaultVariant = "default"): string {
+export function getExperimentVariant(_experimentKey: string, defaultVariant = "default"): string {
   // Simplified - always return default variant
   return defaultVariant;
 }

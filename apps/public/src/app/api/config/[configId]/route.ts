@@ -33,7 +33,7 @@ async function getStableDemoConfig() {
     } else {
       STABLE_DEMO_CONFIG = createDefaultSiteConfig(shopDomain);
     }
-  } catch (error) {
+  } catch (_error) {
     // Fallback to mock data on error
     STABLE_DEMO_CONFIG = createDefaultSiteConfig(shopDomain);
   }
@@ -73,10 +73,9 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
       edgeCache.set(cacheKey, config, 300, tags);
 
       return config;
-    } else {
-      throw new Error("R2 service not available");
     }
-  } catch (error) {
+    throw new Error("R2 service not available");
+  } catch (_error) {
     // R2 fetch failed, try fallback strategies
 
     // Fallback strategy based on environment and configId
@@ -127,7 +126,7 @@ export async function GET(
     return NextResponse.json(
       {
         error: "Configuration not found",
-        message: error instanceof Error ? error.message : "Unknown error",
+        message: _error instanceof Error ? _error.message : "Unknown error",
       },
       { status: 404 }
     );

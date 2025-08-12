@@ -98,13 +98,13 @@ export function StoriesRenderer({
     }
   };
 
-  const goToStory = (index: number) => {
+  const _goToStory = (index: number) => {
     setCurrentIndex(Math.max(0, Math.min(index, totalItems - 1)));
     setProgress(0);
   };
 
   // Handle vertical drag
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (_event: any, info: PanInfo) => {
     setIsDragging(false);
 
     const threshold = 100;

@@ -189,19 +189,23 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
                       onLoadedMetadata={(e) => {
                         // Respect reduced motion by not autoplaying
                         if (
-                          typeof window !== 'undefined' &&
+                          typeof window !== "undefined" &&
                           window.matchMedia &&
-                          window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                          window.matchMedia("(prefers-reduced-motion: reduce)").matches
                         ) {
                           return;
                         }
-                        try { (e.currentTarget as HTMLVideoElement).play().catch(() => {}); } catch {}
+                        try {
+                          (e.currentTarget as HTMLVideoElement).play().catch(() => {});
+                        } catch {}
                       }}
                       onKeyDown={(e) => {
                         const v = e.currentTarget as HTMLVideoElement;
-                        if (e.code === 'Space') {
+                        if (e.code === "Space") {
                           e.preventDefault();
-                          try { v.paused ? v.play() : v.pause(); } catch {}
+                          try {
+                            v.paused ? v.play() : v.pause();
+                          } catch {}
                         }
                       }}
                     >

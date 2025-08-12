@@ -25,7 +25,7 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
     try {
       // Try R2 first
       const r2 = getR2Service();
-      const config = await r2!.getConfig(configId, draftVersion);
+      const config = await r2?.getConfig(configId, draftVersion);
       edgeCache.set(cacheKey, config, 300);
       console.log(`R2 SUCCESS: Cached config ${cacheKey} for 300s`);
       return config;
@@ -45,9 +45,8 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
         try {
           if (accessToken) {
             return await createEnhancedSiteConfig(shopDomain, accessToken);
-          } else {
-            return createDefaultSiteConfig(shopDomain);
           }
+          return createDefaultSiteConfig(shopDomain);
         } catch {
           return createDefaultSiteConfig(shopDomain);
         }

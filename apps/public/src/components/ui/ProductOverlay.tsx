@@ -55,7 +55,7 @@ export function ProductOverlay({ tag, tagIndex, onAddToCart, className }: Produc
     e.stopPropagation();
   };
 
-  const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+  const handleDrag = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     // Add resistance when dragging up
     const dragThreshold = 100;
     if (info.offset.y > dragThreshold) {
@@ -63,7 +63,7 @@ export function ProductOverlay({ tag, tagIndex, onAddToCart, className }: Produc
     }
   };
 
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     // Dismiss if dragged down more than 50px or with sufficient velocity
     const shouldDismiss = info.offset.y > 50 || info.velocity.y > 300;
     if (shouldDismiss) {

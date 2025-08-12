@@ -99,7 +99,7 @@ export function ImageUpload({
     return (
       <div className={`relative group ${className}`}>
         <div className="relative overflow-hidden rounded-lg border border-gray-200">
-          <img src={value} alt="Uploaded image" className="w-full h-48 object-cover" />
+          <img src={value} alt="Uploaded asset" className="w-full h-48 object-cover" />
           <AnimatePresence>
             {!disabled && (
               <motion.div

@@ -28,48 +28,48 @@ export function buildCartAttributes(
   const attributes: Record<string, string> = {};
 
   // Core MINIMALL attribution
-  attributes["minimall_config_id"] = attributionData.configId;
-  attributes["minimall_block_id"] = attributionData.blockId;
+  attributes.minimall_config_id = attributionData.configId;
+  attributes.minimall_block_id = attributionData.blockId;
 
   if (attributionData.layoutPreset) {
-    attributes["minimall_layout_preset"] = attributionData.layoutPreset;
+    attributes.minimall_layout_preset = attributionData.layoutPreset;
   }
 
   if (attributionData.experimentKey) {
-    attributes["minimall_experiment_key"] = attributionData.experimentKey;
+    attributes.minimall_experiment_key = attributionData.experimentKey;
   }
 
   if (attributionData.categoryId) {
-    attributes["minimall_category_id"] = attributionData.categoryId;
+    attributes.minimall_category_id = attributionData.categoryId;
   }
 
   if (attributionData.itemId) {
-    attributes["minimall_item_id"] = attributionData.itemId;
+    attributes.minimall_item_id = attributionData.itemId;
   }
 
   // UTM attribution from stored data
   const utmData = UTMUtils.getUTMData(attributionData.configId);
   if (utmData?.utm) {
-    if (utmData.utm.source) attributes["minimall_utm_source"] = utmData.utm.source;
-    if (utmData.utm.medium) attributes["minimall_utm_medium"] = utmData.utm.medium;
-    if (utmData.utm.campaign) attributes["minimall_utm_campaign"] = utmData.utm.campaign;
-    if (utmData.utm.term) attributes["minimall_utm_term"] = utmData.utm.term;
-    if (utmData.utm.content) attributes["minimall_utm_content"] = utmData.utm.content;
+    if (utmData.utm.source) attributes.minimall_utm_source = utmData.utm.source;
+    if (utmData.utm.medium) attributes.minimall_utm_medium = utmData.utm.medium;
+    if (utmData.utm.campaign) attributes.minimall_utm_campaign = utmData.utm.campaign;
+    if (utmData.utm.term) attributes.minimall_utm_term = utmData.utm.term;
+    if (utmData.utm.content) attributes.minimall_utm_content = utmData.utm.content;
   }
 
   // Session and device data
   const sessionData = UTMUtils.getSessionData(attributionData.configId);
   if (sessionData) {
-    attributes["minimall_session_id"] = sessionData.sessionId;
-    attributes["minimall_device"] = sessionData.device;
+    attributes.minimall_session_id = sessionData.sessionId;
+    attributes.minimall_device = sessionData.device;
 
     if (sessionData.referrer) {
-      attributes["minimall_referrer"] = sessionData.referrer;
+      attributes.minimall_referrer = sessionData.referrer;
     }
   }
 
   // Timestamp for tracking
-  attributes["minimall_attributed_at"] = new Date().toISOString();
+  attributes.minimall_attributed_at = new Date().toISOString();
 
   // Add any additional attributes
   Object.assign(attributes, additionalAttributes);

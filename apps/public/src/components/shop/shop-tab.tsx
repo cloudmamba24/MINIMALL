@@ -1,13 +1,13 @@
 "use client";
 
-import { type Category } from "@minimall/core";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { createAnalytics } from "@/lib/enhanced-analytics";
-import { CategoryChips, type CategoryChipItem } from "../navigation/category-chips";
-import { CollectionChips, type CollectionChipItem } from "../navigation/collection-chips";
-import { ProductCarousel } from "./product-carousel";
+import type { Category } from "@minimall/core";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { type CategoryChipItem, CategoryChips } from "../navigation/category-chips";
+import { type CollectionChipItem, CollectionChips } from "../navigation/collection-chips";
 import { ImageGrid } from "./image-grid";
+import { ProductCarousel } from "./product-carousel";
 
 interface ShopTabProps {
   category: Category;
@@ -44,8 +44,10 @@ export function ShopTab({ category, onProductClick }: ShopTabProps) {
   );
 
   // Read active from URL
-  const initialCategory = (searchParams?.get("shop:category") as string | null) || categoryItems[0]?.id || "new";
-  const initialCollection = (searchParams?.get("shop:collection") as string | null) || collectionItems[0]?.id || "new-in";
+  const initialCategory =
+    (searchParams?.get("shop:category") as string | null) || categoryItems[0]?.id || "new";
+  const initialCollection =
+    (searchParams?.get("shop:collection") as string | null) || collectionItems[0]?.id || "new-in";
 
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [activeCollection, setActiveCollection] = useState<string>(initialCollection);
@@ -60,14 +62,20 @@ export function ShopTab({ category, onProductClick }: ShopTabProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCategory, activeCollection]);
 
-  const handleCategorySelect = useCallback((id: string) => {
-    setActiveCategory(id);
-    analytics.trackCustomEvent("filter_category", { configId: "shop", properties: { id } });
-  }, [analytics]);
-  const handleCollectionSelect = useCallback((id: string) => {
-    setActiveCollection(id);
-    analytics.trackCustomEvent("filter_collection", { configId: "shop", properties: { id } });
-  }, [analytics]);
+  const handleCategorySelect = useCallback(
+    (id: string) => {
+      setActiveCategory(id);
+      analytics.trackCustomEvent("filter_category", { configId: "shop", properties: { id } });
+    },
+    [analytics]
+  );
+  const handleCollectionSelect = useCallback(
+    (id: string) => {
+      setActiveCollection(id);
+      analytics.trackCustomEvent("filter_collection", { configId: "shop", properties: { id } });
+    },
+    [analytics]
+  );
 
   // TODO: If needed, add actual filtering by mapping IDs to Shopify collection handles.
 
@@ -78,7 +86,11 @@ export function ShopTab({ category, onProductClick }: ShopTabProps) {
   return (
     <div className="space-y-6">
       {/* Category chips controlling product carousel */}
-      <CategoryChips items={categoryItems} activeId={activeCategory} onSelect={handleCategorySelect} />
+      <CategoryChips
+        items={categoryItems}
+        activeId={activeCategory}
+        onSelect={handleCategorySelect}
+      />
       <ProductCarousel category={productsCategory} onProductClick={onProductClick} />
 
       {/* Collections row controlling image grid */}
@@ -92,5 +104,3 @@ export function ShopTab({ category, onProductClick }: ShopTabProps) {
     </div>
   );
 }
-
-

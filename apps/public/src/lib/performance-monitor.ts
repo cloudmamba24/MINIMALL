@@ -51,7 +51,7 @@ export interface PerformanceSession {
   resourceTimings: PerformanceResourceTiming[];
 }
 
-const performanceMetricSchema = z.object({
+const _performanceMetricSchema = z.object({
   name: z.string(),
   value: z.number(),
   rating: z.enum(["good", "needs-improvement", "poor"]),
@@ -351,7 +351,7 @@ function trackErrors(session: Partial<PerformanceSession>): void {
 
   // Track uncaught errors
   window.addEventListener("error", (event) => {
-    session.errors!.push({
+    session.errors?.push({
       message: event.message,
       stack: event.error?.stack,
       timestamp: new Date(),
@@ -360,7 +360,7 @@ function trackErrors(session: Partial<PerformanceSession>): void {
 
   // Track unhandled promise rejections
   window.addEventListener("unhandledrejection", (event) => {
-    session.errors!.push({
+    session.errors?.push({
       message: `Unhandled Promise Rejection: ${event.reason}`,
       timestamp: new Date(),
     });
@@ -414,7 +414,8 @@ function getDeviceType(): "desktop" | "mobile" | "tablet" {
 
   if (width <= 768 || /mobile|android|iphone/.test(userAgent)) {
     return "mobile";
-  } else if (width <= 1024 || /tablet|ipad/.test(userAgent)) {
+  }
+  if (width <= 1024 || /tablet|ipad/.test(userAgent)) {
     return "tablet";
   }
 

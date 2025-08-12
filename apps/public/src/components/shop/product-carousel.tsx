@@ -1,8 +1,8 @@
 "use client";
 
-import { type Category } from "@minimall/core";
-import { motion } from "framer-motion";
 import { animationTokens } from "@/lib/animation-tokens";
+import type { Category } from "@minimall/core";
+import { motion } from "framer-motion";
 
 interface ProductCarouselProps {
   category: Category;
@@ -10,10 +10,18 @@ interface ProductCarouselProps {
   className?: string;
 }
 
-export function ProductCarousel({ category, onProductClick, className = "" }: ProductCarouselProps) {
+export function ProductCarousel({
+  category,
+  onProductClick,
+  className = "",
+}: ProductCarouselProps) {
   const items = category.children || [];
   return (
-    <div className={`w-full overflow-x-auto snap-x snap-mandatory ${className}`} role="region" aria-label="Products">
+    <div
+      className={`w-full overflow-x-auto snap-x snap-mandatory ${className}`}
+      role="region"
+      aria-label="Products"
+    >
       <div className="flex gap-4 px-1">
         {items.map((child, index) => {
           const [, cardDetails] = child.card;
@@ -28,7 +36,11 @@ export function ProductCarousel({ category, onProductClick, className = "" }: Pr
               transition={{ delay: index * (animationTokens.duration.stagger / 1000) }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={details.image || details.imageUrl || ""} alt={child.title} className="w-full aspect-[4/5] object-cover" />
+              <img
+                src={details.image || details.imageUrl || ""}
+                alt={child.title}
+                className="w-full aspect-[4/5] object-cover"
+              />
               <div className="p-2">
                 <div className="text-sm font-semibold text-gray-900 truncate">{child.title}</div>
                 {details.price && <div className="text-sm text-gray-600">{details.price}</div>}
@@ -40,5 +52,3 @@ export function ProductCarousel({ category, onProductClick, className = "" }: Pr
     </div>
   );
 }
-
-

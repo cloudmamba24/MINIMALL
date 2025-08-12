@@ -7,7 +7,7 @@ import { type NextRequest, NextResponse } from "next/server";
  * without importing server-side database code
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   context: { params: Promise<{ shopDomain: string }> }
 ) {
   try {

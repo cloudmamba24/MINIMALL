@@ -1,8 +1,8 @@
 "use client";
 
 import { useTabGestures } from "@/hooks/use-gesture-handler";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Tab as HeadlessTab } from "@headlessui/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export interface Tab {
   id: string;
@@ -62,14 +62,20 @@ export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
     }
   };
 
-  const selectedIndex = Math.max(0, contentTabs.findIndex((t) => t.id === activeTab));
+  const selectedIndex = Math.max(
+    0,
+    contentTabs.findIndex((t) => t.id === activeTab)
+  );
 
   return (
     <div className={`w-full ${className}`} {...gestureProps}>
-      <HeadlessTab.Group selectedIndex={selectedIndex} onChange={(idx) => {
-        const tab = contentTabs[idx];
-        if (tab) setActiveTab(tab.id);
-      }}>
+      <HeadlessTab.Group
+        selectedIndex={selectedIndex}
+        onChange={(idx) => {
+          const tab = contentTabs[idx];
+          if (tab) setActiveTab(tab.id);
+        }}
+      >
         <div className="flex justify-center mb-8">
           <HeadlessTab.List className="flex space-x-8">
             {tabs.map((tab) => (
@@ -77,11 +83,13 @@ export function LinkTabs({ tabs, className = "" }: LinkTabsProps) {
                 key={tab.id}
                 as="button"
                 onClick={() => handleTabClick(tab)}
-                className={({ selected }) => `text-sm font-medium tracking-wide transition-colors duration-200 ${
-                  selected && !tab.isAction
-                    ? "text-white border-b-2 border-white pb-1"
-                    : "text-gray-400 hover:text-gray-200"
-                } ${tab.isAction ? "hover:text-white" : ""}`}
+                className={({ selected }) =>
+                  `text-sm font-medium tracking-wide transition-colors duration-200 ${
+                    selected && !tab.isAction
+                      ? "text-white border-b-2 border-white pb-1"
+                      : "text-gray-400 hover:text-gray-200"
+                  } ${tab.isAction ? "hover:text-white" : ""}`
+                }
               >
                 {tab.label}
               </HeadlessTab>

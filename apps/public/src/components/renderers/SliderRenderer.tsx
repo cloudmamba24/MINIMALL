@@ -100,7 +100,7 @@ export function SliderRenderer({ category, layout, onTileClick, className }: Sli
   };
 
   // Handle drag
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (_event: any, info: PanInfo) => {
     setIsDragging(false);
 
     const threshold = slideWidth / 4;

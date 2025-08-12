@@ -1,8 +1,8 @@
 "use client";
 
-import { type Category } from "@minimall/core";
-import { motion } from "framer-motion";
 import { animationTokens } from "@/lib/animation-tokens";
+import type { Category } from "@minimall/core";
+import { motion } from "framer-motion";
 
 interface ImageGridProps {
   category: Category;
@@ -24,15 +24,20 @@ export function ImageGrid({ category, onTileClick, className = "" }: ImageGridPr
             className="relative w-full overflow-hidden rounded-lg bg-gray-100"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * (animationTokens.duration.stagger / 1000), duration: animationTokens.duration.normal / 1000 }}
+            transition={{
+              delay: index * (animationTokens.duration.stagger / 1000),
+              duration: animationTokens.duration.normal / 1000,
+            }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={details.image || details.imageUrl || ""} alt={child.title} className="w-full h-auto object-cover" />
+            <img
+              src={details.image || details.imageUrl || ""}
+              alt={child.title}
+              className="w-full h-auto object-cover"
+            />
           </motion.button>
         );
       })}
     </div>
   );
 }
-
-

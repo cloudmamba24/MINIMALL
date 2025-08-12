@@ -1,21 +1,21 @@
 "use client";
 
+import { SiteConfigProvider } from "@/contexts/site-config-context";
 import type { Category, SiteConfig } from "@minimall/core/client";
 import { useCart } from "../hooks/use-cart";
-import { useModalRouter } from "../hooks/use-modal-router";
 import { useRenderMode } from "../hooks/use-mobile-detection";
+import { useModalRouter } from "../hooks/use-modal-router";
 import { conditionalProps } from "../lib/type-utils";
 import { cn } from "../lib/utils";
 import { EnhancedProductQuickView } from "./enhanced-product-quick-view";
-import { EnhancedPostModal } from "./modals/enhanced-post-modal";
 import { InstagramTab } from "./instagram/instagram-tab";
+import { LookbookSection } from "./lookbook/lookbook-section";
+import { EnhancedPostModal } from "./modals/enhanced-post-modal";
 import { Renderer } from "./renderer";
 import { LayoutSwitch } from "./renderers/LayoutSwitch";
 import { ShopTab } from "./shop/shop-tab";
-import { LookbookSection } from "./lookbook/lookbook-section";
 import { PixelDispatcher } from "./tracking/PixelDispatcher";
 import { UTMTracker } from "./tracking/UTMTracker";
-import { SiteConfigProvider } from "@/contexts/site-config-context";
 import "../styles/instagram-native.css";
 import { BrandHeader } from "./brand/brand-header";
 import { LinkTabs, type Tab } from "./navigation/link-tabs";
@@ -47,7 +47,9 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
   const { openModal: openProductModal } = useModalRouter("product");
 
   // Flatten all post items across categories for the modal carousel (Instagram content only for 1:1 demo parity)
-  const instagramCategory = (config.categories || []).find((c) => c.title.toLowerCase() === "instagram");
+  const instagramCategory = (config.categories || []).find(
+    (c) => c.title.toLowerCase() === "instagram"
+  );
   const allPosts: Category[] = (instagramCategory?.children || []) as Category[];
 
   // Development debug logging
@@ -74,10 +76,16 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
               <div className="mb-6 md:mb-8">
                 <BrandHeader
                   title={config.settings.brand.name}
-                  {...(config.settings.brand.subtitle && { subtitle: config.settings.brand.subtitle })}
+                  {...(config.settings.brand.subtitle && {
+                    subtitle: config.settings.brand.subtitle,
+                  })}
                   {...(config.settings.brand.logo && { logo: config.settings.brand.logo })}
-                  {...(config.settings.brand.socialLinks && { socialLinks: config.settings.brand.socialLinks })}
-                  {...(config.settings.brand.ctaButton && { ctaButton: config.settings.brand.ctaButton })}
+                  {...(config.settings.brand.socialLinks && {
+                    socialLinks: config.settings.brand.socialLinks,
+                  })}
+                  {...(config.settings.brand.ctaButton && {
+                    ctaButton: config.settings.brand.ctaButton,
+                  })}
                 />
               </div>
             )}
@@ -91,25 +99,39 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
                 />
               );
               const shopCategory = config.categories.find((c) => c.title.toLowerCase() === "shop");
-              const lookbookCategory = config.categories.find((c) => c.title.toLowerCase() === "lookbook");
+              const lookbookCategory = config.categories.find(
+                (c) => c.title.toLowerCase() === "lookbook"
+              );
 
               const tabs: Tab[] = [
                 { id: "instagram", label: "INSTAGRAM", content: instagramContent },
                 ...(shopCategory
-                  ? [{ id: "shop", label: "SHOP", content: (
-                      <ShopTab
-                        category={shopCategory}
-                        onProductClick={(productId) => openPostModal({ id: productId })}
-                      />
-                    ) }] as Tab[]
+                  ? ([
+                      {
+                        id: "shop",
+                        label: "SHOP",
+                        content: (
+                          <ShopTab
+                            category={shopCategory}
+                            onProductClick={(productId) => openPostModal({ id: productId })}
+                          />
+                        ),
+                      },
+                    ] as Tab[])
                   : []),
                 ...(lookbookCategory
-                  ? [{ id: "lookbook", label: "LOOKBOOK", content: (
-                      <LookbookSection
-                        category={lookbookCategory}
-                        onHotspotClick={(productId) => openPostModal({ id: productId })}
-                      />
-                    ) }] as Tab[]
+                  ? ([
+                      {
+                        id: "lookbook",
+                        label: "LOOKBOOK",
+                        content: (
+                          <LookbookSection
+                            category={lookbookCategory}
+                            onHotspotClick={(productId) => openPostModal({ id: productId })}
+                          />
+                        ),
+                      },
+                    ] as Tab[])
                   : []),
               ];
 
@@ -121,7 +143,10 @@ export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendere
 
       {/* Shared Components */}
       <EnhancedProductQuickView />
-      <EnhancedPostModal posts={allPosts} onProductClick={(productId) => openProductModal({ id: productId })} />
+      <EnhancedPostModal
+        posts={allPosts}
+        onProductClick={(productId) => openProductModal({ id: productId })}
+      />
     </>
   );
 }

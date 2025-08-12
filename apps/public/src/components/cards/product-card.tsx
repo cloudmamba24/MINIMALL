@@ -120,8 +120,6 @@ export function ProductCard({
         className
       )}
       onClick={handleQuickView}
-      role="button"
-      tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();

@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { animationTokens } from "@/lib/animation-tokens";
+import { motion } from "framer-motion";
 
 export interface CollectionChipItem {
   id: string;
@@ -16,7 +16,12 @@ interface CollectionChipsProps {
   className?: string;
 }
 
-export function CollectionChips({ items, activeId, onSelect, className = "" }: CollectionChipsProps) {
+export function CollectionChips({
+  items,
+  activeId,
+  onSelect,
+  className = "",
+}: CollectionChipsProps) {
   return (
     <div className={`w-full overflow-x-auto no-scrollbar ${className}`} aria-label="Collections">
       <div className="flex gap-4">
@@ -29,17 +34,30 @@ export function CollectionChips({ items, activeId, onSelect, className = "" }: C
               className={`flex flex-col items-center justify-center w-16 shrink-0 focus:outline-none ${isActive ? "opacity-100" : "opacity-80 hover:opacity-100"}`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              transition={{ duration: animationTokens.duration.fast / 1000, ease: animationTokens.easing.entrance }}
+              transition={{
+                duration: animationTokens.duration.fast / 1000,
+                ease: animationTokens.easing.entrance,
+              }}
             >
-              <div className={`w-14 h-14 rounded-full overflow-hidden border ${isActive ? "border-white" : "border-gray-700"}`}>
+              <div
+                className={`w-14 h-14 rounded-full overflow-hidden border ${isActive ? "border-white" : "border-gray-700"}`}
+              >
                 {item.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.imageUrl} alt={item.label} className="w-full h-full object-cover" />
+                  <img
+                    src={item.imageUrl}
+                    alt={item.label}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <div className="w-full h-full bg-gray-700" />
                 )}
               </div>
-              <div className={`mt-2 text-[10px] uppercase tracking-wide ${isActive ? "text-white" : "text-gray-400"}`}>{item.label}</div>
+              <div
+                className={`mt-2 text-[10px] uppercase tracking-wide ${isActive ? "text-white" : "text-gray-400"}`}
+              >
+                {item.label}
+              </div>
             </motion.button>
           );
         })}
@@ -47,5 +65,3 @@ export function CollectionChips({ items, activeId, onSelect, className = "" }: C
     </div>
   );
 }
-
-

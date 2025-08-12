@@ -75,8 +75,14 @@
 
 /* Performance optimizations */
 @layer utilities {
-  .gpu-accelerated { will-change: transform; transform: translateZ(0); }
-  .smooth-scroll { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+  .gpu-accelerated {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+  .smooth-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
 
   /* Loading states */
   .loading-shimmer {
@@ -90,7 +96,14 @@
     animation: shimmer 2s infinite;
   }
 
-  @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
 
   /* Luxe surfaces */
   .glass {
@@ -100,8 +113,12 @@
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid hsl(var(--glass-border));
   }
-  .elev-1 { box-shadow: var(--elev-1); }
-  .elev-2 { box-shadow: var(--elev-2); }
+  .elev-1 {
+    box-shadow: var(--elev-1);
+  }
+  .elev-2 {
+    box-shadow: var(--elev-2);
+  }
 }
 
 /* Critical CSS for above-the-fold content */
@@ -114,20 +131,31 @@
 }
 
 /* Optimize scrolling performance */
-.scroll-container { overscroll-behavior: contain; scroll-snap-type: y mandatory; }
-.scroll-item { scroll-snap-align: start; }
+.scroll-container {
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+}
+.scroll-item {
+  scroll-snap-align: start;
+}
 
 /* Reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
 
-  .gpu-accelerated { transform: none !important; }
+  .gpu-accelerated {
+    transform: none !important;
+  }
 
   /* Videos should not autoplay under reduced motion */
-  video[autoplay] { animation: none !important; }
+  video[autoplay] {
+    animation: none !important;
+  }
 }

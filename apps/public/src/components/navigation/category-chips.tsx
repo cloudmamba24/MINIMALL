@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { animationTokens } from "@/lib/animation-tokens";
+import { motion } from "framer-motion";
 
 export interface CategoryChipItem {
   id: string;
@@ -17,7 +17,11 @@ interface CategoryChipsProps {
 
 export function CategoryChips({ items, activeId, onSelect, className = "" }: CategoryChipsProps) {
   return (
-    <div className={`w-full overflow-x-auto no-scrollbar ${className}`} role="tablist" aria-label="Categories">
+    <div
+      className={`w-full overflow-x-auto no-scrollbar ${className}`}
+      role="tablist"
+      aria-label="Categories"
+    >
       <div className="flex gap-2">
         {items.map((item) => {
           const isActive = item.id === activeId;
@@ -30,7 +34,10 @@ export function CategoryChips({ items, activeId, onSelect, className = "" }: Cat
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${isActive ? "bg-white text-black" : "bg-gray-800 text-gray-200 hover:bg-gray-700"}`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              transition={{ duration: animationTokens.duration.fast / 1000, ease: animationTokens.easing.entrance }}
+              transition={{
+                duration: animationTokens.duration.fast / 1000,
+                ease: animationTokens.easing.entrance,
+              }}
             >
               {item.label}
             </motion.button>
@@ -40,5 +47,3 @@ export function CategoryChips({ items, activeId, onSelect, className = "" }: Cat
     </div>
   );
 }
-
-

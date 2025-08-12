@@ -1,8 +1,8 @@
 "use client";
 
-import { type Category } from "@minimall/core";
-import { motion } from "framer-motion";
 import { animationTokens } from "@/lib/animation-tokens";
+import type { Category } from "@minimall/core";
+import { motion } from "framer-motion";
 
 interface LookbookSectionProps {
   category: Category;
@@ -17,7 +17,10 @@ export function LookbookSection({ category, onHotspotClick }: LookbookSectionPro
         {items.map((child, index) => {
           const [, cardDetails] = child.card;
           const details = cardDetails as any;
-          const tags = (details.productTags || []) as Array<{ productId: string; position: { x: number; y: number } }>;
+          const tags = (details.productTags || []) as Array<{
+            productId: string;
+            position: { x: number; y: number };
+          }>;
           return (
             <motion.div
               key={child.id}
@@ -27,7 +30,11 @@ export function LookbookSection({ category, onHotspotClick }: LookbookSectionPro
               transition={{ delay: index * (animationTokens.duration.stagger / 1000) }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={details.image || details.imageUrl || ""} alt={child.title} className="w-full h-auto object-cover" />
+              <img
+                src={details.image || details.imageUrl || ""}
+                alt={child.title}
+                className="w-full h-auto object-cover"
+              />
 
               {tags.map((tag, i) => (
                 <button
@@ -35,7 +42,11 @@ export function LookbookSection({ category, onHotspotClick }: LookbookSectionPro
                   type="button"
                   onClick={() => onHotspotClick?.(tag.productId)}
                   className="absolute w-5 h-5 rounded-full bg-white text-black flex items-center justify-center shadow-md"
-                  style={{ left: `${tag.position.x * 100}%`, top: `${tag.position.y * 100}%`, transform: "translate(-50%, -50%)" }}
+                  style={{
+                    left: `${tag.position.x * 100}%`,
+                    top: `${tag.position.y * 100}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
                   aria-label="Shop this product"
                 >
                   •
@@ -48,5 +59,3 @@ export function LookbookSection({ category, onHotspotClick }: LookbookSectionPro
     </section>
   );
 }
-
-

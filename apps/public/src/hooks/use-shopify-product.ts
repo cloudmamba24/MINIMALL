@@ -24,13 +24,13 @@ export function useShopifyProduct(
   const [error, setError] = useState<string | null>(null);
 
   // Get config from context (may not be available in all contexts)
-  let siteConfig = null;
+  let _siteConfig = null;
   let configShopDomain = overrideShopDomain;
   let configAccessToken = null;
 
   try {
     const config = useSiteConfig();
-    siteConfig = config.config;
+    _siteConfig = config.config;
     configShopDomain = overrideShopDomain || config.shopDomain;
     configAccessToken = config.config.settings.shopify?.storefrontAccessToken;
   } catch {

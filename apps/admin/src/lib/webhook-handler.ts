@@ -88,7 +88,7 @@ export class WebhookHandler {
 
   private async storeWebhook(context: WebhookContext, _rawBody: string): Promise<void> {
     const { createDatabase, webhooks } = await import("@minimall/db");
-    const db = createDatabase(process.env.DATABASE_URL!);
+    const db = createDatabase(process.env.DATABASE_URL || "");
 
     await db.insert(webhooks).values({
       shopDomain: context.shop,
@@ -102,7 +102,7 @@ export class WebhookHandler {
 
   private async markWebhookProcessed(context: WebhookContext): Promise<void> {
     const { createDatabase, webhooks } = await import("@minimall/db");
-    const db = createDatabase(process.env.DATABASE_URL!);
+    const db = createDatabase(process.env.DATABASE_URL || "");
 
     await db
       .update(webhooks)
@@ -153,7 +153,7 @@ export class WebhookHandler {
   private async handleAppUninstall(context: WebhookContext): Promise<void> {
     const { shop } = context;
     const { createDatabase, users, configs, featureFlags } = await import("@minimall/db");
-    const _db = createDatabase(process.env.DATABASE_URL!);
+    const _db = createDatabase(process.env.DATABASE_URL || "");
 
     try {
       // Clean up shop data (be careful with cascade deletions)
@@ -249,7 +249,7 @@ export class WebhookHandler {
     // - Clean up any backup or cached data
 
     const { createDatabase, webhooks, analyticsEvents, configs } = await import("@minimall/db");
-    const db = createDatabase(process.env.DATABASE_URL!);
+    const db = createDatabase(process.env.DATABASE_URL || "");
 
     try {
       // Remove all remaining data for this shop
