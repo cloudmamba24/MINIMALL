@@ -16,7 +16,7 @@ interface GraphQLError {
   path?: string[];
 }
 
-interface GraphQLResponse<T = unknown> {
+interface GraphQLResponse<T = any> {
   data?: T;
   errors?: GraphQLError[];
   extensions?: Record<string, any>;
@@ -36,7 +36,7 @@ export class ShopifyStorefrontService {
   /**
    * Execute GraphQL query with error handling and retries
    */
-  private async query<T = unknown>(
+  private async query<T = any>(
     query: string,
     variables?: Record<string, unknown>,
     retries = 3

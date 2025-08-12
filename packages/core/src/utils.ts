@@ -58,8 +58,24 @@ export async function createEnhancedSiteConfig(
 			);
 
 			// Fetch first 8 products for the demo
-			const searchResult = await shopifyService.searchProducts("*", 8);
-			realProducts = searchResult.products.map(transformProduct) as unknown[];
+      const searchResult = await shopifyService.searchProducts("*", 8);
+      realProducts = (searchResult.products as unknown[]).map((p) =>
+        transformProduct(p as {
+          id: string;
+          title: string;
+          handle: string;
+          description?: string | null;
+          images?: { nodes?: Array<{ id: string; url: string; altText?: string | null; width: number; height: number }> };
+          variants?: { nodes?: Array<unknown> };
+          priceRange: { minVariantPrice: { amount: string; currencyCode: string }; maxVariantPrice: { amount: string; currencyCode: string } };
+          tags?: string[];
+          productType?: string;
+          vendor?: string;
+          availableForSale: boolean;
+          createdAt: string;
+          updatedAt: string;
+        }),
+      ) as unknown[];
 
 			console.log(`Loaded ${realProducts.length} products from Shopify`);
 		} catch (error) {

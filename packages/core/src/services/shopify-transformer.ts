@@ -130,8 +130,31 @@ export function transformProduct(graphqlProduct: {
     title: graphqlProduct.title,
     handle: graphqlProduct.handle,
     description: graphqlProduct.description || "",
-    images: graphqlProduct.images?.nodes?.map(transformImage) || [],
-    variants: graphqlProduct.variants?.nodes?.map(transformVariant) || [],
+    images: (graphqlProduct.images?.nodes as unknown[] | undefined)?.map((n) =>
+      transformImage(n as {
+        id: string;
+        url: string;
+        altText?: string | null;
+        width: number;
+        height: number;
+      }),
+    ) || [],
+    variants: (graphqlProduct.variants?.nodes as unknown[] | undefined)?.map((n) =>
+      transformVariant(n as {
+        id: string;
+        title: string;
+        price: { amount: string; currencyCode: string };
+        availableForSale: boolean;
+        selectedOptions?: Array<{ name: string; value: string }>;
+        requiresShipping: boolean;
+        compareAtPrice?: { amount: string; currencyCode: string } | null;
+        image?: { id: string; url: string; altText?: string | null; width: number; height: number } | null;
+        sku?: string | null;
+        barcode?: string | null;
+        weight?: number | null;
+        weightUnit?: string | null;
+      }),
+    ) || [],
     priceRange: {
       minVariantPrice: transformMoney(graphqlProduct.priceRange.minVariantPrice),
       maxVariantPrice: transformMoney(graphqlProduct.priceRange.maxVariantPrice),
