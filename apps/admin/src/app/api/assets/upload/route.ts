@@ -51,14 +51,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
 
     // Upload to R2
-    const _uploadResult = await r2Service.putObject(key, buffer, {
-      metadata: {
-        originalName: file.name,
-        uploadedAt: new Date().toISOString(),
-        size: file.size.toString(),
-        mimeType: file.type,
-      },
-    });
+    await r2Service.putObject(key, buffer, { contentType: file.type });
 
     // Get the uploaded object URL
     const url = r2Service.getObjectUrl(key);

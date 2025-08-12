@@ -9,7 +9,7 @@ export interface SentryConfig {
   replaysSessionSampleRate?: number;
   replaysOnErrorSampleRate?: number;
   beforeSend?: (event: unknown) => unknown;
-  integrations?: unknown[];
+  integrations?: unknown[] | ((integrations: unknown[]) => unknown[]);
   tags?: Record<string, string>;
 }
 
@@ -83,7 +83,7 @@ export function createSentryConfig(config: SentryConfig & { component: string })
 /**
  * Client-side Sentry configuration factory
  */
-export function createClientConfig(overrides: Partial<SentryConfig> = {}): SentryConfig {
+export function createClientConfig(overrides: Partial<SentryConfig> = {}): any {
   const baseConfig = createSentryConfig({
     component: "client",
     enableReplays: true,
@@ -96,13 +96,13 @@ export function createClientConfig(overrides: Partial<SentryConfig> = {}): Sentr
     return { ...baseConfig, dsn: "", beforeSend: () => null } as SentryConfig;
   }
 
-  return { ...baseConfig, dsn: baseConfig.dsn } as SentryConfig;
+  return { ...baseConfig, dsn: baseConfig.dsn } as any;
 }
 
 /**
  * Server-side Sentry configuration factory
  */
-export function createServerConfig(overrides: Partial<SentryConfig> = {}): SentryConfig {
+export function createServerConfig(overrides: Partial<SentryConfig> = {}): any {
   const baseConfig = createSentryConfig({
     component: "server",
     enableReplays: false,
@@ -115,13 +115,13 @@ export function createServerConfig(overrides: Partial<SentryConfig> = {}): Sentr
     return { ...baseConfig, dsn: "", beforeSend: () => null } as SentryConfig;
   }
 
-  return { ...baseConfig, dsn: baseConfig.dsn } as SentryConfig;
+  return { ...baseConfig, dsn: baseConfig.dsn } as any;
 }
 
 /**
  * Edge runtime Sentry configuration factory
  */
-export function createEdgeConfig(overrides: Partial<SentryConfig> = {}): SentryConfig {
+export function createEdgeConfig(overrides: Partial<SentryConfig> = {}): any {
   const baseConfig = createSentryConfig({
     component: "edge",
     enableReplays: false,
@@ -135,5 +135,5 @@ export function createEdgeConfig(overrides: Partial<SentryConfig> = {}): SentryC
     return { ...baseConfig, dsn: "", beforeSend: () => null } as SentryConfig;
   }
 
-  return { ...baseConfig, dsn: baseConfig.dsn } as SentryConfig;
+  return { ...baseConfig, dsn: baseConfig.dsn } as any;
 }
