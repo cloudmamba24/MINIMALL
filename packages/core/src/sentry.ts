@@ -51,18 +51,26 @@ export function createSentryConfig(config: SentryConfig & { component: string })
       return event;
     },
 
-    integrations: [
-      // Replay integration temporarily disabled for compatibility
-      // ...(enableReplays
-      //   ? [
-      //       Sentry.replayIntegration({
-      //         maskAllText: false,
-      //         blockAllMedia: false,
-      //       }),
-      //     ]
-      //   : []),
-      ...integrations,
-    ],
+    // Support both array and callback forms for integrations
+    ...(Array.isArray(integrations)
+      ? {
+          integrations: [
+            // Replay integration temporarily disabled for compatibility
+            // ...(enableReplays
+            //   ? [
+            //       Sentry.replayIntegration({
+            //         maskAllText: false,
+            //         blockAllMedia: false,
+            //       }),
+            //     ]
+            //   : []),
+            ...integrations,
+          ],
+        }
+      : {
+          // If a function is provided, pass it through directly
+          integrations,
+        }),
 
     // Replay configuration
     ...(enableReplays && {
