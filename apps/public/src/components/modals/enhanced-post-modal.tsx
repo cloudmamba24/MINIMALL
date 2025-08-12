@@ -349,7 +349,7 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
             </motion.div>
           </AnimatePresence>
         </div>
-      </div>
+      </fieldset>
     </EnhancedModal>
   );
 }

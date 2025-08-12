@@ -161,9 +161,10 @@ export async function GET(request: NextRequest) {
           await Promise.all([
             // Fetch recent performance metrics for display
             withQueryMonitoring(
-              () =>
-                db
-                  ?.select({
+              () => {
+                const database = db!;
+                return database
+                  .select({
                     id: performanceMetrics.id,
                     configId: performanceMetrics.configId,
                     lcp: performanceMetrics.lcp,
@@ -180,16 +181,19 @@ export async function GET(request: NextRequest) {
                   .from(performanceMetrics)
                   .where(baseConditions.length > 0 ? and(...baseConditions) : sql`TRUE`)
                   .orderBy(desc(performanceMetrics.timestamp))
-                  .limit(1000),
+                  .limit(1000)
+                  .execute();
+              },
               "fetch_performance_metrics",
               [params.configId, params.timeframe]
             ),
 
             // Database aggregation for performance metrics (much more efficient)
             withQueryMonitoring(
-              () =>
-                db
-                  ?.select({
+              () => {
+                const database = db!;
+                return database
+                  .select({
                     avgLcp: sql<number>`COALESCE(AVG(${performanceMetrics.lcp}), 0)`,
                     avgFid: sql<number>`COALESCE(AVG(${performanceMetrics.fid}), 0)`,
                     avgCls: sql<number>`COALESCE(AVG(${performanceMetrics.cls}), 0)`,
@@ -197,16 +201,19 @@ export async function GET(request: NextRequest) {
                     totalMetrics: sql<number>`COUNT(*)`,
                   })
                   .from(performanceMetrics)
-                  .where(baseConditions.length > 0 ? and(...baseConditions) : sql`TRUE`),
+                  .where(baseConditions.length > 0 ? and(...baseConditions) : sql`TRUE`)
+                  .execute();
+              },
               "aggregate_performance_metrics",
               [params.configId, params.timeframe]
             ),
 
             // Fetch recent analytics events for display
             withQueryMonitoring(
-              () =>
-                db
-                  ?.select({
+              () => {
+                const database = db!;
+                return database
+                  .select({
                     id: analyticsEvents.id,
                     event: analyticsEvents.event,
                     configId: analyticsEvents.configId,
@@ -222,23 +229,28 @@ export async function GET(request: NextRequest) {
                   .from(analyticsEvents)
                   .where(analyticsConditions.length > 0 ? and(...analyticsConditions) : sql`TRUE`)
                   .orderBy(desc(analyticsEvents.timestamp))
-                  .limit(1000),
+                  .limit(1000)
+                  .execute();
+              },
               "fetch_analytics_events",
               [params.configId, params.timeframe]
             ),
 
             // Database aggregation for analytics events (much more efficient)
             withQueryMonitoring(
-              () =>
-                db
-                  ?.select({
+              () => {
+                const database = db!;
+                return database
+                  .select({
                     event: analyticsEvents.event,
                     eventCount: sql<number>`COUNT(*)`,
                     uniqueSessions: sql<number>`COUNT(DISTINCT ${analyticsEvents.sessionId})`,
                   })
                   .from(analyticsEvents)
                   .where(analyticsConditions.length > 0 ? and(...analyticsConditions) : sql`TRUE`)
-                  .groupBy(analyticsEvents.event),
+                  .groupBy(analyticsEvents.event)
+                  .execute();
+              },
               "aggregate_analytics_events",
               [params.configId, params.timeframe]
             ),
