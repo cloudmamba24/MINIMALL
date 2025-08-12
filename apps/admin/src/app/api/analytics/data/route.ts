@@ -190,11 +190,11 @@ export async function GET(request: NextRequest) {
               () =>
                 db!
                   .select({
-                    avgLcp: sql<number>`COALESCE(AVG(${performanceMetrics.lcp}), 0)",
-                avgFid: sql<number>"COALESCE(AVG(${performanceMetrics.fid}), 0)",
-                avgCls: sql<number>"COALESCE(AVG(${performanceMetrics.cls}), 0)",
-                avgTtfb: sql<number>"COALESCE(AVG(${performanceMetrics.ttfb}), 0)",
-                totalMetrics: sql<number>"COUNT(*)`,
+                    avgLcp: sql<number>`COALESCE(AVG(${performanceMetrics.lcp}), 0)`,
+                    avgFid: sql<number>`COALESCE(AVG(${performanceMetrics.fid}), 0)`,
+                    avgCls: sql<number>`COALESCE(AVG(${performanceMetrics.cls}), 0)`,
+                    avgTtfb: sql<number>`COALESCE(AVG(${performanceMetrics.ttfb}), 0)`,
+                    totalMetrics: sql<number>`COUNT(*)`,
                   })
                   .from(performanceMetrics)
                   .where(baseConditions.length > 0 ? and(...baseConditions) : sql`TRUE`),
