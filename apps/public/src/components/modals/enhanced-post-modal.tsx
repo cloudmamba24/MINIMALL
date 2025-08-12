@@ -85,7 +85,7 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
       size="xl"
       className="bg-black text-white"
     >
-      <div
+      <fieldset
         className="flex h-[82vh] max-h-[82vh]"
         onKeyDown={(e) => {
           if (e.key === "ArrowLeft" && canGoPrev) {
@@ -97,7 +97,6 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
           }
         }}
         tabIndex={-1}
-        role="group"
         aria-roledescription="Lightbox navigation"
       >
         {/* Left side - Image with product tags */}
@@ -205,7 +204,9 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
                           e.preventDefault();
                           try {
                             v.paused ? v.play() : v.pause();
-                          } catch {}
+                          } catch {
+                            /* ignore */
+                          }
                         }
                       }}
                     >

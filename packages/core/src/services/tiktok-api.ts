@@ -1,11 +1,11 @@
 /**
  * TikTok API Integration
- * 
+ *
  * Real TikTok API integration for importing videos and user content
  * Requires TikTok for Developers API setup and user OAuth tokens
  */
 
-import { SocialPost, SocialEngagement, SocialAuthor } from '../types';
+import type { SocialAuthor, SocialEngagement, SocialPost } from "../types";
 
 export interface TikTokAPIConfig {
   clientKey: string;
@@ -58,7 +58,7 @@ export interface TikTokUser {
 
 export class TikTokAPI {
   private config: TikTokAPIConfig;
-  private baseUrl = 'https://open-api.tiktok.com';
+  private baseUrl = "https://open-api.tiktok.com";
 
   constructor(config: TikTokAPIConfig) {
     this.config = config;
@@ -70,8 +70,8 @@ export class TikTokAPI {
   getAuthorizationUrl(state?: string): string {
     const params = new URLSearchParams({
       client_key: this.config.clientKey,
-      response_type: 'code',
-      scope: 'user.info.basic,video.list,video.upload',
+      response_type: "code",
+      scope: "user.info.basic,video.list,video.upload",
       redirect_uri: this.config.redirectUri,
       ...(state && { state }),
     });
@@ -91,16 +91,16 @@ export class TikTokAPI {
     open_id: string;
   }> {
     const response = await fetch(`${this.baseUrl}/v2/oauth/token/`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Cache-Control': 'no-cache',
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Cache-Control": "no-cache",
       },
       body: new URLSearchParams({
         client_key: this.config.clientKey,
         client_secret: this.config.clientSecret,
         code,
-        grant_type: 'authorization_code',
+        grant_type: "authorization_code",
         redirect_uri: this.config.redirectUri,
       }),
     });
@@ -118,9 +118,14 @@ export class TikTokAPI {
    * Get user profile information
    */
   async getUserInfo(accessToken: string): Promise<TikTokUser> {
-    const response = await this.makeAPIRequest('/v2/user/info/', {
-      fields: 'open_id,union_id,avatar_url,avatar_url_100,avatar_large_url,display_name,bio_description,profile_deep_link,is_verified,follower_count,following_count,likes_count,video_count',
-    }, accessToken);
+    const response = await this.makeAPIRequest(
+      "/v2/user/info/",
+      {
+        fields:
+          "open_id,union_id,avatar_url,avatar_url_100,avatar_large_url,display_name,bio_description,profile_deep_link,is_verified,follower_count,following_count,likes_count,video_count",
+      },
+      accessToken
+    );
 
     return response.data.user;
   }
@@ -140,9 +145,10 @@ export class TikTokAPI {
     has_more: boolean;
   }> {
     const { max_count = 20, cursor } = options;
-    
+
     const params: Record<string, string> = {
-      fields: 'id,title,video_description,duration,height,width,share_url,embed_html,embed_link,cover_image_url,create_time,share_count,view_count,like_count,comment_count,music_info',
+      fields:
+        "id,title,video_description,duration,height,width,share_url,embed_html,embed_link,cover_image_url,create_time,share_count,view_count,like_count,comment_count,music_info",
       max_count: max_count.toString(),
     };
 
@@ -150,11 +156,11 @@ export class TikTokAPI {
       params.cursor = cursor;
     }
 
-    const response = await this.makeAPIRequest('/v2/video/list/', params, accessToken);
+    const response = await this.makeAPIRequest("/v2/video/list/", params, accessToken);
 
     return {
       videos: response.data.videos || [],
-      cursor: response.data.cursor || '',
+      cursor: response.data.cursor || "",
       has_more: response.data.has_more || false,
     };
   }
@@ -162,14 +168,16 @@ export class TikTokAPI {
   /**
    * Get specific video details
    */
-  async getVideoDetails(
-    videoIds: string[],
-    accessToken: string
-  ): Promise<TikTokVideo[]> {
-    const response = await this.makeAPIRequest('/v2/video/query/', {
-      fields: 'id,title,video_description,duration,height,width,share_url,embed_html,embed_link,cover_image_url,create_time,share_count,view_count,like_count,comment_count,music_info',
-      video_ids: videoIds.join(','),
-    }, accessToken);
+  async getVideoDetails(videoIds: string[], accessToken: string): Promise<TikTokVideo[]> {
+    const response = await this.makeAPIRequest(
+      "/v2/video/query/",
+      {
+        fields:
+          "id,title,video_description,duration,height,width,share_url,embed_html,embed_link,cover_image_url,create_time,share_count,view_count,like_count,comment_count,music_info",
+        video_ids: videoIds.join(","),
+      },
+      accessToken
+    );
 
     return response.data.videos || [];
   }
@@ -206,7 +214,7 @@ export class TikTokAPI {
     return {
       configId,
       shopDomain,
-      platform: 'tiktok',
+      platform: "tiktok",
       originalUrl: video.share_url,
       postId: video.id,
       caption: video.video_description,
@@ -219,8 +227,8 @@ export class TikTokAPI {
           height: video.height,
         },
         duration: video.duration,
-        aspectRatio: '9:16',
-        format: 'mp4',
+        aspectRatio: "9:16",
+        format: "mp4",
         thumbnail: video.cover_image_url,
       },
       engagement,
@@ -265,10 +273,10 @@ export class TikTokAPI {
     hasMore: boolean;
   }> {
     const { maxCount = 20, cursor, hashtagFilter, minimumLikes = 0, minimumViews = 0 } = options;
-    
+
     // Get user info first
     const user = await this.getUserInfo(accessToken);
-    
+
     // Get user videos
     const videosResponse = await this.getUserVideos(accessToken, {
       max_count: maxCount,
@@ -289,7 +297,7 @@ export class TikTokAPI {
 
       if (hashtagFilter && hashtagFilter.length > 0) {
         const postHashtags = this.extractHashtags(video.video_description);
-        const hasMatchingHashtag = hashtagFilter.some(tag => 
+        const hasMatchingHashtag = hashtagFilter.some((tag) =>
           postHashtags.includes(tag.toLowerCase())
         );
         if (!hasMatchingHashtag) {
@@ -297,12 +305,7 @@ export class TikTokAPI {
         }
       }
 
-      const socialPost = await this.convertToSocialPost(
-        video,
-        user,
-        configId,
-        shopDomain
-      );
+      const socialPost = await this.convertToSocialPost(video, user, configId, shopDomain);
       posts.push(socialPost);
     }
 
@@ -325,19 +328,19 @@ export class TikTokAPI {
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.append(key, value);
     });
-    
+
     const response = await fetch(url.toString(), {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
     });
 
     const data = await response.json();
 
     if (data.error) {
-      throw new Error(`TikTok API error: ${data.error.message || 'Unknown error'}`);
+      throw new Error(`TikTok API error: ${data.error.message || "Unknown error"}`);
     }
 
     return data;
@@ -349,7 +352,7 @@ export class TikTokAPI {
   private extractHashtags(text: string): string[] {
     const hashtagRegex = /#([a-zA-Z0-9_\u4e00-\u9fff]+)/g;
     const matches = text.match(hashtagRegex);
-    return matches ? matches.map(tag => tag.slice(1).toLowerCase()) : [];
+    return matches ? matches.map((tag) => tag.slice(1).toLowerCase()) : [];
   }
 
   /**
@@ -358,7 +361,7 @@ export class TikTokAPI {
   private extractMentions(text: string): string[] {
     const mentionRegex = /@([a-zA-Z0-9_.]+)/g;
     const matches = text.match(mentionRegex);
-    return matches ? matches.map(mention => mention.slice(1).toLowerCase()) : [];
+    return matches ? matches.map((mention) => mention.slice(1).toLowerCase()) : [];
   }
 
   /**
@@ -372,15 +375,15 @@ export class TikTokAPI {
     token_type: string;
   }> {
     const response = await fetch(`${this.baseUrl}/v2/oauth/token/`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Cache-Control': 'no-cache',
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Cache-Control": "no-cache",
       },
       body: new URLSearchParams({
         client_key: this.config.clientKey,
         client_secret: this.config.clientSecret,
-        grant_type: 'refresh_token',
+        grant_type: "refresh_token",
         refresh_token: refreshToken,
       }),
     });
@@ -409,12 +412,12 @@ export function isValidTikTokUrl(url: string): boolean {
   try {
     const parsedUrl = new URL(url);
     const hostname = parsedUrl.hostname.toLowerCase();
-    
+
     return (
-      (hostname === 'tiktok.com' || 
-       hostname === 'www.tiktok.com' || 
-       hostname === 'vm.tiktok.com') &&
-      (parsedUrl.pathname.includes('/@') || parsedUrl.pathname.includes('/video/'))
+      (hostname === "tiktok.com" ||
+        hostname === "www.tiktok.com" ||
+        hostname === "vm.tiktok.com") &&
+      (parsedUrl.pathname.includes("/@") || parsedUrl.pathname.includes("/video/"))
     );
   } catch {
     return false;

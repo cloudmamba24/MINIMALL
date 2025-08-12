@@ -34,7 +34,7 @@ export function DragDropUrlImport({
   const [isDragOver, setIsDragOver] = useState(false);
   const [urls, setUrls] = useState<UrlEntry[]>([]);
   const [inputValue, setInputValue] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const _fileInputRef = useRef<HTMLInputElement>(null);
 
   // Extract URLs from text using regex
   const extractUrlsFromText = (text: string): string[] => {
@@ -103,7 +103,7 @@ export function DragDropUrlImport({
                   return u;
                 })
               );
-            } catch (error) {
+            } catch (_error) {
               setUrls((prev) =>
                 prev.map((u) => {
                   if (u.id === entry.id) {

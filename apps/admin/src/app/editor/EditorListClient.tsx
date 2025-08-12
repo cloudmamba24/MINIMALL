@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Card, Layout, Page } from "@shopify/polaris";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 interface ConfigListItem {
   id: string;
@@ -45,7 +45,14 @@ export default function EditorListClient() {
       <Layout>
         <Layout.Section>
           <Card>
-            <div style={{ padding: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div
+              style={{
+                padding: 16,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
               <div style={{ fontWeight: 600 }}>Pages</div>
               <Button variant="primary" onClick={() => router.push(`/editor/new${suffix}`)}>
                 Create New
@@ -57,18 +64,36 @@ export default function EditorListClient() {
                 <div style={{ color: "#6d7175" }}>No pages yet. Create your first one.</div>
               )}
               {!loading && items.length > 0 && (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 12 }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                    gap: 12,
+                  }}
+                >
                   {items.map((item) => (
-                    <div key={item.id} style={{ border: "1px solid #dfe3e8", borderRadius: 8, padding: 12 }}>
+                    <div
+                      key={item.id}
+                      style={{ border: "1px solid #dfe3e8", borderRadius: 8, padding: 12 }}
+                    >
                       <div style={{ fontWeight: 600, marginBottom: 4 }}>{item.id}</div>
                       <div style={{ color: "#6d7175", fontSize: 12 }}>
                         {item.shop || ""} {item.slug ? `• ${item.slug}` : ""}
                       </div>
                       <div style={{ color: "#6d7175", fontSize: 12, marginTop: 6 }}>
-                        Updated {item.updatedAt ? new Date(item.updatedAt as any).toLocaleString() : "—"}
+                        Updated{" "}
+                        {(() => {
+                          const dateValue =
+                            typeof item.updatedAt === "string"
+                              ? new Date(item.updatedAt)
+                              : item.updatedAt ?? null;
+                          return dateValue ? dateValue.toLocaleString() : "—";
+                        })()}
                       </div>
                       <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-                        <Button onClick={() => router.push(`/editor/${item.id}${suffix}`)}>Open</Button>
+                        <Button onClick={() => router.push(`/editor/${item.id}${suffix}`)}>
+                          Open
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -81,5 +106,3 @@ export default function EditorListClient() {
     </Page>
   );
 }
-
-

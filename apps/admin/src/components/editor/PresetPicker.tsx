@@ -174,7 +174,7 @@ export function PresetPicker({
   className,
   showSocialPresets = false,
 }: PresetPickerProps) {
-  const allPresets = showSocialPresets
+  const _allPresets = showSocialPresets
     ? [...LAYOUT_PRESETS, ...SOCIAL_LAYOUT_PRESETS]
     : LAYOUT_PRESETS;
 

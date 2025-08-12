@@ -262,7 +262,7 @@ interface TopPostCardProps {
 }
 
 function TopPostCard({ post }: TopPostCardProps) {
-  const engagement = post.engagement.likes + post.engagement.comments + post.engagement.shares;
+  const _engagement = post.engagement.likes + post.engagement.comments + post.engagement.shares;
 
   return (
     <motion.div
@@ -377,7 +377,7 @@ function calculateSocialMetrics(posts: SocialPost[], analytics: SocialAnalytics[
   };
 }
 
-function getTopPerformingPosts(posts: SocialPost[], analytics: SocialAnalytics[]): SocialPost[] {
+function getTopPerformingPosts(posts: SocialPost[], _analytics: SocialAnalytics[]): SocialPost[] {
   return posts
     .sort((a, b) => {
       const aEngagement = a.engagement.likes + a.engagement.comments + a.engagement.shares;
@@ -390,11 +390,11 @@ function getTopPerformingPosts(posts: SocialPost[], analytics: SocialAnalytics[]
 function getTrendingHashtags(posts: SocialPost[]): { tag: string; count: number }[] {
   const hashtagCounts = new Map<string, number>();
 
-  posts.forEach((post) => {
-    post.hashtags.forEach((hashtag) => {
+  for (const post of posts) {
+    for (const hashtag of post.hashtags) {
       hashtagCounts.set(hashtag, (hashtagCounts.get(hashtag) || 0) + 1);
-    });
-  });
+    }
+  }
 
   return Array.from(hashtagCounts.entries())
     .map(([tag, count]) => ({ tag, count }))

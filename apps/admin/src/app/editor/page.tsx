@@ -4,12 +4,7 @@ export const revalidate = 0;
 
 import EditorListClient from "./EditorListClient";
 
-interface ConfigListItem {
-  id: string;
-  shop?: string | null;
-  slug?: string | null;
-  updatedAt?: string | Date | null;
-}
+// Removed unused interface flagged by linter
 
 export default function EditorIndexPage() {
   return (
@@ -18,5 +13,3 @@ export default function EditorIndexPage() {
     </Suspense>
   );
 }
-
-

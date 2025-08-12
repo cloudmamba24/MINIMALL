@@ -275,7 +275,7 @@ export async function GET(request: NextRequest) {
       upcomingScheduled: upcomingCount.length,
       message: "Cron endpoint is ready",
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       {
         status: "error",

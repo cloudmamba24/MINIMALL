@@ -83,7 +83,7 @@ export function SocialImporter({
 
       console.log(`[SocialImporter] URL validated for ${data.platform}`);
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }, []);
@@ -113,7 +113,7 @@ export function SocialImporter({
 
       setPreviewPost(data.post || null);
       setStep("preview");
-    } catch (error) {
+    } catch (_error) {
       setUrlError("Failed to extract content");
     } finally {
       setLoading(false);
@@ -153,7 +153,7 @@ export function SocialImporter({
       if (data.assets) {
         onImportComplete(data.assets);
       }
-    } catch (error) {
+    } catch (_error) {
       setUrlError("Import failed");
       setStep("preview");
     } finally {

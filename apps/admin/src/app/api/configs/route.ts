@@ -11,11 +11,7 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ success: true, items: [] });
     }
 
-    const items = await db
-      .select()
-      .from(configs)
-      .orderBy(desc(configs.updatedAt))
-      .limit(50);
+    const items = await db.select().from(configs).orderBy(desc(configs.updatedAt)).limit(50);
 
     return NextResponse.json({ success: true, items });
   } catch (error) {
@@ -110,5 +106,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to create config" }, { status: 500 });
   }
 }
-
-

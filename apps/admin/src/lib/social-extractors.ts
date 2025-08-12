@@ -437,7 +437,7 @@ function extractInstagramPostId(url: string): string | null {
 
   for (const pattern of patterns) {
     const match = url.match(pattern);
-    if (match && match[1]) return match[1];
+    if (match?.[1]) return match[1];
   }
 
   return null;
@@ -455,7 +455,7 @@ function extractTikTokPostId(url: string): string | null {
 
   for (const pattern of patterns) {
     const match = url.match(pattern);
-    if (match && match[1]) return match[1];
+    if (match?.[1]) return match[1];
   }
 
   return null;
@@ -469,7 +469,7 @@ function extractTwitterPostId(url: string): string | null {
 
   for (const pattern of patterns) {
     const match = url.match(pattern);
-    if (match && match[1]) return match[1];
+    if (match?.[1]) return match[1];
   }
 
   return null;
@@ -487,7 +487,7 @@ function extractYouTubeVideoId(url: string): string | null {
 
   for (const pattern of patterns) {
     const match = url.match(pattern);
-    if (match && match[1]) return match[1];
+    if (match?.[1]) return match[1];
   }
 
   return null;
@@ -501,7 +501,7 @@ function extractPinterestPinId(url: string): string | null {
 
   for (const pattern of patterns) {
     const match = url.match(pattern);
-    if (match && match[1]) return match[1];
+    if (match?.[1]) return match[1];
   }
 
   return null;
@@ -668,7 +668,7 @@ export function validateSocialMediaUrl(url: string): {
       valid: true,
       platform,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       valid: false,
       error: "Invalid URL format",

@@ -36,7 +36,7 @@ interface ImportResult {
     type: "image" | "video";
     filename: string;
     size: number;
-    metadata: Record<string, any>;
+    metadata: Record<string, unknown>;
   }>;
   error?: string;
 }
@@ -135,7 +135,10 @@ export async function POST(request: NextRequest) {
  * Download media from social post and upload to R2
  */
 async function downloadAndUploadMedia(
-  r2Service: any,
+  r2Service: {
+    putObject: (key: string, buffer: Buffer, options?: { metadata?: Record<string, unknown> }) => Promise<unknown>;
+    getObjectUrl: (key: string) => string;
+  } | null,
   post: SocialMediaPost,
   folder: string,
   processImages: boolean
@@ -196,14 +199,14 @@ async function downloadAndUploadMedia(
       };
 
       // Process images if requested
-      let finalBuffer = downloadResult.buffer;
-      let processedMetadata = metadata;
+      let finalBuffer: Buffer = downloadResult.buffer;
+      let processedMetadata: Record<string, unknown> = metadata;
 
       if (processImages && mediaItem.type === "image") {
         try {
           const processedResult = await processImageForSocial(downloadResult.buffer, post.platform);
           if (processedResult.success) {
-            finalBuffer = processedResult.buffer!;
+            finalBuffer = processedResult.buffer as Buffer;
             processedMetadata = {
               ...metadata,
               ...conditionalProps({
@@ -224,13 +227,13 @@ async function downloadAndUploadMedia(
         metadata: processedMetadata,
       });
 
-      const asset = {
+      const asset: NonNullable<ImportResult["assets"]>[number] = {
         id: key,
         url: r2Service.getObjectUrl(key),
         type: mediaItem.type,
         filename,
         size: finalBuffer.length,
-        metadata: processedMetadata,
+        metadata: processedMetadata as Record<string, unknown>,
       };
 
       assets.push(asset);
@@ -416,14 +419,14 @@ export async function GET(request: NextRequest) {
     }
 
     // Return platform info and extraction preview
-    return NextResponse.json({
+  return NextResponse.json({
       valid: true,
       platform: validation.platform,
-      platformName: getPlatformDisplayName(validation.platform!),
+      platformName: getPlatformDisplayName(validation.platform ?? "unknown"),
       canExtract: true,
       estimatedMedia: 1, // Simplified estimate
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({ error: "URL validation failed" }, { status: 500 });
   }
 }

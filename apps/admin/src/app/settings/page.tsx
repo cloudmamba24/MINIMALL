@@ -1,6 +1,6 @@
 "use client";
 
-import { Layout, Page, Card } from "@shopify/polaris";
+import { Card, Layout, Page } from "@shopify/polaris";
 
 export default function SettingsPage() {
   return (
@@ -8,14 +8,10 @@ export default function SettingsPage() {
       <Layout>
         <Layout.Section>
           <Card>
-            <div style={{ padding: 16 }}>
-              Settings will be available here soon.
-            </div>
+            <div style={{ padding: 16 }}>Settings will be available here soon.</div>
           </Card>
         </Layout.Section>
       </Layout>
     </Page>
   );
 }
-
-

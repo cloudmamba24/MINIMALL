@@ -1,11 +1,16 @@
 /**
  * Instagram Basic Display API Integration
- * 
+ *
  * Real Instagram API integration for importing posts, reels, and stories
  * Requires Instagram Basic Display API setup and user OAuth tokens
  */
 
-import { SocialPost, SocialConnection, SocialEngagement, SocialAuthor } from '../types';
+import {
+  type SocialAuthor,
+  SocialConnection,
+  type SocialEngagement,
+  type SocialPost,
+} from "../types";
 
 export interface InstagramAPIConfig {
   clientId: string;
@@ -16,7 +21,7 @@ export interface InstagramAPIConfig {
 
 export interface InstagramMedia {
   id: string;
-  media_type: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
+  media_type: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
   media_url: string;
   thumbnail_url?: string;
   permalink: string;
@@ -33,13 +38,13 @@ export interface InstagramMedia {
 export interface InstagramUser {
   id: string;
   username: string;
-  account_type: 'PERSONAL' | 'BUSINESS';
+  account_type: "PERSONAL" | "BUSINESS";
   media_count: number;
 }
 
 export class InstagramBasicDisplayAPI {
   private config: InstagramAPIConfig;
-  private baseUrl = 'https://graph.instagram.com';
+  private baseUrl = "https://graph.instagram.com";
 
   constructor(config: InstagramAPIConfig) {
     this.config = config;
@@ -52,8 +57,8 @@ export class InstagramBasicDisplayAPI {
     const params = new URLSearchParams({
       client_id: this.config.clientId,
       redirect_uri: this.config.redirectUri,
-      scope: 'user_profile,user_media',
-      response_type: 'code',
+      scope: "user_profile,user_media",
+      response_type: "code",
       ...(state && { state }),
     });
 
@@ -67,15 +72,15 @@ export class InstagramBasicDisplayAPI {
     access_token: string;
     user_id: string;
   }> {
-    const response = await fetch('https://api.instagram.com/oauth/access_token', {
-      method: 'POST',
+    const response = await fetch("https://api.instagram.com/oauth/access_token", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
         client_id: this.config.clientId,
         client_secret: this.config.clientSecret,
-        grant_type: 'authorization_code',
+        grant_type: "authorization_code",
         redirect_uri: this.config.redirectUri,
         code,
       }),
@@ -118,25 +123,19 @@ export class InstagramBasicDisplayAPI {
     };
   }> {
     const params = new URLSearchParams({
-      fields: 'id,media_type,media_url,thumbnail_url,permalink,caption,timestamp,username',
+      fields: "id,media_type,media_url,thumbnail_url,permalink,caption,timestamp,username",
       limit: limit.toString(),
       ...(after && { after }),
     });
 
-    const response = await this.makeAPIRequest(
-      `/me/media?${params.toString()}`,
-      accessToken
-    );
+    const response = await this.makeAPIRequest(`/me/media?${params.toString()}`, accessToken);
     return response;
   }
 
   /**
    * Get specific media item details
    */
-  async getMediaDetails(
-    mediaId: string,
-    accessToken: string
-  ): Promise<InstagramMedia> {
+  async getMediaDetails(mediaId: string, accessToken: string): Promise<InstagramMedia> {
     const response = await this.makeAPIRequest(
       `/${mediaId}?fields=id,media_type,media_url,thumbnail_url,permalink,caption,timestamp,username,like_count,comments_count,children{media_url,media_type}`,
       accessToken
@@ -153,13 +152,13 @@ export class InstagramBasicDisplayAPI {
     shopDomain: string
   ): Promise<Partial<SocialPost>> {
     // Extract hashtags and mentions from caption
-    const hashtags = this.extractHashtags(media.caption || '');
-    const mentions = this.extractMentions(media.caption || '');
+    const hashtags = this.extractHashtags(media.caption || "");
+    const mentions = this.extractMentions(media.caption || "");
 
     // Handle carousel posts (multiple media)
     let mediaUrls: string[] = [media.media_url];
-    if (media.media_type === 'CAROUSEL_ALBUM' && media.children?.data) {
-      mediaUrls = media.children.data.map(child => child.media_url);
+    if (media.media_type === "CAROUSEL_ALBUM" && media.children?.data) {
+      mediaUrls = media.children.data.map((child) => child.media_url);
     }
 
     const engagement: SocialEngagement = {
@@ -178,16 +177,16 @@ export class InstagramBasicDisplayAPI {
     return {
       configId,
       shopDomain,
-      platform: 'instagram',
+      platform: "instagram",
       originalUrl: media.permalink,
       postId: media.id,
-      caption: media.caption || '',
+      caption: media.caption || "",
       hashtags,
       mentions,
       mediaUrls, // These will need to be downloaded and uploaded to R2
       mediaMetadata: {
-        aspectRatio: media.media_type === 'IMAGE' ? '1:1' : '9:16',
-        format: media.media_type === 'VIDEO' ? 'mp4' : 'jpg',
+        aspectRatio: media.media_type === "IMAGE" ? "1:1" : "9:16",
+        format: media.media_type === "VIDEO" ? "mp4" : "jpg",
       },
       engagement,
       author,
@@ -226,22 +225,22 @@ export class InstagramBasicDisplayAPI {
     } = {}
   ): Promise<Partial<SocialPost>[]> {
     const { limit = 25, after, hashtagFilter, minimumLikes = 0 } = options;
-    
+
     const mediaResponse = await this.getUserMedia(accessToken, limit, after);
     const posts: Partial<SocialPost>[] = [];
 
     for (const media of mediaResponse.data) {
       // Get detailed media information including engagement
       const detailedMedia = await this.getMediaDetails(media.id, accessToken);
-      
+
       // Apply filters
       if (minimumLikes > 0 && (detailedMedia.like_count || 0) < minimumLikes) {
         continue;
       }
 
       if (hashtagFilter && hashtagFilter.length > 0) {
-        const postHashtags = this.extractHashtags(detailedMedia.caption || '');
-        const hasMatchingHashtag = hashtagFilter.some(tag => 
+        const postHashtags = this.extractHashtags(detailedMedia.caption || "");
+        const hasMatchingHashtag = hashtagFilter.some((tag) =>
           postHashtags.includes(tag.toLowerCase())
         );
         if (!hasMatchingHashtag) {
@@ -249,11 +248,7 @@ export class InstagramBasicDisplayAPI {
         }
       }
 
-      const socialPost = await this.convertToSocialPost(
-        detailedMedia,
-        configId,
-        shopDomain
-      );
+      const socialPost = await this.convertToSocialPost(detailedMedia, configId, shopDomain);
       posts.push(socialPost);
     }
 
@@ -265,16 +260,16 @@ export class InstagramBasicDisplayAPI {
    */
   private async makeAPIRequest(endpoint: string, accessToken: string): Promise<any> {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     const response = await fetch(url, {
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Instagram API error: ${error.error?.message || 'Unknown error'}`);
+      throw new Error(`Instagram API error: ${error.error?.message || "Unknown error"}`);
     }
 
     return response.json();
@@ -286,7 +281,7 @@ export class InstagramBasicDisplayAPI {
   private extractHashtags(text: string): string[] {
     const hashtagRegex = /#([a-zA-Z0-9_]+)/g;
     const matches = text.match(hashtagRegex);
-    return matches ? matches.map(tag => tag.slice(1).toLowerCase()) : [];
+    return matches ? matches.map((tag) => tag.slice(1).toLowerCase()) : [];
   }
 
   /**
@@ -295,7 +290,7 @@ export class InstagramBasicDisplayAPI {
   private extractMentions(text: string): string[] {
     const mentionRegex = /@([a-zA-Z0-9_.]+)/g;
     const matches = text.match(mentionRegex);
-    return matches ? matches.map(mention => mention.slice(1).toLowerCase()) : [];
+    return matches ? matches.map((mention) => mention.slice(1).toLowerCase()) : [];
   }
 
   /**
@@ -307,17 +302,17 @@ export class InstagramBasicDisplayAPI {
     expires_in: number;
   }> {
     const params = new URLSearchParams({
-      grant_type: 'ig_refresh_token',
+      grant_type: "ig_refresh_token",
       access_token: accessToken,
     });
 
     const response = await fetch(`${this.baseUrl}/refresh_access_token?${params.toString()}`, {
-      method: 'GET',
+      method: "GET",
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Token refresh error: ${error.error?.message || 'Unknown error'}`);
+      throw new Error(`Token refresh error: ${error.error?.message || "Unknown error"}`);
     }
 
     return response.json();
@@ -338,10 +333,10 @@ export function isValidInstagramUrl(url: string): boolean {
   try {
     const parsedUrl = new URL(url);
     const hostname = parsedUrl.hostname.toLowerCase();
-    
+
     return (
-      (hostname === 'instagram.com' || hostname === 'www.instagram.com') &&
-      (parsedUrl.pathname.includes('/p/') || parsedUrl.pathname.includes('/reel/'))
+      (hostname === "instagram.com" || hostname === "www.instagram.com") &&
+      (parsedUrl.pathname.includes("/p/") || parsedUrl.pathname.includes("/reel/"))
     );
   } catch {
     return false;

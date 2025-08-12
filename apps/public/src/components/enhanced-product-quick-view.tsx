@@ -89,9 +89,9 @@ export function EnhancedProductQuickView() {
       const firstVariant = product.variants[0] as ProductVariant;
       if (firstVariant) {
         const options: Record<string, string> = {};
-        firstVariant.selectedOptions.forEach((option) => {
+        for (const option of firstVariant.selectedOptions) {
           options[option.name] = option.value;
-        });
+        }
         setSelectedOptions(options);
       }
     }
@@ -280,9 +280,9 @@ export function EnhancedProductQuickView() {
 
                       return (
                         <div key={optionName}>
-                          <label className="block text-sm font-medium text-gray-900 mb-2">
+                          <div className="block text-sm font-medium text-gray-900 mb-2">
                             {optionName}: {selectedOptions[optionName]}
-                          </label>
+                          </div>
                           <div className="flex gap-2 flex-wrap">
                             {optionValues.map((value) => (
                               <button
@@ -312,7 +312,7 @@ export function EnhancedProductQuickView() {
 
                 {/* Quantity */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-2">Quantity</label>
+                  <div className="block text-sm font-medium text-gray-900 mb-2">Quantity</div>
                   <div className="flex items-center gap-3">
                     <button
                       type="button"

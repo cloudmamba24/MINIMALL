@@ -42,7 +42,7 @@ export function EditorPanel({
   const [activeTab, setActiveTab] = useState<"layout" | "content" | "templates">("layout");
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showTemplates, setShowTemplates] = useState(false);
+  const [_showTemplates, _setShowTemplates] = useState(false);
 
   // Default layout if none exists
   const defaultLayout: LayoutConfig = {
@@ -169,8 +169,9 @@ export function EditorPanel({
             { id: "templates", label: "Templates", icon: <LayoutGrid className="w-4 h-4" /> },
           ].map((tab) => (
             <button
+              type="button"
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as "layout" | "content" | "templates")}
               className={cn(
                 "flex-1 flex items-center justify-center space-x-2 py-3 px-4 text-sm font-medium border-b-2 transition-colors",
                 activeTab === tab.id

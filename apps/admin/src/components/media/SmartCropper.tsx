@@ -205,7 +205,7 @@ export function SmartCropper({
 
       if (!response.ok) throw new Error("Preview generation failed");
 
-      const data = await response.json();
+      const _data = await response.json();
       // In a real implementation, you'd get the processed image buffer and create a preview URL
       // For now, we'll just indicate preview is ready
       setPreviewUrl("preview-ready");

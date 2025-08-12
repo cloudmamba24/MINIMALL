@@ -60,7 +60,7 @@ function InstagramGrid({
     );
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
-  }, [isLoadingMore, visibleCount, items.length]);
+  }, [isLoadingMore, items.length, visibleCount]);
 
   useEffect(() => {
     const root = containerRef.current;
@@ -135,19 +135,38 @@ function InstagramGrid({
                   onMouseEnter={(e) => {
                     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
                     try {
-                      (e.currentTarget as HTMLVideoElement).play().catch(() => {});
-                    } catch {}
+                      (e.currentTarget as HTMLVideoElement).play().catch(() => {
+                        /* ignore autoplay failure */
+                      });
+                    } catch {
+                      /* ignore */
+                    }
                   }}
                   onMouseLeave={(e) => {
                     try {
                       (e.currentTarget as HTMLVideoElement).pause();
-                    } catch {}
+                    } catch {
+                      /* ignore */
+                    }
                   }}
                   onClick={(e) => {
                     const v = e.currentTarget as HTMLVideoElement;
                     try {
                       v.paused ? v.play() : v.pause();
-                    } catch {}
+                    } catch {
+                      /* ignore */
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      const v = e.currentTarget as HTMLVideoElement;
+                      try {
+                        v.paused ? v.play() : v.pause();
+                      } catch {
+                        /* ignore */
+                      }
+                    }
                   }}
                 >
                   {details.videoUrl && <source src={details.videoUrl} />}
@@ -165,14 +184,16 @@ function InstagramGrid({
         );
       })}
       {isLoadingMore &&
-        Array.from({ length: Math.min(12, items.length - visibleCount) }).map((_, i) => (
-          <div
-            key={`skeleton-${i}`}
-            className="relative aspect-square md:aspect-[4/5] lg:aspect-square"
-          >
-            <div className="w-full h-full loading-shimmer rounded-sm" />
-          </div>
-        ))}
+        items
+          .slice(visibleCount, Math.min(visibleCount + 12, items.length))
+          .map((child) => (
+            <div
+              key={`skeleton-${child.id}`}
+              className="relative aspect-square md:aspect-[4/5] lg:aspect-square"
+            >
+              <div className="w-full h-full loading-shimmer rounded-sm" />
+            </div>
+          ))}
       <div ref={sentinelRef} className="col-span-full h-6" />
     </div>
   );

@@ -68,8 +68,8 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
         transition={{ duration: fadeInDuration }}
         className={"fixed inset-0 z-50 flex items-center justify-center p-4"}
         style={{
-          backgroundColor: `rgba(0, 0, 0, ${backdropOpacity})",
-          backdropFilter: "blur(${backdropBlur}px)`,
+          backgroundColor: `rgba(0, 0, 0, ${backdropOpacity})`,
+          backdropFilter: `blur(${backdropBlur}px)`,
         }}
         onClick={handleBackdropClick}
       >
@@ -153,7 +153,9 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
                           viewBox="0 0 24 24"
                           stroke="currentColor"
                           role="img"
+                          aria-label="Navigate to product"
                         >
+                          <title>Navigate to product</title>
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"

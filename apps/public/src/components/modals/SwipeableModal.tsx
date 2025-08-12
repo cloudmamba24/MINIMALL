@@ -96,7 +96,7 @@ export function SwipeableModal({
   }, [isOpen, onClose]);
 
   // Handle vertical drag (swipe to close)
-  const handleDragEnd = (_event: any, info: PanInfo) => {
+  const handleDragEnd = (_event: unknown, info: PanInfo) => {
     setIsDragging(false);
 
     const { offset, velocity } = info;
@@ -113,7 +113,7 @@ export function SwipeableModal({
   };
 
   // Handle horizontal swipe for navigation
-  const handleHorizontalSwipe = (_event: any, info: PanInfo) => {
+  const handleHorizontalSwipe = (_event: unknown, info: PanInfo) => {
     if (!showNavigation) return;
 
     const { offset, velocity } = info;
@@ -208,7 +208,12 @@ export function SwipeableModal({
                 )}
               </div>
 
-              <button onClick={onClose} className="instagram-modal-close" aria-label="Close modal">
+              <button
+                type="button"
+                onClick={onClose}
+                className="instagram-modal-close"
+                aria-label="Close modal"
+              >
                 <X />
               </button>
             </div>
@@ -219,6 +224,7 @@ export function SwipeableModal({
                 {/* Previous Button */}
                 {currentIndex > 0 && (
                   <button
+                    type="button"
                     onClick={onPrevious}
                     className="instagram-swipe-indicator left"
                     aria-label="Previous item"
@@ -230,6 +236,7 @@ export function SwipeableModal({
                 {/* Next Button */}
                 {currentIndex < totalItems - 1 && (
                   <button
+                    type="button"
                     onClick={onNext}
                     className="instagram-swipe-indicator right"
                     aria-label="Next item"
@@ -261,7 +268,7 @@ export function SwipeableModal({
 /**
  * Hook for managing swipeable modal state with navigation
  */
-export function useSwipeableModal(items: any[] = []) {
+export function useSwipeableModal<TItem>(items: TItem[] = []) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 

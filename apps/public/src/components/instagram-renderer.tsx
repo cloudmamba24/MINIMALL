@@ -81,7 +81,7 @@ export function InstagramRenderer({ config, className = "" }: InstagramRendererP
     };
 
     return [...categoryTabs, cartTab];
-  }, [config.id, cart.totalItems, handleCartModal]);
+  }, [config.categories, cart.totalItems, handleCartModal]);
 
   // Memoize rendered tabs to prevent infinite re-renders
   const renderedTabs = useMemo(
@@ -258,22 +258,24 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
           if (!entry.isIntersecting) {
             try {
               v.pause();
-            } catch {}
+            } catch (_error) {
+              /* ignore */
+            }
           }
         }
       },
       { threshold: 0.2 }
     );
-    videos.forEach((v) => io.observe(v));
+    for (const v of videos) io.observe(v);
     return () => io.disconnect();
-  }, [visibleCount]);
+  }, [items.length]);
 
   // Track impressions for tiles entering viewport
   useEffect(() => {
     if (!gridRef.current) return;
     const io = createImpressionTracker(analytics, 0.5);
     const cards = Array.from(gridRef.current.querySelectorAll("[data-item-id]")) as HTMLElement[];
-    cards.forEach((el) => io.observe(el));
+    for (const el of cards) io.observe(el);
     return () => io.disconnect();
   }, [analytics, visibleCount]);
 
@@ -336,9 +338,9 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
 
       {/* Skeletons when loading more */}
       {isLoadingMore &&
-        Array.from({ length: Math.min(12, items.length - visibleCount) }).map((_, i) => (
+        items.slice(visibleCount, Math.min(visibleCount + 12, items.length)).map((child) => (
           <div
-            key={`skeleton-${i}`}
+            key={`skeleton-${child.id}`}
             className="relative aspect-square md:aspect-[4/5] lg:aspect-square"
           >
             <div className="w-full h-full loading-shimmer rounded-sm" />
@@ -369,7 +371,15 @@ function InstagramContentItem({
   className = "",
 }: InstagramContentItemProps) {
   // Cast cardDetails for type safety
-  const details = cardDetails as Record<string, any>;
+  const details = cardDetails as Record<string, unknown> & {
+    videoUrl?: string;
+    poster?: string;
+    image?: string;
+    imageUrl?: string;
+    overlay?: { position: string; text: string };
+    gallery?: unknown[];
+    price?: string;
+  };
   const isVideo = cardType === "video" || Boolean(details.videoUrl);
 
   const content = (
@@ -386,20 +396,41 @@ function InstagramContentItem({
             if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
             // Autoplay on hover for desktop
             try {
-              (e.currentTarget as HTMLVideoElement).play().catch(() => {});
-            } catch {}
+              (e.currentTarget as HTMLVideoElement).play().catch((_error) => {
+                /* ignore autoplay failure */
+              });
+            } catch (_error) {
+              /* ignore */
+            }
           }}
           onMouseLeave={(e) => {
             try {
               (e.currentTarget as HTMLVideoElement).pause();
-            } catch {}
+            } catch (_error) {
+              /* ignore */
+            }
           }}
           // On mobile, user taps to toggle play/pause
           onClick={(e) => {
             const v = e.currentTarget as HTMLVideoElement;
             try {
               v.paused ? v.play() : v.pause();
-            } catch {}
+            } catch (_error) {
+              /* ignore */
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              const v = e.currentTarget as HTMLVideoElement;
+              try {
+                v.paused ? v.play() : v.pause();
+              } catch (_error) {
+                /* ignore */
+              }
+            }
           }}
         >
           {details.videoUrl && <source src={details.videoUrl} />}

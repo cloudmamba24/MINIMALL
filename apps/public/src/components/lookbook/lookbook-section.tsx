@@ -16,7 +16,11 @@ export function LookbookSection({ category, onHotspotClick }: LookbookSectionPro
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {items.map((child, index) => {
           const [, cardDetails] = child.card;
-          const details = cardDetails as any;
+          const details = cardDetails as Record<string, unknown> & {
+            image?: string;
+            imageUrl?: string;
+            productTags?: Array<{ productId: string; position: { x: number; y: number } }>;
+          };
           const tags = (details.productTags || []) as Array<{
             productId: string;
             position: { x: number; y: number };

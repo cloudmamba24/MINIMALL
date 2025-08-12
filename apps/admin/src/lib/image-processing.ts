@@ -88,7 +88,7 @@ export async function processImage(
   const cleanedOptions = Object.fromEntries(
     Object.entries(options).filter(([_, value]) => value !== undefined)
   ) as ProcessingOptions;
-  const validOptions = processingOptionsSchema.parse(cleanedOptions);
+  const _validOptions = processingOptionsSchema.parse(cleanedOptions);
 
   // Get image metadata
   const image = sharp(inputBuffer);
@@ -268,7 +268,8 @@ async function applyCropping(
     return pipeline; // Already correct aspect ratio
   }
 
-  let cropWidth: number, cropHeight: number;
+  let cropWidth: number;
+  let cropHeight: number;
 
   if (currentAspectRatio > targetAspectRatio) {
     // Image is wider, crop width
@@ -290,13 +291,12 @@ async function applyCropping(
       fit: "cover",
       position: gravity,
     });
-  } else {
-    // Center crop
-    return pipeline.resize(cropWidth, cropHeight, {
-      fit: "cover",
-      position: "center",
-    });
   }
+  // Center crop
+  return pipeline.resize(cropWidth, cropHeight, {
+    fit: "cover",
+    position: "center",
+  });
 }
 
 /**
@@ -459,8 +459,8 @@ function getAspectRatioValue(aspectRatio: string): number {
  */
 function calculateGravity(
   focusPoint: { x: number; y: number },
-  width: number,
-  height: number
+  _width: number,
+  _height: number
 ): string {
   const x = focusPoint.x / 100; // Convert percentage to decimal
   const y = focusPoint.y / 100;
@@ -470,15 +470,15 @@ function calculateGravity(
     if (y < 0.33) return "northwest";
     if (y > 0.67) return "southwest";
     return "west";
-  } else if (x > 0.67) {
+  }
+  if (x > 0.67) {
     if (y < 0.33) return "northeast";
     if (y > 0.67) return "southeast";
     return "east";
-  } else {
-    if (y < 0.33) return "north";
-    if (y > 0.67) return "south";
-    return "center";
   }
+  if (y < 0.33) return "north";
+  if (y > 0.67) return "south";
+  return "center";
 }
 
 /**

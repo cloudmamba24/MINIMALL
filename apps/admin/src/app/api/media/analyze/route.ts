@@ -291,7 +291,7 @@ async function analyzeWithGoogleVision(
  */
 async function analyzeLocally(
   imageBuffer: Buffer,
-  analysisTypes: string[]
+  _analysisTypes: string[]
 ): Promise<Omit<AnalysisResult, "success">> {
   // This is a simplified fallback when no AI services are available
   // In production, you might use libraries like @tensorflow/tfjs or opencv4nodejs
@@ -386,7 +386,7 @@ function parseAIResponse(content: string, provider: string): Omit<AnalysisResult
         ...(provider === "openai-vision" && { model: "gpt-4-vision-preview" }),
       },
     };
-  } catch (error) {
+  } catch (_error) {
     // Fallback parsing for non-JSON responses
     const tags = extractTagsFromText(content);
 

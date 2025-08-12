@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { db, revenueAttributions, shops } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { eq } from "drizzle-orm";
@@ -135,7 +135,31 @@ async function processLineItemAttribution(
   order: ShopifyOrder,
   lineItem: ShopifyLineItem,
   shopDomain: string
-): Promise<any | null> {
+): Promise<
+  | {
+      orderId: string;
+      lineItemId: string;
+      shopDomain: string;
+      configId: string;
+      blockId: string;
+      layoutPreset: string;
+      experimentKey: string | null;
+      productId: string;
+      variantId: string;
+      quantity: number;
+      price: number;
+      revenue: number;
+      utmSource: string | null;
+      utmMedium: string | null;
+      utmCampaign: string | null;
+      utmTerm: string | null;
+      utmContent: string | null;
+      sessionId: string;
+      device: string;
+      timestamp: Date;
+    }
+  | null
+> {
   // Extract attribution data from line item properties or order note attributes
   const attributionData = extractAttributionData(order, lineItem);
 
@@ -177,7 +201,21 @@ async function processLineItemAttribution(
  * Extract attribution data from order note attributes or line item properties
  */
 function extractAttributionData(order: ShopifyOrder, lineItem: ShopifyLineItem) {
-  const attributionData: any = {
+  const attributionData: {
+    configId?: string;
+    blockId?: string;
+    layoutPreset?: string;
+    experimentKey?: string;
+    sessionId?: string;
+    device?: string;
+    utm?: {
+      source?: string;
+      medium?: string;
+      campaign?: string;
+      term?: string;
+      content?: string;
+    };
+  } = {
     utm: {},
   };
 
@@ -201,7 +239,25 @@ function extractAttributionData(order: ShopifyOrder, lineItem: ShopifyLineItem) 
 /**
  * Map property names to attribution data structure
  */
-function mapAttributionProperty(name: string, value: string, data: any) {
+function mapAttributionProperty(
+  name: string,
+  value: string,
+  data: {
+    configId?: string;
+    blockId?: string;
+    layoutPreset?: string;
+    experimentKey?: string;
+    sessionId?: string;
+    device?: string;
+    utm?: {
+      source?: string;
+      medium?: string;
+      campaign?: string;
+      term?: string;
+      content?: string;
+    };
+  }
+) {
   const lowerName = name.toLowerCase();
 
   if (lowerName === "minimall_config_id") {

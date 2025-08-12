@@ -21,20 +21,7 @@ export const runtime = "nodejs";
  * - Automatic upload to R2 storage
  */
 
-interface ProcessingRequest {
-  // Source image
-  imageUrl?: string;
-  imageFile?: File;
-
-  // Processing options
-  options: ProcessingOptions;
-
-  // Upload options
-  folder?: string;
-  filename?: string;
-  generateVariants?: boolean;
-  uploadToR2?: boolean;
-}
+// (Deprecated) ProcessingRequest interface removed because it isn't used
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,7 +41,7 @@ export async function POST(request: NextRequest) {
     let options: ProcessingOptions;
     try {
       options = optionsJson ? JSON.parse(optionsJson) : {};
-    } catch (error) {
+    } catch (_error) {
       return NextResponse.json({ error: "Invalid options JSON" }, { status: 400 });
     }
 
@@ -156,7 +143,7 @@ export async function POST(request: NextRequest) {
           size: processingResult.original.size,
           url: uploadResults.find((r) => !r.variant)?.url,
         },
-        variants: processingResult.variants.map((variant, index) => ({
+        variants: processingResult.variants.map((variant, _index) => ({
           variant: variant.variant,
           width: variant.width,
           height: variant.height,
@@ -187,8 +174,11 @@ export async function POST(request: NextRequest) {
 /**
  * Upload processed images to R2
  */
-  async function uploadProcessedImages(
-  r2Service: { putObject: Function; getObjectUrl: (key: string) => string } | null,
+async function uploadProcessedImages(
+  r2Service: {
+    putObject: (key: string, data: Buffer, opts?: Record<string, string>) => Promise<void>;
+    getObjectUrl: (key: string) => string;
+  } | null,
   result: ProcessingResult,
   folder: string,
   originalFilename: string
@@ -284,9 +274,11 @@ export async function GET(request: NextRequest) {
       valid: true,
       metadata: validation.metadata,
       fileSize: buffer.length,
-      suggestedOptions: validation.metadata ? getSuggestedProcessingOptions(validation.metadata) : undefined,
+      suggestedOptions: validation.metadata
+        ? getSuggestedProcessingOptions(validation.metadata)
+        : undefined,
     });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json({ error: "Failed to analyze image" }, { status: 500 });
   }
 }
