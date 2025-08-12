@@ -91,19 +91,29 @@ function initializePixels(pixels: PixelSettings, configId: string) {
  * Initialize Facebook Pixel
  */
 function initializeFacebookPixel(pixelId: string, _configId: string) {
-  if ((window as any).fbq) return; // Already initialized
+  if ((window as unknown as { fbq?: unknown }).fbq) return; // Already initialized
 
   // Facebook Pixel Code
-  const fbq = (_event: string, _data?: any) => {
-    (fbq as any).callMethod
-      ? (fbq as any).callMethod.apply(fbq, arguments)
-      : (fbq as any).queue.push(arguments);
+  type FBQ = ((...args: unknown[]) => void) & {
+    callMethod?: { apply: (self: unknown, args: IArguments) => void };
+    push: (...args: unknown[]) => void;
+    loaded?: boolean;
+    version?: string;
+    queue: unknown[];
   };
-  (fbq as any).push = fbq;
-  (fbq as any).loaded = true;
-  (fbq as any).version = "2.0";
-  (fbq as any).queue = [];
-  (window as any).fbq = fbq;
+
+  const fbq: FBQ = ((..._args: unknown[]) => {
+    if (fbq.callMethod) {
+      fbq.callMethod.apply(fbq, arguments);
+    } else {
+      fbq.queue.push(arguments);
+    }
+  }) as FBQ;
+  fbq.push = fbq;
+  fbq.loaded = true;
+  fbq.version = "2.0";
+  fbq.queue = [];
+  (window as unknown as { fbq: FBQ }).fbq = fbq;
 
   // Load Facebook Pixel script
   const script = document.createElement("script");
@@ -112,8 +122,8 @@ function initializeFacebookPixel(pixelId: string, _configId: string) {
   document.head.appendChild(script);
 
   // Initialize pixel
-  (window as any).fbq("init", pixelId);
-  (window as any).fbq("track", "PageView");
+  (window as unknown as { fbq: (...args: unknown[]) => void }).fbq("init", pixelId);
+  (window as unknown as { fbq: (...args: unknown[]) => void }).fbq("track", "PageView");
 
   if (process.env.NODE_ENV === "development") {
     console.log("[PixelDispatcher] Facebook Pixel initialized:", pixelId);
@@ -124,7 +134,7 @@ function initializeFacebookPixel(pixelId: string, _configId: string) {
  * Initialize Google Analytics 4
  */
 function initializeGoogleAnalytics(measurementId: string, _configId: string) {
-  if ((window as any).gtag) return; // Already initialized
+  if ((window as unknown as { gtag?: unknown }).gtag) return; // Already initialized
 
   // Google Analytics 4 Code
   const script1 = document.createElement("script");
@@ -132,11 +142,12 @@ function initializeGoogleAnalytics(measurementId: string, _configId: string) {
   script1.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
   document.head.appendChild(script1);
 
-  (window as any).dataLayer = (window as any).dataLayer || [];
-  function gtag(_type: string, ..._args: any[]) {
-    (window as any).dataLayer.push(arguments);
+  (window as unknown as { dataLayer?: unknown[] }).dataLayer =
+    (window as unknown as { dataLayer?: unknown[] }).dataLayer || [];
+  function gtag(_type: string, ..._args: unknown[]) {
+    (window as unknown as { dataLayer: unknown[] }).dataLayer.push(arguments as unknown as never);
   }
-  (window as any).gtag = gtag;
+  (window as unknown as { gtag: typeof gtag }).gtag = gtag;
 
   gtag("js", new Date());
   gtag("config", measurementId, {
@@ -154,17 +165,27 @@ function initializeGoogleAnalytics(measurementId: string, _configId: string) {
  * Initialize TikTok Pixel
  */
 function initializeTikTokPixel(pixelId: string, _configId: string) {
-  if ((window as any).ttq) return; // Already initialized
+  if ((window as unknown as { ttq?: unknown }).ttq) return; // Already initialized
 
   // TikTok Pixel Code
-  const ttq = (_event: string, _data?: any) => {
-    (ttq as any).methods = (ttq as any).methods || [];
-    (ttq as any).methods.push(arguments);
+  type TTQ = ((...args: unknown[]) => void) & {
+    methods?: unknown[];
+    queue?: unknown[];
+    loaded?: boolean;
+    version?: string;
+    load?: (id: string) => void;
+    page?: () => void;
+    track?: (event: string, data?: unknown) => void;
   };
-  (ttq as any).version = "1.1";
-  (ttq as any).queue = [];
-  (ttq as any).loaded = false;
-  (window as any).ttq = ttq;
+
+  const ttq: TTQ = ((..._args: unknown[]) => {
+    ttq.methods = ttq.methods || [];
+    ttq.methods.push(arguments);
+  }) as TTQ;
+  ttq.version = "1.1";
+  ttq.queue = [];
+  ttq.loaded = false;
+  (window as unknown as { ttq: TTQ }).ttq = ttq;
 
   // Load TikTok Pixel script
   const script = document.createElement("script");
@@ -173,8 +194,8 @@ function initializeTikTokPixel(pixelId: string, _configId: string) {
   document.head.appendChild(script);
 
   // Initialize pixel
-  (window as any).ttq.load(pixelId);
-  (window as any).ttq.page();
+  (window as unknown as { ttq: TTQ }).ttq.load?.(pixelId);
+  (window as unknown as { ttq: TTQ }).ttq.page?.();
 
   if (process.env.NODE_ENV === "development") {
     console.log("[PixelDispatcher] TikTok Pixel initialized:", pixelId);
@@ -185,16 +206,20 @@ function initializeTikTokPixel(pixelId: string, _configId: string) {
  * Initialize Pinterest Pixel
  */
 function initializePinterestPixel(tagId: string, _configId: string) {
-  if ((window as any).pintrk) return; // Already initialized
+  if ((window as unknown as { pintrk?: unknown }).pintrk) return; // Already initialized
 
   // Pinterest Pixel Code
-  const pintrk = (_event: string, _data?: any) => {
-    (pintrk as any).queue = (pintrk as any).queue || [];
-    (pintrk as any).queue.push(Array.prototype.slice.call(arguments));
+  type PinTrk = ((...args: unknown[]) => void) & {
+    queue?: unknown[];
+    version?: string;
   };
-  (pintrk as any).queue = [];
-  (pintrk as any).version = "3.0";
-  (window as any).pintrk = pintrk;
+  const pintrk: PinTrk = ((..._args: unknown[]) => {
+    pintrk.queue = pintrk.queue || [];
+    pintrk.queue.push(Array.prototype.slice.call(arguments));
+  }) as PinTrk;
+  pintrk.queue = [];
+  pintrk.version = "3.0";
+  (window as unknown as { pintrk: PinTrk }).pintrk = pintrk;
 
   // Load Pinterest Pixel script
   const script = document.createElement("script");
@@ -203,8 +228,10 @@ function initializePinterestPixel(tagId: string, _configId: string) {
   document.head.appendChild(script);
 
   // Initialize pixel
-  (window as any).pintrk("load", tagId, { em: "<user_email_address>" });
-  (window as any).pintrk("page");
+  (window as unknown as { pintrk: (...args: unknown[]) => void }).pintrk("load", tagId, {
+    em: "<user_email_address>",
+  });
+  (window as unknown as { pintrk: (...args: unknown[]) => void }).pintrk("page");
 
   if (process.env.NODE_ENV === "development") {
     console.log("[PixelDispatcher] Pinterest Pixel initialized:", tagId);
@@ -215,16 +242,23 @@ function initializePinterestPixel(tagId: string, _configId: string) {
  * Initialize Snapchat Pixel
  */
 function initializeSnapchatPixel(pixelId: string, _configId: string) {
-  if ((window as any).snaptr) return; // Already initialized
+  if ((window as unknown as { snaptr?: unknown }).snaptr) return; // Already initialized
 
   // Snapchat Pixel Code
-  const snaptr = (_event: string, _data?: any) => {
-    (snaptr as any).handleRequest
-      ? (snaptr as any).handleRequest.apply(snaptr, arguments)
-      : (snaptr as any).queue.push(arguments);
+  type SnapTr = ((...args: unknown[]) => void) & {
+    handleRequest?: { apply: (self: unknown, args: IArguments) => void };
+    queue?: unknown[];
   };
-  (snaptr as any).queue = [];
-  (window as any).snaptr = snaptr;
+  const snaptr: SnapTr = ((..._args: unknown[]) => {
+    if (snaptr.handleRequest) {
+      snaptr.handleRequest.apply(snaptr, arguments);
+    } else {
+      snaptr.queue = snaptr.queue || [];
+      snaptr.queue.push(arguments);
+    }
+  }) as SnapTr;
+  snaptr.queue = [];
+  (window as unknown as { snaptr: SnapTr }).snaptr = snaptr;
 
   // Load Snapchat Pixel script
   const script = document.createElement("script");
@@ -233,8 +267,8 @@ function initializeSnapchatPixel(pixelId: string, _configId: string) {
   document.head.appendChild(script);
 
   // Initialize pixel
-  (window as any).snaptr("init", pixelId, {});
-  (window as any).snaptr("track", "PAGE_VIEW");
+  (window as unknown as { snaptr: (...args: unknown[]) => void }).snaptr("init", pixelId, {});
+  (window as unknown as { snaptr: (...args: unknown[]) => void }).snaptr("track", "PAGE_VIEW");
 
   if (process.env.NODE_ENV === "development") {
     console.log("[PixelDispatcher] Snapchat Pixel initialized:", pixelId);
@@ -271,7 +305,9 @@ function initializeCustomPixel(
  */
 function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
   // Create global event dispatcher function
-  (window as any).__MINIMALL_PIXEL_DISPATCH__ = (eventName: string, eventData: any = {}) => {
+  (window as unknown as {
+    __MINIMALL_PIXEL_DISPATCH__?: (eventName: string, eventData?: Record<string, unknown>) => void;
+  }).__MINIMALL_PIXEL_DISPATCH__ = (eventName: string, eventData: Record<string, unknown> = {}) => {
     const utmData = UTMUtils.getUTMData(configId);
     const sessionData = UTMUtils.getSessionData(configId);
 
@@ -289,20 +325,24 @@ function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
     };
 
     // Dispatch to Facebook Pixel
-    if (pixels.facebook && (window as any).fbq) {
+    if (pixels.facebook && (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq) {
       try {
         const fbEventName = mapEventToFacebook(eventName);
-        (window as any).fbq("track", fbEventName, enhancedEventData);
+        (window as unknown as { fbq: (...args: unknown[]) => void }).fbq(
+          "track",
+          fbEventName,
+          enhancedEventData,
+        );
       } catch (error) {
         console.warn("[PixelDispatcher] Facebook event failed:", error);
       }
     }
 
     // Dispatch to Google Analytics
-    if (pixels.google && (window as any).gtag) {
+    if (pixels.google && (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag) {
       try {
         const gaEventName = mapEventToGoogle(eventName);
-        (window as any).gtag("event", gaEventName, {
+        (window as unknown as { gtag: (...args: unknown[]) => void }).gtag("event", gaEventName, {
           ...enhancedEventData,
           custom_parameter_1: configId,
         });
@@ -312,30 +352,41 @@ function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
     }
 
     // Dispatch to TikTok Pixel
-    if (pixels.tiktok && (window as any).ttq) {
+    if (pixels.tiktok && (window as unknown as { ttq?: { track?: (e: string, d?: unknown) => void } }).ttq) {
       try {
         const tiktokEventName = mapEventToTikTok(eventName);
-        (window as any).ttq.track(tiktokEventName, enhancedEventData);
+        (window as unknown as { ttq: { track?: (e: string, d?: unknown) => void } }).ttq.track?.(
+          tiktokEventName,
+          enhancedEventData,
+        );
       } catch (error) {
         console.warn("[PixelDispatcher] TikTok event failed:", error);
       }
     }
 
     // Dispatch to Pinterest
-    if (pixels.pinterest && (window as any).pintrk) {
+    if (pixels.pinterest && (window as unknown as { pintrk?: (...args: unknown[]) => void }).pintrk) {
       try {
         const pinterestEventName = mapEventToPinterest(eventName);
-        (window as any).pintrk("track", pinterestEventName, enhancedEventData);
+        (window as unknown as { pintrk: (...args: unknown[]) => void }).pintrk(
+          "track",
+          pinterestEventName,
+          enhancedEventData,
+        );
       } catch (error) {
         console.warn("[PixelDispatcher] Pinterest event failed:", error);
       }
     }
 
     // Dispatch to Snapchat
-    if (pixels.snapchat && (window as any).snaptr) {
+    if (pixels.snapchat && (window as unknown as { snaptr?: (...args: unknown[]) => void }).snaptr) {
       try {
         const snapchatEventName = mapEventToSnapchat(eventName);
-        (window as any).snaptr("track", snapchatEventName, enhancedEventData);
+        (window as unknown as { snaptr: (...args: unknown[]) => void }).snaptr(
+          "track",
+          snapchatEventName,
+          enhancedEventData,
+        );
       } catch (error) {
         console.warn("[PixelDispatcher] Snapchat event failed:", error);
       }
@@ -416,9 +467,16 @@ export const PixelUtils = {
   /**
    * Dispatch a standardized event to all configured pixels
    */
-  dispatch(eventName: string, eventData: any = {}) {
-    if (typeof window !== "undefined" && (window as any).__MINIMALL_PIXEL_DISPATCH__) {
-      (window as any).__MINIMALL_PIXEL_DISPATCH__(eventName, eventData);
+  dispatch(eventName: string, eventData: Record<string, unknown> = {}) {
+    if (
+      typeof window !== "undefined" &&
+      (window as unknown as {
+        __MINIMALL_PIXEL_DISPATCH__?: (evt: string, data?: Record<string, unknown>) => void;
+      }).__MINIMALL_PIXEL_DISPATCH__
+    ) {
+      (window as unknown as {
+        __MINIMALL_PIXEL_DISPATCH__: (evt: string, data?: Record<string, unknown>) => void;
+      }).__MINIMALL_PIXEL_DISPATCH__(eventName, eventData);
     }
   },
 

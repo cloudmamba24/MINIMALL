@@ -185,7 +185,7 @@ export function SwipeableModal({
             {showNavigation && totalItems > 1 && (
               <div className="instagram-story-progress">
                 {Array.from({ length: totalItems }).map((_, index) => (
-                  <div key={index} className="instagram-story-progress-bar">
+                  <div key={`progress-${index}`} className="instagram-story-progress-bar">
                     <div
                       className={cn(
                         "instagram-story-progress-fill",

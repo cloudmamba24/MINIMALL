@@ -25,7 +25,12 @@ export function ProductCarousel({
       <div className="flex gap-4 px-1">
         {items.map((child, index) => {
           const [, cardDetails] = child.card;
-          const details = cardDetails as any;
+          const details = cardDetails as Record<string, unknown> & {
+            image?: string;
+            imageUrl?: string;
+            productId?: string;
+            price?: string;
+          };
           return (
             <motion.button
               key={child.id}

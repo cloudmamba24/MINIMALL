@@ -16,7 +16,10 @@ export function ImageGrid({ category, onTileClick, className = "" }: ImageGridPr
     <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${className}`}>
       {items.map((child, index) => {
         const [, cardDetails] = child.card;
-        const details = cardDetails as any;
+        const details = cardDetails as Record<string, unknown> & {
+          image?: string;
+          imageUrl?: string;
+        };
         return (
           <motion.button
             key={child.id}

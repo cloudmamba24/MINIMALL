@@ -6,21 +6,21 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 /**
  * Virtual List Component for Large Gallery Rendering
  */
-interface VirtualListProps {
-  items: any[];
+interface VirtualListProps<TItem> {
+  items: TItem[];
   itemHeight: number;
   containerHeight: number;
-  renderItem: (item: any, index: number) => ReactNode;
+  renderItem: (item: TItem, index: number) => ReactNode;
   overscan?: number;
 }
 
-export function VirtualList({
+export function VirtualList<TItem>({
   items,
   itemHeight,
   containerHeight,
   renderItem,
   overscan = 3,
-}: VirtualListProps) {
+}: VirtualListProps<TItem>) {
   const [scrollTop, setScrollTop] = useState(0);
   const scrollElementRef = useRef<HTMLDivElement>(null);
 
@@ -184,7 +184,8 @@ export function TouchButton({
 
     // Haptic feedback on supported devices
     if (hapticFeedback && "vibrate" in navigator) {
-      navigator.vibrate(10);
+      const nav = navigator as Navigator & { vibrate?: (pattern: number | number[]) => boolean };
+      nav.vibrate?.(10);
     }
 
     onClick();

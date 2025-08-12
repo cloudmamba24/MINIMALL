@@ -132,15 +132,18 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
         </div>
 
         <div className="flex space-x-1 p-1 bg-gray-100 rounded-lg">
-          {[
-            { id: "base", label: "Base" },
-            { id: "sm", label: "SM" },
-            { id: "md", label: "MD" },
-            { id: "lg", label: "LG" },
-          ].map((device) => (
+          {(
+            [
+              { id: "base", label: "Base" },
+              { id: "sm", label: "SM" },
+              { id: "md", label: "MD" },
+              { id: "lg", label: "LG" },
+            ] as Array<{ id: "base" | "sm" | "md" | "lg"; label: string }>
+          ).map((device) => (
             <button
               key={device.id}
-              onClick={() => setActiveDevice(device.id as any)}
+              type="button"
+              onClick={() => setActiveDevice(device.id)}
               className={cn(
                 "flex-1 flex items-center justify-center space-x-1 py-2 px-3 text-xs font-medium rounded-md transition-colors",
                 activeDevice === device.id

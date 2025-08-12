@@ -39,7 +39,7 @@ export interface AnalyticsEventData {
   quantity?: number;
 
   // Additional properties
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 /**
@@ -143,7 +143,7 @@ export class EnhancedAnalytics {
   /**
    * Track checkout initiation
    */
-  async trackBeginCheckout(data: AnalyticsEventData & { items: any[] }) {
+  async trackBeginCheckout(data: AnalyticsEventData & { items: unknown[] }) {
     const eventData = this.enrichEventData({
       ...data,
       event: "begin_checkout",
@@ -456,8 +456,9 @@ export function createImpressionTracker(
           const layoutPreset = element.dataset.layoutPreset as LayoutPreset;
 
           if (blockId) {
-            const impressionData: any = {
-              configId: analytics.configId,
+            const impressionData: AnalyticsEventData = {
+              // The tracker uses its own internal config ID; this placeholder satisfies typing
+              configId: "",
               blockId,
               layoutPreset,
             };
@@ -500,7 +501,10 @@ export function setupPerformanceTracking(analytics: EnhancedAnalytics) {
   new PerformanceObserver((list) => {
     const entries = list.getEntries();
     entries.forEach((entry) => {
-      fid = (entry as any).processingStart - entry.startTime;
+      const e = entry as PerformanceEventTiming & { processingStart?: number };
+      if (typeof e.processingStart === "number") {
+        fid = e.processingStart - e.startTime;
+      }
     });
   }).observe({ entryTypes: ["first-input"] });
 
@@ -508,15 +512,16 @@ export function setupPerformanceTracking(analytics: EnhancedAnalytics) {
   new PerformanceObserver((list) => {
     const entries = list.getEntries();
     entries.forEach((entry) => {
-      if (!(entry as any).hadRecentInput) {
-        cls += (entry as any).value;
+      const e = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number };
+      if (!e.hadRecentInput && typeof e.value === "number") {
+        cls += e.value;
       }
     });
   }).observe({ entryTypes: ["layout-shift"] });
 
   // Send performance data when page is about to unload
   window.addEventListener("beforeunload", () => {
-    const perfData: any = {
+    const perfData: { cls: number; loadTime: number; lcp?: number; fid?: number } = {
       cls,
       loadTime: performance.now(),
     };

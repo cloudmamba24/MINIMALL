@@ -5,12 +5,12 @@
 /**
  * Creates an object with only defined properties, avoiding undefined assignments to optional props
  */
-export function conditionalProps<T extends Record<string, any>>(props: T): Partial<T> {
+export function conditionalProps<T extends Record<string, unknown>>(props: T): Partial<T> {
   const result: Partial<T> = {};
 
   for (const [key, value] of Object.entries(props)) {
     if (value !== undefined && value !== null) {
-      (result as any)[key] = value;
+      (result as Record<string, unknown>)[key] = value;
     }
   }
 
@@ -73,16 +73,16 @@ export function createAttributionData(input: {
   configId: string;
   categoryId?: string | undefined;
   itemId?: string | undefined;
-  [key: string]: any;
-}): Record<string, any> {
-  const result: Record<string, any> = {
+  [key: string]: unknown;
+}): Record<string, unknown> {
+  const result: Record<string, unknown> = {
     configId: input.configId,
   };
 
   // Only add properties that have actual values
   Object.entries(input).forEach(([key, value]) => {
     if (key !== "configId" && value !== undefined && value !== null && value !== "") {
-      result[key] = value;
+      result[key] = value as unknown;
     }
   });
 

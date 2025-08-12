@@ -1,3 +1,5 @@
+import React from "react";
+import { vi } from "vitest";
 // Next.js App Router mocks (for public app)
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -32,7 +34,7 @@ vi.mock("server-only", () => ({}));
 vi.mock("next/link", () => {
   return {
     __esModule: true,
-    default: ({ children, href, ...props }: any) =>
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string }) =>
       React.createElement("a", { href, ...props }, children),
   };
 });
@@ -41,6 +43,6 @@ vi.mock("next/link", () => {
 vi.mock("next/image", () => {
   return {
     __esModule: true,
-    default: (props: any) => React.createElement("img", props),
+    default: (props: Record<string, unknown>) => React.createElement("img", props),
   };
 });

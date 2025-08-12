@@ -389,12 +389,12 @@ export class R2ConfigService {
 		return [];
 	}
 
-	async putObject(
-		key: string,
-		body: string | ArrayBuffer | Buffer,
-		options: any = {},
-	): Promise<any> {
-		const contentType = options.contentType || "application/octet-stream";
+  async putObject(
+    key: string,
+    body: string | ArrayBuffer | Buffer,
+    options: { contentType?: string } = {},
+  ): Promise<Response> {
+    const contentType = options.contentType || "application/octet-stream";
 		let bodyString: string;
 
 		if (typeof body === "string") {
@@ -405,7 +405,7 @@ export class R2ConfigService {
 			bodyString = new TextDecoder().decode(body);
 		}
 
-		return await this.client.putObject(key, bodyString, contentType);
+    return await this.client.putObject(key, bodyString, contentType);
 	}
 
 	getObjectUrl(key: string): string {

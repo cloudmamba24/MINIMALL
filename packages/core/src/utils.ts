@@ -132,9 +132,17 @@ function createSiteConfigWithProducts(
 		},
 	];
 
-	const finalProducts = (
-		products.length > 0 ? products : mockProducts
-	) as any[];
+  type MinimalProduct = {
+    id: string;
+    title: string;
+    handle: string;
+    images: Array<{ url: string }>;
+    priceRange: { minVariantPrice: { amount: string; currencyCode: string } };
+  };
+
+  const finalProducts: MinimalProduct[] = (
+    (products.length > 0 ? products : mockProducts) as unknown[]
+  ).map((p) => p as MinimalProduct);
 
 	// Create product items for the config
 	const productItems = finalProducts.map((product, index) => ({
@@ -207,10 +215,10 @@ function createBaseSiteConfig(
 										},
 										productTags: [
 											{
-												productId: (featuredProduct as any)?.id || "prod_abc",
+          productId: (featuredProduct as { id?: string } | undefined)?.id || "prod_abc",
 												position: { x: 0.6, y: 0.4 },
 												label:
-													(featuredProduct as any)?.title || "Essential Tee",
+              (featuredProduct as { title?: string } | undefined)?.title || "Essential Tee",
 											},
 										],
 									},
@@ -284,7 +292,7 @@ function createBaseSiteConfig(
 				categoryType: [
 					"products",
 					{
-						children: productItems as any,
+        children: productItems as unknown as Category[],
 						products: [],
 						displayType: "grid",
 						itemsPerRow: 2,
@@ -650,7 +658,7 @@ export function createPerformanceMetrics(
 	const navigation = performance.getEntriesByType(
 		"navigation",
 	)[0] as PerformanceNavigationTiming;
-	const connection = (navigator as any).connection;
+  const connection = (navigator as unknown as { connection?: { effectiveType?: string } }).connection;
 
 	return {
 		configId,

@@ -246,7 +246,7 @@ export function getRecommendedTemplates(
  * Generate custom template from current layout
  */
 export function createCustomTemplate(
-	layout: any,
+  layout: LayoutTemplate["layout"],
 	metadata: {
 		name: string;
 		description: string;

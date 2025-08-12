@@ -16,7 +16,7 @@ interface GraphQLError {
   path?: string[];
 }
 
-interface GraphQLResponse<T = any> {
+interface GraphQLResponse<T = unknown> {
   data?: T;
   errors?: GraphQLError[];
   extensions?: Record<string, any>;
@@ -36,9 +36,9 @@ export class ShopifyStorefrontService {
   /**
    * Execute GraphQL query with error handling and retries
    */
-  private async query<T = any>(
+  private async query<T = unknown>(
     query: string,
-    variables?: Record<string, any>,
+    variables?: Record<string, unknown>,
     retries = 3
   ): Promise<T> {
     const requestBody = {
@@ -90,7 +90,7 @@ export class ShopifyStorefrontService {
   /**
    * Get products by IDs
    */
-  async getProducts(productIds: string[], first = 20): Promise<any[]> {
+  async getProducts(productIds: string[], first = 20): Promise<unknown[]> {
     const query = `
       query getProducts($ids: [ID!]!, $first: Int!) {
         nodes(ids: $ids) {
@@ -172,7 +172,7 @@ export class ShopifyStorefrontService {
   /**
    * Get single product by handle or ID
    */
-  async getProduct(identifier: string, isId = false): Promise<any> {
+  async getProduct(identifier: string, isId = false): Promise<unknown> {
     const query = isId
       ? `
       query getProductById($id: ID!) {
@@ -320,7 +320,7 @@ export class ShopifyStorefrontService {
     query: string,
     first = 20,
     after?: string
-  ): Promise<{ products: any[]; hasNextPage: boolean; endCursor?: string }> {
+  ): Promise<{ products: unknown[]; hasNextPage: boolean; endCursor?: string }> {
     const searchQuery = `
       query searchProducts($query: String!, $first: Int!, $after: String) {
         search(query: $query, first: $first, after: $after, types: [PRODUCT]) {
@@ -374,7 +374,7 @@ export class ShopifyStorefrontService {
     handle: string,
     first = 20,
     after?: string
-  ): Promise<{ products: any[]; hasNextPage: boolean; endCursor?: string }> {
+  ): Promise<{ products: unknown[]; hasNextPage: boolean; endCursor?: string }> {
     const query = `
       query getCollectionProducts($handle: String!, $first: Int!, $after: String) {
         collectionByHandle(handle: $handle) {
@@ -431,7 +431,7 @@ export class ShopifyStorefrontService {
   /**
    * Create a cart
    */
-  async createCart(lines?: Array<{ merchandiseId: string; quantity: number }>): Promise<any> {
+  async createCart(lines?: Array<{ merchandiseId: string; quantity: number }>): Promise<unknown> {
     const query = `
       mutation cartCreate($input: CartInput!) {
         cartCreate(input: $input) {
@@ -506,7 +506,7 @@ export class ShopifyStorefrontService {
       }
     `;
 
-    const input: any = {};
+    const input: { lines?: Array<{ merchandiseId: string; quantity: number }> } = {};
     if (lines?.length) {
       input.lines = lines.map((line) => ({
         merchandiseId: `gid://shopify/ProductVariant/${line.merchandiseId}`,
@@ -518,7 +518,7 @@ export class ShopifyStorefrontService {
 
     if (result.cartCreate.userErrors?.length) {
       throw new Error(
-        `Cart creation failed: ${result.cartCreate.userErrors.map((e: any) => e.message).join(", ")}`
+        `Cart creation failed: ${result.cartCreate.userErrors.map((e: { message: string }) => e.message).join(", ")}`
       );
     }
 
@@ -531,7 +531,7 @@ export class ShopifyStorefrontService {
   async addToCart(
     cartId: string,
     lines: Array<{ merchandiseId: string; quantity: number }>
-  ): Promise<any> {
+  ): Promise<unknown> {
     const query = `
       mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
         cartLinesAdd(cartId: $cartId, lines: $lines) {
@@ -584,7 +584,7 @@ export class ShopifyStorefrontService {
 
     if (result.cartLinesAdd.userErrors?.length) {
       throw new Error(
-        `Add to cart failed: ${result.cartLinesAdd.userErrors.map((e: any) => e.message).join(", ")}`
+        `Add to cart failed: ${result.cartLinesAdd.userErrors.map((e: { message: string }) => e.message).join(", ")}`
       );
     }
 
@@ -594,7 +594,7 @@ export class ShopifyStorefrontService {
   /**
    * Update cart line quantities
    */
-  async updateCart(cartId: string, lines: Array<{ id: string; quantity: number }>): Promise<any> {
+  async updateCart(cartId: string, lines: Array<{ id: string; quantity: number }>): Promise<unknown> {
     const query = `
       mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
         cartLinesUpdate(cartId: $cartId, lines: $lines) {
@@ -639,7 +639,7 @@ export class ShopifyStorefrontService {
 
     if (result.cartLinesUpdate.userErrors?.length) {
       throw new Error(
-        `Cart update failed: ${result.cartLinesUpdate.userErrors.map((e: any) => e.message).join(", ")}`
+        `Cart update failed: ${result.cartLinesUpdate.userErrors.map((e: { message: string }) => e.message).join(", ")}`
       );
     }
 
@@ -649,7 +649,7 @@ export class ShopifyStorefrontService {
   /**
    * Remove lines from cart
    */
-  async removeFromCart(cartId: string, lineIds: string[]): Promise<any> {
+  async removeFromCart(cartId: string, lineIds: string[]): Promise<unknown> {
     const query = `
       mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
         cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
@@ -694,7 +694,7 @@ export class ShopifyStorefrontService {
 
     if (result.cartLinesRemove.userErrors?.length) {
       throw new Error(
-        `Remove from cart failed: ${result.cartLinesRemove.userErrors.map((e: any) => e.message).join(", ")}`
+        `Remove from cart failed: ${result.cartLinesRemove.userErrors.map((e: { message: string }) => e.message).join(", ")}`
       );
     }
 
@@ -704,7 +704,7 @@ export class ShopifyStorefrontService {
   /**
    * Get cart by ID
    */
-  async getCart(cartId: string): Promise<any> {
+  async getCart(cartId: string): Promise<unknown> {
     const query = `
       query getCart($cartId: ID!) {
         cart(id: $cartId) {

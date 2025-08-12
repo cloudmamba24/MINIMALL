@@ -104,7 +104,7 @@ export function StoriesRenderer({
   };
 
   // Handle vertical drag
-  const handleDragEnd = (_event: any, info: PanInfo) => {
+  const handleDragEnd = (_event: unknown, info: PanInfo) => {
     setIsDragging(false);
 
     const threshold = 100;
@@ -124,7 +124,7 @@ export function StoriesRenderer({
   };
 
   // Handle tap interactions
-  const handleTap = (event: any) => {
+  const handleTap = (event: { clientX: number }) => {
     if (isDragging) return;
 
     const rect = containerRef.current?.getBoundingClientRect();
@@ -140,12 +140,12 @@ export function StoriesRenderer({
     }
   };
 
-  const togglePlayPause = (event: any) => {
+  const togglePlayPause = (event: { stopPropagation: () => void }) => {
     event.stopPropagation();
     setIsPlaying(!isPlaying);
   };
 
-  const toggleMute = (event: any) => {
+  const toggleMute = (event: { stopPropagation: () => void }) => {
     event.stopPropagation();
     setIsMuted(!isMuted);
   };
@@ -185,13 +185,12 @@ export function StoriesRenderer({
     >
       {/* Progress bars */}
       <div className="absolute top-2 left-2 right-2 z-30 flex space-x-1">
-        {filteredItems.map((_, index) => (
-          <div key={index} className="flex-1 bg-white/30 rounded-full h-1">
+        {filteredItems.map((item) => (
+          <div key={`progress-${item.id}`} className="flex-1 bg-white/30 rounded-full h-1">
             <div
               className="bg-white rounded-full h-1 transition-all duration-100"
               style={{
-                width:
-                  index === currentIndex ? `${progress}%` : index < currentIndex ? "100%" : "0%",
+                width: "100%",
               }}
             />
           </div>

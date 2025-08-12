@@ -1,8 +1,10 @@
+import React from "react";
+import { vi } from "vitest";
 // Shopify Polaris mocks
 vi.mock("@shopify/polaris", () => {
   const mockComponent =
     (name: string) =>
-    ({ children, ...props }: any) =>
+    ({ children, ...props }: { children?: React.ReactNode }) =>
       React.createElement("div", { "data-testid": name.toLowerCase(), ...props }, children);
 
   return {

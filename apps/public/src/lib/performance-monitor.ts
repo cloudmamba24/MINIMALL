@@ -192,7 +192,8 @@ function trackWebVitals(session: Partial<PerformanceSession>, debug: boolean): v
         const firstEntry = entries[0];
 
         if (firstEntry && session.metrics) {
-          const fidValue = (firstEntry as any).processingStart - firstEntry.startTime;
+          const e = firstEntry as PerformanceEventTiming & { processingStart?: number };
+          const fidValue = typeof e.processingStart === "number" ? e.processingStart - e.startTime : 0;
           const metric: PerformanceMetric = {
             name: "FID",
             value: fidValue,
@@ -216,11 +217,12 @@ function trackWebVitals(session: Partial<PerformanceSession>, debug: boolean): v
     try {
       let clsValue = 0;
       const clsObserver = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (!(entry as any).hadRecentInput) {
-            clsValue += (entry as any).value;
+          for (const entry of list.getEntries()) {
+            const e = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number };
+            if (!e.hadRecentInput && typeof e.value === "number") {
+              clsValue += e.value;
+            }
           }
-        }
 
         if (session.metrics) {
           const metric: PerformanceMetric = {

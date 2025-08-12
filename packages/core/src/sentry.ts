@@ -8,8 +8,8 @@ export interface SentryConfig {
   enableReplays?: boolean;
   replaysSessionSampleRate?: number;
   replaysOnErrorSampleRate?: number;
-  beforeSend?: (event: any) => any;
-  integrations?: any[];
+  beforeSend?: (event: unknown) => unknown;
+  integrations?: unknown[];
   tags?: Record<string, string>;
 }
 
@@ -37,7 +37,7 @@ export function createSentryConfig(config: SentryConfig & { component: string })
     tracesSampleRate,
     debug: environment === "development",
 
-    beforeSend: (event: any) => {
+    beforeSend: (event: unknown) => {
       // Don't send events in development unless explicitly enabled
       if (environment === "development" && !enableInDevelopment) {
         return null;

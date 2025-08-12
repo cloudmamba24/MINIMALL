@@ -101,7 +101,7 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
             {/* Product Tags */}
             {cardDetails.productTags?.map((tag, index) => (
               <ProductTag
-                key={index}
+                key={`${tag.productId}-${index}`}
                 tag={tag}
                 onTagClick={() => handleProductTagClick(tag.productId)}
               />
@@ -135,7 +135,7 @@ export function PostModal({ post, animationSettings }: PostModalProps) {
                   {cardDetails.productTags.map((tag, index) => (
                     <button
                       type="button"
-                      key={index}
+                      key={`${tag.productId}-${index}`}
                       onClick={() => handleProductTagClick(tag.productId)}
                       className="flex items-center gap-3 p-3 rounded-lg border border-gray-800 hover:border-gray-700 transition-colors w-full text-left group"
                     >

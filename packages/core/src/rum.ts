@@ -416,7 +416,7 @@ class RealUserMonitoring {
   /**
    * Debug logging
    */
-  private log(message: string, data?: any): void {
+  private log(message: string, data?: unknown): void {
     if (this.config.enableConsoleLogging) {
       console.log(`[RUM] ${message}`, data);
     }

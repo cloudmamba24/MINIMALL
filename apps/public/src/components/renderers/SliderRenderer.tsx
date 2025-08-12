@@ -100,7 +100,7 @@ export function SliderRenderer({ category, layout, onTileClick, className }: Sli
   };
 
   // Handle drag
-  const handleDragEnd = (_event: any, info: PanInfo) => {
+  const handleDragEnd = (_event: unknown, info: PanInfo) => {
     setIsDragging(false);
 
     const threshold = slideWidth / 4;
@@ -218,7 +218,7 @@ export function SliderRenderer({ category, layout, onTileClick, className }: Sli
               {/* Product Tags */}
               {cardDetails.productTags?.map((tag, tagIndex) => (
                 <div
-                  key={tagIndex}
+                  key={`${tag.productId}-${tagIndex}`}
                   className="absolute w-3 h-3 bg-white rounded-full border-2 border-black shadow-lg animate-pulse z-10"
                   style={{
                     left: `${tag.position.x * 100}%`,

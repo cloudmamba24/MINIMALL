@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import "@testing-library/jest-dom";
 import * as matchers from "@testing-library/jest-dom/matchers";
 
@@ -9,7 +10,7 @@ vi.mock("react", async () => {
   const actual = await vi.importActual("react");
   return {
     ...actual,
-    cache: (fn: any) => fn,
+    cache: (fn: unknown) => fn,
   };
 });
 

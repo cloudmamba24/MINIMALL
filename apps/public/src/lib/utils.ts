@@ -33,7 +33,7 @@ export function formatNumber(value: number): string {
 /**
  * Debounce function for performance optimization
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -93,14 +93,14 @@ export function generateId(): string {
  */
 export function deepClone<T>(obj: T): T {
   if (obj === null || typeof obj !== "object") return obj;
-  if (obj instanceof Date) return new Date(obj.getTime()) as any;
-  if (Array.isArray(obj)) return obj.map((item) => deepClone(item)) as any;
+  if (obj instanceof Date) return new Date(obj.getTime()) as unknown as T;
+  if (Array.isArray(obj)) return obj.map((item) => deepClone(item)) as unknown as T;
   if (typeof obj === "object") {
-    const copy: any = {};
+    const copy: Record<string, unknown> = {};
     Object.keys(obj).forEach((key) => {
-      copy[key] = deepClone((obj as any)[key]);
+      copy[key] = deepClone((obj as unknown as Record<string, unknown>)[key]);
     });
-    return copy;
+    return copy as unknown as T;
   }
   return obj;
 }

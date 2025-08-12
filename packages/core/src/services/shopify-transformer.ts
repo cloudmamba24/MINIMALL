@@ -17,7 +17,7 @@ import type {
 /**
  * Transform GraphQL MoneyV2 to our MoneyV2 type
  */
-export function transformMoney(graphqlMoney: any): MoneyV2 {
+export function transformMoney(graphqlMoney: { amount: string; currencyCode: string }): MoneyV2 {
   return {
     amount: graphqlMoney.amount,
     currencyCode: graphqlMoney.currencyCode,
@@ -27,7 +27,13 @@ export function transformMoney(graphqlMoney: any): MoneyV2 {
 /**
  * Transform GraphQL Image to our ShopifyImage type
  */
-export function transformImage(graphqlImage: any): ShopifyImage {
+export function transformImage(graphqlImage: {
+  id: string;
+  url: string;
+  altText?: string | null;
+  width: number;
+  height: number;
+}): ShopifyImage {
   return {
     id: graphqlImage.id,
     url: graphqlImage.url,
@@ -40,7 +46,7 @@ export function transformImage(graphqlImage: any): ShopifyImage {
 /**
  * Transform GraphQL SelectedOption to our SelectedOption type
  */
-export function transformSelectedOption(graphqlOption: any): SelectedOption {
+export function transformSelectedOption(graphqlOption: { name: string; value: string }): SelectedOption {
   return {
     name: graphqlOption.name,
     value: graphqlOption.value,
@@ -50,7 +56,20 @@ export function transformSelectedOption(graphqlOption: any): SelectedOption {
 /**
  * Transform GraphQL ProductVariant to our ShopifyVariant type
  */
-export function transformVariant(graphqlVariant: any): ShopifyVariant {
+export function transformVariant(graphqlVariant: {
+  id: string;
+  title: string;
+  price: { amount: string; currencyCode: string };
+  availableForSale: boolean;
+  selectedOptions?: Array<{ name: string; value: string }>;
+  requiresShipping: boolean;
+  compareAtPrice?: { amount: string; currencyCode: string } | null;
+  image?: { id: string; url: string; altText?: string | null; width: number; height: number } | null;
+  sku?: string | null;
+  barcode?: string | null;
+  weight?: number | null;
+  weightUnit?: string | null;
+}): ShopifyVariant {
   const variant: ShopifyVariant = {
     id: extractId(graphqlVariant.id),
     title: graphqlVariant.title,
@@ -91,7 +110,21 @@ export function transformVariant(graphqlVariant: any): ShopifyVariant {
 /**
  * Transform GraphQL Product to our ShopifyProduct type
  */
-export function transformProduct(graphqlProduct: any): ShopifyProduct {
+export function transformProduct(graphqlProduct: {
+  id: string;
+  title: string;
+  handle: string;
+  description?: string | null;
+  images?: { nodes?: Array<{ id: string; url: string; altText?: string | null; width: number; height: number }> };
+  variants?: { nodes?: Array<unknown> };
+  priceRange: { minVariantPrice: { amount: string; currencyCode: string }; maxVariantPrice: { amount: string; currencyCode: string } };
+  tags?: string[];
+  productType?: string;
+  vendor?: string;
+  availableForSale: boolean;
+  createdAt: string;
+  updatedAt: string;
+}): ShopifyProduct {
   return {
     id: extractId(graphqlProduct.id),
     title: graphqlProduct.title,
@@ -115,7 +148,18 @@ export function transformProduct(graphqlProduct: any): ShopifyProduct {
 /**
  * Transform Shopify cart line to our CartItem type
  */
-export function transformCartLine(graphqlLine: any): CartItem {
+export function transformCartLine(graphqlLine: {
+  id: string;
+  quantity: number;
+  merchandise: {
+    id: string;
+    title: string;
+    price: { amount: string; currencyCode: string };
+    image?: { url: string } | null;
+    product: { id: string; title: string };
+    selectedOptions?: Array<{ name: string; value: string }>;
+  };
+}): CartItem {
   const variant = graphqlLine.merchandise;
   const product = variant.product;
 
