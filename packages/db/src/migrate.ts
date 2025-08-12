@@ -18,14 +18,14 @@ async function runMigrations() {
   try {
     // Choose migration function based on database type
     if (url.hostname.includes("planetscale") || url.hostname.includes("pscale")) {
-      // drizzle migration types require any
-      await migrate(db as unknown as object, { migrationsFolder: "./migrations" } as unknown as { migrationsFolder: string });
+      // biome-ignore lint/suspicious/noExplicitAny: drizzle migration types require any
+      await migrate(db as any, { migrationsFolder: "./migrations" });
     } else if (url.hostname.includes("neon")) {
-      // drizzle migration types require any
-      await migrateNeon(db as unknown as object, { migrationsFolder: "./migrations" } as unknown as { migrationsFolder: string });
+      // biome-ignore lint/suspicious/noExplicitAny: drizzle migration types require any
+      await migrateNeon(db as any, { migrationsFolder: "./migrations" });
     } else {
-      // drizzle migration types require any
-      await migratePostgres(db as unknown as object, { migrationsFolder: "./migrations" } as unknown as { migrationsFolder: string });
+      // biome-ignore lint/suspicious/noExplicitAny: drizzle migration types require any
+      await migratePostgres(db as any, { migrationsFolder: "./migrations" });
     }
 
     console.log("✅ Migrations completed successfully");
