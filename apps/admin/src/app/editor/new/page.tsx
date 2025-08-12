@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Frame, Loading, Page } from "@shopify/polaris";
 
-export default function EditorNewPage() {
+function CreateInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -21,7 +24,6 @@ export default function EditorNewPage() {
 
       const res = await fetch(`/api/configs?${qs.toString()}`, { method: "POST" });
       if (!res.ok) {
-        // Go back to home with error state
         router.replace(`/${qs.toString() ? `?${qs.toString()}` : ""}`);
         return;
       }
@@ -30,13 +32,18 @@ export default function EditorNewPage() {
       router.replace(`/editor/${data.configId}${suffix}`);
     };
     create();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [router, searchParams]);
 
+  return <Loading />;
+}
+
+export default function EditorNewPage() {
   return (
     <Frame>
       <Page title="Creating page" subtitle="Please wait...">
-        <Loading />
+        <Suspense fallback={<Loading />}>
+          <CreateInner />
+        </Suspense>
       </Page>
     </Frame>
   );

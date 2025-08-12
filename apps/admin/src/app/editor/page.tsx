@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Card, Layout, Page } from "@shopify/polaris";
 
@@ -11,7 +14,7 @@ interface ConfigListItem {
   updatedAt?: string | Date | null;
 }
 
-export default function EditorIndexPage() {
+function EditorIndexInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -79,6 +82,14 @@ export default function EditorIndexPage() {
         </Layout.Section>
       </Layout>
     </Page>
+  );
+}
+
+export default function EditorIndexPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 16 }}>Loading…</div>}>
+      <EditorIndexInner />
+    </Suspense>
   );
 }
 
