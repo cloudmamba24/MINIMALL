@@ -187,8 +187,8 @@ export async function POST(request: NextRequest) {
 /**
  * Upload processed images to R2
  */
-async function uploadProcessedImages(
-  r2Service: any,
+  async function uploadProcessedImages(
+  r2Service: { putObject: Function; getObjectUrl: (key: string) => string } | null,
   result: ProcessingResult,
   folder: string,
   originalFilename: string
@@ -284,7 +284,7 @@ export async function GET(request: NextRequest) {
       valid: true,
       metadata: validation.metadata,
       fileSize: buffer.length,
-      suggestedOptions: getSuggestedProcessingOptions(validation.metadata!),
+      suggestedOptions: validation.metadata ? getSuggestedProcessingOptions(validation.metadata) : undefined,
     });
   } catch (error) {
     return NextResponse.json({ error: "Failed to analyze image" }, { status: 500 });
@@ -294,7 +294,11 @@ export async function GET(request: NextRequest) {
 /**
  * Get suggested processing options based on image characteristics
  */
-function getSuggestedProcessingOptions(metadata: any): ProcessingOptions {
+function getSuggestedProcessingOptions(metadata: {
+  width: number;
+  height: number;
+  density?: number;
+}): ProcessingOptions {
   const aspectRatio = metadata.width / metadata.height;
   const isPhoto = metadata.density && metadata.density > 72;
   const isLarge = metadata.width > 1920 || metadata.height > 1920;

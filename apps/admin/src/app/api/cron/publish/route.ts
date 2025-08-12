@@ -1,6 +1,6 @@
 import { configVersions, configs, db } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
-import { and, eq, lte, gte } from "drizzle-orm";
+import { and, eq, gte, lte } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 
 /**
@@ -23,7 +23,7 @@ import { type NextRequest, NextResponse } from "next/server";
 interface ScheduledVersion {
   id: string;
   configId: string;
-  data: any;
+  data: unknown;
   scheduledAt: Date | null;
 }
 
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
         // Add success tracking to Sentry
         Sentry.addBreadcrumb({
           category: "cron-publish",
-          message: `Published scheduled version`,
+          message: "Published scheduled version",
           data: {
             versionId: version.id,
             configId: version.configId,
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
     if (results.published > 0 || results.failed > 0) {
       Sentry.addBreadcrumb({
         category: "cron-summary",
-        message: `Cron job completed`,
+        message: "Cron job completed",
         data: {
           published: results.published,
           failed: results.failed,
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
  * Publish a single scheduled version
  */
 async function publishScheduledVersion(version: ScheduledVersion): Promise<void> {
-  const { id: versionId, configId, data } = version;
+  const { id: versionId, configId } = version;
 
   if (!db) {
     throw new Error("Database connection not available");

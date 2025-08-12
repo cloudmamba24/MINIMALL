@@ -162,8 +162,7 @@ export async function GET(request: NextRequest) {
             // Fetch recent performance metrics for display
             withQueryMonitoring(
               () =>
-                db!
-                  .select({
+                db?.select({
                     id: performanceMetrics.id,
                     configId: performanceMetrics.configId,
                     lcp: performanceMetrics.lcp,
@@ -188,8 +187,7 @@ export async function GET(request: NextRequest) {
             // Database aggregation for performance metrics (much more efficient)
             withQueryMonitoring(
               () =>
-                db!
-                  .select({
+                db?.select({
                     avgLcp: sql<number>`COALESCE(AVG(${performanceMetrics.lcp}), 0)`,
                     avgFid: sql<number>`COALESCE(AVG(${performanceMetrics.fid}), 0)`,
                     avgCls: sql<number>`COALESCE(AVG(${performanceMetrics.cls}), 0)`,
@@ -205,8 +203,7 @@ export async function GET(request: NextRequest) {
             // Fetch recent analytics events for display
             withQueryMonitoring(
               () =>
-                db!
-                  .select({
+                db?.select({
                     id: analyticsEvents.id,
                     event: analyticsEvents.event,
                     configId: analyticsEvents.configId,
@@ -230,8 +227,7 @@ export async function GET(request: NextRequest) {
             // Database aggregation for analytics events (much more efficient)
             withQueryMonitoring(
               () =>
-                db!
-                  .select({
+                db?.select({
                     event: analyticsEvents.event,
                     eventCount: sql<number>`COUNT(*)`,
                     uniqueSessions: sql<number>`COUNT(DISTINCT ${analyticsEvents.sessionId})`,

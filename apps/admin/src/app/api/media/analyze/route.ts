@@ -268,7 +268,7 @@ async function analyzeWithGoogleVision(
   }
 
   // Process text
-  if (annotations.textAnnotations && annotations.textAnnotations[0]) {
+  if (annotations.textAnnotations?.[0]) {
     text = annotations.textAnnotations[0].description;
   }
 

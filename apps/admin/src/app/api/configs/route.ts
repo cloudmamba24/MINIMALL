@@ -1,8 +1,8 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { configs, configVersions, db } from "@minimall/db";
-import { desc, eq } from "drizzle-orm";
-import * as Sentry from "@sentry/nextjs";
 import { createDefaultSiteConfig, extractShopFromDomain } from "@minimall/core";
+import { configVersions, configs, db } from "@minimall/db";
+import * as Sentry from "@sentry/nextjs";
+import { desc, eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 
 // GET /api/configs - list configs
 export async function GET(_request: NextRequest) {
@@ -30,11 +30,11 @@ export async function POST(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const searchParams = url.searchParams;
-    const body = await (async () => {
+    const body: { shopDomain?: string } = await (async () => {
       try {
         return await request.json();
       } catch {
-        return {} as any;
+        return {};
       }
     })();
 
