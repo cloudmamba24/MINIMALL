@@ -2,12 +2,25 @@
 
 import { Button, Card, Layout, Page } from "@shopify/polaris";
 import { useRouter } from "next/navigation";
+import { useAppBridge } from "@shopify/app-bridge-react";
+import { Redirect } from "@shopify/app-bridge/actions";
 import { useEffect } from "react";
 
 export default function AdminHomePage() {
   const router = useRouter();
+  const app = useAppBridge();
 
-  // Remove auto-redirect - let users choose where to go
+  // Navigation helper function for App Bridge
+  const navigateWithAppBridge = (path: string) => {
+    if (app) {
+      // Use App Bridge navigation for embedded apps
+      const redirect = Redirect.create(app);
+      redirect.dispatch(Redirect.Action.APP, path);
+    } else {
+      // Fallback to Next.js router for development
+      router.push(path);
+    }
+  };
 
   return (
     <Page
@@ -34,21 +47,21 @@ export default function AdminHomePage() {
                 <Button
                   variant="primary"
                   size="large"
-                  onClick={() => router.push("/editor/new")}
+                  onClick={() => navigateWithAppBridge("/editor/new")}
                   fullWidth
                 >
                   🎨 Create New Link-in-Bio Page
                 </Button>
 
-                <Button size="large" onClick={() => router.push("/editor")} fullWidth>
+                <Button size="large" onClick={() => navigateWithAppBridge("/editor")} fullWidth>
                   📝 Manage Existing Pages
                 </Button>
 
-                <Button size="large" onClick={() => router.push("/analytics")} fullWidth>
+                <Button size="large" onClick={() => navigateWithAppBridge("/analytics")} fullWidth>
                   📊 View Analytics
                 </Button>
 
-                <Button size="large" onClick={() => router.push("/settings")} fullWidth>
+                <Button size="large" onClick={() => navigateWithAppBridge("/settings")} fullWidth>
                   ⚙️ Settings
                 </Button>
               </div>
