@@ -203,10 +203,10 @@ export function MasonryRenderer({
 
     const tempHeights = new Array(columns).fill(0);
 
-    masonryItems.forEach((masonryItem) => {
+    for (const masonryItem of masonryItems) {
       const shortestColumn = getShortestColumn(tempHeights);
       tempHeights[shortestColumn] += masonryItem.height + layout.gutter;
-    });
+    }
 
     return Math.max(...tempHeights) + layout.outerMargin * 2;
   };

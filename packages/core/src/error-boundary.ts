@@ -2,7 +2,7 @@
 
 export interface ErrorInfo {
 	componentStack: string;
-  errorBoundary?: unknown;
+	errorBoundary?: unknown;
 	errorBoundaryName?: string;
 	errorBoundaryFound: boolean;
 	errorBoundaryStack?: string;
@@ -36,8 +36,19 @@ export const logError = (error: Error, context?: Record<string, unknown>) => {
 	console.error("🚨 Application Error:", errorData);
 
 	// Send to error tracking service (Sentry, LogRocket, etc.)
-  if (typeof window !== "undefined" && (window as unknown as { Sentry?: { captureException: (e: Error, opts?: unknown) => void } }).Sentry) {
-    (window as unknown as { Sentry: { captureException: (e: Error, opts?: unknown) => void } }).Sentry.captureException(error, {
+	if (
+		typeof window !== "undefined" &&
+		(
+			window as unknown as {
+				Sentry?: { captureException: (e: Error, opts?: unknown) => void };
+			}
+		).Sentry
+	) {
+		(
+			window as unknown as {
+				Sentry: { captureException: (e: Error, opts?: unknown) => void };
+			}
+		).Sentry.captureException(error, {
 			extra: context,
 			tags: {
 				section: "application-error",

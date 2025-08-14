@@ -71,9 +71,9 @@ function initializePixels(pixels: PixelSettings, configId: string) {
 
     // Custom pixels
     if (pixels.custom?.length) {
-      pixels.custom.forEach((customPixel) => {
+      for (const customPixel of pixels.custom) {
         initializeCustomPixel(customPixel, configId);
-      });
+      }
     }
 
     // Set up global event dispatcher
@@ -102,11 +102,11 @@ function initializeFacebookPixel(pixelId: string, _configId: string) {
     queue: unknown[];
   };
 
-  const fbq: FBQ = ((..._args: unknown[]) => {
+  const fbq: FBQ = ((...args: unknown[]) => {
     if (fbq.callMethod) {
-      fbq.callMethod.apply(fbq, arguments);
+      fbq.callMethod.apply(fbq, args);
     } else {
-      fbq.queue.push(arguments);
+      fbq.queue.push(args);
     }
   }) as FBQ;
   fbq.push = fbq;
@@ -144,8 +144,8 @@ function initializeGoogleAnalytics(measurementId: string, _configId: string) {
 
   (window as unknown as { dataLayer?: unknown[] }).dataLayer =
     (window as unknown as { dataLayer?: unknown[] }).dataLayer || [];
-  function gtag(_type: string, ..._args: unknown[]) {
-    (window as unknown as { dataLayer: unknown[] }).dataLayer.push(arguments as unknown as never);
+  function gtag(_type: string, ...args: unknown[]) {
+    (window as unknown as { dataLayer: unknown[] }).dataLayer.push(args as unknown as never);
   }
   (window as unknown as { gtag: typeof gtag }).gtag = gtag;
 
@@ -178,9 +178,9 @@ function initializeTikTokPixel(pixelId: string, _configId: string) {
     track?: (event: string, data?: unknown) => void;
   };
 
-  const ttq: TTQ = ((..._args: unknown[]) => {
+  const ttq: TTQ = ((...args: unknown[]) => {
     ttq.methods = ttq.methods || [];
-    ttq.methods.push(arguments);
+    ttq.methods.push(args);
   }) as TTQ;
   ttq.version = "1.1";
   ttq.queue = [];
@@ -213,9 +213,9 @@ function initializePinterestPixel(tagId: string, _configId: string) {
     queue?: unknown[];
     version?: string;
   };
-  const pintrk: PinTrk = ((..._args: unknown[]) => {
+  const pintrk: PinTrk = ((...args: unknown[]) => {
     pintrk.queue = pintrk.queue || [];
-    pintrk.queue.push(Array.prototype.slice.call(arguments));
+    pintrk.queue.push(args);
   }) as PinTrk;
   pintrk.queue = [];
   pintrk.version = "3.0";
@@ -249,12 +249,12 @@ function initializeSnapchatPixel(pixelId: string, _configId: string) {
     handleRequest?: { apply: (self: unknown, args: IArguments) => void };
     queue?: unknown[];
   };
-  const snaptr: SnapTr = ((..._args: unknown[]) => {
+  const snaptr: SnapTr = ((...args: unknown[]) => {
     if (snaptr.handleRequest) {
-      snaptr.handleRequest.apply(snaptr, arguments);
+      snaptr.handleRequest.apply(snaptr, args);
     } else {
       snaptr.queue = snaptr.queue || [];
-      snaptr.queue.push(arguments);
+      snaptr.queue.push(args);
     }
   }) as SnapTr;
   snaptr.queue = [];
@@ -305,9 +305,14 @@ function initializeCustomPixel(
  */
 function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
   // Create global event dispatcher function
-  (window as unknown as {
-    __MINIMALL_PIXEL_DISPATCH__?: (eventName: string, eventData?: Record<string, unknown>) => void;
-  }).__MINIMALL_PIXEL_DISPATCH__ = (eventName: string, eventData: Record<string, unknown> = {}) => {
+  (
+    window as unknown as {
+      __MINIMALL_PIXEL_DISPATCH__?: (
+        eventName: string,
+        eventData?: Record<string, unknown>
+      ) => void;
+    }
+  ).__MINIMALL_PIXEL_DISPATCH__ = (eventName: string, eventData: Record<string, unknown> = {}) => {
     const utmData = UTMUtils.getUTMData(configId);
     const sessionData = UTMUtils.getSessionData(configId);
 
@@ -331,7 +336,7 @@ function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
         (window as unknown as { fbq: (...args: unknown[]) => void }).fbq(
           "track",
           fbEventName,
-          enhancedEventData,
+          enhancedEventData
         );
       } catch (error) {
         console.warn("[PixelDispatcher] Facebook event failed:", error);
@@ -352,12 +357,15 @@ function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
     }
 
     // Dispatch to TikTok Pixel
-    if (pixels.tiktok && (window as unknown as { ttq?: { track?: (e: string, d?: unknown) => void } }).ttq) {
+    if (
+      pixels.tiktok &&
+      (window as unknown as { ttq?: { track?: (e: string, d?: unknown) => void } }).ttq
+    ) {
       try {
         const tiktokEventName = mapEventToTikTok(eventName);
         (window as unknown as { ttq: { track?: (e: string, d?: unknown) => void } }).ttq.track?.(
           tiktokEventName,
-          enhancedEventData,
+          enhancedEventData
         );
       } catch (error) {
         console.warn("[PixelDispatcher] TikTok event failed:", error);
@@ -365,13 +373,16 @@ function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
     }
 
     // Dispatch to Pinterest
-    if (pixels.pinterest && (window as unknown as { pintrk?: (...args: unknown[]) => void }).pintrk) {
+    if (
+      pixels.pinterest &&
+      (window as unknown as { pintrk?: (...args: unknown[]) => void }).pintrk
+    ) {
       try {
         const pinterestEventName = mapEventToPinterest(eventName);
         (window as unknown as { pintrk: (...args: unknown[]) => void }).pintrk(
           "track",
           pinterestEventName,
-          enhancedEventData,
+          enhancedEventData
         );
       } catch (error) {
         console.warn("[PixelDispatcher] Pinterest event failed:", error);
@@ -379,13 +390,16 @@ function setupGlobalEventDispatcher(pixels: PixelSettings, configId: string) {
     }
 
     // Dispatch to Snapchat
-    if (pixels.snapchat && (window as unknown as { snaptr?: (...args: unknown[]) => void }).snaptr) {
+    if (
+      pixels.snapchat &&
+      (window as unknown as { snaptr?: (...args: unknown[]) => void }).snaptr
+    ) {
       try {
         const snapchatEventName = mapEventToSnapchat(eventName);
         (window as unknown as { snaptr: (...args: unknown[]) => void }).snaptr(
           "track",
           snapchatEventName,
-          enhancedEventData,
+          enhancedEventData
         );
       } catch (error) {
         console.warn("[PixelDispatcher] Snapchat event failed:", error);
@@ -470,13 +484,17 @@ export const PixelUtils = {
   dispatch(eventName: string, eventData: Record<string, unknown> = {}) {
     if (
       typeof window !== "undefined" &&
-      (window as unknown as {
-        __MINIMALL_PIXEL_DISPATCH__?: (evt: string, data?: Record<string, unknown>) => void;
-      }).__MINIMALL_PIXEL_DISPATCH__
+      (
+        window as unknown as {
+          __MINIMALL_PIXEL_DISPATCH__?: (evt: string, data?: Record<string, unknown>) => void;
+        }
+      ).__MINIMALL_PIXEL_DISPATCH__
     ) {
-      (window as unknown as {
-        __MINIMALL_PIXEL_DISPATCH__: (evt: string, data?: Record<string, unknown>) => void;
-      }).__MINIMALL_PIXEL_DISPATCH__(eventName, eventData);
+      (
+        window as unknown as {
+          __MINIMALL_PIXEL_DISPATCH__: (evt: string, data?: Record<string, unknown>) => void;
+        }
+      ).__MINIMALL_PIXEL_DISPATCH__(eventName, eventData);
     }
   },
 
@@ -525,7 +543,7 @@ export const PixelUtils = {
   /**
    * Track checkout initiation
    */
-  trackBeginCheckout(_configId: string, cartValue: number, items: any[]) {
+  trackBeginCheckout(_configId: string, cartValue: number, items: unknown[]) {
     this.dispatch("begin_checkout", {
       value: cartValue / 100, // Convert cents to dollars
       currency: "USD",
@@ -537,7 +555,7 @@ export const PixelUtils = {
   /**
    * Track purchase completion
    */
-  trackPurchase(_configId: string, orderId: string, revenue: number, items: any[]) {
+  trackPurchase(_configId: string, orderId: string, revenue: number, items: unknown[]) {
     this.dispatch("purchase", {
       transaction_id: orderId,
       value: revenue / 100, // Convert cents to dollars

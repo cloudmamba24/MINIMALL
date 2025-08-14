@@ -93,7 +93,9 @@ export function EnhancedProductQuickView() {
         quantity,
         value: Math.round(Number.parseFloat(selectedVariant.price.amount) * 100),
       });
-    } catch {}
+    } catch {
+      // Ignore analytics errors - don't block add to cart
+    }
   };
 
   const handleOptionChange = (optionName: string, value: string) => {
@@ -180,6 +182,7 @@ export function EnhancedProductQuickView() {
                     poster={product.images[selectedImage]?.url}
                   >
                     <source src={product.images[selectedImage]?.url} />
+                    <track kind="captions" label="Product video" default />
                   </video>
                 ) : (
                   <Image
@@ -215,7 +218,7 @@ export function EnhancedProductQuickView() {
             <div className="flex gap-3">
               {product.images.map((image, index) => (
                 <motion.button
-                  key={image.id || index}
+                  key={image.id || `image-${index}`}
                   onClick={() => setSelectedImage(index)}
                   className={`
                     relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors
@@ -226,7 +229,13 @@ export function EnhancedProductQuickView() {
                 >
                   {/\.(mp4|webm|ogg)(\?.*)?$/i.test(image.url) ? (
                     <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <svg
+                        className="w-6 h-6 text-white"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        aria-label="Play video"
+                      >
+                        <title>Play video</title>
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     </div>
@@ -260,7 +269,7 @@ export function EnhancedProductQuickView() {
               <div className="flex items-center">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
-                    key={i}
+                    key={`star-${i}`}
                     size={16}
                     className={i < 4 ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
                   />
@@ -319,9 +328,9 @@ export function EnhancedProductQuickView() {
 
             return (
               <div key={optionName}>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
+                <div className="block text-sm font-medium text-gray-900 mb-2">
                   {optionName}: {selectedValue}
-                </label>
+                </div>
                 <div className="flex gap-2 flex-wrap">
                   {optionValues.map((value: string) => (
                     <motion.button
@@ -348,14 +357,14 @@ export function EnhancedProductQuickView() {
 
           {/* Validation message for missing selection */}
           {validationMessage && (
-            <div className="text-red-600 text-sm" role="status" aria-live="polite">
+            <div className="text-red-600 text-sm" aria-live="polite">
               {validationMessage}
             </div>
           )}
 
           {/* Quantity Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">Quantity</label>
+            <div className="block text-sm font-medium text-gray-900 mb-2">Quantity</div>
             <div className="flex items-center gap-3">
               <motion.button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}

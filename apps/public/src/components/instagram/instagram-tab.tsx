@@ -184,16 +184,14 @@ function InstagramGrid({
         );
       })}
       {isLoadingMore &&
-        items
-          .slice(visibleCount, Math.min(visibleCount + 12, items.length))
-          .map((child) => (
-            <div
-              key={`skeleton-${child.id}`}
-              className="relative aspect-square md:aspect-[4/5] lg:aspect-square"
-            >
-              <div className="w-full h-full loading-shimmer rounded-sm" />
-            </div>
-          ))}
+        items.slice(visibleCount, Math.min(visibleCount + 12, items.length)).map((child) => (
+          <div
+            key={`skeleton-${child.id}`}
+            className="relative aspect-square md:aspect-[4/5] lg:aspect-square"
+          >
+            <div className="w-full h-full loading-shimmer rounded-sm" />
+          </div>
+        ))}
       <div ref={sentinelRef} className="col-span-full h-6" />
     </div>
   );

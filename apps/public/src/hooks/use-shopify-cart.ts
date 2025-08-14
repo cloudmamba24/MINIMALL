@@ -61,7 +61,7 @@ export function useShopifyCart({ shopDomain }: UseShopifyCartOptions = {}) {
           },
         ];
 
-        let cartResponse;
+        let cartResponse: unknown;
 
         if (!shopifyCartId && !hasCreatedShopifyCart.current) {
           // Create new cart

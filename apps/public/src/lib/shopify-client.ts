@@ -11,6 +11,42 @@ import {
   transformProduct,
 } from "@minimall/core/client";
 
+// GraphQL Product type that matches transformProduct expectations
+type GraphQLProduct = {
+  id: string;
+  title: string;
+  handle: string;
+  description?: string | null;
+  images?: {
+    nodes?: Array<{
+      id: string;
+      url: string;
+      altText?: string | null;
+      width: number;
+      height: number;
+    }>;
+  };
+  variants?: {
+    nodes?: unknown[];
+  };
+  priceRange: {
+    minVariantPrice: {
+      amount: string;
+      currencyCode: string;
+    };
+    maxVariantPrice: {
+      amount: string;
+      currencyCode: string;
+    };
+  };
+  availableForSale: boolean;
+  tags: string[];
+  vendor: string;
+  productType: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 // Re-export for components
 export type { ShopifyProduct } from "@minimall/core/client";
 
@@ -27,7 +63,11 @@ function getShopifyService(domain: string, accessToken: string) {
     serviceCache.set(cacheKey, createShopifyStorefrontService(domain, accessToken));
   }
 
-  return serviceCache.get(cacheKey)!;
+  const service = serviceCache.get(cacheKey);
+  if (!service) {
+    throw new Error(`Failed to get Shopify service for ${domain}`);
+  }
+  return service;
 }
 
 /**
@@ -60,7 +100,7 @@ async function getCachedProduct(
 
   try {
     const service = getShopifyService(domain, accessToken);
-    const graphqlProduct = await service.getProduct(productId, true);
+    const graphqlProduct = (await service.getProduct(productId, true)) as GraphQLProduct | null;
 
     if (!graphqlProduct) {
       return null;
@@ -127,7 +167,7 @@ export class ShopifyClient {
       const result = await service.searchProducts(query, first);
 
       return {
-        products: result.products.map(transformProduct),
+        products: result.products.map((p) => transformProduct(p as GraphQLProduct)),
         hasNextPage: result.hasNextPage,
       };
     } catch (error) {
@@ -148,7 +188,7 @@ export class ShopifyClient {
       const result = await service.getCollectionProducts(handle, first);
 
       return {
-        products: result.products.map(transformProduct),
+        products: result.products.map((p) => transformProduct(p as GraphQLProduct)),
         hasNextPage: result.hasNextPage,
       };
     } catch (error) {

@@ -3,6 +3,19 @@
 import { createShopifyClient, normalizeShopDomain } from "@/lib/shopify-client";
 import type { UICartItem } from "@/store/app-store";
 
+// Shopify Cart types
+type ShopifyCart = {
+  id: string;
+  checkoutUrl: string;
+  totalQuantity?: number;
+  cost?: {
+    totalAmount?: {
+      amount: string;
+      currencyCode: string;
+    };
+  };
+};
+
 export interface ShopifyCartState {
   cartId: string | null;
   isLoading: boolean;
@@ -50,7 +63,7 @@ export class ShopifyCartIntegration {
       // If we have an existing cart ID, try to use it
       if (this.state.cartId) {
         try {
-          const existingCart = await client.getCart(this.state.cartId);
+          const existingCart = (await client.getCart(this.state.cartId)) as ShopifyCart | null;
           if (existingCart) {
             this.state.checkoutUrl = existingCart.checkoutUrl;
             this.persistState();
@@ -68,7 +81,7 @@ export class ShopifyCartIntegration {
         quantity: item.quantity,
       }));
 
-      const newCart = await client.createCart(cartLines);
+      const newCart = (await client.createCart(cartLines)) as ShopifyCart | null;
 
       if (newCart) {
         this.state.cartId = newCart.id;
@@ -108,7 +121,7 @@ export class ShopifyCartIntegration {
         quantity: item.quantity,
       }));
 
-      const updatedCart = await client.addToCart(cartId, cartLines);
+      const updatedCart = (await client.addToCart(cartId, cartLines)) as ShopifyCart | null;
 
       if (updatedCart) {
         this.state.checkoutUrl = updatedCart.checkoutUrl;
@@ -241,7 +254,11 @@ export function getShopifyCartIntegration(shopDomain: string): ShopifyCartIntegr
     cartIntegrations.set(normalizedDomain, new ShopifyCartIntegration(normalizedDomain));
   }
 
-  return cartIntegrations.get(normalizedDomain)!;
+  const integration = cartIntegrations.get(normalizedDomain);
+  if (!integration) {
+    throw new Error(`Cart integration not found for domain: ${normalizedDomain}`);
+  }
+  return integration;
 }
 
 /**

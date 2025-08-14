@@ -135,31 +135,28 @@ async function processLineItemAttribution(
   order: ShopifyOrder,
   lineItem: ShopifyLineItem,
   shopDomain: string
-): Promise<
-  | {
-      orderId: string;
-      lineItemId: string;
-      shopDomain: string;
-      configId: string;
-      blockId: string;
-      layoutPreset: string;
-      experimentKey: string | null;
-      productId: string;
-      variantId: string;
-      quantity: number;
-      price: number;
-      revenue: number;
-      utmSource: string | null;
-      utmMedium: string | null;
-      utmCampaign: string | null;
-      utmTerm: string | null;
-      utmContent: string | null;
-      sessionId: string;
-      device: string;
-      timestamp: Date;
-    }
-  | null
-> {
+): Promise<{
+  orderId: string;
+  lineItemId: string;
+  shopDomain: string;
+  configId: string;
+  blockId: string;
+  layoutPreset: string;
+  experimentKey: string | null;
+  productId: string;
+  variantId: string;
+  quantity: number;
+  price: number;
+  revenue: number;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmTerm: string | null;
+  utmContent: string | null;
+  sessionId: string;
+  device: string;
+  timestamp: Date;
+} | null> {
   // Extract attribution data from line item properties or order note attributes
   const attributionData = extractAttributionData(order, lineItem);
 
@@ -273,14 +270,19 @@ function mapAttributionProperty(
   } else if (lowerName === "minimall_device") {
     data.device = value;
   } else if (lowerName === "minimall_utm_source") {
+    if (!data.utm) data.utm = {};
     data.utm.source = value;
   } else if (lowerName === "minimall_utm_medium") {
+    if (!data.utm) data.utm = {};
     data.utm.medium = value;
   } else if (lowerName === "minimall_utm_campaign") {
+    if (!data.utm) data.utm = {};
     data.utm.campaign = value;
   } else if (lowerName === "minimall_utm_term") {
+    if (!data.utm) data.utm = {};
     data.utm.term = value;
   } else if (lowerName === "minimall_utm_content") {
+    if (!data.utm) data.utm = {};
     data.utm.content = value;
   }
 }

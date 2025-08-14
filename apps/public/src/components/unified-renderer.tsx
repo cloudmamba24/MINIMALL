@@ -5,14 +5,11 @@ import type { Category, SiteConfig } from "@minimall/core/client";
 import { useCart } from "../hooks/use-cart";
 import { useRenderMode } from "../hooks/use-mobile-detection";
 import { useModalRouter } from "../hooks/use-modal-router";
-import { conditionalProps } from "../lib/type-utils";
 import { cn } from "../lib/utils";
 import { EnhancedProductQuickView } from "./enhanced-product-quick-view";
 import { InstagramTab } from "./instagram/instagram-tab";
 import { LookbookSection } from "./lookbook/lookbook-section";
 import { EnhancedPostModal } from "./modals/enhanced-post-modal";
-import { Renderer } from "./renderer";
-import { LayoutSwitch } from "./renderers/LayoutSwitch";
 import { ShopTab } from "./shop/shop-tab";
 import { PixelDispatcher } from "./tracking/PixelDispatcher";
 import { UTMTracker } from "./tracking/UTMTracker";
@@ -42,7 +39,7 @@ interface UnifiedRendererProps {
 export function UnifiedRenderer({ config, className, forceMode }: UnifiedRendererProps) {
   const detectedMode = useRenderMode();
   const renderMode = forceMode || detectedMode;
-  const { addToCart } = useCart();
+  // const { addToCart } = useCart();
   const { openModal: openPostModal } = useModalRouter("post");
   const { openModal: openProductModal } = useModalRouter("product");
 
@@ -167,7 +164,7 @@ function MobileNativeRenderer({
     productId: string,
     variantId?: string,
     quantity?: number
-  ) => Promise<{ success: boolean; error?: any }>;
+  ) => Promise<{ success: boolean; error?: unknown }>;
   onOpenPost: (postId: string) => void;
 }) {
   return (
@@ -186,7 +183,7 @@ function MobileNativeRenderer({
       {config.categories.length > 1 && (
         <div className="instagram-tabs">
           {config.categories.map((category) => (
-            <button key={category.id} className="instagram-tab active">
+            <button key={category.id} type="button" className="instagram-tab active">
               {category.title}
             </button>
           ))}
@@ -207,7 +204,7 @@ function MobileNativeRenderer({
 function DesktopLayoutRenderer({
   config,
   className,
-  onAddToCart,
+  onAddToCart: _onAddToCart,
   onOpenPost,
 }: {
   config: SiteConfig;
@@ -216,7 +213,7 @@ function DesktopLayoutRenderer({
     productId: string,
     variantId?: string,
     quantity?: number
-  ) => Promise<{ success: boolean; error?: any }>;
+  ) => Promise<{ success: boolean; error?: unknown }>;
   onOpenPost: (postId: string) => void;
 }) {
   return (

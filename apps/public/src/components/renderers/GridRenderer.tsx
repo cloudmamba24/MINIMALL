@@ -166,7 +166,7 @@ export function GridRenderer({
             {/* Enhanced Product Tags with One-Tap Overlay */}
             {cardDetails.productTags?.map((tag, tagIndex) => (
               <ProductOverlay
-                key={tagIndex}
+                key={tag.productId || `tag-${tagIndex}`}
                 tag={tag}
                 tagIndex={tagIndex}
                 onAddToCart={onAddToCart || (() => console.log("No cart handler provided"))}
@@ -175,8 +175,9 @@ export function GridRenderer({
           </motion.div>
         );
       })}
-
       {/* Empty slots for maintaining grid structure */}
+      // biome-ignore lint/suspicious/noArrayIndexKey: Empty layout slots for grid structure,
+      position-based index IS stable identifier
       {Array.from({ length: maxItems - displayItems.length }).map((_, index) => (
         <div
           key={`empty-${index}`}

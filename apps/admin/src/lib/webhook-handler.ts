@@ -152,7 +152,7 @@ export class WebhookHandler {
 
   private async handleAppUninstall(context: WebhookContext): Promise<void> {
     const { shop } = context;
-    const { createDatabase, users, configs, featureFlags } = await import("@minimall/db");
+    const { createDatabase } = await import("@minimall/db");
     const _db = createDatabase(process.env.DATABASE_URL || "");
 
     try {

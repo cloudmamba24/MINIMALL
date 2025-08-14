@@ -92,7 +92,7 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
     }
 
     // Production and strict development: throw error for configs that aren't found
-    console.error(`Configuration not found: ${configId}. R2 error: ${error}`);
+    console.error(`Configuration not found: ${configId}. R2 error: ${_error}`);
     throw new Error(`Configuration not found: ${configId}`);
   }
 }
@@ -126,7 +126,7 @@ export async function GET(
     return NextResponse.json(
       {
         error: "Configuration not found",
-        message: _error instanceof Error ? _error.message : "Unknown error",
+        message: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 404 }
     );

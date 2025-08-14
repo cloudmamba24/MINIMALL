@@ -81,12 +81,11 @@ export default function EditorListClient() {
                         {item.shop || ""} {item.slug ? `• ${item.slug}` : ""}
                       </div>
                       <div style={{ color: "#6d7175", fontSize: 12, marginTop: 6 }}>
-                        Updated{" "}
-                        {(() => {
+                        Updated {(() => {
                           const dateValue =
                             typeof item.updatedAt === "string"
                               ? new Date(item.updatedAt)
-                              : item.updatedAt ?? null;
+                              : (item.updatedAt ?? null);
                           return dateValue ? dateValue.toLocaleString() : "—";
                         })()}
                       </div>

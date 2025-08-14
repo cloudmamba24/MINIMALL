@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "biome check .",
     "lint:fix": "biome check . --apply",
+    "lint:summary": "node ../../scripts/lint-summary.js",
+    "lint:architecture": "echo '📚 See LINT_ARCHITECTURE.md for MiniMall-specific patterns' && npm run lint:summary",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",

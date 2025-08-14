@@ -5,12 +5,12 @@
 /**
  * Creates an object with only defined properties, avoiding undefined assignments to optional props
  */
-export function conditionalProps<T extends Record<string, any>>(props: T): Partial<T> {
+export function conditionalProps<T extends Record<string, unknown>>(props: T): Partial<T> {
   const result: Partial<T> = {};
 
   for (const [key, value] of Object.entries(props)) {
     if (value !== undefined && value !== null) {
-      (result as any)[key] = value;
+      (result as Record<string, unknown>)[key] = value;
     }
   }
 
@@ -45,14 +45,14 @@ export function safeProp<T, K extends keyof T>(
 /**
  * Creates a filtered object with only truthy values for optional properties
  */
-export function filterDefinedProps<T extends Record<string, any>>(obj: T): Partial<T> {
+export function filterDefinedProps<T extends Record<string, unknown>>(obj: T): Partial<T> {
   const result: Partial<T> = {};
 
-  Object.entries(obj).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(obj)) {
     if (value !== undefined && value !== null && value !== "") {
-      (result as any)[key] = value;
+      (result as Record<string, unknown>)[key] = value;
     }
-  });
+  }
 
   return result;
 }

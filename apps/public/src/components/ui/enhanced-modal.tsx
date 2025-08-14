@@ -98,12 +98,11 @@ export function EnhancedModal({
 
           {/* Modal container */}
           <FocusTrap active={isOpen} focusTrapOptions={{ allowOutsideClick: true }}>
-            <div
+            <dialog
               id="enhanced-modal-container"
               className="fixed inset-0 z-50 flex items-center justify-center p-4"
-              role="dialog"
+              open={isOpen}
               aria-modal="true"
-              tabIndex={-1}
             >
               <motion.div
                 className={`
@@ -135,7 +134,7 @@ export function EnhancedModal({
                 {/* Modal content */}
                 <div className="relative max-h-[90vh] overflow-auto">{children}</div>
               </motion.div>
-            </div>
+            </dialog>
           </FocusTrap>
         </>
       )}

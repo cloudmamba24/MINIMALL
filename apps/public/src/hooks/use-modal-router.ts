@@ -42,9 +42,9 @@ export function useModalRouter(modalKey: string) {
       const newSearchParams = new URLSearchParams(searchParams);
 
       // Add modal data to URL params
-      Object.entries(data).forEach(([key, value]) => {
+      for (const [key, value] of Object.entries(data)) {
         newSearchParams.set(`${modalKey}:${key}`, value);
-      });
+      }
 
       // Update URL without page refresh
       router.push(`?${newSearchParams.toString()}`, { scroll: false });
@@ -57,11 +57,11 @@ export function useModalRouter(modalKey: string) {
     const newSearchParams = new URLSearchParams(searchParams);
 
     // Remove all modal-related params
-    Array.from(newSearchParams.keys()).forEach((key) => {
+    for (const key of Array.from(newSearchParams.keys())) {
       if (key.startsWith(`${modalKey}:`)) {
         newSearchParams.delete(key);
       }
-    });
+    }
 
     const newUrl = newSearchParams.toString()
       ? `?${newSearchParams.toString()}`

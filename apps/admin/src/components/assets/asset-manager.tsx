@@ -92,7 +92,8 @@ export function AssetManager({
     { id: "recent", content: "Recent", panelID: "recent-assets" },
   ];
 
-  // Load assets on mount
+  // Load assets when folder changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: folder dependency is needed to reload assets
   useEffect(() => {
     loadAssets();
   }, [folder]);
@@ -396,7 +397,9 @@ export function AssetManager({
         ) : filteredAssets.length === 0 ? (
           <EmptyState
             heading="No assets found"
-            action={{ content: "Upload files", onAction: () => {} }}
+            action={{ content: "Upload files", onAction: () => {
+              // TODO: Implement file upload dialog
+            } }}
             image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
           >
             <p>Upload some files to get started with your asset library.</p>
@@ -413,6 +416,15 @@ export function AssetManager({
                     : "border-gray-200 hover:border-gray-300"
                 }`}
                 onClick={() => handleAssetSelect(asset)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleAssetSelect(asset);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Select ${asset.originalName}`}
               >
                 <div className="aspect-square p-2">
                   {asset.type === "image" ? (
@@ -524,14 +536,18 @@ export function AssetManager({
               <TextField
                 label="Alt text (for images)"
                 value=""
-                onChange={() => {}}
+                onChange={() => {
+                  // TODO: Implement alt text editing
+                }}
                 helpText="Describe this image for accessibility"
                 autoComplete="off"
               />
               <TextField
                 label="Tags"
                 value={editingAsset.tags?.join(", ") || ""}
-                onChange={() => {}}
+                onChange={() => {
+                  // TODO: Implement tags editing
+                }}
                 helpText="Separate tags with commas"
                 autoComplete="off"
               />

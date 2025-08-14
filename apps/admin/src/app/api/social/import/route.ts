@@ -136,7 +136,11 @@ export async function POST(request: NextRequest) {
  */
 async function downloadAndUploadMedia(
   r2Service: {
-    putObject: (key: string, buffer: Buffer, options?: { metadata?: Record<string, unknown> }) => Promise<unknown>;
+    putObject: (
+      key: string,
+      buffer: Buffer,
+      options?: { metadata?: Record<string, unknown> }
+    ) => Promise<unknown>;
     getObjectUrl: (key: string) => string;
   } | null,
   post: SocialMediaPost,
@@ -419,7 +423,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Return platform info and extraction preview
-  return NextResponse.json({
+    return NextResponse.json({
       valid: true,
       platform: validation.platform,
       platformName: getPlatformDisplayName(validation.platform ?? "unknown"),

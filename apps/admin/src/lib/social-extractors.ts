@@ -40,7 +40,7 @@ export interface SocialMediaPost {
   };
   createdAt?: Date;
   extractedAt: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ExtractionResult {
@@ -513,7 +513,7 @@ function extractPinterestPinId(url: string): string | null {
 export function extractHashtags(text: string): string[] {
   const hashtagRegex = /#(\w+)/g;
   const hashtags: string[] = [];
-  let match;
+  let match: RegExpExecArray | null;
 
   while ((match = hashtagRegex.exec(text)) !== null) {
     if (match[1]) {
@@ -584,7 +584,7 @@ function getFallbackInstagramPost(postId: string, url: string): ExtractionResult
 export function extractMentions(text: string): string[] {
   const mentionRegex = /@(\w+)/g;
   const mentions: string[] = [];
-  let match;
+  let match: RegExpExecArray | null;
 
   while ((match = mentionRegex.exec(text)) !== null) {
     if (match[1]) {

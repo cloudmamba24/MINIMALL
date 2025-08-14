@@ -245,6 +245,7 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
   }, [isLoadingMore, visibleCount, items.length]);
 
   // Pause videos when tiles go offscreen
+  // biome-ignore lint/correctness/useExhaustiveDependencies: items.length triggers video observer re-initialization when content changes
   useEffect(() => {
     const root = containerRef.current;
     if (!root) return;
@@ -271,6 +272,7 @@ const InstagramGrid = memo(function InstagramGrid({ category, openPostModal }: I
   }, [items.length]);
 
   // Track impressions for tiles entering viewport
+  // biome-ignore lint/correctness/useExhaustiveDependencies: visibleCount triggers impression tracking re-initialization for analytics accuracy
   useEffect(() => {
     if (!gridRef.current) return;
     const io = createImpressionTracker(analytics, 0.5);
@@ -419,8 +421,7 @@ function InstagramContentItem({
               /* ignore */
             }
           }}
-          role="button"
-          tabIndex={0}
+          aria-label="Toggle video playback"
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();

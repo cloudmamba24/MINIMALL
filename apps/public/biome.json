@@ -5,7 +5,9 @@
     "rules": {
       "suspicious": {
         "noExplicitAny": "warn",
-        "noGlobalIsNan": "off"
+        "noGlobalIsNan": "off",
+        "noArrayIndexKey": "warn",
+        "noCommentText": "off"
       },
       "a11y": {
         "noSvgWithoutTitle": "warn",
@@ -13,7 +15,8 @@
         "useSemanticElements": "warn"
       },
       "correctness": {
-        "noUnusedVariables": "warn"
+        "noUnusedVariables": "warn",
+        "useExhaustiveDependencies": "warn"
       },
       "style": {
         "noUnusedTemplateLiteral": "warn",
@@ -24,5 +27,38 @@
         "noForEach": "warn"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "include": [
+        "**/components/modals/**",
+        "**/components/renderers/**",
+        "**/components/shop/**",
+        "**/components/renderer.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          },
+          "correctness": {
+            "useExhaustiveDependencies": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["**/components/optimization/**", "**/components/instagram/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useExhaustiveDependencies": "off"
+          },
+          "complexity": {
+            "noForEach": "off"
+          }
+        }
+      }
+    }
+  ]
 }

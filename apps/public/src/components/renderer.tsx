@@ -209,7 +209,7 @@ interface PlaceholderCardsProps {
 
 function PlaceholderCards({
   cardType,
-  cardDetails,
+  cardDetails: _cardDetails,
   count,
   displayType,
   className,

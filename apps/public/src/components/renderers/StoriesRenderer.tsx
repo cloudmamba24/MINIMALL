@@ -23,7 +23,7 @@ export function StoriesRenderer({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
-  const [progress, setProgress] = useState(0);
+  const [_progress, setProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -124,13 +124,14 @@ export function StoriesRenderer({
   };
 
   // Handle tap interactions
-  const handleTap = (event: { clientX: number }) => {
+  const handleTap = (event: MouseEvent | PointerEvent | TouchEvent) => {
     if (isDragging) return;
 
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const clickX = event.clientX - rect.left;
+    const clientX = "clientX" in event ? event.clientX : event.touches?.[0]?.clientX || 0;
+    const clickX = clientX - rect.left;
     const centerX = rect.width / 2;
 
     if (clickX < centerX) {

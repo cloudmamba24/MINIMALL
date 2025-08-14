@@ -176,7 +176,11 @@ export async function POST(request: NextRequest) {
  */
 async function uploadProcessedImages(
   r2Service: {
-    putObject: (key: string, data: Buffer, opts?: Record<string, string>) => Promise<void>;
+    putObject: (
+      key: string,
+      body: string | ArrayBuffer | Buffer,
+      options?: { contentType?: string }
+    ) => Promise<Response>;
     getObjectUrl: (key: string) => string;
   } | null,
   result: ProcessingResult,
@@ -195,16 +199,7 @@ async function uploadProcessedImages(
     // Upload original processed image
     const originalKey = `${folder}/${timestamp}-${baseName}-original.${result.original.format}`;
     await r2Service.putObject(originalKey, result.original.buffer, {
-      metadata: {
-        originalName: originalFilename,
-        width: result.original.width.toString(),
-        height: result.original.height.toString(),
-        size: result.original.size.toString(),
-        format: result.original.format,
-        processingTime: result.metadata.processingTime.toString(),
-        compressionRatio: result.metadata.compressionRatio.toString(),
-        uploadedAt: new Date().toISOString(),
-      },
+      contentType: `image/${result.original.format}`,
     });
 
     uploads.push({
@@ -217,15 +212,7 @@ async function uploadProcessedImages(
       const variantKey = `${folder}/${timestamp}-${baseName}-${variant.variant}.${variant.format}`;
 
       await r2Service.putObject(variantKey, variant.buffer, {
-        metadata: {
-          originalName: originalFilename,
-          variant: variant.variant,
-          width: variant.width.toString(),
-          height: variant.height.toString(),
-          size: variant.size.toString(),
-          format: variant.format,
-          uploadedAt: new Date().toISOString(),
-        },
+        contentType: `image/${variant.format}`,
       });
 
       uploads.push({
@@ -275,7 +262,15 @@ export async function GET(request: NextRequest) {
       metadata: validation.metadata,
       fileSize: buffer.length,
       suggestedOptions: validation.metadata
-        ? getSuggestedProcessingOptions(validation.metadata)
+        ? getSuggestedProcessingOptions(
+            Object.fromEntries(
+              Object.entries({
+                width: validation.metadata.width,
+                height: validation.metadata.height,
+                density: validation.metadata.density,
+              }).filter(([, value]) => value !== undefined)
+            ) as { width?: number; height?: number; density?: number }
+          )
         : undefined,
     });
   } catch (_error) {
@@ -287,13 +282,15 @@ export async function GET(request: NextRequest) {
  * Get suggested processing options based on image characteristics
  */
 function getSuggestedProcessingOptions(metadata: {
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
   density?: number;
 }): ProcessingOptions {
-  const aspectRatio = metadata.width / metadata.height;
-  const isPhoto = metadata.density && metadata.density > 72;
-  const isLarge = metadata.width > 1920 || metadata.height > 1920;
+  const width = metadata.width ?? 1920;
+  const height = metadata.height ?? 1080;
+  const aspectRatio = width / height;
+  const isPhoto = Boolean(metadata.density && metadata.density > 72);
+  const isLarge = width > 1920 || height > 1920;
 
   return {
     // Suggest aspect ratio based on current ratio

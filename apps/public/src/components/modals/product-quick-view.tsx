@@ -38,9 +38,9 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
       const firstVariant = product.variants[0];
       if (firstVariant) {
         const options: Record<string, string> = {};
-        firstVariant.selectedOptions.forEach((option: { name: string; value: string }) => {
+        for (const option of firstVariant.selectedOptions as { name: string; value: string }[]) {
           options[option.name] = option.value;
-        });
+        }
         setSelectedOptions(options);
       }
     }
@@ -218,7 +218,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                   {product.images.map((image, index) => (
                     <button
                       type="button"
-                      key={image.id || index}
+                      key={image.id || `image-${index}`}
                       onClick={() => setSelectedImage(index)}
                       className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 ${
                         selectedImage === index ? "border-black" : "border-transparent"
@@ -245,7 +245,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
                     <div className="flex">
                       {[...Array(5)].map((_, i) => (
                         <Star
-                          key={i}
+                          key={`star-${i}`}
                           size={16}
                           className={i < 4 ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
                         />
@@ -281,9 +281,9 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
 
                     return (
                       <div key={optionName}>
-                        <label className="block text-sm font-medium mb-2">
+                        <div className="block text-sm font-medium mb-2">
                           {optionName}: {selectedValue}
-                        </label>
+                        </div>
                         <div className="flex gap-2 flex-wrap">
                           {optionValues.map((value: string) => (
                             <button
@@ -306,7 +306,7 @@ export function ProductQuickView({ animationSettings }: ProductQuickViewProps) {
 
                   {/* Quantity */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">Quantity</label>
+                    <div className="block text-sm font-medium mb-2">Quantity</div>
                     <div className="flex items-center gap-3">
                       <button
                         type="button"

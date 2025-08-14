@@ -87,6 +87,7 @@ export function LivePreview({ category, isPreviewMode = false, className }: Live
           <div className="flex border border-gray-200 rounded-lg overflow-hidden">
             {Object.entries(DEVICE_CONFIGS).map(([device, config]) => (
               <button
+                type="button"
                 key={device}
                 onClick={() => handleDeviceChange(device as PreviewDevice)}
                 className={cn(

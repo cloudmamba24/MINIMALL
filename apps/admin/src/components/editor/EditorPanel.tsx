@@ -60,7 +60,8 @@ export function EditorPanel({
 
   const currentLayout = category.layout || defaultLayout;
 
-  // Track changes
+  // Track changes - when category prop changes, mark form as having unsaved changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: category dependency is needed for business logic
   useEffect(() => {
     setHasUnsavedChanges(true);
   }, [category]);

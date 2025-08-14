@@ -17,9 +17,8 @@ export function ProductCarousel({
 }: ProductCarouselProps) {
   const items = category.children || [];
   return (
-    <div
+    <section
       className={`w-full overflow-x-auto snap-x snap-mandatory ${className}`}
-      role="region"
       aria-label="Products"
     >
       <div className="flex gap-4 px-1">
@@ -54,6 +53,6 @@ export function ProductCarousel({
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }

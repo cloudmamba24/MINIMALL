@@ -175,16 +175,17 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
               {(() => {
                 // Detect video from card details
                 const [, cardDetails] = currentPost.children?.[0]?.card || [];
-                const details = (cardDetails || {}) as Record<string, any>;
+                const details = (cardDetails || {}) as Record<string, unknown>;
                 const videoUrl = details.videoUrl as string | undefined;
                 if (videoUrl) {
                   return (
                     <video
                       className="w-full h-full object-cover"
                       controls
+                      aria-label="Post video content"
                       playsInline
                       preload="metadata"
-                      poster={details.poster || postImage || undefined}
+                      poster={(details.poster as string) || postImage || undefined}
                       onLoadedMetadata={(e) => {
                         // Respect reduced motion by not autoplaying
                         if (
@@ -195,8 +196,12 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
                           return;
                         }
                         try {
-                          (e.currentTarget as HTMLVideoElement).play().catch(() => {});
-                        } catch {}
+                          (e.currentTarget as HTMLVideoElement).play().catch(() => {
+                            // Ignore autoplay failures - expected in many browsers
+                          });
+                        } catch {
+                          // Ignore video play errors
+                        }
                       }}
                       onKeyDown={(e) => {
                         const v = e.currentTarget as HTMLVideoElement;
@@ -211,6 +216,7 @@ export function EnhancedPostModal({ posts, onProductClick }: EnhancedPostModalPr
                       }}
                     >
                       <source src={videoUrl} />
+                      <track kind="captions" src="" label="No captions available" />
                     </video>
                   );
                 }

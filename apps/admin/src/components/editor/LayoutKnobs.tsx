@@ -168,8 +168,9 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
         {/* Grid Dimensions */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Rows</label>
+            <label htmlFor="layout-rows" className="block text-sm font-medium text-gray-700 mb-2">Rows</label>
             <input
+              id="layout-rows"
               type="range"
               value={currentConfig.rows}
               onChange={(e) => updateConfig({ rows: Number.parseInt(e.target.value) })}
@@ -182,8 +183,9 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Columns</label>
+            <label htmlFor="layout-columns" className="block text-sm font-medium text-gray-700 mb-2">Columns</label>
             <input
+              id="layout-columns"
               type="range"
               value={currentConfig.columns}
               onChange={(e) => updateConfig({ columns: Number.parseInt(e.target.value) })}
@@ -199,8 +201,9 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
         {/* Spacing */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Gutter</label>
+            <label htmlFor="layout-gutter" className="block text-sm font-medium text-gray-700 mb-2">Gutter</label>
             <input
+              id="layout-gutter"
               type="range"
               value={currentConfig.gutter}
               onChange={(e) => updateConfig({ gutter: Number.parseInt(e.target.value) })}
@@ -213,8 +216,9 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Margin</label>
+            <label htmlFor="layout-margin" className="block text-sm font-medium text-gray-700 mb-2">Margin</label>
             <input
+              id="layout-margin"
               type="range"
               value={currentConfig.outerMargin}
               onChange={(e) => updateConfig({ outerMargin: Number.parseInt(e.target.value) })}
@@ -233,8 +237,11 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
         <div className="space-y-4">
           {/* Border Radius */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Border Radius</label>
+            <label htmlFor="border-radius" className="block text-sm font-medium text-gray-700 mb-2">
+              Border Radius
+            </label>
             <input
+              id="border-radius"
               type="range"
               value={layout.borderRadius}
               onChange={(e) => onLayoutChange({ borderRadius: Number.parseInt(e.target.value) })}
@@ -248,8 +255,11 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
 
           {/* Aspect Ratio */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Aspect Ratio</label>
+            <label htmlFor="aspect-ratio" className="block text-sm font-medium text-gray-700 mb-2">
+              Aspect Ratio
+            </label>
             <select
+              id="aspect-ratio"
               value={layout.aspect}
               onChange={(e) => onLayoutChange({ aspect: e.target.value as AspectRatio })}
               className="w-full p-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -264,8 +274,11 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
 
           {/* Media Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Media Filter</label>
+            <label htmlFor="media-filter" className="block text-sm font-medium text-gray-700 mb-2">
+              Media Filter
+            </label>
             <select
+              id="media-filter"
               value={layout.mediaFilter}
               onChange={(e) => onLayoutChange({ mediaFilter: e.target.value as MediaFilter })}
               className="w-full p-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -281,11 +294,12 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
           {/* Hover Zoom */}
           <div className="flex items-center justify-between">
             <div>
-              <label className="text-sm font-medium text-gray-700">Hover Zoom</label>
+              <label htmlFor="hover-zoom" className="text-sm font-medium text-gray-700">Hover Zoom</label>
               <p className="text-xs text-gray-500">Scale items on hover</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
+                id="hover-zoom"
                 type="checkbox"
                 checked={layout.hoverZoom}
                 onChange={(e) => onLayoutChange({ hoverZoom: e.target.checked })}

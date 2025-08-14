@@ -56,12 +56,12 @@ export function createUTMParams(searchParams: URLSearchParams): Record<string, s
     { key: "content", param: "utm_content" },
   ];
 
-  utmFields.forEach(({ key, param }) => {
+  for (const { key, param } of utmFields) {
     const value = searchParams.get(param);
     if (value) {
       result[key] = value;
     }
-  });
+  }
 
   return result;
 }
@@ -80,11 +80,11 @@ export function createAttributionData(input: {
   };
 
   // Only add properties that have actual values
-  Object.entries(input).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(input)) {
     if (key !== "configId" && value !== undefined && value !== null && value !== "") {
       result[key] = value as unknown;
     }
-  });
+  }
 
   return result;
 }

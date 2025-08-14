@@ -65,7 +65,9 @@ export function EnhancedCartDrawer({ shopDomain }: EnhancedCartDrawerProps) {
             items: cart.items,
           });
           analytics.trackCheckoutUrlGenerated({ configId: "cart" });
-        } catch {}
+        } catch {
+          // Ignore analytics errors - don't block checkout flow
+        }
         if (process.env.NODE_ENV === "development") {
           console.log("Redirecting to checkout:", checkoutUrl);
         }

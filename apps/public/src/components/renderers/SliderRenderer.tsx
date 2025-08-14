@@ -242,6 +242,7 @@ export function SliderRenderer({ category, layout, onTileClick, className }: Sli
       {totalItems > itemsPerSlide && (
         <>
           <button
+            type="button"
             className={cn(
               "absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-all",
               {
@@ -255,6 +256,7 @@ export function SliderRenderer({ category, layout, onTileClick, className }: Sli
           </button>
 
           <button
+            type="button"
             className={cn(
               "absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-all",
               {
@@ -272,8 +274,11 @@ export function SliderRenderer({ category, layout, onTileClick, className }: Sli
       {/* Pagination dots */}
       {totalItems > itemsPerSlide && maxIndex > 0 && (
         <div className="flex justify-center space-x-2 mt-4">
+          // biome-ignore lint/suspicious/noArrayIndexKey: Pagination dots represent slide
+          positions, index IS the stable identifier
           {Array.from({ length: maxIndex + 1 }).map((_, index) => (
             <button
+              type="button"
               key={index}
               className={cn("w-2 h-2 rounded-full transition-all", {
                 "bg-gray-800": index === currentIndex,

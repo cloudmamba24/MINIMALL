@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -73,7 +73,7 @@ interface AnalyticsEvent {
   event: string;
   configId: string;
   sessionId: string;
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   timestamp: string;
   userAgent: string | null;
   referrer: string | null;
@@ -116,7 +116,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
   const [error, setError] = useState<string | null>(null);
   const [timeframe, setTimeframe] = useState<"1h" | "24h" | "7d" | "30d">("24h");
 
-  const fetchAnalyticsData = async () => {
+  const fetchAnalyticsData = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -139,11 +139,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeframe, configId]);
 
   useEffect(() => {
     fetchAnalyticsData();
-  }, [timeframe, configId]);
+  }, [fetchAnalyticsData]);
 
   if (loading) {
     return (
@@ -162,6 +162,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
         <CardContent>
           <p className="text-red-600">{error}</p>
           <button
+            type="button"
             onClick={fetchAnalyticsData}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
@@ -216,6 +217,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
         <div className="flex gap-2">
           {(["1h", "24h", "7d", "30d"] as const).map((period) => (
             <button
+              type="button"
               key={period}
               onClick={() => setTimeframe(period)}
               className={`px-3 py-1 rounded text-sm ${
@@ -366,8 +368,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ configId
                     fill="#8884d8"
                     dataKey="count"
                   >
-                    {eventChartData.map((_entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    {eventChartData.map((entry, index) => (
+                      <Cell key={`cell-${entry.event}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />

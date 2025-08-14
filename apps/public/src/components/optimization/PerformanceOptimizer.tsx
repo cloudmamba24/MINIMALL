@@ -53,6 +53,7 @@ export function VirtualList<TItem>({
           }}
         >
           {visibleItems.map((item, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: Virtual scroll position creates stable keys for performance optimization
             <div key={visibleStartWithOverscan + index} style={{ height: itemHeight }}>
               {renderItem(item, visibleStartWithOverscan + index)}
             </div>
@@ -311,21 +312,29 @@ export function usePerformanceMonitor(configId: string) {
     // First Input Delay
     const fidObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      entries.forEach((entry) => {
-        metricsRef.current.fid = (entry as any).processingStart - entry.startTime;
+      for (const entry of entries) {
+        metricsRef.current.fid = (entry as PerformanceEntry & { processingStart?: number })
+          .processingStart
+          ? (entry as PerformanceEntry & { processingStart: number }).processingStart -
+            entry.startTime
+          : 0;
         console.log(`[Performance] FID: ${metricsRef.current.fid?.toFixed(2)}ms`);
-      });
+      }
     });
 
     // Cumulative Layout Shift
     let clsValue = 0;
     const clsObserver = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      entries.forEach((entry) => {
-        if (!(entry as any).hadRecentInput) {
-          clsValue += (entry as any).value;
+      for (const entry of entries) {
+        const layoutShiftEntry = entry as PerformanceEntry & {
+          hadRecentInput?: boolean;
+          value?: number;
+        };
+        if (!layoutShiftEntry.hadRecentInput) {
+          clsValue += layoutShiftEntry.value || 0;
         }
-      });
+      }
       metricsRef.current.cls = clsValue;
       console.log(`[Performance] CLS: ${clsValue.toFixed(4)}`);
     });
@@ -355,7 +364,16 @@ export function useAdaptiveImageQuality() {
   const [quality, setQuality] = useState<"high" | "medium" | "low">("high");
 
   useEffect(() => {
-    const connection = (navigator as any).connection;
+    const connection = (
+      navigator as Navigator & {
+        connection?: {
+          effectiveType?: string;
+          downlink?: number;
+          addEventListener?: (event: string, handler: () => void) => void;
+          removeEventListener?: (event: string, handler: () => void) => void;
+        };
+      }
+    ).connection;
 
     if (connection) {
       const updateQuality = () => {
@@ -369,10 +387,10 @@ export function useAdaptiveImageQuality() {
       };
 
       updateQuality();
-      connection.addEventListener("change", updateQuality);
+      connection.addEventListener?.("change", updateQuality);
 
       return () => {
-        connection.removeEventListener("change", updateQuality);
+        connection.removeEventListener?.("change", updateQuality);
       };
     }
   }, []);

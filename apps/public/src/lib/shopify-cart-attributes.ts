@@ -238,11 +238,11 @@ function generateCheckoutUrlWithAttributes(
   params.set("quantity", data.quantity.toString());
 
   // Add all attributes as query parameters
-  Object.entries(attributes).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(attributes)) {
     if (value) {
       params.set(key, value);
     }
-  });
+  }
 
   return `${baseUrl}?${params.toString()}`;
 }
@@ -321,7 +321,7 @@ export async function updateCartWithAttribution(
 /**
  * Track cart abandonment with attribution data
  */
-export function trackCartAbandonment(configId: string, cartValue: number, items: any[]) {
+export function trackCartAbandonment(configId: string, cartValue: number, items: unknown[]) {
   const attributes = UTMUtils.getCartAttributes(configId);
 
   // Send abandonment event to analytics
@@ -341,8 +341,8 @@ export function trackCartAbandonment(configId: string, cartValue: number, items:
 /**
  * Utility to extract attribution from Shopify order webhook
  */
-export function extractAttributionFromOrder(orderData: any): Partial<EnhancedCartAttributes> {
-  const attributes: Record<string, any> = {};
+export function extractAttributionFromOrder(orderData: unknown): Partial<EnhancedCartAttributes> {
+  const attributes: Record<string, unknown> = {};
 
   // Extract from note_attributes or line_item_properties
   const noteAttributes = orderData.note_attributes || [];

@@ -136,7 +136,7 @@ function storeUTMData(configId: string, utm: UTMParameters, sessionId: string) {
 
   // Also update the global UTM context for immediate use
   if (typeof window !== "undefined") {
-    (window as any).__MINIMALL_UTM__ = utmData;
+    (window as Window & { __MINIMALL_UTM__?: UTMData }).__MINIMALL_UTM__ = utmData;
   }
 }
 
@@ -242,7 +242,11 @@ export const UTMUtils = {
   /**
    * Track custom event with UTM attribution
    */
-  trackEvent(configId: string, eventName: string, properties: Record<string, any> = {}) {
+  trackEvent(
+    configId: string,
+    eventName: string,
+    properties: Record<string, string | number | boolean> = {}
+  ) {
     const utmData = getStoredUTMData(configId);
     const sessionData = getOrCreateSession(configId);
 
@@ -302,7 +306,7 @@ export const UTMUtils = {
       localStorage.removeItem(sessionKey);
 
       if (typeof window !== "undefined") {
-        (window as any).__MINIMALL_UTM__ = undefined;
+        (window as Window & { __MINIMALL_UTM__?: UTMData }).__MINIMALL_UTM__ = undefined;
       }
     } catch (error) {
       console.warn("[UTMTracker] Failed to cleanup:", error);

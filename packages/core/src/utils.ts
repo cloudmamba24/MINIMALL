@@ -58,24 +58,37 @@ export async function createEnhancedSiteConfig(
 			);
 
 			// Fetch first 8 products for the demo
-      const searchResult = await shopifyService.searchProducts("*", 8);
-      realProducts = (searchResult.products as unknown[]).map((p) =>
-        transformProduct(p as {
-          id: string;
-          title: string;
-          handle: string;
-          description?: string | null;
-          images?: { nodes?: Array<{ id: string; url: string; altText?: string | null; width: number; height: number }> };
-          variants?: { nodes?: Array<unknown> };
-          priceRange: { minVariantPrice: { amount: string; currencyCode: string }; maxVariantPrice: { amount: string; currencyCode: string } };
-          tags?: string[];
-          productType?: string;
-          vendor?: string;
-          availableForSale: boolean;
-          createdAt: string;
-          updatedAt: string;
-        }),
-      ) as unknown[];
+			const searchResult = await shopifyService.searchProducts("*", 8);
+			realProducts = (searchResult.products as unknown[]).map((p) =>
+				transformProduct(
+					p as {
+						id: string;
+						title: string;
+						handle: string;
+						description?: string | null;
+						images?: {
+							nodes?: Array<{
+								id: string;
+								url: string;
+								altText?: string | null;
+								width: number;
+								height: number;
+							}>;
+						};
+						variants?: { nodes?: Array<unknown> };
+						priceRange: {
+							minVariantPrice: { amount: string; currencyCode: string };
+							maxVariantPrice: { amount: string; currencyCode: string };
+						};
+						tags?: string[];
+						productType?: string;
+						vendor?: string;
+						availableForSale: boolean;
+						createdAt: string;
+						updatedAt: string;
+					},
+				),
+			) as unknown[];
 
 			console.log(`Loaded ${realProducts.length} products from Shopify`);
 		} catch (error) {
@@ -148,17 +161,17 @@ function createSiteConfigWithProducts(
 		},
 	];
 
-  type MinimalProduct = {
-    id: string;
-    title: string;
-    handle: string;
-    images: Array<{ url: string }>;
-    priceRange: { minVariantPrice: { amount: string; currencyCode: string } };
-  };
+	type MinimalProduct = {
+		id: string;
+		title: string;
+		handle: string;
+		images: Array<{ url: string }>;
+		priceRange: { minVariantPrice: { amount: string; currencyCode: string } };
+	};
 
-  const finalProducts: MinimalProduct[] = (
-    (products.length > 0 ? products : mockProducts) as unknown[]
-  ).map((p) => p as MinimalProduct);
+	const finalProducts: MinimalProduct[] = (
+		(products.length > 0 ? products : mockProducts) as unknown[]
+	).map((p) => p as MinimalProduct);
 
 	// Create product items for the config
 	const productItems = finalProducts.map((product, index) => ({
@@ -231,10 +244,13 @@ function createBaseSiteConfig(
 										},
 										productTags: [
 											{
-          productId: (featuredProduct as { id?: string } | undefined)?.id || "prod_abc",
+												productId:
+													(featuredProduct as { id?: string } | undefined)
+														?.id || "prod_abc",
 												position: { x: 0.6, y: 0.4 },
 												label:
-              (featuredProduct as { title?: string } | undefined)?.title || "Essential Tee",
+													(featuredProduct as { title?: string } | undefined)
+														?.title || "Essential Tee",
 											},
 										],
 									},
@@ -308,7 +324,7 @@ function createBaseSiteConfig(
 				categoryType: [
 					"products",
 					{
-        children: productItems as unknown as Category[],
+						children: productItems as unknown as Category[],
 						products: [],
 						displayType: "grid",
 						itemsPerRow: 2,
@@ -674,7 +690,9 @@ export function createPerformanceMetrics(
 	const navigation = performance.getEntriesByType(
 		"navigation",
 	)[0] as PerformanceNavigationTiming;
-  const connection = (navigator as unknown as { connection?: { effectiveType?: string } }).connection;
+	const connection = (
+		navigator as unknown as { connection?: { effectiveType?: string } }
+	).connection;
 
 	return {
 		configId,

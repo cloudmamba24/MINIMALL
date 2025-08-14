@@ -97,9 +97,9 @@ export function deepClone<T>(obj: T): T {
   if (Array.isArray(obj)) return obj.map((item) => deepClone(item)) as unknown as T;
   if (typeof obj === "object") {
     const copy: Record<string, unknown> = {};
-    Object.keys(obj).forEach((key) => {
+    for (const key of Object.keys(obj)) {
       copy[key] = deepClone((obj as unknown as Record<string, unknown>)[key]);
-    });
+    }
     return copy as unknown as T;
   }
   return obj;

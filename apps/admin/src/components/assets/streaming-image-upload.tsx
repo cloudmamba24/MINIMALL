@@ -184,7 +184,7 @@ export function StreamingImageUpload({
     return (
       <div className={`relative group ${className}`}>
         <div className="relative overflow-hidden rounded-lg border border-gray-200">
-          <img src={value} alt="Uploaded image" className="w-full h-48 object-cover" />
+          <img src={value} alt="Uploaded asset preview" className="w-full h-48 object-cover" />
 
           {/* Upload result info */}
           {uploadState.result && (
@@ -192,9 +192,9 @@ export function StreamingImageUpload({
               {uploadState.result.compressed && (
                 <div className="flex items-center gap-1">
                   <CheckCircle className="w-3 h-3" />
-                  {(
-                    ((uploadState.result.originalSize! - uploadState.result.size) /
-                      uploadState.result.originalSize!) *
+                  {uploadState.result.originalSize && (
+                    ((uploadState.result.originalSize - uploadState.result.size) /
+                      uploadState.result.originalSize) *
                     100
                   ).toFixed(0)}
                   % smaller
@@ -213,6 +213,7 @@ export function StreamingImageUpload({
               >
                 <div className="flex gap-2">
                   <button
+                    type="button"
                     onClick={openFileDialog}
                     className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
                     title="Replace image"
@@ -220,6 +221,7 @@ export function StreamingImageUpload({
                     <Upload className="w-4 h-4" />
                   </button>
                   <button
+                    type="button"
                     onClick={handleRemove}
                     className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
                     title="Remove image"
@@ -313,8 +315,8 @@ export function StreamingImageUpload({
               {uploadState.status === "completed" && uploadState.result && (
                 <span>
                   {formatBytes(uploadState.result.size)}
-                  {uploadState.result.compressed &&
-                    ` • Optimized (${(((uploadState.result.originalSize! - uploadState.result.size) / uploadState.result.originalSize!) * 100).toFixed(0)}% smaller)`}
+                  {uploadState.result.compressed && uploadState.result.originalSize &&
+                    ` • Optimized (${(((uploadState.result.originalSize - uploadState.result.size) / uploadState.result.originalSize) * 100).toFixed(0)}% smaller)`}
                 </span>
               )}
             </p>
@@ -350,6 +352,7 @@ export function StreamingImageUpload({
           {/* Action Buttons */}
           {uploadState.status === "uploading" && (
             <button
+              type="button"
               onClick={handleCancel}
               className="text-xs text-red-500 hover:text-red-700 transition-colors"
             >
@@ -359,6 +362,7 @@ export function StreamingImageUpload({
 
           {uploadState.status === "error" && (
             <button
+              type="button"
               onClick={resetUploadState}
               className="text-xs text-blue-500 hover:text-blue-700 transition-colors"
             >

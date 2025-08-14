@@ -162,8 +162,8 @@ export async function GET(request: NextRequest) {
             // Fetch recent performance metrics for display
             withQueryMonitoring(
               () => {
-                const database = db!;
-                return database
+                if (!db) throw new Error("Database not available");
+                return db
                   .select({
                     id: performanceMetrics.id,
                     configId: performanceMetrics.configId,
@@ -191,8 +191,8 @@ export async function GET(request: NextRequest) {
             // Database aggregation for performance metrics (much more efficient)
             withQueryMonitoring(
               () => {
-                const database = db!;
-                return database
+                if (!db) throw new Error("Database not available");
+                return db
                   .select({
                     avgLcp: sql<number>`COALESCE(AVG(${performanceMetrics.lcp}), 0)`,
                     avgFid: sql<number>`COALESCE(AVG(${performanceMetrics.fid}), 0)`,
@@ -211,8 +211,8 @@ export async function GET(request: NextRequest) {
             // Fetch recent analytics events for display
             withQueryMonitoring(
               () => {
-                const database = db!;
-                return database
+                if (!db) throw new Error("Database not available");
+                return db
                   .select({
                     id: analyticsEvents.id,
                     event: analyticsEvents.event,
@@ -239,8 +239,8 @@ export async function GET(request: NextRequest) {
             // Database aggregation for analytics events (much more efficient)
             withQueryMonitoring(
               () => {
-                const database = db!;
-                return database
+                if (!db) throw new Error("Database not available");
+                return db
                   .select({
                     event: analyticsEvents.event,
                     eventCount: sql<number>`COUNT(*)`,

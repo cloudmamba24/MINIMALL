@@ -32,7 +32,7 @@ interface ProductOverlayProps {
   className?: string;
 }
 
-export function ProductOverlay({ tag, tagIndex, onAddToCart, className }: ProductOverlayProps) {
+export function ProductOverlay({ tag, onAddToCart, className }: ProductOverlayProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(tag.product?.variants?.[0]);
@@ -161,6 +161,7 @@ export function ProductOverlay({ tag, tagIndex, onAddToCart, className }: Produc
               />
               {/* Close Button */}
               <button
+                type="button"
                 onClick={() => setIsExpanded(false)}
                 className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
               >
@@ -200,6 +201,7 @@ export function ProductOverlay({ tag, tagIndex, onAddToCart, className }: Produc
                         {tag.product.variants.map((variant) => (
                           <button
                             key={variant.id}
+                            type="button"
                             onClick={() => setSelectedVariant(variant)}
                             className={cn(
                               "px-2 py-1 text-xs rounded border transition-colors",
@@ -221,6 +223,7 @@ export function ProductOverlay({ tag, tagIndex, onAddToCart, className }: Produc
                   <div className="flex items-center justify-between">
                     <div className="flex items-center border border-gray-300 rounded-lg">
                       <button
+                        type="button"
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
                         className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors"
                         disabled={quantity <= 1}
@@ -229,6 +232,7 @@ export function ProductOverlay({ tag, tagIndex, onAddToCart, className }: Produc
                       </button>
                       <span className="w-8 text-center text-sm font-medium">{quantity}</span>
                       <button
+                        type="button"
                         onClick={() => setQuantity(quantity + 1)}
                         className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors"
                       >
@@ -237,6 +241,7 @@ export function ProductOverlay({ tag, tagIndex, onAddToCart, className }: Produc
                     </div>
 
                     <button
+                      type="button"
                       onClick={handleAddToCart}
                       disabled={
                         !tag.product.available || (selectedVariant && !selectedVariant.available)
