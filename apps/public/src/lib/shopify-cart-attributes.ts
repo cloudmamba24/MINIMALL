@@ -328,15 +328,14 @@ export function trackCartAbandonment(configId: string, cartValue: number, items:
   UTMUtils.trackEvent(configId, "cart_abandon", {
     cart_value: cartValue,
     items_count: items.length,
-    items: items.map(
-      (item: {
-        productId?: string;
-        variantId?: string;
-        quantity?: number;
-        price?: number;
-      }) => ({
-        product_id: item.productId,
-        variant_id: item.variantId,
+    items: (items as {
+      productId?: string;
+      variantId?: string;
+      quantity?: number;
+      price?: number;
+    }[]).map((item) => ({
+      product_id: item.productId,
+      variant_id: item.variantId,
         quantity: item.quantity,
         price: item.price,
       })
