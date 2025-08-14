@@ -25,6 +25,8 @@
     "reset": "npm run clean && npm install",
     "analyze": "turbo analyze",
     "ci": "npm run type-check && npm run lint && npm run build && npm run test",
+    "quick-check:admin": "./scripts/quick-test.sh admin",
+    "quick-check:public": "./scripts/quick-test.sh public",
     "validate": "node scripts/validate-deployment.js",
     "validate:admin": "node scripts/validate-deployment.js --app=admin",
     "validate:public": "node scripts/validate-deployment.js --app=public",
@@ -32,7 +34,8 @@
     "deploy:simulate:admin": "scripts/local-deployment.sh admin",
     "deploy:simulate:public": "scripts/local-deployment.sh public",
     "pre-deploy": "npm run validate && echo '✅ Ready for deployment!'",
-    "quick-check": "npm run type-check && npm run lint && echo '⚡ Quick checks passed!'"
+    "quick-check": "npm run type-check && npm run lint && echo '⚡ Quick checks passed!'",
+    "test:coverage": "turbo test:coverage"
   },
   "workspaces": ["apps/*", "packages/*"],
   "devDependencies": {

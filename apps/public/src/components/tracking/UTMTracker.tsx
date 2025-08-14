@@ -315,7 +315,7 @@ export const UTMUtils = {
       localStorage.removeItem(utmKey);
       localStorage.removeItem(sessionKey);
 
-      if (typeof window !== "undefined") {
+      if (typeof window !== "undefined" && '__MINIMALL_UTM__' in window) {
         delete (window as Window & { __MINIMALL_UTM__?: UTMData }).__MINIMALL_UTM__;
       }
     } catch (error) {

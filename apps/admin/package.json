@@ -9,6 +9,9 @@
     "lint": "biome check .",
     "lint:fix": "biome check . --apply",
     "type-check": "tsc --noEmit",
+    "quick-check": "../../scripts/quick-test.sh admin",
+    "validate": "node ../../scripts/validate-deployment.js --app=admin",
+    "deploy:simulate": "../../scripts/local-deployment.sh admin",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
