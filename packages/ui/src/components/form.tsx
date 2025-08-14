@@ -460,7 +460,7 @@ export const Form: React.FC<FormProps> = ({
 
 		// Check required fields
 		const requiredFields = formElement.querySelectorAll("[required]");
-		requiredFields.forEach((field) => {
+		for (const field of requiredFields) {
 			const input = field as HTMLInputElement;
 			const name = input.name;
 			const value = formData.get(name) as string;
@@ -468,7 +468,7 @@ export const Form: React.FC<FormProps> = ({
 			if (!value || value.trim() === "") {
 				errors[name] = "This field is required";
 			}
-		});
+		}
 
 		setFormErrors(errors);
 		return Object.keys(errors).length === 0;
@@ -532,12 +532,15 @@ export const FormField: React.FC<FormFieldProps> = ({
 	required,
 	children,
 }) => {
+	const fieldId = `form-field-${name || "unnamed"}-${Math.random().toString(36).substr(2, 9)}`;
+
 	// Clone children and inject error prop
 	const childrenWithProps = React.Children.map(children, (child) => {
 		if (React.isValidElement(child)) {
 			return React.cloneElement(child, {
 				error: error || (child.props as any).error,
 				name: name || (child.props as any).name,
+				id: fieldId,
 				required:
 					required !== undefined ? required : (child.props as any).required,
 			} as any);
@@ -548,7 +551,7 @@ export const FormField: React.FC<FormFieldProps> = ({
 	return (
 		<div className="space-y-2">
 			{label && (
-				<label className="text-sm font-medium">
+				<label className="text-sm font-medium" htmlFor={fieldId}>
 					{label}
 					{required && <span className="text-destructive ml-1">*</span>}
 				</label>
