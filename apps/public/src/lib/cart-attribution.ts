@@ -196,9 +196,9 @@ export function buildAttributedCheckoutUrl(
   // Add attribution as URL parameters (will be available to checkout scripts)
   const attributes = buildCartAttributes(attributionData);
 
-  Object.entries(attributes).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(attributes)) {
     url.searchParams.set(`attributes[${key}]`, value);
-  });
+  }
 
   return url.toString();
 }
@@ -209,11 +209,14 @@ export function buildAttributedCheckoutUrl(
 export function trackAttributionEvent(
   event: "add_to_cart" | "begin_checkout" | "checkout_url_generated",
   attributionData: CartAttributionData,
-  additionalData: Record<string, any> = {}
+  additionalData: Record<string, unknown> = {}
 ) {
   // Dispatch analytics event with full attribution context
-  if (typeof window !== "undefined" && (window as any).gtag) {
-    (window as any).gtag("event", event, {
+  if (
+    typeof window !== "undefined" &&
+    (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag
+  ) {
+    (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag?.("event", event, {
       config_id: attributionData.configId,
       block_id: attributionData.blockId,
       layout_preset: attributionData.layoutPreset,
@@ -223,8 +226,19 @@ export function trackAttributionEvent(
   }
 
   // Also track with our pixel dispatcher if available
-  if (typeof window !== "undefined" && (window as any).minimallPixels) {
-    (window as any).minimallPixels.dispatch(event, {
+  if (
+    typeof window !== "undefined" &&
+    (
+      window as unknown as {
+        minimallPixels?: { dispatch: (e: string, p: Record<string, unknown>) => void };
+      }
+    ).minimallPixels
+  ) {
+    (
+      window as unknown as {
+        minimallPixels?: { dispatch: (e: string, p: Record<string, unknown>) => void };
+      }
+    ).minimallPixels?.dispatch(event, {
       configId: attributionData.configId,
       blockId: attributionData.blockId,
       layoutPreset: attributionData.layoutPreset,

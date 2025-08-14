@@ -104,7 +104,7 @@ function initializeFacebookPixel(pixelId: string, _configId: string) {
 
   const fbq: FBQ = ((...args: unknown[]) => {
     if (fbq.callMethod) {
-      fbq.callMethod.apply(fbq, args as any);
+      fbq.callMethod.apply(fbq, args as unknown as IArguments);
     } else {
       fbq.queue.push(args);
     }
@@ -251,7 +251,7 @@ function initializeSnapchatPixel(pixelId: string, _configId: string) {
   };
   const snaptr: SnapTr = ((...args: unknown[]) => {
     if (snaptr.handleRequest) {
-      snaptr.handleRequest.apply(snaptr, args as any);
+      snaptr.handleRequest.apply(snaptr, args as unknown as IArguments);
     } else {
       snaptr.queue = snaptr.queue || [];
       snaptr.queue.push(args);

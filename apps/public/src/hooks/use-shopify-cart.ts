@@ -61,7 +61,7 @@ export function useShopifyCart({ shopDomain }: UseShopifyCartOptions = {}) {
           },
         ];
 
-        let cartResponse: unknown;
+        let cartResponse: { cart?: { id?: string }; source?: string } | undefined;
 
         if (!shopifyCartId && !hasCreatedShopifyCart.current) {
           // Create new cart
@@ -81,8 +81,8 @@ export function useShopifyCart({ shopDomain }: UseShopifyCartOptions = {}) {
             throw new Error("Failed to create cart");
           }
 
-          cartResponse = await response.json();
-          setShopifyCartId((cartResponse as any)?.cart?.id);
+          cartResponse = (await response.json()) as typeof cartResponse;
+          setShopifyCartId(cartResponse?.cart?.id ?? null);
         } else if (shopifyCartId) {
           // Add to existing cart
           const response = await fetch(`/api/shopify/cart/${shopifyCartId}`, {
@@ -100,14 +100,14 @@ export function useShopifyCart({ shopDomain }: UseShopifyCartOptions = {}) {
             throw new Error("Failed to add to cart");
           }
 
-          cartResponse = await response.json();
+          cartResponse = (await response.json()) as typeof cartResponse;
         }
 
         // Log success but don't show to user (local cart is already updated)
-        console.log("Added to Shopify cart:", (cartResponse as any)?.cart?.id);
+        console.log("Added to Shopify cart:", cartResponse?.cart?.id);
 
         // Show warning if using mock data
-        if ((cartResponse as any)?.source === "mock") {
+        if (cartResponse?.source === "mock") {
           console.warn(
             "Using mock cart - configure Shopify credentials for real cart functionality"
           );

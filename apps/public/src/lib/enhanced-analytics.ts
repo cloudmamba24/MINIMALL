@@ -447,7 +447,7 @@ export function createImpressionTracker(
 ): IntersectionObserver {
   return new IntersectionObserver(
     (entries) => {
-      entries.forEach((entry) => {
+      for (const entry of entries) {
         if (entry.isIntersecting) {
           const element = entry.target as HTMLElement;
           const blockId = element.dataset.blockId;
@@ -469,7 +469,7 @@ export function createImpressionTracker(
             analytics.trackTileImpression(impressionData);
           }
         }
-      });
+      }
     },
     {
       threshold,
@@ -500,23 +500,23 @@ export function setupPerformanceTracking(analytics: EnhancedAnalytics) {
   // First Input Delay
   new PerformanceObserver((list) => {
     const entries = list.getEntries();
-    entries.forEach((entry) => {
+    for (const entry of entries) {
       const e = entry as PerformanceEventTiming & { processingStart?: number };
       if (typeof e.processingStart === "number") {
         fid = e.processingStart - e.startTime;
       }
-    });
+    }
   }).observe({ entryTypes: ["first-input"] });
 
   // Cumulative Layout Shift
   new PerformanceObserver((list) => {
     const entries = list.getEntries();
-    entries.forEach((entry) => {
+    for (const entry of entries) {
       const e = entry as PerformanceEntry & { hadRecentInput?: boolean; value?: number };
       if (!e.hadRecentInput && typeof e.value === "number") {
         cls += e.value;
       }
-    });
+    }
   }).observe({ entryTypes: ["layout-shift"] });
 
   // Send performance data when page is about to unload

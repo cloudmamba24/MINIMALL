@@ -328,14 +328,21 @@ export function trackCartAbandonment(configId: string, cartValue: number, items:
   UTMUtils.trackEvent(configId, "cart_abandon", {
     cart_value: cartValue,
     items_count: items.length,
-    items: items.map((item: any) => ({
-      product_id: item.productId,
-      variant_id: item.variantId,
-      quantity: item.quantity,
-      price: item.price,
-    })),
+    items: items.map(
+      (item: {
+        productId?: string;
+        variantId?: string;
+        quantity?: number;
+        price?: number;
+      }) => ({
+        product_id: item.productId,
+        variant_id: item.variantId,
+        quantity: item.quantity,
+        price: item.price,
+      })
+    ),
     ...attributes,
-  } as any);
+  } as unknown as Record<string, string | number | boolean>);
 }
 
 /**
@@ -345,16 +352,20 @@ export function extractAttributionFromOrder(orderData: unknown): Partial<Enhance
   const attributes: Record<string, unknown> = {};
 
   // Extract from note_attributes or line_item_properties
-  const noteAttributes = (orderData as any)?.note_attributes || [];
-  const lineItemProperties = (orderData as any)?.line_items?.[0]?.properties || [];
+  const noteAttributes =
+    (orderData as { note_attributes?: Array<{ name?: string; value?: string }> })
+      ?.note_attributes || [];
+  const lineItemProperties =
+    (orderData as { line_items?: Array<{ properties?: Array<{ name?: string; value?: string }> }> })
+      ?.line_items?.[0]?.properties || [];
 
   const allProperties = [...noteAttributes, ...lineItemProperties];
 
-  allProperties.forEach((prop: any) => {
+  for (const prop of allProperties as Array<{ name?: string; value?: string }>) {
     if (prop.name?.startsWith("minimall_")) {
       attributes[prop.name] = prop.value;
     }
-  });
+  }
 
   return attributes as Partial<EnhancedCartAttributes>;
 }
@@ -398,11 +409,11 @@ export function cleanCartAttributes(
 ): Partial<EnhancedCartAttributes> {
   const cleaned: Partial<EnhancedCartAttributes> = {};
 
-  Object.entries(attributes).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(attributes)) {
     if (value && value.trim() !== "") {
       cleaned[key as keyof EnhancedCartAttributes] = value;
     }
-  });
+  }
 
   return cleaned;
 }

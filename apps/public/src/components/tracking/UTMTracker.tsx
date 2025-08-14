@@ -316,7 +316,7 @@ export const UTMUtils = {
       localStorage.removeItem(sessionKey);
 
       if (typeof window !== "undefined" && "__MINIMALL_UTM__" in window) {
-        delete (window as Window & { __MINIMALL_UTM__?: UTMData }).__MINIMALL_UTM__;
+        (window as Window & { __MINIMALL_UTM__?: UTMData }).__MINIMALL_UTM__ = undefined;
       }
     } catch (error) {
       console.warn("[UTMTracker] Failed to cleanup:", error);
