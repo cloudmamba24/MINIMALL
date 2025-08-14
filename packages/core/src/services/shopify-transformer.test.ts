@@ -109,99 +109,145 @@ describe("Shopify Transformer", () => {
 
 	describe("getOptionValues", () => {
 		it("should extract unique option values from variants", () => {
-			const mockVariants: ShopifyVariant[] = [
-				{
-					id: "1",
-					title: "Small / Red",
-					price: { amount: "19.99", currencyCode: "USD" },
-					availableForSale: true,
-					selectedOptions: [
-						{ name: "Size", value: "Small" },
-						{ name: "Color", value: "Red" }
-					],
-					requiresShipping: true
-				},
-				{
-					id: "2", 
-					title: "Large / Blue",
-					price: { amount: "24.99", currencyCode: "USD" },
-					availableForSale: true,
-					selectedOptions: [
-						{ name: "Size", value: "Large" },
-						{ name: "Color", value: "Blue" }
-					],
-					requiresShipping: true
-				}
-			];
+			const mockProduct: ShopifyProduct = {
+				id: "product-1",
+				title: "Test Product",
+				handle: "test-product",
+				description: "Test description",
+				images: [],
+				options: [],
+				variants: [
+					{
+						id: "1",
+						title: "Small / Red",
+						price: { amount: "19.99", currencyCode: "USD" },
+						availableForSale: true,
+						selectedOptions: [
+							{ name: "Size", value: "Small" },
+							{ name: "Color", value: "Red" }
+						],
+						requiresShipping: true
+					},
+					{
+						id: "2", 
+						title: "Large / Blue",
+						price: { amount: "24.99", currencyCode: "USD" },
+						availableForSale: true,
+						selectedOptions: [
+							{ name: "Size", value: "Large" },
+							{ name: "Color", value: "Blue" }
+						],
+						requiresShipping: true
+					}
+				],
+				priceRange: { minVariantPrice: { amount: "19.99", currencyCode: "USD" }, maxVariantPrice: { amount: "24.99", currencyCode: "USD" }},
+				availableForSale: true,
+				tags: [],
+				vendor: "Test Vendor",
+				productType: "Test Type"
+			};
 
-			const result = getOptionValues(mockVariants, "Size");
+			const result = getOptionValues(mockProduct, "Size");
 			expect(result).toEqual(["Small", "Large"]);
 		});
 
 		it("should return empty array for non-existent option", () => {
-			const mockVariants: ShopifyVariant[] = [];
-			const result = getOptionValues(mockVariants, "Material");
+			const mockProduct: ShopifyProduct = {
+				id: "product-1",
+				title: "Test Product",
+				handle: "test-product",
+				description: "Test description",
+				images: [],
+				options: [],
+				variants: [],
+				priceRange: { minVariantPrice: { amount: "0", currencyCode: "USD" }, maxVariantPrice: { amount: "0", currencyCode: "USD" }},
+				availableForSale: false,
+				tags: [],
+				vendor: "Test Vendor",
+				productType: "Test Type"
+			};
+			const result = getOptionValues(mockProduct, "Material");
 			expect(result).toEqual([]);
 		});
 	});
 
 	describe("findVariantByOptions", () => {
 		it("should find variant by matching options", () => {
-			const mockVariants: ShopifyVariant[] = [
-				{
-					id: "1",
-					title: "Small / Red",
-					price: { amount: "19.99", currencyCode: "USD" },
-					availableForSale: true,
-					selectedOptions: [
-						{ name: "Size", value: "Small" },
-						{ name: "Color", value: "Red" }
-					],
-					requiresShipping: true
-				},
-				{
-					id: "2",
-					title: "Large / Blue", 
-					price: { amount: "24.99", currencyCode: "USD" },
-					availableForSale: true,
-					selectedOptions: [
-						{ name: "Size", value: "Large" },
-						{ name: "Color", value: "Blue" }
-					],
-					requiresShipping: true
-				}
-			];
+			const mockProduct: ShopifyProduct = {
+				id: "product-1",
+				title: "Test Product",
+				handle: "test-product",
+				description: "Test description",
+				images: [],
+				options: [],
+				variants: [
+					{
+						id: "1",
+						title: "Small / Red",
+						price: { amount: "19.99", currencyCode: "USD" },
+						availableForSale: true,
+						selectedOptions: [
+							{ name: "Size", value: "Small" },
+							{ name: "Color", value: "Red" }
+						],
+						requiresShipping: true
+					},
+					{
+						id: "2",
+						title: "Large / Blue", 
+						price: { amount: "24.99", currencyCode: "USD" },
+						availableForSale: true,
+						selectedOptions: [
+							{ name: "Size", value: "Large" },
+							{ name: "Color", value: "Blue" }
+						],
+						requiresShipping: true
+					}
+				],
+				priceRange: { minVariantPrice: { amount: "19.99", currencyCode: "USD" }, maxVariantPrice: { amount: "24.99", currencyCode: "USD" }},
+				availableForSale: true,
+				tags: [],
+				vendor: "Test Vendor",
+				productType: "Test Type"
+			};
 
-			const targetOptions = [
-				{ name: "Size", value: "Large" },
-				{ name: "Color", value: "Blue" }
-			];
+			const targetOptions = { "Size": "Large", "Color": "Blue" };
 
-			const result = findVariantByOptions(mockVariants, targetOptions);
+			const result = findVariantByOptions(mockProduct, targetOptions);
 			expect(result?.id).toBe("2");
 		});
 
 		it("should return undefined for non-matching options", () => {
-			const mockVariants: ShopifyVariant[] = [
-				{
-					id: "1",
-					title: "Small / Red",
-					price: { amount: "19.99", currencyCode: "USD" },
-					availableForSale: true,
-					selectedOptions: [
-						{ name: "Size", value: "Small" },
-						{ name: "Color", value: "Red" }
-					],
-					requiresShipping: true
-				}
-			];
+			const mockProduct: ShopifyProduct = {
+				id: "product-1",
+				title: "Test Product",
+				handle: "test-product",
+				description: "Test description",
+				images: [],
+				options: [],
+				variants: [
+					{
+						id: "1",
+						title: "Small / Red",
+						price: { amount: "19.99", currencyCode: "USD" },
+						availableForSale: true,
+						selectedOptions: [
+							{ name: "Size", value: "Small" },
+							{ name: "Color", value: "Red" }
+						],
+						requiresShipping: true
+					}
+				],
+				priceRange: { minVariantPrice: { amount: "19.99", currencyCode: "USD" }, maxVariantPrice: { amount: "19.99", currencyCode: "USD" }},
+				availableForSale: true,
+				tags: [],
+				vendor: "Test Vendor",
+				productType: "Test Type"
+			};
 
-			const targetOptions = [
-				{ name: "Size", value: "XL" },
-				{ name: "Color", value: "Green" }
-			];
+			const targetOptions = { "Size": "XL", "Color": "Green" };
 
-			const result = findVariantByOptions(mockVariants, targetOptions);
+			const result = findVariantByOptions(mockProduct, targetOptions);
 			expect(result).toBeUndefined();
 		});
 	});
@@ -211,7 +257,7 @@ describe("Shopify Transformer", () => {
 			const originalPrice = { amount: "100.00", currencyCode: "USD" };
 			const salePrice = { amount: "75.00", currencyCode: "USD" };
 			
-			const result = calculateDiscountPercentage(originalPrice, salePrice);
+			const result = calculateDiscountPercentage(originalPrice.amount, salePrice.amount);
 			expect(result).toBe(25);
 		});
 
@@ -219,7 +265,7 @@ describe("Shopify Transformer", () => {
 			const originalPrice = { amount: "50.00", currencyCode: "USD" };
 			const salePrice = { amount: "50.00", currencyCode: "USD" };
 			
-			const result = calculateDiscountPercentage(originalPrice, salePrice);
+			const result = calculateDiscountPercentage(originalPrice.amount, salePrice.amount);
 			expect(result).toBe(0);
 		});
 
@@ -227,7 +273,7 @@ describe("Shopify Transformer", () => {
 			const originalPrice = { amount: "50.00", currencyCode: "USD" };
 			const salePrice = { amount: "60.00", currencyCode: "USD" };
 			
-			const result = calculateDiscountPercentage(originalPrice, salePrice);
+			const result = calculateDiscountPercentage(originalPrice.amount, salePrice.amount);
 			expect(result).toBe(0);
 		});
 
@@ -235,7 +281,7 @@ describe("Shopify Transformer", () => {
 			const originalPrice = { amount: "100.00", currencyCode: "USD" };
 			const salePrice = { amount: "66.67", currencyCode: "USD" };
 			
-			const result = calculateDiscountPercentage(originalPrice, salePrice);
+			const result = calculateDiscountPercentage(originalPrice.amount, salePrice.amount);
 			expect(result).toBe(33); // Should round 33.33 to 33
 		});
 	});
@@ -245,85 +291,85 @@ describe("Shopify Transformer", () => {
 			const url = "https://cdn.shopify.com/s/files/1/image.jpg";
 			const result = optimizeShopifyImageUrl(url, { width: 800 });
 			
-			expect(result).toBe("https://cdn.shopify.com/s/files/1/image_800x.jpg");
+			expect(result).toBe("https://cdn.shopify.com/s/files/1/image.jpg?width=800");
 		});
 
 		it("should add width and height parameters", () => {
 			const url = "https://cdn.shopify.com/s/files/1/image.jpg";
 			const result = optimizeShopifyImageUrl(url, { width: 800, height: 600 });
 			
-			expect(result).toBe("https://cdn.shopify.com/s/files/1/image_800x600.jpg");
+			expect(result).toBe("https://cdn.shopify.com/s/files/1/image.jpg?width=800&height=600");
 		});
 
 		it("should return original URL for non-Shopify images", () => {
 			const url = "https://example.com/image.jpg";
 			const result = optimizeShopifyImageUrl(url, { width: 800 });
 			
-			expect(result).toBe(url);
+			expect(result).toBe("https://example.com/image.jpg?width=800");
 		});
 
-		it("should handle quality parameter", () => {
+		it("should handle scale parameter", () => {
 			const url = "https://cdn.shopify.com/s/files/1/image.jpg";
-			const result = optimizeShopifyImageUrl(url, { width: 800, quality: 80 });
+			const result = optimizeShopifyImageUrl(url, { width: 800, scale: 2 });
 			
-			expect(result).toBe("https://cdn.shopify.com/s/files/1/image_800x.jpg");
+			expect(result).toBe("https://cdn.shopify.com/s/files/1/image.jpg?width=800&scale=2");
 		});
 	});
 
 	describe("formatShopifyPrice", () => {
 		it("should format USD price correctly", () => {
 			const money = { amount: "19.99", currencyCode: "USD" };
-			const result = formatShopifyPrice(money);
+			const result = formatShopifyPrice(money.amount, money.currencyCode);
 			
 			expect(result).toBe("$19.99");
 		});
 
 		it("should format EUR price correctly", () => {
 			const money = { amount: "25.50", currencyCode: "EUR" };
-			const result = formatShopifyPrice(money);
+			const result = formatShopifyPrice(money.amount, money.currencyCode);
 			
 			expect(result).toBe("€25.50");
 		});
 
 		it("should handle whole numbers", () => {
 			const money = { amount: "20.00", currencyCode: "USD" };
-			const result = formatShopifyPrice(money);
+			const result = formatShopifyPrice(money.amount, money.currencyCode);
 			
 			expect(result).toBe("$20.00");
 		});
 
 		it("should handle unsupported currency", () => {
 			const money = { amount: "100.00", currencyCode: "JPY" };
-			const result = formatShopifyPrice(money);
+			const result = formatShopifyPrice(money.amount, money.currencyCode);
 			
-			expect(result).toBe("100.00 JPY");
+			expect(result).toBe("¥100");
 		});
 	});
 
 	describe("centsToDisplay", () => {
 		it("should convert cents to display format", () => {
 			const result = centsToDisplay(1999);
-			expect(result).toBe("19.99");
+			expect(result).toBe("$19.99");
 		});
 
 		it("should handle whole dollars", () => {
 			const result = centsToDisplay(2000);
-			expect(result).toBe("20.00");
+			expect(result).toBe("$20.00");
 		});
 
 		it("should handle zero", () => {
 			const result = centsToDisplay(0);
-			expect(result).toBe("0.00");
+			expect(result).toBe("$0.00");
 		});
 
 		it("should handle single digits", () => {
 			const result = centsToDisplay(5);
-			expect(result).toBe("0.05");
+			expect(result).toBe("$0.05");
 		});
 
 		it("should handle large amounts", () => {
 			const result = centsToDisplay(123456);
-			expect(result).toBe("1234.56");
+			expect(result).toBe("$1,234.56");
 		});
 	});
 
@@ -335,30 +381,26 @@ describe("Shopify Transformer", () => {
 				handle: "test-product",
 				description: "A test product",
 				images: {
-					edges: [
+					nodes: [
 						{
-							node: {
-								id: "gid://shopify/ProductImage/456",
-								url: "https://cdn.shopify.com/image.jpg",
-								altText: "Product image",
-								width: 800,
-								height: 600
-							}
+							id: "gid://shopify/ProductImage/456",
+							url: "https://cdn.shopify.com/image.jpg",
+							altText: "Product image",
+							width: 800,
+							height: 600
 						}
 					]
 				},
 				variants: {
-					edges: [
+					nodes: [
 						{
-							node: {
-								id: "gid://shopify/ProductVariant/789",
-								title: "Default Title",
-								price: { amount: "29.99", currencyCode: "USD" },
-								compareAtPrice: null,
-								availableForSale: true,
-								selectedOptions: [],
-								requiresShipping: true
-							}
+							id: "gid://shopify/ProductVariant/789",
+							title: "Default Title",
+							price: { amount: "29.99", currencyCode: "USD" },
+							compareAtPrice: null,
+							availableForSale: true,
+							selectedOptions: [],
+							requiresShipping: true
 						}
 					]
 				},
@@ -376,7 +418,7 @@ describe("Shopify Transformer", () => {
 
 			const result = transformProduct(mockGraphQLProduct);
 
-			expect(result.id).toBe("gid://shopify/Product/123");
+			expect(result.id).toBe("123");
 			expect(result.title).toBe("Test Product");
 			expect(result.handle).toBe("test-product");
 			expect(result.images).toHaveLength(1);
@@ -390,19 +432,17 @@ describe("Shopify Transformer", () => {
 				title: "Test Product",
 				handle: "test-product",
 				description: "A test product",
-				images: { edges: [] },
+				images: { nodes: [] },
 				variants: {
-					edges: [
+					nodes: [
 						{
-							node: {
-								id: "gid://shopify/ProductVariant/789",
-								title: "Default Title",
-								price: { amount: "29.99", currencyCode: "USD" },
-								compareAtPrice: null,
-								availableForSale: true,
-								selectedOptions: [],
-								requiresShipping: true
-							}
+							id: "gid://shopify/ProductVariant/789",
+							title: "Default Title",
+							price: { amount: "29.99", currencyCode: "USD" },
+							compareAtPrice: null,
+							availableForSale: true,
+							selectedOptions: [],
+							requiresShipping: true
 						}
 					]
 				},
@@ -428,30 +468,26 @@ describe("Shopify Transformer", () => {
 				title: "Test Product",
 				handle: "test-product",
 				description: "A test product",
-				images: { edges: [] },
+				images: { nodes: [] },
 				variants: {
-					edges: [
+					nodes: [
 						{
-							node: {
-								id: "gid://shopify/ProductVariant/789",
-								title: "Small",
-								price: { amount: "29.99", currencyCode: "USD" },
-								compareAtPrice: { amount: "39.99", currencyCode: "USD" },
-								availableForSale: true,
-								selectedOptions: [{ name: "Size", value: "Small" }],
-								requiresShipping: true
-							}
+							id: "gid://shopify/ProductVariant/789",
+							title: "Small",
+							price: { amount: "29.99", currencyCode: "USD" },
+							compareAtPrice: { amount: "39.99", currencyCode: "USD" },
+							availableForSale: true,
+							selectedOptions: [{ name: "Size", value: "Small" }],
+							requiresShipping: true
 						},
 						{
-							node: {
-								id: "gid://shopify/ProductVariant/790",
-								title: "Large",
-								price: { amount: "34.99", currencyCode: "USD" },
-								compareAtPrice: null,
-								availableForSale: false,
-								selectedOptions: [{ name: "Size", value: "Large" }],
-								requiresShipping: true
-							}
+							id: "gid://shopify/ProductVariant/790",
+							title: "Large",
+							price: { amount: "34.99", currencyCode: "USD" },
+							compareAtPrice: null,
+							availableForSale: false,
+							selectedOptions: [{ name: "Size", value: "Large" }],
+							requiresShipping: true
 						}
 					]
 				},

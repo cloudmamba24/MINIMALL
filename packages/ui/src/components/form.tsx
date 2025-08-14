@@ -3,8 +3,17 @@
  * Comprehensive form controls with validation and accessibility
  */
 
-import React, { forwardRef, useState, useId } from "react";
+import React, { forwardRef, useState, useId, createContext, useContext } from "react";
 import { cn } from "../lib/utils";
+
+// Form Context
+const FormContext = createContext<{
+  errors: Record<string, string>;
+  isSubmitting: boolean;
+}>({
+  errors: {},
+  isSubmitting: false
+});
 
 // Button Component
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -52,14 +61,32 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   label?: string;
   error?: string;
   helpText?: string;
+  validate?: (value: string) => string | null;
+  debounceMs?: number;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, helpText, required, id, ...props }, ref) => {
+  ({ className, label, error, helpText, required, id, validate, debounceMs, name, ...props }, ref) => {
+    const [validationError, setValidationError] = useState<string | null>(null);
+    const { errors: formErrors } = useContext(FormContext);
     const inputId = useId();
     const finalId = id || inputId;
     const errorId = `${finalId}-error`;
     const helpId = `${finalId}-help`;
+    const formError = name ? formErrors[name] : null;
+    const displayError = error || validationError || formError;
+
+    // Debounced validation
+    React.useEffect(() => {
+      if (!validate || !props.value || typeof props.value !== 'string') return;
+      
+      const timeoutId = setTimeout(() => {
+        const result = validate(props.value as string);
+        setValidationError(result);
+      }, debounceMs || 0);
+
+      return () => clearTimeout(timeoutId);
+    }, [props.value, validate, debounceMs]);
 
     return (
       <div className="space-y-2">
@@ -71,6 +98,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
         <input
           id={finalId}
+          name={name}
+          required={required}
           ref={ref}
           className={cn(
             "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2",
@@ -78,11 +107,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             "file:text-sm file:font-medium placeholder:text-muted-foreground",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             "focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-            error && "border-destructive input-error",
+            displayError && "border-destructive input-error",
             className
           )}
-          aria-describedby={cn(error && errorId, helpText && helpId)}
-          aria-invalid={!!error}
+          aria-describedby={cn(displayError && errorId, helpText && helpId)}
+          aria-invalid={!!displayError}
           {...props}
         />
         {helpText && (
@@ -90,9 +119,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {helpText}
           </p>
         )}
-        {error && (
+        {displayError && (
           <p id={errorId} className="text-sm text-destructive" role="alert">
-            {error}
+            {displayError}
           </p>
         )}
       </div>
@@ -323,14 +352,41 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 // Form Component
 export interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
   onSubmit?: (data: FormData | Record<string, any>) => void | Promise<void>;
+  validateOnSubmit?: boolean;
 }
 
-export const Form: React.FC<FormProps> = ({ children, onSubmit, ...props }) => {
+export const Form: React.FC<FormProps> = ({ children, onSubmit, validateOnSubmit = true, ...props }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const validateForm = (formElement: HTMLFormElement): boolean => {
+    if (!validateOnSubmit) return true;
+    
+    const errors: Record<string, string> = {};
+    const formData = new FormData(formElement);
+    
+    // Check required fields
+    const requiredFields = formElement.querySelectorAll('[required]');
+    requiredFields.forEach((field) => {
+      const input = field as HTMLInputElement;
+      const name = input.name;
+      const value = formData.get(name) as string;
+      
+      if (!value || value.trim() === '') {
+        errors[name] = 'This field is required';
+      }
+    });
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!onSubmit) return;
+
+    const isValid = validateForm(e.currentTarget);
+    if (!isValid) return;
 
     setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
@@ -338,6 +394,7 @@ export const Form: React.FC<FormProps> = ({ children, onSubmit, ...props }) => {
 
     try {
       await onSubmit(data);
+      setFormErrors({});
     } catch (error) {
       console.error("Form submission error:", error);
     } finally {
@@ -350,10 +407,17 @@ export const Form: React.FC<FormProps> = ({ children, onSubmit, ...props }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} onReset={handleReset} {...props}>
-      {isSubmitting && <div className="loading-overlay">Loading...</div>}
-      {children}
-    </form>
+    <FormContext.Provider value={{ errors: formErrors, isSubmitting }}>
+      <form onSubmit={handleSubmit} onReset={handleReset} {...props}>
+        {isSubmitting && <div className="loading-overlay">Loading...</div>}
+        {children}
+        {Object.entries(formErrors).map(([field, error]) => (
+          <div key={field} className="text-sm text-destructive" role="alert">
+            {error}
+          </div>
+        ))}
+      </form>
+    </FormContext.Provider>
   );
 };
 
@@ -375,6 +439,18 @@ export const FormField: React.FC<FormFieldProps> = ({
   required,
   children,
 }) => {
+  // Clone children and inject error prop
+  const childrenWithProps = React.Children.map(children, (child) => {
+    if (React.isValidElement(child)) {
+      return React.cloneElement(child, { 
+        error: error || (child.props as any).error,
+        name: name || (child.props as any).name,
+        required: required !== undefined ? required : (child.props as any).required
+      } as any);
+    }
+    return child;
+  });
+
   return (
     <div className="space-y-2">
       {label && (
@@ -383,7 +459,7 @@ export const FormField: React.FC<FormFieldProps> = ({
           {required && <span className="text-destructive ml-1">*</span>}
         </label>
       )}
-      <div className={error ? "has-error" : ""}>{children}</div>
+      <div className={error ? "has-error" : ""}>{childrenWithProps}</div>
       {helpText && <p className="text-sm text-muted-foreground">{helpText}</p>}
       {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
     </div>
@@ -420,7 +496,7 @@ export const FormSubmit: React.FC<FormSubmitProps> = ({
     <Button
       type="submit"
       disabled={disabled || loading}
-      loading={loading}
+      loading={loading ?? false}
       {...props}
     >
       {children}
