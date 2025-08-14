@@ -370,7 +370,7 @@ export function SocialImporter({
                 </Text>
 
                 <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {previewPost.media.map((media) => (
+                  {previewPost.media.map((media, index) => (
                     <div
                       key={`${media.type}-${media.url}`}
                       className="relative border border-gray-200 rounded-lg overflow-hidden aspect-square"

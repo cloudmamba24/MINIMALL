@@ -48,24 +48,6 @@ export default function EditorPage({ params }: EditorPageProps) {
     { id: "analytics", content: "Analytics", panelID: "analytics-panel" },
   ];
 
-  // Load configuration on mount
-  useEffect(() => {
-    loadConfig();
-  }, [loadConfig]);
-
-  // Warn about unsaved changes
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [hasUnsavedChanges]);
-
   const loadConfig = async () => {
     try {
       setLoading(true);
@@ -87,6 +69,24 @@ export default function EditorPage({ params }: EditorPageProps) {
       setLoading(false);
     }
   };
+
+  // Load configuration on mount
+  useEffect(() => {
+    loadConfig();
+  }, [loadConfig]);
+
+  // Warn about unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   const saveConfig = async () => {
     if (!config) return;
