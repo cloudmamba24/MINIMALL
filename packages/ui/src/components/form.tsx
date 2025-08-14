@@ -86,6 +86,7 @@ export interface InputProps
 	helpText?: string;
 	validate?: (value: string) => string | null;
 	debounceMs?: number;
+	hideError?: boolean;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -100,30 +101,44 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 			validate,
 			debounceMs,
 			name,
+			hideError,
 			...props
 		},
 		ref,
 	) => {
 		const [validationError, setValidationError] = useState<string | null>(null);
+		const [internalValue, setInternalValue] = useState("");
 		const { errors: formErrors } = useContext(FormContext);
 		const inputId = useId();
 		const finalId = id || inputId;
 		const errorId = `${finalId}-error`;
 		const helpId = `${finalId}-help`;
-		const formError = name ? formErrors[name] : null;
+		const inputName = name || finalId;
+		const formError = formErrors[inputName];
 		const displayError = error || validationError || formError;
+
+		const currentValue = props.value ?? internalValue;
+
+		// Handle input change for validation
+		const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+			const newValue = e.target.value;
+			if (props.value === undefined) {
+				setInternalValue(newValue);
+			}
+			props.onChange?.(e);
+		};
 
 		// Debounced validation
 		React.useEffect(() => {
-			if (!validate || !props.value || typeof props.value !== "string") return;
+			if (!validate || !currentValue || typeof currentValue !== "string") return;
 
 			const timeoutId = setTimeout(() => {
-				const result = validate(props.value as string);
+				const result = validate(currentValue);
 				setValidationError(result);
 			}, debounceMs || 0);
 
 			return () => clearTimeout(timeoutId);
-		}, [props.value, validate, debounceMs]);
+		}, [currentValue, validate, debounceMs]);
 
 		return (
 			<div className="space-y-2">
@@ -135,7 +150,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 				)}
 				<input
 					id={finalId}
-					name={name}
+					name={inputName}
 					required={required}
 					ref={ref}
 					className={cn(
@@ -149,6 +164,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 					)}
 					aria-describedby={cn(displayError && errorId, helpText && helpId)}
 					aria-invalid={!!displayError}
+					onChange={handleChange}
 					{...props}
 				/>
 				{helpText && (
@@ -156,7 +172,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 						{helpText}
 					</p>
 				)}
-				{displayError && (
+				{displayError && !hideError && (
 					<p id={errorId} className="text-sm text-destructive" role="alert">
 						{displayError}
 					</p>
@@ -275,6 +291,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 	) => {
 		const inputId = useId();
 		const finalId = id || inputId;
+		const timeoutRef = React.useRef<NodeJS.Timeout>();
 
 		const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 			if (props.multiple) {
@@ -282,7 +299,13 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 					e.target.selectedOptions,
 					(option) => option.value,
 				);
-				onChange?.(values);
+				// Debounce multiple rapid onChange calls to get final selection
+				if (timeoutRef.current) {
+					clearTimeout(timeoutRef.current);
+				}
+				timeoutRef.current = setTimeout(() => {
+					onChange?.(values);
+				}, 0);
 			} else {
 				onChange?.(e.target.value);
 			}
@@ -341,11 +364,24 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 		const inputId = useId();
 		const finalId = id || inputId;
 
+		const inputRef = React.useRef<HTMLInputElement>(null);
+		const combinedRef = React.useCallback(
+			(node: HTMLInputElement | null) => {
+				inputRef.current = node;
+				if (typeof ref === 'function') {
+					ref(node);
+				} else if (ref) {
+					ref.current = node;
+				}
+			},
+			[ref]
+		);
+
 		React.useEffect(() => {
-			if (ref && "current" in ref && ref.current) {
-				ref.current.indeterminate = !!indeterminate;
+			if (inputRef.current) {
+				inputRef.current.indeterminate = !!indeterminate;
 			}
-		}, [indeterminate, ref]);
+		}, [indeterminate]);
 
 		const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 			onChange?.(e.target.checked);
@@ -357,7 +393,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 					<input
 						type="checkbox"
 						id={finalId}
-						ref={ref}
+						ref={combinedRef}
 						className={cn(
 							"h-4 w-4 rounded border border-input ring-offset-background",
 							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -407,6 +443,15 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 	onChange,
 	error,
 }) => {
+	const [internalValue, setInternalValue] = useState<string>("");
+	const currentValue = value ?? internalValue;
+
+	const handleChange = (newValue: string) => {
+		if (value === undefined) {
+			setInternalValue(newValue);
+		}
+		onChange?.(newValue);
+	};
 	return (
 		<div className="space-y-2">
 			{label && <div className="text-sm font-medium">{label}</div>}
@@ -418,8 +463,8 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 							id={`${name}-${option.value}`}
 							name={name}
 							value={option.value}
-							checked={value === option.value}
-							onChange={(e) => onChange?.(e.target.value)}
+							checked={currentValue === option.value}
+							onChange={(e) => handleChange(e.target.value)}
 							className="h-4 w-4 border border-input focus-visible:ring-2 focus-visible:ring-ring"
 						/>
 						<label htmlFor={`${name}-${option.value}`} className="text-sm">
@@ -462,14 +507,13 @@ export const Form: React.FC<FormProps> = ({
 		const requiredFields = formElement.querySelectorAll("[required]");
 		for (const field of requiredFields) {
 			const input = field as HTMLInputElement;
-			const name = input.name;
-			const value = formData.get(name) as string;
+			const name = input.name || input.id || `field_${Math.random().toString(36).substring(2, 11)}`;
+			const value = formData.get(input.name) as string || input.value;
 
 			if (!value || value.trim() === "") {
 				errors[name] = "This field is required";
 			}
 		}
-
 		setFormErrors(errors);
 		return Object.keys(errors).length === 0;
 	};
@@ -532,9 +576,9 @@ export const FormField: React.FC<FormFieldProps> = ({
 	required,
 	children,
 }) => {
-	const fieldId = `form-field-${name || "unnamed"}-${Math.random().toString(36).substr(2, 9)}`;
+	const fieldId = `form-field-${name || "unnamed"}-${Math.random().toString(36).substring(2, 11)}`;
 
-	// Clone children and inject error prop
+	// Clone children and inject props including error for styling
 	const childrenWithProps = React.Children.map(children, (child) => {
 		if (React.isValidElement(child)) {
 			return React.cloneElement(child, {
@@ -543,6 +587,7 @@ export const FormField: React.FC<FormFieldProps> = ({
 				id: fieldId,
 				required:
 					required !== undefined ? required : (child.props as any).required,
+				hideError: true, // Don't render error in child, FormField will render it
 			} as any);
 		}
 		return child;
@@ -597,7 +642,7 @@ export const FormSubmit: React.FC<FormSubmitProps> = ({
 		<Button
 			type="submit"
 			disabled={disabled || loading}
-			loading={loading ?? false}
+			loading={false} // Don't let Button handle loading text
 			{...props}
 		>
 			{children}

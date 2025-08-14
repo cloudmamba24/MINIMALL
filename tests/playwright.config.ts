@@ -67,7 +67,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: [
     {
-      command: "npm run dev:public",
+      command: "turbo dev --filter=@minimall/public",
       port: 3000,
       reuseExistingServer: !process.env.CI,
       env: {
@@ -75,7 +75,7 @@ export default defineConfig({
       },
     },
     {
-      command: "npm run dev:admin",
+      command: "turbo dev --filter=@minimall/admin",
       port: 3001,
       reuseExistingServer: !process.env.CI,
       env: {

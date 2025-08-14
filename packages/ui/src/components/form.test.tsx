@@ -191,6 +191,9 @@ describe("UI Form Components", () => {
 			const select = screen.getByLabelText("Fruits");
 			await userEvent.selectOptions(select, ["apple", "banana"]);
 
+			// Wait for debounced onChange
+			await new Promise(resolve => setTimeout(resolve, 10));
+
 			expect(handleChange).toHaveBeenCalledWith(["apple", "banana"]);
 		});
 	});
