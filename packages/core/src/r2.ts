@@ -536,7 +536,7 @@ export class EdgeCache {
 		let expired = 0;
 		let valid = 0;
 
-		for (const [key, item] of this.cache.entries()) {
+		for (const [_key, item] of this.cache.entries()) {
 			if (now > item.expires) {
 				expired++;
 			} else {

@@ -99,7 +99,7 @@ export class InstagramBasicDisplayAPI {
    */
   async getUserProfile(accessToken: string): Promise<InstagramUser> {
     const response = await this.makeAPIRequest(
-      `/me?fields=id,username,account_type,media_count`,
+      "/me?fields=id,username,account_type,media_count",
       accessToken
     );
     return response;

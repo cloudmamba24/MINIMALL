@@ -46,7 +46,10 @@ export function transformImage(graphqlImage: {
 /**
  * Transform GraphQL SelectedOption to our SelectedOption type
  */
-export function transformSelectedOption(graphqlOption: { name: string; value: string }): SelectedOption {
+export function transformSelectedOption(graphqlOption: {
+  name: string;
+  value: string;
+}): SelectedOption {
   return {
     name: graphqlOption.name,
     value: graphqlOption.value,
@@ -64,7 +67,13 @@ export function transformVariant(graphqlVariant: {
   selectedOptions?: Array<{ name: string; value: string }>;
   requiresShipping: boolean;
   compareAtPrice?: { amount: string; currencyCode: string } | null;
-  image?: { id: string; url: string; altText?: string | null; width: number; height: number } | null;
+  image?: {
+    id: string;
+    url: string;
+    altText?: string | null;
+    width: number;
+    height: number;
+  } | null;
   sku?: string | null;
   barcode?: string | null;
   weight?: number | null;
@@ -115,9 +124,20 @@ export function transformProduct(graphqlProduct: {
   title: string;
   handle: string;
   description?: string | null;
-  images?: { nodes?: Array<{ id: string; url: string; altText?: string | null; width: number; height: number }> };
+  images?: {
+    nodes?: Array<{
+      id: string;
+      url: string;
+      altText?: string | null;
+      width: number;
+      height: number;
+    }>;
+  };
   variants?: { nodes?: Array<unknown> };
-  priceRange: { minVariantPrice: { amount: string; currencyCode: string }; maxVariantPrice: { amount: string; currencyCode: string } };
+  priceRange: {
+    minVariantPrice: { amount: string; currencyCode: string };
+    maxVariantPrice: { amount: string; currencyCode: string };
+  };
   tags?: string[];
   productType?: string;
   vendor?: string;
@@ -130,31 +150,43 @@ export function transformProduct(graphqlProduct: {
     title: graphqlProduct.title,
     handle: graphqlProduct.handle,
     description: graphqlProduct.description || "",
-    images: (graphqlProduct.images?.nodes as unknown[] | undefined)?.map((n) =>
-      transformImage(n as {
-        id: string;
-        url: string;
-        altText?: string | null;
-        width: number;
-        height: number;
-      }),
-    ) || [],
-    variants: (graphqlProduct.variants?.nodes as unknown[] | undefined)?.map((n) =>
-      transformVariant(n as {
-        id: string;
-        title: string;
-        price: { amount: string; currencyCode: string };
-        availableForSale: boolean;
-        selectedOptions?: Array<{ name: string; value: string }>;
-        requiresShipping: boolean;
-        compareAtPrice?: { amount: string; currencyCode: string } | null;
-        image?: { id: string; url: string; altText?: string | null; width: number; height: number } | null;
-        sku?: string | null;
-        barcode?: string | null;
-        weight?: number | null;
-        weightUnit?: string | null;
-      }),
-    ) || [],
+    images:
+      (graphqlProduct.images?.nodes as unknown[] | undefined)?.map((n) =>
+        transformImage(
+          n as {
+            id: string;
+            url: string;
+            altText?: string | null;
+            width: number;
+            height: number;
+          }
+        )
+      ) || [],
+    variants:
+      (graphqlProduct.variants?.nodes as unknown[] | undefined)?.map((n) =>
+        transformVariant(
+          n as {
+            id: string;
+            title: string;
+            price: { amount: string; currencyCode: string };
+            availableForSale: boolean;
+            selectedOptions?: Array<{ name: string; value: string }>;
+            requiresShipping: boolean;
+            compareAtPrice?: { amount: string; currencyCode: string } | null;
+            image?: {
+              id: string;
+              url: string;
+              altText?: string | null;
+              width: number;
+              height: number;
+            } | null;
+            sku?: string | null;
+            barcode?: string | null;
+            weight?: number | null;
+            weightUnit?: string | null;
+          }
+        )
+      ) || [],
     priceRange: {
       minVariantPrice: transformMoney(graphqlProduct.priceRange.minVariantPrice),
       maxVariantPrice: transformMoney(graphqlProduct.priceRange.maxVariantPrice),

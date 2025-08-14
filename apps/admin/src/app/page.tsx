@@ -2,26 +2,41 @@
 
 import { Button, Card, Layout, Page } from "@shopify/polaris";
 import { useRouter } from "next/navigation";
-import { useAppBridge } from "@shopify/app-bridge-react";
-import { Redirect } from "@shopify/app-bridge/actions";
-import { useEffect } from "react";
+import { useState } from "react";
 
-export default function AdminHomePage() {
+// Create a separate component for App Bridge functionality
+function NavigationButton({
+  path,
+  variant,
+  size,
+  children,
+}: {
+  path: string;
+  variant?: "primary" | "plain" | "secondary" | "tertiary" | "monochromePlain";
+  size: "large";
+  children: React.ReactNode;
+}) {
   const router = useRouter();
-  const app = useAppBridge();
 
-  // Navigation helper function for App Bridge
-  const navigateWithAppBridge = (path: string) => {
-    if (app) {
-      // Use App Bridge navigation for embedded apps
-      const redirect = Redirect.create(app);
-      redirect.dispatch(Redirect.Action.APP, path);
-    } else {
-      // Fallback to Next.js router for development
-      router.push(path);
-    }
+  const handleClick = () => {
+    // For now, just use Next.js router
+    // App Bridge navigation will be handled at a higher level
+    router.push(path);
   };
 
+  return (
+    <Button 
+      variant={variant || undefined} 
+      size={size} 
+      onClick={handleClick} 
+      fullWidth
+    >
+      {typeof children === 'string' ? children : String(children)}
+    </Button>
+  );
+}
+
+export default function AdminHomePage() {
   return (
     <Page
       title="MiniMall Admin Dashboard"
@@ -44,26 +59,21 @@ export default function AdminHomePage() {
                   marginTop: "24px",
                 }}
               >
-                <Button
-                  variant="primary"
-                  size="large"
-                  onClick={() => navigateWithAppBridge("/editor/new")}
-                  fullWidth
-                >
+                <NavigationButton variant="primary" size="large" path="/editor/new">
                   🎨 Create New Link-in-Bio Page
-                </Button>
+                </NavigationButton>
 
-                <Button size="large" onClick={() => navigateWithAppBridge("/editor")} fullWidth>
+                <NavigationButton size="large" path="/editor">
                   📝 Manage Existing Pages
-                </Button>
+                </NavigationButton>
 
-                <Button size="large" onClick={() => navigateWithAppBridge("/analytics")} fullWidth>
+                <NavigationButton size="large" path="/analytics">
                   📊 View Analytics
-                </Button>
+                </NavigationButton>
 
-                <Button size="large" onClick={() => navigateWithAppBridge("/settings")} fullWidth>
+                <NavigationButton size="large" path="/settings">
                   ⚙️ Settings
-                </Button>
+                </NavigationButton>
               </div>
 
               <div

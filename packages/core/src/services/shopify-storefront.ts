@@ -594,7 +594,10 @@ export class ShopifyStorefrontService {
   /**
    * Update cart line quantities
    */
-  async updateCart(cartId: string, lines: Array<{ id: string; quantity: number }>): Promise<unknown> {
+  async updateCart(
+    cartId: string,
+    lines: Array<{ id: string; quantity: number }>
+  ): Promise<unknown> {
     const query = `
       mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
         cartLinesUpdate(cartId: $cartId, lines: $lines) {

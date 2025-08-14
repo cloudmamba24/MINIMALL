@@ -397,9 +397,12 @@ export function AssetManager({
         ) : filteredAssets.length === 0 ? (
           <EmptyState
             heading="No assets found"
-            action={{ content: "Upload files", onAction: () => {
-              // TODO: Implement file upload dialog
-            } }}
+            action={{
+              content: "Upload files",
+              onAction: () => {
+                // TODO: Implement file upload dialog
+              },
+            }}
             image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
           >
             <p>Upload some files to get started with your asset library.</p>
@@ -417,7 +420,7 @@ export function AssetManager({
                 }`}
                 onClick={() => handleAssetSelect(asset)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
+                  if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     handleAssetSelect(asset);
                   }

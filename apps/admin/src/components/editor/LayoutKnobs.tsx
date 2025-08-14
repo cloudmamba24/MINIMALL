@@ -168,7 +168,9 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
         {/* Grid Dimensions */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="layout-rows" className="block text-sm font-medium text-gray-700 mb-2">Rows</label>
+            <label htmlFor="layout-rows" className="block text-sm font-medium text-gray-700 mb-2">
+              Rows
+            </label>
             <input
               id="layout-rows"
               type="range"
@@ -183,7 +185,12 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
           </div>
 
           <div>
-            <label htmlFor="layout-columns" className="block text-sm font-medium text-gray-700 mb-2">Columns</label>
+            <label
+              htmlFor="layout-columns"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Columns
+            </label>
             <input
               id="layout-columns"
               type="range"
@@ -201,7 +208,9 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
         {/* Spacing */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="layout-gutter" className="block text-sm font-medium text-gray-700 mb-2">Gutter</label>
+            <label htmlFor="layout-gutter" className="block text-sm font-medium text-gray-700 mb-2">
+              Gutter
+            </label>
             <input
               id="layout-gutter"
               type="range"
@@ -216,7 +225,9 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
           </div>
 
           <div>
-            <label htmlFor="layout-margin" className="block text-sm font-medium text-gray-700 mb-2">Margin</label>
+            <label htmlFor="layout-margin" className="block text-sm font-medium text-gray-700 mb-2">
+              Margin
+            </label>
             <input
               id="layout-margin"
               type="range"
@@ -294,7 +305,9 @@ export function LayoutKnobs({ layout, onLayoutChange, className }: LayoutKnobsPr
           {/* Hover Zoom */}
           <div className="flex items-center justify-between">
             <div>
-              <label htmlFor="hover-zoom" className="text-sm font-medium text-gray-700">Hover Zoom</label>
+              <label htmlFor="hover-zoom" className="text-sm font-medium text-gray-700">
+                Hover Zoom
+              </label>
               <p className="text-xs text-gray-500">Scale items on hover</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">

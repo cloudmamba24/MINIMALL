@@ -3,33 +3,33 @@
  * Covers configuration management, product handling, and performance utilities
  */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { validateSiteConfig, generateConfigId } from "./utils";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { PerformanceMetrics, ShopifyProduct, SiteConfig } from "./types";
+import { generateConfigId, validateSiteConfig } from "./utils";
 import {
-	generateUniqueId,
+	calculateAspectRatio,
+	calculatePerformanceScore,
+	debounce,
+	extractProductIdFromHandle,
+	formatFileSize,
 	formatProductPrice,
 	formatShopifyHandle,
-	parseShopifyProductId,
-	isValidShopifyId,
-	calculatePerformanceScore,
-	shouldPreloadImages,
-	optimizeImageUrl,
 	generateCacheKey,
-	validatePerformanceMetrics,
 	generateShopifyCheckoutUrl,
-	extractProductIdFromHandle,
-	sanitizeFilename,
-	validateImageFormat,
-	slugify,
+	generateUniqueId,
+	isValidShopifyId,
+	isValidUrl,
+	optimizeImageUrl,
+	parseShopifyProductId,
 	parseUrlParams,
-	formatFileSize,
-	calculateAspectRatio,
-	debounce,
-	throttle,
 	retry,
-	isValidUrl
+	sanitizeFilename,
+	shouldPreloadImages,
+	slugify,
+	throttle,
+	validateImageFormat,
+	validatePerformanceMetrics,
 } from "./utils-extended";
-import type { SiteConfig, PerformanceMetrics, ShopifyProduct } from "./types";
 
 describe("Core Utilities - Comprehensive Tests", () => {
 	describe("Configuration Management", () => {
@@ -44,11 +44,11 @@ describe("Core Utilities - Comprehensive Tests", () => {
 						shopDomain: "example.myshopify.com",
 						theme: {
 							primaryColor: "#000000",
-							backgroundColor: "#ffffff"
-						}
+							backgroundColor: "#ffffff",
+						},
 					},
 					createdAt: "2023-01-01T00:00:00Z",
-					updatedAt: "2023-01-01T00:00:00Z"
+					updatedAt: "2023-01-01T00:00:00Z",
 				};
 
 				expect(validateSiteConfig(validConfig)).toBe(true);
@@ -57,7 +57,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 			it("should reject invalid config missing required fields", () => {
 				const invalidConfig = {
 					id: "test123",
-					categories: []
+					categories: [],
 					// missing settings
 				};
 
@@ -166,7 +166,9 @@ describe("Core Utilities - Comprehensive Tests", () => {
 			});
 
 			it("should handle variant IDs", () => {
-				const id = parseShopifyProductId("gid://shopify/ProductVariant/987654321");
+				const id = parseShopifyProductId(
+					"gid://shopify/ProductVariant/987654321",
+				);
 				expect(id).toBe("987654321");
 			});
 		});
@@ -197,11 +199,11 @@ describe("Core Utilities - Comprehensive Tests", () => {
 				const metrics: PerformanceMetrics = {
 					configId: "test",
 					lcp: 1200, // Good LCP
-					fid: 80,   // Good FID
+					fid: 80, // Good FID
 					cls: 0.05, // Good CLS
 					ttfb: 150, // Good TTFB
 					loadTime: 1000,
-					timestamp: new Date()
+					timestamp: new Date(),
 				};
 
 				const score = calculatePerformanceScore(metrics);
@@ -212,11 +214,11 @@ describe("Core Utilities - Comprehensive Tests", () => {
 				const metrics: PerformanceMetrics = {
 					configId: "test",
 					lcp: 3000, // Poor LCP
-					fid: 200,  // Poor FID
+					fid: 200, // Poor FID
 					cls: 0.25, // Poor CLS
 					ttfb: 500, // Poor TTFB
 					loadTime: 5000,
-					timestamp: new Date()
+					timestamp: new Date(),
 				};
 
 				const score = calculatePerformanceScore(metrics);
@@ -226,7 +228,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 			it("should handle missing metrics", () => {
 				const metrics: PerformanceMetrics = {
 					configId: "test",
-					timestamp: new Date()
+					timestamp: new Date(),
 				};
 
 				const score = calculatePerformanceScore(metrics);
@@ -240,7 +242,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 				const shouldPreload = shouldPreloadImages({
 					position: "above-fold",
 					priority: "high",
-					size: "large"
+					size: "large",
 				});
 				expect(shouldPreload).toBe(true);
 			});
@@ -249,7 +251,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 				const shouldPreload = shouldPreloadImages({
 					position: "below-fold",
 					priority: "low",
-					size: "small"
+					size: "small",
 				});
 				expect(shouldPreload).toBe(false);
 			});
@@ -262,7 +264,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 					lcp: 1500,
 					fid: 100,
 					cls: 0.1,
-					timestamp: new Date()
+					timestamp: new Date(),
 				};
 
 				expect(validatePerformanceMetrics(metrics)).toBe(true);
@@ -272,7 +274,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 				const invalidMetrics = {
 					configId: "test123",
 					lcp: -100, // Invalid negative value
-					timestamp: new Date()
+					timestamp: new Date(),
 				};
 
 				expect(validatePerformanceMetrics(invalidMetrics as any)).toBe(false);
@@ -288,7 +290,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 					width: 800,
 					height: 600,
 					quality: 80,
-					format: "webp"
+					format: "webp",
 				});
 
 				expect(optimized).toContain("800x600");
@@ -369,7 +371,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 				expect(params).toEqual({
 					name: "John",
 					age: "25",
-					active: "true"
+					active: "true",
 				});
 			});
 
@@ -401,7 +403,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 
 		describe("sanitizeFilename", () => {
 			it("should remove invalid filename characters", () => {
-				expect(sanitizeFilename("file<>:\"/\\|?*.txt")).toBe("file.txt");
+				expect(sanitizeFilename('file<>:"/\\|?*.txt')).toBe("file.txt");
 				expect(sanitizeFilename("normal-file.jpg")).toBe("normal-file.jpg");
 			});
 
@@ -425,7 +427,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 
 				expect(mockFn).not.toHaveBeenCalled();
 
-				await new Promise(resolve => setTimeout(resolve, 150));
+				await new Promise((resolve) => setTimeout(resolve, 150));
 				expect(mockFn).toHaveBeenCalledTimes(1);
 			});
 		});
@@ -441,7 +443,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 
 				expect(mockFn).toHaveBeenCalledTimes(1);
 
-				await new Promise(resolve => setTimeout(resolve, 150));
+				await new Promise((resolve) => setTimeout(resolve, 150));
 				throttledFn();
 				expect(mockFn).toHaveBeenCalledTimes(2);
 			});
@@ -464,10 +466,13 @@ describe("Core Utilities - Comprehensive Tests", () => {
 			});
 
 			it("should throw after max attempts", async () => {
-				const mockFn = vi.fn().mockRejectedValue(new Error("Persistent failure"));
+				const mockFn = vi
+					.fn()
+					.mockRejectedValue(new Error("Persistent failure"));
 
-				await expect(retry(mockFn, { maxAttempts: 2, delay: 10 }))
-					.rejects.toThrow("Persistent failure");
+				await expect(
+					retry(mockFn, { maxAttempts: 2, delay: 10 }),
+				).rejects.toThrow("Persistent failure");
 				expect(mockFn).toHaveBeenCalledTimes(2);
 			});
 		});
@@ -490,7 +495,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 			it("should handle complex objects", () => {
 				const key = generateCacheKey("config", {
 					shop: "test",
-					filters: { category: "clothes", price: { min: 10, max: 100 } }
+					filters: { category: "clothes", price: { min: 10, max: 100 } },
 				});
 				expect(key).toContain("config");
 				expect(typeof key).toBe("string");
@@ -503,10 +508,13 @@ describe("Core Utilities - Comprehensive Tests", () => {
 			it("should generate correct checkout URL", () => {
 				const items = [
 					{ variantId: "123", quantity: 2 },
-					{ variantId: "456", quantity: 1 }
+					{ variantId: "456", quantity: 1 },
 				];
-				const url = generateShopifyCheckoutUrl("test-shop.myshopify.com", items);
-				
+				const url = generateShopifyCheckoutUrl(
+					"test-shop.myshopify.com",
+					items,
+				);
+
 				expect(url).toContain("test-shop.myshopify.com");
 				expect(url).toContain("cart");
 				expect(url).toContain("123:2");
@@ -516,7 +524,7 @@ describe("Core Utilities - Comprehensive Tests", () => {
 			it("should handle single item", () => {
 				const items = [{ variantId: "123", quantity: 1 }];
 				const url = generateShopifyCheckoutUrl("shop.myshopify.com", items);
-				
+
 				expect(url).toContain("123:1");
 			});
 
@@ -538,7 +546,9 @@ describe("Core Utilities - Comprehensive Tests", () => {
 			});
 
 			it("should handle complex handles", () => {
-				const id = extractProductIdFromHandle("super-awesome-product-v2-456789");
+				const id = extractProductIdFromHandle(
+					"super-awesome-product-v2-456789",
+				);
 				expect(id).toBe("456789");
 			});
 		});

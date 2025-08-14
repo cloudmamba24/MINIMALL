@@ -86,12 +86,17 @@ export async function POST(request: NextRequest) {
     if (downloadMedia && r2Service) {
       // Create adapter for downloadAndUploadMedia function
       const r2Adapter = {
-        putObject: async (key: string, buffer: Buffer, options?: { metadata?: Record<string, unknown> }) => {
+        putObject: async (
+          key: string,
+          buffer: Buffer,
+          options?: { metadata?: Record<string, unknown> }
+        ) => {
           // Convert metadata to contentType for R2ConfigService
-          const contentType = options?.metadata?.contentType as string || 'application/octet-stream';
+          const contentType =
+            (options?.metadata?.contentType as string) || "application/octet-stream";
           return await r2Service.putObject(key, buffer, { contentType });
         },
-        getObjectUrl: (key: string) => r2Service.getObjectUrl(key)
+        getObjectUrl: (key: string) => r2Service.getObjectUrl(key),
       };
       assets = await downloadAndUploadMedia(r2Adapter, post, folder, processImages);
     }

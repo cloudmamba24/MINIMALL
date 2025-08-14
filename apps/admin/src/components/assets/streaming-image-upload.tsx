@@ -192,11 +192,12 @@ export function StreamingImageUpload({
               {uploadState.result.compressed && (
                 <div className="flex items-center gap-1">
                   <CheckCircle className="w-3 h-3" />
-                  {uploadState.result.originalSize && (
-                    ((uploadState.result.originalSize - uploadState.result.size) /
-                      uploadState.result.originalSize) *
-                    100
-                  ).toFixed(0)}
+                  {uploadState.result.originalSize &&
+                    (
+                      ((uploadState.result.originalSize - uploadState.result.size) /
+                        uploadState.result.originalSize) *
+                      100
+                    ).toFixed(0)}
                   % smaller
                 </div>
               )}
@@ -315,7 +316,8 @@ export function StreamingImageUpload({
               {uploadState.status === "completed" && uploadState.result && (
                 <span>
                   {formatBytes(uploadState.result.size)}
-                  {uploadState.result.compressed && uploadState.result.originalSize &&
+                  {uploadState.result.compressed &&
+                    uploadState.result.originalSize &&
                     ` • Optimized (${(((uploadState.result.originalSize - uploadState.result.size) / uploadState.result.originalSize) * 100).toFixed(0)}% smaller)`}
                 </span>
               )}

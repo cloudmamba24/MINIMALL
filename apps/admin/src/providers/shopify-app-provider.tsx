@@ -39,7 +39,24 @@ export function ShopifyAppProvider({ children }: ShopifyAppProviderProps) {
           },
         }}
       >
-        {children}
+        <div style={{ padding: "20px", background: "#f6f6f7", minHeight: "100vh" }}>
+          <div
+            style={{
+              background: "white",
+              padding: "20px",
+              borderRadius: "8px",
+              textAlign: "center",
+              maxWidth: "600px",
+              margin: "0 auto 20px",
+            }}
+          >
+            <h2 style={{ color: "#202223", marginBottom: "16px" }}>🔧 Development Mode</h2>
+            <p style={{ color: "#6d7175", marginBottom: "16px" }}>
+              Running in standalone mode. Add NEXT_PUBLIC_SHOPIFY_API_KEY for embedded mode.
+            </p>
+          </div>
+          {children}
+        </div>
       </AppProvider>
     );
   }

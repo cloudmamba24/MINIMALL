@@ -5,19 +5,19 @@
  * This catches errors locally before deployment to save time
  */
 
-const { execSync, spawn } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+const { execSync, spawn } = require("node:child_process");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const COLORS = {
-  reset: '\x1b[0m',
-  bright: '\x1b[1m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
-  magenta: '\x1b[35m',
-  cyan: '\x1b[36m',
+  reset: "\x1b[0m",
+  bright: "\x1b[1m",
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  magenta: "\x1b[35m",
+  cyan: "\x1b[36m",
 };
 
 const log = {
@@ -37,20 +37,19 @@ class DeploymentValidator {
   }
 
   async validate(app = null) {
-    log.title('🚀 MINIMALL Deployment Validation');
-    log.info('Simulating Vercel build process locally...\n');
+    log.title("🚀 MINIMALL Deployment Validation");
+    log.info("Simulating Vercel build process locally...\n");
 
     try {
       // Determine which apps to validate
-      const appsToValidate = app ? [app] : ['admin', 'public'];
-      
+      const appsToValidate = app ? [app] : ["admin", "public"];
+
       for (const appName of appsToValidate) {
         await this.validateApp(appName);
       }
 
       await this.runGlobalChecks();
       this.printSummary();
-
     } catch (error) {
       log.error(`Validation failed: ${error.message}`);
       process.exit(1);
@@ -59,8 +58,8 @@ class DeploymentValidator {
 
   async validateApp(appName) {
     log.title(`📦 Validating ${appName} app`);
-    
-    const appPath = path.join(process.cwd(), 'apps', appName);
+
+    const appPath = path.join(process.cwd(), "apps", appName);
     if (!fs.existsSync(appPath)) {
       this.addError(`App directory not found: ${appPath}`);
       return;
@@ -91,17 +90,19 @@ class DeploymentValidator {
   async validateEnvironment(appName) {
     log.step(`Checking environment configuration for ${appName}`);
 
-    const vercelConfigPath = path.join(process.cwd(), 'apps', appName, 'vercel.json');
+    const vercelConfigPath = path.join(process.cwd(), "apps", appName, "vercel.json");
     if (fs.existsSync(vercelConfigPath)) {
       try {
-        const vercelConfig = JSON.parse(fs.readFileSync(vercelConfigPath, 'utf8'));
-        
+        const _vercelConfig = JSON.parse(fs.readFileSync(vercelConfigPath, "utf8"));
+
         // Check required environment variables from turbo.json
-        const turboConfig = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'turbo.json'), 'utf8'));
+        const turboConfig = JSON.parse(
+          fs.readFileSync(path.join(process.cwd(), "turbo.json"), "utf8")
+        );
         const requiredEnvVars = turboConfig.tasks.build.env || [];
 
         for (const envVar of requiredEnvVars) {
-          if (!process.env[envVar] && !envVar.startsWith('NEXT_PUBLIC_')) {
+          if (!process.env[envVar] && !envVar.startsWith("NEXT_PUBLIC_")) {
             this.addWarning(`Environment variable ${envVar} not set (will use default/empty)`);
           }
         }
@@ -118,20 +119,20 @@ class DeploymentValidator {
 
     try {
       // Check for security vulnerabilities
-      execSync('npm audit --audit-level=high', { 
+      execSync("npm audit --audit-level=high", {
         cwd: process.cwd(),
-        stdio: 'pipe'
+        stdio: "pipe",
       });
       log.success(`No high-severity vulnerabilities found in ${appName}`);
-    } catch (error) {
+    } catch (_error) {
       this.addWarning(`Security vulnerabilities detected in dependencies for ${appName}`);
     }
 
     // Check package-lock integrity
     try {
-      execSync('npm ci --dry-run', { 
+      execSync("npm ci --dry-run", {
         cwd: process.cwd(),
-        stdio: 'pipe'
+        stdio: "pipe",
       });
       log.success(`Package-lock integrity verified for ${appName}`);
     } catch (error) {
@@ -143,12 +144,12 @@ class DeploymentValidator {
     log.step(`Running TypeScript validation for ${appName}`);
 
     try {
-      execSync(`npx turbo type-check --filter=@minimall/${appName}`, { 
+      execSync(`npx turbo type-check --filter=@minimall/${appName}`, {
         cwd: process.cwd(),
-        stdio: 'pipe'
+        stdio: "pipe",
       });
       log.success(`TypeScript validation passed for ${appName}`);
-    } catch (error) {
+    } catch (_error) {
       this.addError(`TypeScript errors in ${appName}. Run 'npm run type-check' for details.`);
     }
   }
@@ -157,12 +158,12 @@ class DeploymentValidator {
     log.step(`Running linting for ${appName}`);
 
     try {
-      execSync(`npx turbo lint --filter=@minimall/${appName}`, { 
+      execSync(`npx turbo lint --filter=@minimall/${appName}`, {
         cwd: process.cwd(),
-        stdio: 'pipe'
+        stdio: "pipe",
       });
       log.success(`Linting passed for ${appName}`);
-    } catch (error) {
+    } catch (_error) {
       this.addWarning(`Linting issues in ${appName}. Run 'npm run lint' for details.`);
     }
   }
@@ -172,44 +173,44 @@ class DeploymentValidator {
 
     try {
       // Clean build
-      execSync(`npx turbo clean --filter=@minimall/${appName}`, { 
+      execSync(`npx turbo clean --filter=@minimall/${appName}`, {
         cwd: process.cwd(),
-        stdio: 'pipe'
+        stdio: "pipe",
       });
 
       // Production build with exact Vercel command
-      const buildCmd = appName === 'admin' 
-        ? 'npx turbo build --filter=@minimall/admin --force'
-        : 'npx turbo build --filter=@minimall/public --force';
+      const buildCmd =
+        appName === "admin"
+          ? "npx turbo build --filter=@minimall/admin --force"
+          : "npx turbo build --filter=@minimall/public --force";
 
       log.info(`Running: ${buildCmd}`);
-      execSync(buildCmd, { 
+      execSync(buildCmd, {
         cwd: process.cwd(),
-        stdio: 'inherit',
+        stdio: "inherit",
         env: {
           ...process.env,
-          NODE_ENV: 'production',
-          NEXT_PUBLIC_APP_ENV: 'production'
-        }
+          NODE_ENV: "production",
+          NEXT_PUBLIC_APP_ENV: "production",
+        },
       });
 
       // Verify build output
-      const buildPath = path.join(process.cwd(), 'apps', appName, '.next');
+      const buildPath = path.join(process.cwd(), "apps", appName, ".next");
       if (!fs.existsSync(buildPath)) {
         this.addError(`Build output not found for ${appName}`);
         return;
       }
 
       // Check for build warnings/errors in output
-      const buildInfoPath = path.join(buildPath, 'build-manifest.json');
+      const buildInfoPath = path.join(buildPath, "build-manifest.json");
       if (fs.existsSync(buildInfoPath)) {
         log.success(`Build completed successfully for ${appName}`);
       } else {
         this.addWarning(`Build may have issues - build manifest not found for ${appName}`);
       }
-
     } catch (error) {
-      this.addError(`Build failed for ${appName}: ${error.message.split('\n')[0]}`);
+      this.addError(`Build failed for ${appName}: ${error.message.split("\n")[0]}`);
     }
   }
 
@@ -217,12 +218,12 @@ class DeploymentValidator {
     log.step(`Running tests for ${appName}`);
 
     try {
-      execSync(`npx turbo test --filter=@minimall/${appName}`, { 
+      execSync(`npx turbo test --filter=@minimall/${appName}`, {
         cwd: process.cwd(),
-        stdio: 'pipe'
+        stdio: "pipe",
       });
       log.success(`Tests passed for ${appName}`);
-    } catch (error) {
+    } catch (_error) {
       this.addWarning(`Test failures in ${appName}. Run 'npm test' for details.`);
     }
   }
@@ -231,53 +232,55 @@ class DeploymentValidator {
     log.step(`Running security checks for ${appName}`);
 
     // Check for sensitive data exposure
-    const appPath = path.join(process.cwd(), 'apps', appName);
-    const buildPath = path.join(appPath, '.next');
+    const appPath = path.join(process.cwd(), "apps", appName);
+    const buildPath = path.join(appPath, ".next");
 
     if (fs.existsSync(buildPath)) {
       try {
         // Check for API keys in built files (basic check)
-        const result = execSync(`grep -r "sk_" "${buildPath}" || true`, { 
-          encoding: 'utf8',
-          stdio: 'pipe'
+        const result = execSync(`grep -r "sk_" "${buildPath}" || true`, {
+          encoding: "utf8",
+          stdio: "pipe",
         });
-        
+
         if (result.trim()) {
           this.addError(`Potential API key exposure detected in ${appName} build`);
         } else {
           log.success(`No obvious sensitive data exposure in ${appName}`);
         }
-      } catch (error) {
+      } catch (_error) {
         // Ignore grep errors
       }
     }
   }
 
   async runGlobalChecks() {
-    log.title('🔍 Running global checks');
+    log.title("🔍 Running global checks");
 
     // Check workspace integrity
-    log.step('Checking workspace integrity');
+    log.step("Checking workspace integrity");
     try {
-      execSync('npm run type-check', { 
+      execSync("npm run type-check", {
         cwd: process.cwd(),
-        stdio: 'pipe'
+        stdio: "pipe",
       });
-      log.success('Global type checking passed');
-    } catch (error) {
-      this.addError('Global type checking failed');
+      log.success("Global type checking passed");
+    } catch (_error) {
+      this.addError("Global type checking failed");
     }
 
     // Check for common issues
-    log.step('Checking for common deployment issues');
-    
+    log.step("Checking for common deployment issues");
+
     // Check for conflicting dependencies
-    const rootPackage = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
+    const rootPackage = JSON.parse(
+      fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8")
+    );
     if (rootPackage.overrides && Object.keys(rootPackage.overrides).length > 0) {
-      log.warning('Package overrides detected - ensure they are necessary for deployment');
+      log.warning("Package overrides detected - ensure they are necessary for deployment");
     }
 
-    log.success('Global checks completed');
+    log.success("Global checks completed");
   }
 
   addError(message) {
@@ -292,30 +295,29 @@ class DeploymentValidator {
 
   printSummary() {
     const duration = ((Date.now() - this.startTime) / 1000).toFixed(2);
-    
-    log.title('📊 Validation Summary');
-    
+
+    log.title("📊 Validation Summary");
+
     if (this.errors.length === 0) {
       log.success(`✨ All checks passed! Ready for deployment (${duration}s)`);
-      
+
       if (this.warnings.length > 0) {
         log.warning(`${this.warnings.length} warnings found (non-blocking):`);
-        this.warnings.forEach(warning => log.warning(`  • ${warning}`));
+        this.warnings.forEach((warning) => log.warning(`  • ${warning}`));
       }
 
-      log.info('\n🚀 Safe to deploy to Vercel!');
-      log.info('💡 Run with --app=admin or --app=public to validate specific apps');
-      
+      log.info("\n🚀 Safe to deploy to Vercel!");
+      log.info("💡 Run with --app=admin or --app=public to validate specific apps");
     } else {
       log.error(`❌ ${this.errors.length} errors found (${duration}s):`);
-      this.errors.forEach(error => log.error(`  • ${error}`));
-      
+      this.errors.forEach((error) => log.error(`  • ${error}`));
+
       if (this.warnings.length > 0) {
         log.warning(`${this.warnings.length} additional warnings:`);
-        this.warnings.forEach(warning => log.warning(`  • ${warning}`));
+        this.warnings.forEach((warning) => log.warning(`  • ${warning}`));
       }
 
-      log.error('\n🚫 Fix errors before deploying to Vercel!');
+      log.error("\n🚫 Fix errors before deploying to Vercel!");
       process.exit(1);
     }
   }
@@ -323,23 +325,23 @@ class DeploymentValidator {
 
 // CLI interface
 const args = process.argv.slice(2);
-const appArg = args.find(arg => arg.startsWith('--app='));
-const app = appArg ? appArg.split('=')[1] : null;
+const appArg = args.find((arg) => arg.startsWith("--app="));
+const app = appArg ? appArg.split("=")[1] : null;
 
-if (app && !['admin', 'public'].includes(app)) {
-  log.error('Invalid app specified. Use --app=admin or --app=public');
+if (app && !["admin", "public"].includes(app)) {
+  log.error("Invalid app specified. Use --app=admin or --app=public");
   process.exit(1);
 }
 
 // Handle Ctrl+C gracefully
-process.on('SIGINT', () => {
-  console.log('\n\n🛑 Validation cancelled by user');
+process.on("SIGINT", () => {
+  console.log("\n\n🛑 Validation cancelled by user");
   process.exit(1);
 });
 
 // Run validation
 const validator = new DeploymentValidator();
-validator.validate(app).catch(error => {
+validator.validate(app).catch((error) => {
   log.error(`Unexpected error: ${error.message}`);
   process.exit(1);
 });
