@@ -52,7 +52,7 @@ jobs:
           NODE_ENV: test
 
       - name: Run E2E tests
-        run: npx playwright test --project=${{ matrix.browser }} --shard=${{ matrix.shard }}
+        run: npx playwright test --config=tests/playwright.config.ts --project=${{ matrix.browser }} --shard=${{ matrix.shard }}
         env:
           # Test environment variables
           PLAYWRIGHT_BASE_URL: http://localhost:3000
