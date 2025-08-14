@@ -76,14 +76,8 @@ export async function POST(request: NextRequest) {
       // Upload complete file to final location
       await r2Service.putObject(uploadSession.key, finalBuffer, {
         contentType: uploadSession.type,
-        metadata: {
-          originalName: uploadSession.filename,
-          uploadedAt: new Date().toISOString(),
-          size: finalBuffer.length.toString(),
-          mimeType: uploadSession.type,
-          uploadType: "streaming",
-          chunkCount: sortedChunks.length.toString(),
-        },
+        // Note: R2ConfigService doesn't support metadata in putObject
+        // metadata would go here: { originalName, uploadedAt, size, mimeType, uploadType, chunkCount }
       });
 
       // Clean up chunk files

@@ -82,7 +82,7 @@ export function useShopifyCart({ shopDomain }: UseShopifyCartOptions = {}) {
           }
 
           cartResponse = await response.json();
-          setShopifyCartId(cartResponse.cart.id);
+          setShopifyCartId((cartResponse as any)?.cart?.id);
         } else if (shopifyCartId) {
           // Add to existing cart
           const response = await fetch(`/api/shopify/cart/${shopifyCartId}`, {
@@ -104,10 +104,10 @@ export function useShopifyCart({ shopDomain }: UseShopifyCartOptions = {}) {
         }
 
         // Log success but don't show to user (local cart is already updated)
-        console.log("Added to Shopify cart:", cartResponse?.cart?.id);
+        console.log("Added to Shopify cart:", (cartResponse as any)?.cart?.id);
 
         // Show warning if using mock data
-        if (cartResponse?.source === "mock") {
+        if ((cartResponse as any)?.source === "mock") {
           console.warn(
             "Using mock cart - configure Shopify credentials for real cart functionality"
           );

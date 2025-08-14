@@ -124,3 +124,10 @@ tmp/
 temp/
 *storybook.log
 storybook-static
+
+# Claude Code personal settings
+.claude/settings.local.json
+.claude/problem-solving-prompt.md
+
+# Personal development scripts (optional)
+# scripts/

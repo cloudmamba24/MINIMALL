@@ -4,6 +4,15 @@ import type { UTMParameters } from "@minimall/core";
 import { useEffect, useRef } from "react";
 import { createUTMParams } from "../../lib/type-utils";
 
+// Define UTMData type for global window object
+interface UTMData {
+  configId: string;
+  sessionId: string;
+  utm: UTMParameters;
+  capturedAt: string;
+  expiresAt: string;
+}
+
 interface UTMTrackerProps {
   configId: string;
 }
@@ -124,12 +133,13 @@ function getOrCreateSession(configId: string) {
  */
 function storeUTMData(configId: string, utm: UTMParameters, sessionId: string) {
   const utmKey = `minimall_utm_${configId}`;
-  const utmData = {
+  const now = new Date().toISOString();
+  const utmData: UTMData = {
+    configId,
     utm,
     sessionId,
-    capturedAt: Date.now(),
-    url: window.location.href,
-    referrer: document.referrer || undefined,
+    capturedAt: now,
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours from now
   };
 
   localStorage.setItem(utmKey, JSON.stringify(utmData));
@@ -306,7 +316,7 @@ export const UTMUtils = {
       localStorage.removeItem(sessionKey);
 
       if (typeof window !== "undefined") {
-        (window as Window & { __MINIMALL_UTM__?: UTMData }).__MINIMALL_UTM__ = undefined;
+        delete (window as Window & { __MINIMALL_UTM__?: UTMData }).__MINIMALL_UTM__;
       }
     } catch (error) {
       console.warn("[UTMTracker] Failed to cleanup:", error);

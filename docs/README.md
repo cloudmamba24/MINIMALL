@@ -10,7 +10,7 @@
 ## 🚀 Quick Setup
 
 1. **Environment**: Use the comprehensive `.env.local` file in the project root with all required variables
-2. **Database**: Set up PostgreSQL and run `npm run db:push`
+2. **Database**: Set up your database and run `npm run db:push`
 3. **Social APIs**: Configure Instagram Basic Display API (required), TikTok API (optional)
 4. **Shopify**: Create app in Shopify Partners with proper OAuth scopes
 5. **Deploy**: `npm run build` for both apps
@@ -18,7 +18,7 @@
 ## 🔗 Social Media Integration
 
 - **Instagram**: Real post importing via Instagram Basic Display API
-- **TikTok**: Video importing (requires business verification)  
+- **TikTok**: Video importing (requires business verification)
 - **Manual**: Direct upload with caption/hashtag support
 - **Layouts**: Instagram Grid, TikTok Vertical, Pinterest Masonry, Stories modes
 
@@ -28,6 +28,8 @@
 npm install
 npm run dev:admin    # http://localhost:3001
 npm run dev:public   # http://localhost:3000
+npm run lint         # Biome linting (replaces ESLint)
+npm run type-check   # TypeScript checking
 ```
 
 ## 📡 API Endpoints

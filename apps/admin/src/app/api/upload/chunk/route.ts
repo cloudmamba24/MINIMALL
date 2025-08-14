@@ -47,12 +47,8 @@ export async function POST(request: NextRequest) {
 
     await r2Service.putObject(chunkKey, buffer, {
       contentType: "application/octet-stream",
-      metadata: {
-        uploadId,
-        chunkIndex: chunkIndex.toString(),
-        etag,
-        uploadedAt: new Date().toISOString(),
-      },
+      // Note: R2ConfigService doesn't support metadata in putObject
+      // metadata would go here: { uploadId, chunkIndex, etag, uploadedAt }
     });
 
     // Store chunk info in session

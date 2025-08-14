@@ -328,14 +328,14 @@ export function trackCartAbandonment(configId: string, cartValue: number, items:
   UTMUtils.trackEvent(configId, "cart_abandon", {
     cart_value: cartValue,
     items_count: items.length,
-    items: items.map((item) => ({
+    items: items.map((item: any) => ({
       product_id: item.productId,
       variant_id: item.variantId,
       quantity: item.quantity,
       price: item.price,
     })),
     ...attributes,
-  });
+  } as any);
 }
 
 /**
@@ -345,8 +345,8 @@ export function extractAttributionFromOrder(orderData: unknown): Partial<Enhance
   const attributes: Record<string, unknown> = {};
 
   // Extract from note_attributes or line_item_properties
-  const noteAttributes = orderData.note_attributes || [];
-  const lineItemProperties = orderData.line_items?.[0]?.properties || [];
+  const noteAttributes = (orderData as any)?.note_attributes || [];
+  const lineItemProperties = (orderData as any)?.line_items?.[0]?.properties || [];
 
   const allProperties = [...noteAttributes, ...lineItemProperties];
 
