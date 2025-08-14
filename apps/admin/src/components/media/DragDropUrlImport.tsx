@@ -22,6 +22,12 @@ interface UrlEntry {
   error?: string;
 }
 
+// Extract URLs from text using regex (module scope to avoid hook deps)
+const extractUrlsFromText = (text: string): string[] => {
+  const urlRegex = /https?:\/\/(www\.)?(instagram|tiktok|twitter|x)\.com\/[^\s]*/gi;
+  return text.match(urlRegex) || [];
+};
+
 export function DragDropUrlImport({
   onUrlSubmit,
   onValidateUrl,
@@ -35,12 +41,6 @@ export function DragDropUrlImport({
   const [urls, setUrls] = useState<UrlEntry[]>([]);
   const [inputValue, setInputValue] = useState("");
   const _fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Extract URLs from text using regex
-  const extractUrlsFromText = (text: string): string[] => {
-    const urlRegex = /https?:\/\/(www\.)?(instagram|tiktok|twitter|x)\.com\/[^\s]*/gi;
-    return text.match(urlRegex) || [];
-  };
 
   // Validate if URL is from supported domains
   const isValidDomain = (url: string): boolean => {

@@ -35,8 +35,8 @@ const PRESET_CONFIG = {
     icon: <Grid3X3 className="w-6 h-6" />,
     preview: (
       <div className="grid grid-cols-2 gap-1 w-full h-8">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-blue-200 rounded-sm" />
+        {Array.from({ length: 4 }).map((_unused, index) => (
+          <div key={`grid-${index}`} className="bg-blue-200 rounded-sm" />
         ))}
       </div>
     ),
@@ -95,9 +95,9 @@ const SOCIAL_PRESET_CONFIG = {
     icon: <Instagram className="w-6 h-6" />,
     preview: (
       <div className="grid grid-cols-3 gap-0.5 w-full h-8">
-        {Array.from({ length: 9 }).map((_, i) => (
+        {Array.from({ length: 9 }).map((_unused, i) => (
           <div
-            key={i}
+            key={`ig-${i}`}
             className="bg-gradient-to-br from-purple-400 to-pink-400 rounded-sm aspect-square"
           />
         ))}
@@ -156,9 +156,9 @@ const SOCIAL_PRESET_CONFIG = {
     icon: <Images className="w-6 h-6" />,
     preview: (
       <div className="flex gap-0.5 w-full h-8">
-        {Array.from({ length: 5 }).map((_, i) => (
+        {Array.from({ length: 5 }).map((_unused, i) => (
           <div
-            key={i}
+            key={`stories-${i}`}
             className="bg-gradient-to-t from-orange-400 to-yellow-300 rounded-full w-6 h-6 border-2 border-white flex-shrink-0"
           />
         ))}

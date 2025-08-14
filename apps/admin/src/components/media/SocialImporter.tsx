@@ -39,7 +39,7 @@ interface ImportedAsset {
   type: "image" | "video";
   filename: string;
   size: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 interface ImportResult {
@@ -233,7 +233,7 @@ export function SocialImporter({
       case "import":
         return {
           content: "Importing...",
-          onAction: () => {},
+          onAction: () => undefined,
           loading: true,
           disabled: true,
         };
@@ -347,8 +347,8 @@ export function SocialImporter({
 
                     {previewPost.hashtags.length > 0 && (
                       <div className="mt-2 flex gap-2 flex-wrap">
-                        {previewPost.hashtags.slice(0, 5).map((tag, index) => (
-                          <Badge key={`hashtag-${index}`}>
+                        {previewPost.hashtags.slice(0, 5).map((tag) => (
+                          <Badge key={`hashtag-${String(tag)}`}>
                             {`#${Array.isArray(tag) ? tag.join(" ") : String(tag)}`}
                           </Badge>
                         ))}
@@ -370,9 +370,9 @@ export function SocialImporter({
                 </Text>
 
                 <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {previewPost.media.map((media, index) => (
+                  {previewPost.media.map((media) => (
                     <div
-                      key={index}
+                      key={`${media.type}-${media.url}`}
                       className="relative border border-gray-200 rounded-lg overflow-hidden aspect-square"
                     >
                       {media.type === "image" ? (

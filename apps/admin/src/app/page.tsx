@@ -25,13 +25,8 @@ function NavigationButton({
   };
 
   return (
-    <Button 
-      variant={variant || undefined} 
-      size={size} 
-      onClick={handleClick} 
-      fullWidth
-    >
-      {typeof children === 'string' ? children : String(children)}
+    <Button {...(variant && { variant })} size={size} onClick={handleClick} fullWidth>
+      {typeof children === "string" ? children : String(children)}
     </Button>
   );
 }

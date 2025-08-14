@@ -74,11 +74,7 @@ interface ContentItem {
   showFollowers?: boolean;
 }
 
-interface DragItem {
-  id: string;
-  type: ContentItem["type"];
-  item: ContentItem;
-}
+// Removed unused DragItem interface
 
 // Helper functions to convert between Category and ContentItem
 const categoryToContentItem = (category: Category): ContentItem => {
@@ -458,9 +454,9 @@ export function VisualEditor({ config, onConfigChange, onPreview }: VisualEditor
                   <div className="opacity-90">
                     <SortableItem
                       item={activeItem}
-                      onEdit={() => {}}
-                      onDelete={() => {}}
-                      onDuplicate={() => {}}
+                      onEdit={() => undefined}
+                      onDelete={() => undefined}
+                      onDuplicate={() => undefined}
                     />
                   </div>
                 )}

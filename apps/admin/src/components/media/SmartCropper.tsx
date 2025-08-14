@@ -375,6 +375,19 @@ export function SmartCropper({
                     ref={canvasRef}
                     className="absolute top-0 left-0 cursor-crosshair"
                     onClick={handleCanvasClick}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        // Simulate a click at the center when using keyboard
+                        const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
+                        const centerEvent = {
+                          clientX: rect.left + rect.width / 2,
+                          clientY: rect.top + rect.height / 2,
+                        } as unknown as React.MouseEvent<HTMLCanvasElement>;
+                        handleCanvasClick(centerEvent);
+                      }
+                    }}
+                    tabIndex={0}
                     title="Click to set focus point"
                   />
                 )}

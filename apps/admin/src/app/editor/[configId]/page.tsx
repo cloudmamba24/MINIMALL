@@ -51,7 +51,7 @@ export default function EditorPage({ params }: EditorPageProps) {
   // Load configuration on mount
   useEffect(() => {
     loadConfig();
-  }, [configId]);
+  }, [loadConfig]);
 
   // Warn about unsaved changes
   useEffect(() => {

@@ -515,6 +515,7 @@ export function extractHashtags(text: string): string[] {
   const hashtags: string[] = [];
   let match: RegExpExecArray | null;
 
+  // biome-ignore lint/suspicious/noAssignInExpressions: Standard regex pattern matching
   while ((match = hashtagRegex.exec(text)) !== null) {
     if (match[1]) {
       hashtags.push(match[1]);
@@ -586,6 +587,7 @@ export function extractMentions(text: string): string[] {
   const mentions: string[] = [];
   let match: RegExpExecArray | null;
 
+  // biome-ignore lint/suspicious/noAssignInExpressions: Standard regex pattern matching
   while ((match = mentionRegex.exec(text)) !== null) {
     if (match[1]) {
       mentions.push(match[1]);

@@ -308,7 +308,7 @@ async function removeBackground(pipeline: sharp.Sharp): Promise<sharp.Sharp> {
 
   try {
     // Attempt to create an alpha channel based on edge detection
-    const { data, info } = await pipeline
+    const { data } = await pipeline
       .clone()
       .greyscale()
       .normalise()
