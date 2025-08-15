@@ -130,7 +130,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
 		// Debounced validation
 		React.useEffect(() => {
-			if (!validate || !currentValue || typeof currentValue !== "string") return;
+			if (!validate || !currentValue || typeof currentValue !== "string")
+				return;
 
 			const timeoutId = setTimeout(() => {
 				const result = validate(currentValue);
@@ -364,24 +365,15 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 		const inputId = useId();
 		const finalId = id || inputId;
 
-		const inputRef = React.useRef<HTMLInputElement>(null);
-		const combinedRef = React.useCallback(
-			(node: HTMLInputElement | null) => {
-				inputRef.current = node;
-				if (typeof ref === 'function') {
-					ref(node);
-				} else if (ref) {
-					ref.current = node;
-				}
-			},
-			[ref]
-		);
-
-		React.useEffect(() => {
-			if (inputRef.current) {
-				inputRef.current.indeterminate = !!indeterminate;
+		// Handle indeterminate state with a simpler approach
+		const inputRef = (node: HTMLInputElement | null) => {
+			if (node && indeterminate) {
+				node.indeterminate = true;
 			}
-		}, [indeterminate]);
+			if (typeof ref === "function") {
+				ref(node);
+			}
+		};
 
 		const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 			onChange?.(e.target.checked);
@@ -393,7 +385,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 					<input
 						type="checkbox"
 						id={finalId}
-						ref={combinedRef}
+						ref={inputRef}
 						className={cn(
 							"h-4 w-4 rounded border border-input ring-offset-background",
 							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
@@ -507,8 +499,11 @@ export const Form: React.FC<FormProps> = ({
 		const requiredFields = formElement.querySelectorAll("[required]");
 		for (const field of requiredFields) {
 			const input = field as HTMLInputElement;
-			const name = input.name || input.id || `field_${Math.random().toString(36).substring(2, 11)}`;
-			const value = formData.get(input.name) as string || input.value;
+			const name =
+				input.name ||
+				input.id ||
+				`field_${Math.random().toString(36).substring(2, 11)}`;
+			const value = (formData.get(input.name) as string) || input.value;
 
 			if (!value || value.trim() === "") {
 				errors[name] = "This field is required";
