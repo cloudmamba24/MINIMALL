@@ -16,7 +16,8 @@ export default function CreateNewClient() {
       if (shop) qs.set("shop", shop);
       if (shop) qs.set("shopDomain", shop);
 
-      const res = await fetch(`/api/configs?${qs.toString()}`, { method: "POST" });
+      // Use bypass route to avoid database issues
+      const res = await fetch(`/api/configs/bypass?${qs.toString()}`, { method: "POST" });
       if (!res.ok) {
         router.replace(`/${qs.toString() ? `?${qs.toString()}` : ""}`);
         return;
