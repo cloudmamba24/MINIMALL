@@ -56,12 +56,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (!validation.isValid) {
-      return validation.error!;
+      return validation.error || NextResponse.json({ error: "Invalid webhook" }, { status: 400 });
     }
 
     const { shop, body } = validation;
     const db = getDatabaseConnection();
-    const shopifyDomain = shop!; // shop is guaranteed to be defined after validation
+    const shopifyDomain = shop || ""; // shop is guaranteed to be defined after validation
 
     const order: ShopifyOrder = body;
 

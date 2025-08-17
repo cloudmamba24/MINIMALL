@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 /**
  * Handle app uninstall webhook
  */
-export async function handleAppUninstalled(shop: string, payload: any): Promise<void> {
+export async function handleAppUninstalled(shop: string, _payload: any): Promise<void> {
   try {
     const db = getDatabaseConnection();
     if (!db) {

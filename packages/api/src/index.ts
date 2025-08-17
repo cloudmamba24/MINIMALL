@@ -152,7 +152,7 @@ async function authenticate(
             },
           };
         }
-        const token = authHeader.substring(7);
+        // const token = authHeader.substring(7);
         // Validate bearer token
         // user = await validateBearerToken(token);
         break;
@@ -188,8 +188,8 @@ async function authenticate(
     }
 
     // Check scopes
-    if (scopes.length > 0 && user.scope) {
-      const userScopes = user.scope;
+    if (scopes.length > 0 && user && 'scope' in user) {
+      const userScopes = (user as any).scope;
       const hasRequiredScopes = scopes.every((scope) => userScopes.includes(scope));
       if (!hasRequiredScopes) {
         return {

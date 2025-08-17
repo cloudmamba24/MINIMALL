@@ -31,10 +31,10 @@ export async function GET() {
     envVarsStatus: envVars,
     envFileCheck: {
       cwd: process.cwd(),
-      dotEnvLocalExists: require("fs").existsSync(".env.local"),
-      dotEnvExists: require("fs").existsSync(".env"),
-      rootEnvLocalExists: require("fs").existsSync("../../.env.local"),
-      parentEnvLocalExists: require("fs").existsSync("../.env.local"),
+      dotEnvLocalExists: require("node:fs").existsSync(".env.local"),
+      dotEnvExists: require("node:fs").existsSync(".env"),
+      rootEnvLocalExists: require("node:fs").existsSync("../../.env.local"),
+      parentEnvLocalExists: require("node:fs").existsSync("../.env.local"),
     },
   });
 }

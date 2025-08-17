@@ -1,4 +1,4 @@
-import { getDatabaseConnection } from "@minimall/db";
+// import { getDatabaseConnection } from "@minimall/db";
 import type { ShopifyCustomer } from "@minimall/types";
 import * as Sentry from "@sentry/nextjs";
 

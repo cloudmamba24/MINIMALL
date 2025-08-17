@@ -19,14 +19,16 @@ export async function POST(request: NextRequest) {
     });
 
     if (!validation.isValid) {
-      return validation.error!;
+      return validation.error || NextResponse.json({ error: "Invalid webhook" }, { status: 400 });
     }
 
     const { shop, topic, body } = validation;
     const webhookHandler = getWebhookHandler();
 
     // Process webhook
-    await webhookHandler.processWebhook(topic!, shop!, body, JSON.stringify(body));
+    if (topic && shop) {
+      await webhookHandler.processWebhook(topic, shop, body, JSON.stringify(body));
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

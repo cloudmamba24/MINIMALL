@@ -182,7 +182,11 @@ function getRateLimitForTopic(topic: string): number {
 /**
  * Log webhook to database
  */
-async function logWebhook(shop: string, topic: ShopifyWebhookTopic, payload: any): Promise<void> {
+async function logWebhook(
+  _shop: string,
+  _topic: ShopifyWebhookTopic,
+  _payload: any
+): Promise<void> {
   try {
     const db = getDatabaseConnection();
     if (!db) return;

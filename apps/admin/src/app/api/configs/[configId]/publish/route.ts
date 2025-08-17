@@ -99,7 +99,7 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
 
     // Invalidate edge cache for published config
     const tagsToInvalidate = [`config:${configId}`, `config:${configId}:published`];
-    const invalidatedCount = edgeCache.invalidateByTags(tagsToInvalidate);
+    const _invalidatedCount = edgeCache.invalidateByTags(tagsToInvalidate);
     // Log cache invalidation for monitoring
 
     // Trigger cache invalidation on the public app
