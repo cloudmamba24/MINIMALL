@@ -86,36 +86,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Save to DB as a draft version
+    // Save to DB as a draft version (without transaction due to Neon HTTP driver limitation)
     const versionId = crypto.randomUUID();
-    await db.transaction(async (tx) => {
-      await tx
-        .insert(configs)
-        .values({
-          id: config.id,
-          shop: extractShopFromDomain(shopDomain || ""),
-          slug: config.id,
-          updatedAt: new Date(),
-        })
-        .onConflictDoUpdate({
-          target: configs.id,
-          set: { updatedAt: new Date() },
-        });
-
-      await tx.insert(configVersions).values({
-        id: versionId,
-        configId: config.id,
-        version: `v${Date.now()}`,
-        data: config,
-        isPublished: false,
-        createdBy: "admin",
+    
+    // Insert or update config
+    await db
+      .insert(configs)
+      .values({
+        id: config.id,
+        shop: extractShopFromDomain(shopDomain || ""),
+        slug: config.id,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: configs.id,
+        set: { updatedAt: new Date() },
       });
 
-      await tx
-        .update(configs)
-        .set({ currentVersionId: versionId, updatedAt: new Date() })
-        .where(eq(configs.id, config.id));
+    // Insert version
+    await db.insert(configVersions).values({
+      id: versionId,
+      configId: config.id,
+      version: `v${Date.now()}`,
+      data: config,
+      isPublished: false,
+      createdBy: "admin",
     });
+
+    // Update config with current version
+    await db
+      .update(configs)
+      .set({ currentVersionId: versionId, updatedAt: new Date() })
+      .where(eq(configs.id, config.id));
 
     return NextResponse.json({ success: true, configId: config.id, config });
   } catch (error) {
