@@ -1,4 +1,4 @@
-import { createDefaultSiteConfig, getR2Service } from "@minimall/core/server";
+import { createEnhancedSiteConfig, getR2Service } from "@minimall/core/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 interface RouteParams {
@@ -25,8 +25,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       }
     }
     
-    // If not in R2, create a default config with this ID
-    const config = createDefaultSiteConfig("cloudmamba.myshopify.com");
+    // If not in R2, create an enhanced config with real Shopify products
+    const shopDomain = process.env.SHOPIFY_DOMAIN || "cloudmamba.myshopify.com";
+    const accessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+    const config = await createEnhancedSiteConfig(shopDomain, accessToken);
     config.id = configId; // Use the requested ID
     
     return NextResponse.json({ 

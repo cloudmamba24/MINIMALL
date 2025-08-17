@@ -1,14 +1,15 @@
-import { createDefaultSiteConfig, getR2Service } from "@minimall/core/server";
+import { createEnhancedSiteConfig, getR2Service } from "@minimall/core/server";
 import { type NextRequest, NextResponse } from "next/server";
 
 // POST /api/configs/bypass - create config without database
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
-    const shopDomain = body.shopDomain || "cloudmamba.myshopify.com";
+    const shopDomain = body.shopDomain || process.env.SHOPIFY_DOMAIN || "cloudmamba.myshopify.com";
+    const accessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
     
-    // Create default config
-    const config = createDefaultSiteConfig(shopDomain);
+    // Create enhanced config with real Shopify products
+    const config = await createEnhancedSiteConfig(shopDomain, accessToken);
     
     // Try to save to R2 if available
     const r2 = getR2Service();
