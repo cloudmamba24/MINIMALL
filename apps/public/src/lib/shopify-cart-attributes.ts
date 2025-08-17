@@ -328,18 +328,19 @@ export function trackCartAbandonment(configId: string, cartValue: number, items:
   UTMUtils.trackEvent(configId, "cart_abandon", {
     cart_value: cartValue,
     items_count: items.length,
-    items: (items as {
-      productId?: string;
-      variantId?: string;
-      quantity?: number;
-      price?: number;
-    }[]).map((item) => ({
+    items: (
+      items as {
+        productId?: string;
+        variantId?: string;
+        quantity?: number;
+        price?: number;
+      }[]
+    ).map((item) => ({
       product_id: item.productId,
       variant_id: item.variantId,
-        quantity: item.quantity,
-        price: item.price,
-      })
-    ),
+      quantity: item.quantity,
+      price: item.price,
+    })),
     ...attributes,
   } as unknown as Record<string, string | number | boolean>);
 }

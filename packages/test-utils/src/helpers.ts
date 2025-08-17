@@ -1,6 +1,6 @@
-import { render, RenderOptions } from '@testing-library/react';
-import { ReactElement, ReactNode } from 'react';
+import { type RenderOptions, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactElement, ReactNode } from 'react';
 
 /**
  * Test helper utilities
@@ -31,7 +31,7 @@ export function setupUser() {
 /**
  * Wait for async operations
  */
-export async function waitFor(ms: number = 100): Promise<void> {
+export async function waitFor(ms = 100): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -56,9 +56,9 @@ export function createMockFormData(data: Record<string, any>): FormData {
  * Create mock File
  */
 export function createMockFile(
-  name: string = 'test.jpg',
-  size: number = 1024,
-  type: string = 'image/jpeg'
+  name = 'test.jpg',
+  size = 1024,
+  type = 'image/jpeg'
 ): File {
   const buffer = new ArrayBuffer(size);
   return new File([buffer], name, { type });
@@ -106,7 +106,7 @@ export class SessionStorageMock extends LocalStorageMock {}
  */
 export function assertApiResponse(
   response: any,
-  expectedStatus: number = 200
+  expectedStatus = 200
 ) {
   expect(response.status).toBe(expectedStatus);
   expect(response.headers.get('content-type')).toContain('application/json');
@@ -117,7 +117,7 @@ export function assertApiResponse(
  */
 export function createWebhookSignature(
   body: string,
-  secret: string = 'test-webhook-secret'
+  secret = 'test-webhook-secret'
 ): string {
   const crypto = require('crypto');
   return crypto

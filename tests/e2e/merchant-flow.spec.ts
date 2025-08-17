@@ -1,21 +1,21 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from "@playwright/test";
 
-test.describe('Merchant User Flow', () => {
-  test('should complete basic merchant workflow', async ({ page, context }) => {
+test.describe("Merchant User Flow", () => {
+  test("should complete basic merchant workflow", async ({ page, context }) => {
     // Mock authentication
     await context.addCookies([
       {
-        name: 'session',
-        value: 'mock-session-token',
-        domain: 'localhost',
-        path: '/',
+        name: "session",
+        value: "mock-session-token",
+        domain: "localhost",
+        path: "/",
       },
     ]);
 
     // 1. Access admin dashboard
-    await page.goto('/admin');
-    await page.waitForLoadState('networkidle');
-    
+    await page.goto("/admin");
+    await page.waitForLoadState("networkidle");
+
     // Should show admin interface
     const dashboard = page.locator('[data-testid="dashboard"]');
     if (await dashboard.isVisible()) {
@@ -23,9 +23,9 @@ test.describe('Merchant User Flow', () => {
     }
 
     // 2. Navigate to editor
-    await page.goto('/admin/editor');
-    await page.waitForLoadState('networkidle');
-    
+    await page.goto("/admin/editor");
+    await page.waitForLoadState("networkidle");
+
     // Should show editor interface
     const editorPanel = page.locator('[data-testid="editor-panel"]');
     if (await editorPanel.isVisible()) {
@@ -33,9 +33,9 @@ test.describe('Merchant User Flow', () => {
     }
 
     // 3. Check media management
-    await page.goto('/admin/media');
-    await page.waitForLoadState('networkidle');
-    
+    await page.goto("/admin/media");
+    await page.waitForLoadState("networkidle");
+
     // Should load media interface
     const mediaManager = page.locator('[data-testid="media-manager"]');
     if (await mediaManager.isVisible()) {
@@ -43,20 +43,20 @@ test.describe('Merchant User Flow', () => {
     }
   });
 
-  test('should handle settings configuration', async ({ page, context }) => {
+  test("should handle settings configuration", async ({ page, context }) => {
     // Mock auth
     await context.addCookies([
       {
-        name: 'session',
-        value: 'mock-session-token',
-        domain: 'localhost',
-        path: '/',
+        name: "session",
+        value: "mock-session-token",
+        domain: "localhost",
+        path: "/",
       },
     ]);
 
-    await page.goto('/admin/settings');
-    await page.waitForLoadState('networkidle');
-    
+    await page.goto("/admin/settings");
+    await page.waitForLoadState("networkidle");
+
     // Should show settings form
     const settingsForm = page.locator('[data-testid="settings-form"]');
     if (await settingsForm.isVisible()) {

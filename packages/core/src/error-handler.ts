@@ -7,9 +7,9 @@ import * as Sentry from "@sentry/nextjs";
 
 export enum ErrorSeverity {
   LOW = "low",
-  MEDIUM = "medium", 
+  MEDIUM = "medium",
   HIGH = "high",
-  CRITICAL = "critical"
+  CRITICAL = "critical",
 }
 
 export interface ErrorContext {
@@ -101,17 +101,17 @@ export function handleError(
 ): void {
   // Convert unknown errors to Error objects
   const err = error instanceof Error ? error : new Error(String(error));
-  
+
   // Determine severity
   const severity = err instanceof AppError ? err.severity : ErrorSeverity.MEDIUM;
-  
+
   // In development, log to console for debugging
   if (process.env.NODE_ENV === "development") {
     console.error("Error:", {
       message: err.message,
       stack: err.stack,
       context,
-      additionalData
+      additionalData,
     });
   }
 
@@ -120,7 +120,7 @@ export function handleError(
     Sentry.withScope((scope) => {
       // Set severity level
       scope.setLevel(mapSeverityToSentryLevel(severity));
-      
+
       // Add context
       if (context) {
         scope.setContext("error_context", context as Record<string, any>);
@@ -129,12 +129,12 @@ export function handleError(
         if (context.component) scope.setTag("component", context.component);
         if (context.action) scope.setTag("action", context.action);
       }
-      
+
       // Add additional data
       if (additionalData) {
         scope.setContext("additional_data", additionalData);
       }
-      
+
       // Capture the error
       Sentry.captureException(err);
     });
@@ -166,9 +166,7 @@ export function asyncHandler<T extends (...args: any[]) => Promise<any>>(
 /**
  * Safe execution wrapper that returns a Result type
  */
-export type Result<T, E = Error> = 
-  | { success: true; data: T }
-  | { success: false; error: E };
+export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
 
 export async function safeExecute<T>(
   fn: () => Promise<T>,
@@ -179,9 +177,9 @@ export async function safeExecute<T>(
     return { success: true, data };
   } catch (error) {
     handleError(error, context);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error : new Error(String(error))
+    return {
+      success: false,
+      error: error instanceof Error ? error : new Error(String(error)),
     };
   }
 }
@@ -207,25 +205,21 @@ function mapSeverityToSentryLevel(severity: ErrorSeverity): Sentry.SeverityLevel
 /**
  * Express/Next.js error middleware
  */
-export function errorMiddleware(
-  err: Error,
-  _req: any,
-  res: any,
-  _next: any
-): void {
+export function errorMiddleware(err: Error, _req: any, res: any, _next: any): void {
   handleError(err, { component: "api-middleware" });
-  
+
   const statusCode = err instanceof AppError ? err.statusCode || 500 : 500;
-  const message = process.env.NODE_ENV === "production" 
-    ? "An error occurred processing your request"
-    : err.message;
-  
+  const message =
+    process.env.NODE_ENV === "production"
+      ? "An error occurred processing your request"
+      : err.message;
+
   res.status(statusCode).json({
     error: {
       message,
       statusCode,
-      ...(process.env.NODE_ENV === "development" && { stack: err.stack })
-    }
+      ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    },
   });
 }
 
@@ -242,5 +236,5 @@ export default {
   RateLimitError,
   DatabaseError,
   ExternalServiceError,
-  errorMiddleware
+  errorMiddleware,
 };

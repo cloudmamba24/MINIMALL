@@ -1,6 +1,6 @@
-import React from 'react';
-import { ProductCard } from './ProductCard';
-import styles from './ProductGrid.module.css';
+import type React from "react";
+import { ProductCard } from "./ProductCard";
+import styles from "./ProductGrid.module.css";
 
 interface ProductGridProps {
   products: Array<{
@@ -28,7 +28,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   columns = 3,
   onProductClick,
   loading = false,
-  className = '',
+  className = "",
 }) => {
   if (loading) {
     return (
@@ -49,11 +49,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   return (
     <div className={`${styles.grid} ${styles[`cols-${columns}`]} ${className}`}>
       {products.map((product) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          onClick={() => onProductClick?.(product)}
-        />
+        <ProductCard key={product.id} product={product} onClick={() => onProductClick?.(product)} />
       ))}
     </div>
   );

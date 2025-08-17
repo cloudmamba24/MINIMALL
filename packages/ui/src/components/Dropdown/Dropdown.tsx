@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import styles from './Dropdown.module.css';
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import styles from "./Dropdown.module.css";
 
 interface DropdownItem {
   label: string;
@@ -13,15 +14,15 @@ interface DropdownProps {
   onSelect: (value: string) => void;
   trigger: React.ReactNode;
   className?: string;
-  align?: 'left' | 'right';
+  align?: "left" | "right";
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
   items,
   onSelect,
   trigger,
-  className = '',
-  align = 'left',
+  className = "",
+  align = "left",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -33,8 +34,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleSelect = (value: string) => {
@@ -52,7 +53,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           {items.map((item) => (
             <button
               key={item.value}
-              className={`${styles.item} ${item.disabled ? styles.disabled : ''}`}
+              className={`${styles.item} ${item.disabled ? styles.disabled : ""}`}
               onClick={() => !item.disabled && handleSelect(item.value)}
               disabled={item.disabled}
             >

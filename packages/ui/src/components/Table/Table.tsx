@@ -1,12 +1,12 @@
-import React from 'react';
-import styles from './Table.module.css';
+import type React from "react";
+import styles from "./Table.module.css";
 
 interface Column<T> {
   key: string;
   header: string;
   render?: (value: any, row: T) => React.ReactNode;
   width?: string;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
 }
 
 interface TableProps<T> {
@@ -22,9 +22,9 @@ export function Table<T extends Record<string, any>>({
   columns,
   data,
   onRowClick,
-  className = '',
+  className = "",
   loading = false,
-  emptyMessage = 'No data available',
+  emptyMessage = "No data available",
 }: TableProps<T>) {
   if (loading) {
     return (
@@ -50,7 +50,7 @@ export function Table<T extends Record<string, any>>({
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`${styles.header} ${styles[`align-${column.align || 'left'}`]}`}
+                className={`${styles.header} ${styles[`align-${column.align || "left"}`]}`}
                 style={{ width: column.width }}
               >
                 {column.header}
@@ -62,17 +62,15 @@ export function Table<T extends Record<string, any>>({
           {data.map((row, index) => (
             <tr
               key={index}
-              className={`${styles.row} ${onRowClick ? styles.clickable : ''}`}
+              className={`${styles.row} ${onRowClick ? styles.clickable : ""}`}
               onClick={() => onRowClick?.(row)}
             >
               {columns.map((column) => (
                 <td
                   key={column.key}
-                  className={`${styles.cell} ${styles[`align-${column.align || 'left'}`]}`}
+                  className={`${styles.cell} ${styles[`align-${column.align || "left"}`]}`}
                 >
-                  {column.render
-                    ? column.render(row[column.key], row)
-                    : row[column.key]}
+                  {column.render ? column.render(row[column.key], row) : row[column.key]}
                 </td>
               ))}
             </tr>

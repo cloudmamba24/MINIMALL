@@ -1,14 +1,15 @@
-import React, { useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
-import { cn } from '../../utils/cn';
-import type { ModalProps } from '@minimall/types';
+import type { ModalProps } from "@minimall/types";
+import type React from "react";
+import { useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { cn } from "../../utils/cn";
 
 const sizeClasses = {
-  sm: 'max-w-md',
-  md: 'max-w-lg',
-  lg: 'max-w-2xl',
-  xl: 'max-w-4xl',
-  full: 'max-w-full mx-4',
+  sm: "max-w-md",
+  md: "max-w-lg",
+  lg: "max-w-2xl",
+  xl: "max-w-4xl",
+  full: "max-w-full mx-4",
 };
 
 export const Modal: React.FC<ModalProps> = ({
@@ -16,28 +17,31 @@ export const Modal: React.FC<ModalProps> = ({
   onClose,
   title,
   description,
-  size = 'md',
+  size = "md",
   closeOnOverlayClick = true,
   closeOnEsc = true,
   showCloseButton = true,
   className,
   children,
 }) => {
-  const handleEscape = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape' && closeOnEsc) {
-      onClose();
-    }
-  }, [closeOnEsc, onClose]);
+  const handleEscape = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape" && closeOnEsc) {
+        onClose();
+      }
+    },
+    [closeOnEsc, onClose]
+  );
 
   useEffect(() => {
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "";
     };
   }, [isOpen, handleEscape]);
 
@@ -56,16 +60,16 @@ export const Modal: React.FC<ModalProps> = ({
         {/* Modal */}
         <div
           className={cn(
-            'relative bg-white rounded-lg shadow-xl',
-            'transform transition-all',
+            "relative bg-white rounded-lg shadow-xl",
+            "transform transition-all",
             sizeClasses[size],
-            'w-full',
+            "w-full",
             className
           )}
           role="dialog"
           aria-modal="true"
-          aria-labelledby={title ? 'modal-title' : undefined}
-          aria-describedby={description ? 'modal-description' : undefined}
+          aria-labelledby={title ? "modal-title" : undefined}
+          aria-describedby={description ? "modal-description" : undefined}
         >
           {/* Header */}
           {(title || showCloseButton) && (
@@ -82,7 +86,12 @@ export const Modal: React.FC<ModalProps> = ({
                   aria-label="Close modal"
                 >
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               )}
@@ -97,16 +106,14 @@ export const Modal: React.FC<ModalProps> = ({
           )}
 
           {/* Content */}
-          <div className="p-4">
-            {children}
-          </div>
+          <div className="p-4">{children}</div>
         </div>
       </div>
     </div>
   );
 
   // Portal to body
-  if (typeof document !== 'undefined') {
+  if (typeof document !== "undefined") {
     return createPortal(modalContent, document.body);
   }
 

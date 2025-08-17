@@ -61,7 +61,7 @@ export interface ConfigCreateRequest {
 export interface ConfigUpdateRequest {
   name?: string;
   settings?: Partial<ConfigSettings>;
-  status?: 'draft' | 'published' | 'archived';
+  status?: "draft" | "published" | "archived";
 }
 
 export interface ConfigSettings {
@@ -87,13 +87,13 @@ export interface BlockConfig {
   enabled: boolean;
 }
 
-export type BlockType = 
-  | 'hero'
-  | 'product-grid'
-  | 'banner'
-  | 'social-links'
-  | 'newsletter'
-  | 'custom-html';
+export type BlockType =
+  | "hero"
+  | "product-grid"
+  | "banner"
+  | "social-links"
+  | "newsletter"
+  | "custom-html";
 
 export interface AnalyticsSettings {
   googleAnalyticsId?: string;
@@ -115,7 +115,7 @@ export interface AssetUploadRequest {
   metadata?: Record<string, any>;
 }
 
-export type AssetType = 'image' | 'video' | 'document' | 'font';
+export type AssetType = "image" | "video" | "document" | "font";
 
 export interface ApiAsset {
   id: string;
@@ -137,13 +137,13 @@ export interface ApiAnalyticsEvent {
   timestamp: string;
 }
 
-export type EventType = 
-  | 'page_view'
-  | 'product_click'
-  | 'add_to_cart'
-  | 'purchase'
-  | 'social_click'
-  | 'custom';
+export type EventType =
+  | "page_view"
+  | "product_click"
+  | "add_to_cart"
+  | "purchase"
+  | "social_click"
+  | "custom";
 
 export interface AnalyticsData {
   views: number;

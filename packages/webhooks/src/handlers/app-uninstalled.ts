@@ -1,5 +1,5 @@
-import { getDatabaseConnection } from '@minimall/db';
-import * as Sentry from '@sentry/nextjs';
+import { getDatabaseConnection } from "@minimall/db";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * Handle app uninstall webhook
@@ -8,11 +8,11 @@ export async function handleAppUninstalled(shop: string, payload: any): Promise<
   try {
     const db = getDatabaseConnection();
     if (!db) {
-      throw new Error('Database connection not available');
+      throw new Error("Database connection not available");
     }
-    
+
     console.log(`Processing app uninstall for shop: ${shop}`);
-    
+
     // Update shop status in database
     // await db.update(shops)
     //   .set({
@@ -21,24 +21,24 @@ export async function handleAppUninstalled(shop: string, payload: any): Promise<
     //     updatedAt: new Date(),
     //   })
     //   .where(eq(shops.domain, shop));
-    
+
     // Clean up shop data if needed
     // - Mark configs as archived
     // - Cancel any active subscriptions
     // - Send notification email
-    
+
     // Log uninstall event
     Sentry.addBreadcrumb({
-      category: 'webhook',
+      category: "webhook",
       message: `App uninstalled: ${shop}`,
-      level: 'info',
+      level: "info",
     });
-    
+
     console.log(`Successfully processed app uninstall for ${shop}`);
   } catch (error) {
     console.error(`Failed to process app uninstall for ${shop}:`, error);
     Sentry.captureException(error, {
-      tags: { webhook: 'app/uninstalled', shop },
+      tags: { webhook: "app/uninstalled", shop },
     });
     throw error;
   }

@@ -40,7 +40,7 @@ export class WebhookHandler {
     } catch (error) {
       Sentry.captureException(error, {
         level: "warning",
-        tags: { component: "webhook-verification" }
+        tags: { component: "webhook-verification" },
       });
       return false;
     }
@@ -152,7 +152,7 @@ export class WebhookHandler {
         Sentry.addBreadcrumb({
           category: "webhook",
           message: `Unhandled webhook topic: ${topic}`,
-          level: "warning"
+          level: "warning",
         });
     }
   }
@@ -251,7 +251,7 @@ export class WebhookHandler {
     Sentry.addBreadcrumb({
       category: "gdpr",
       message: `Shop redaction request for shop: ${shop}`,
-      level: "info"
+      level: "info",
     });
 
     // TODO: Implement GDPR shop data deletion
@@ -259,7 +259,9 @@ export class WebhookHandler {
     // - Remove all remaining shop data
     // - Clean up any backup or cached data
 
-    const { getDatabaseConnection, webhooks, analyticsEvents, configs } = await import("@minimall/db");
+    const { getDatabaseConnection, webhooks, analyticsEvents, configs } = await import(
+      "@minimall/db"
+    );
     const db = getDatabaseConnection();
 
     try {

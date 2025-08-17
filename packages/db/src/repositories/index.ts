@@ -3,11 +3,11 @@
  * Single source of truth for all database queries
  */
 
-import { ShopRepository } from './shop.repository';
-import { ConfigRepository } from './config.repository';
-import { AssetRepository } from './asset.repository';
-import { AnalyticsRepository } from './analytics.repository';
-import { SessionRepository } from './session.repository';
+import { AnalyticsRepository } from "./analytics.repository";
+import { AssetRepository } from "./asset.repository";
+import { ConfigRepository } from "./config.repository";
+import { SessionRepository } from "./session.repository";
+import { ShopRepository } from "./shop.repository";
 
 // Singleton instances
 let shopRepo: ShopRepository;
@@ -67,9 +67,9 @@ export function getSessionRepository(): SessionRepository {
 }
 
 // Export all repositories
-export * from './base.repository';
-export * from './shop.repository';
-export * from './config.repository';
-export * from './asset.repository';
-export * from './analytics.repository';
-export * from './session.repository';
+export * from "./base.repository";
+export * from "./shop.repository";
+export * from "./config.repository";
+export * from "./asset.repository";
+export * from "./analytics.repository";
+export * from "./session.repository";

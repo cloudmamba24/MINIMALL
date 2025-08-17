@@ -47,27 +47,27 @@ function getBaseUrl(type: "admin" | "public" = "public"): string {
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
-  
+
   // Check for explicit environment URLs
   if (type === "admin" && process.env.NEXT_PUBLIC_ADMIN_URL) {
     return process.env.NEXT_PUBLIC_ADMIN_URL;
   }
-  
+
   if (type === "public" && process.env.NEXT_PUBLIC_BASE_URL) {
     return process.env.NEXT_PUBLIC_BASE_URL;
   }
-  
+
   // Default ports for local development
   const defaultPorts = {
     admin: 3001,
-    public: 3000
+    public: 3000,
   };
-  
+
   // Only use localhost in development
   if (process.env.NODE_ENV === "development") {
     return `http://localhost:${defaultPorts[type]}`;
   }
-  
+
   // In production without explicit URLs, throw error
   throw new Error(
     `Missing required environment variable: ${type === "admin" ? "NEXT_PUBLIC_ADMIN_URL" : "NEXT_PUBLIC_BASE_URL"}`
@@ -79,7 +79,7 @@ function getBaseUrl(type: "admin" | "public" = "public"): string {
  */
 export function loadConfig(): AppConfig {
   const environment = (process.env.NODE_ENV || "development") as AppConfig["environment"];
-  
+
   try {
     const config: AppConfig = {
       environment,
@@ -87,11 +87,11 @@ export function loadConfig(): AppConfig {
         base: getBaseUrl("public"),
         admin: getBaseUrl("admin"),
         public: getBaseUrl("public"),
-        api: `${getBaseUrl("admin")}/api`
+        api: `${getBaseUrl("admin")}/api`,
       },
       database: {
         url: process.env.DATABASE_URL || "",
-        poolSize: parseInt(process.env.DATABASE_POOL_SIZE || "10", 10)
+        poolSize: Number.parseInt(process.env.DATABASE_POOL_SIZE || "10", 10),
       },
       shopify: {
         apiKey: process.env.SHOPIFY_API_KEY || "",
@@ -99,29 +99,29 @@ export function loadConfig(): AppConfig {
         scopes: process.env.SHOPIFY_SCOPES || "",
         webhookSecret: process.env.SHOPIFY_WEBHOOK_SECRET || "",
         domain: process.env.SHOPIFY_DOMAIN || "",
-        storefrontToken: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || ""
+        storefrontToken: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || "",
       },
       storage: {
         endpoint: process.env.R2_ENDPOINT || "",
         bucket: process.env.R2_BUCKET_NAME || "",
-        publicUrl: process.env.R2_PUBLIC_URL || ""
+        publicUrl: process.env.R2_PUBLIC_URL || "",
       },
       auth: {
         nextAuthUrl: process.env.NEXTAUTH_URL || getBaseUrl("admin"),
-        nextAuthSecret: process.env.NEXTAUTH_SECRET || ""
+        nextAuthSecret: process.env.NEXTAUTH_SECRET || "",
       },
       features: {
         advancedAnalytics: process.env.FEATURE_ADVANCED_ANALYTICS === "true",
         socialImport: process.env.FEATURE_SOCIAL_IMPORT === "true",
-        performanceMonitoring: process.env.FEATURE_PERFORMANCE_MONITORING === "true"
-      }
+        performanceMonitoring: process.env.FEATURE_PERFORMANCE_MONITORING === "true",
+      },
     };
-    
+
     // Validate required fields in production
     if (environment === "production") {
       validateProductionConfig(config);
     }
-    
+
     return config;
   } catch (error) {
     // In build time, return minimal config
@@ -140,17 +140,13 @@ function validateProductionConfig(config: AppConfig): void {
     { path: "database.url", value: config.database.url },
     { path: "shopify.apiKey", value: config.shopify.apiKey },
     { path: "shopify.apiSecret", value: config.shopify.apiSecret },
-    { path: "auth.nextAuthSecret", value: config.auth.nextAuthSecret }
+    { path: "auth.nextAuthSecret", value: config.auth.nextAuthSecret },
   ];
-  
-  const missingFields = requiredFields
-    .filter(field => !field.value)
-    .map(field => field.path);
-  
+
+  const missingFields = requiredFields.filter((field) => !field.value).map((field) => field.path);
+
   if (missingFields.length > 0) {
-    throw new Error(
-      `Missing required configuration for production: ${missingFields.join(", ")}`
-    );
+    throw new Error(`Missing required configuration for production: ${missingFields.join(", ")}`);
   }
 }
 
@@ -164,11 +160,11 @@ function getMinimalConfig(): AppConfig {
       base: "http://localhost:3000",
       admin: "http://localhost:3001",
       public: "http://localhost:3000",
-      api: "http://localhost:3001/api"
+      api: "http://localhost:3001/api",
     },
     database: {
       url: "",
-      poolSize: 10
+      poolSize: 10,
     },
     shopify: {
       apiKey: "",
@@ -176,22 +172,22 @@ function getMinimalConfig(): AppConfig {
       scopes: "",
       webhookSecret: "",
       domain: "",
-      storefrontToken: ""
+      storefrontToken: "",
     },
     storage: {
       endpoint: "",
       bucket: "",
-      publicUrl: ""
+      publicUrl: "",
     },
     auth: {
       nextAuthUrl: "http://localhost:3001",
-      nextAuthSecret: ""
+      nextAuthSecret: "",
     },
     features: {
       advancedAnalytics: false,
       socialImport: false,
-      performanceMonitoring: false
-    }
+      performanceMonitoring: false,
+    },
   };
 }
 
@@ -206,17 +202,17 @@ export function getConfig(): AppConfig {
 }
 
 // Export helper functions for common use cases
-export function getApiUrl(path: string = ""): string {
+export function getApiUrl(path = ""): string {
   const config = getConfig();
   return `${config.urls.api}${path}`;
 }
 
-export function getPublicUrl(path: string = ""): string {
+export function getPublicUrl(path = ""): string {
   const config = getConfig();
   return `${config.urls.public}${path}`;
 }
 
-export function getAdminUrl(path: string = ""): string {
+export function getAdminUrl(path = ""): string {
   const config = getConfig();
   return `${config.urls.admin}${path}`;
 }
@@ -241,5 +237,5 @@ export default {
   getAdminUrl,
   isProduction,
   isDevelopment,
-  isFeatureEnabled
+  isFeatureEnabled,
 };

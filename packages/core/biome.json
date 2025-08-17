@@ -1,35 +1,35 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"suspicious": {
-				"noExplicitAny": "off"
-			},
-			"style": {
-				"useDefaultParameterLast": "off",
-				"useNodejsImportProtocol": "off"
-			},
-			"complexity": {
-				"noForEach": "off"
-			}
-		}
-	},
-	"formatter": {
-		"enabled": true
-	},
-	"files": {
-		"ignore": [
-			"dist/**",
-			"src/**/*.js",
-			"src/**/*.d.ts",
-			"src/**/*.js.map",
-			"src/**/*.d.ts.map",
-			"src/services/**",
-			"src/test-setup/**",
-			"src/sentry.ts",
-			"src/performance.ts",
-			"src/rum.ts"
-		]
-	}
+  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
+      "style": {
+        "useDefaultParameterLast": "off",
+        "useNodejsImportProtocol": "off"
+      },
+      "complexity": {
+        "noForEach": "off"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true
+  },
+  "files": {
+    "ignore": [
+      "dist/**",
+      "src/**/*.js",
+      "src/**/*.d.ts",
+      "src/**/*.js.map",
+      "src/**/*.d.ts.map",
+      "src/services/**",
+      "src/test-setup/**",
+      "src/sentry.ts",
+      "src/performance.ts",
+      "src/rum.ts"
+    ]
+  }
 }

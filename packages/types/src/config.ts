@@ -5,7 +5,7 @@
 export interface AppConfig {
   name: string;
   version: string;
-  environment: 'development' | 'staging' | 'production';
+  environment: "development" | "staging" | "production";
   features: FeatureFlags;
   limits: RateLimits;
 }
@@ -36,5 +36,5 @@ export interface RateLimits {
 export interface CacheConfig {
   ttl: number; // in seconds
   maxSize: number; // max items in cache
-  strategy: 'lru' | 'fifo' | 'lfu';
+  strategy: "lru" | "fifo" | "lfu";
 }

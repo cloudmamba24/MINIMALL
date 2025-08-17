@@ -1,12 +1,12 @@
-import { eq, and, or, desc, asc, sql } from 'drizzle-orm';
-import { getDatabaseConnection } from '../connection-pool';
+import { and, asc, desc, eq, or, sql } from "drizzle-orm";
+import { getDatabaseConnection } from "../connection-pool";
 
 /**
  * Base repository with common CRUD operations
  */
 export abstract class BaseRepository<T extends Record<string, any>> {
   protected db = getDatabaseConnection();
-  
+
   constructor(protected table: any) {}
 
   /**
@@ -15,20 +15,13 @@ export abstract class BaseRepository<T extends Record<string, any>> {
   async findById(id: string): Promise<T | null> {
     if (!this.table.id) {
       // For tables without id field, use primary key
-      const results = await this.db
-        .select()
-        .from(this.table)
-        .limit(1);
-      return results[0] as T || null;
+      const results = await this.db.select().from(this.table).limit(1);
+      return (results[0] as T) || null;
     }
-    
-    const result = await this.db
-      .select()
-      .from(this.table)
-      .where(eq(this.table.id, id))
-      .limit(1);
-    
-    return result[0] as T || null;
+
+    const result = await this.db.select().from(this.table).where(eq(this.table.id, id)).limit(1);
+
+    return (result[0] as T) || null;
   }
 
   /**
@@ -36,35 +29,33 @@ export abstract class BaseRepository<T extends Record<string, any>> {
    */
   async findAll(options?: {
     where?: any;
-    orderBy?: { column: string; direction: 'asc' | 'desc' }[];
+    orderBy?: { column: string; direction: "asc" | "desc" }[];
     limit?: number;
     offset?: number;
   }): Promise<T[]> {
     let query = this.db.select().from(this.table);
-    
+
     if (options?.where) {
       query = query.where(options.where) as any;
     }
-    
+
     if (options?.orderBy) {
       for (const order of options.orderBy) {
         const column = this.table[order.column];
         if (column) {
-          query = (query as any).orderBy(
-            order.direction === 'desc' ? desc(column) : asc(column)
-          );
+          query = (query as any).orderBy(order.direction === "desc" ? desc(column) : asc(column));
         }
       }
     }
-    
+
     if (options?.limit !== undefined) {
       query = (query as any).limit(options.limit);
     }
-    
+
     if (options?.offset !== undefined) {
       query = (query as any).offset(options.offset);
     }
-    
+
     const results = await query;
     return results as T[];
   }
@@ -73,24 +64,17 @@ export abstract class BaseRepository<T extends Record<string, any>> {
    * Find one with conditions
    */
   async findOne(where: any): Promise<T | null> {
-    const result = await this.db
-      .select()
-      .from(this.table)
-      .where(where)
-      .limit(1);
-    
-    return result[0] as T || null;
+    const result = await this.db.select().from(this.table).where(where).limit(1);
+
+    return (result[0] as T) || null;
   }
 
   /**
    * Create new record
    */
   async create(data: Partial<T>): Promise<T> {
-    const result = await this.db
-      .insert(this.table)
-      .values(data)
-      .returning();
-    
+    const result = await this.db.insert(this.table).values(data).returning();
+
     return (result as any)[0] as T;
   }
 
@@ -98,11 +82,8 @@ export abstract class BaseRepository<T extends Record<string, any>> {
    * Create many records
    */
   async createMany(data: Partial<T>[]): Promise<T[]> {
-    const result = await this.db
-      .insert(this.table)
-      .values(data)
-      .returning();
-    
+    const result = await this.db.insert(this.table).values(data).returning();
+
     return result as T[];
   }
 
@@ -112,13 +93,10 @@ export abstract class BaseRepository<T extends Record<string, any>> {
   async update(id: string, data: Partial<T>): Promise<T | null> {
     if (!this.table.id) {
       // For tables without id, update by primary key
-      const result = await this.db
-        .update(this.table)
-        .set(data)
-        .returning();
-      return result[0] as T || null;
+      const result = await this.db.update(this.table).set(data).returning();
+      return (result[0] as T) || null;
     }
-    
+
     const result = await this.db
       .update(this.table)
       .set({
@@ -127,8 +105,8 @@ export abstract class BaseRepository<T extends Record<string, any>> {
       })
       .where(eq(this.table.id, id))
       .returning();
-    
-    return result[0] as T || null;
+
+    return (result[0] as T) || null;
   }
 
   /**
@@ -142,7 +120,7 @@ export abstract class BaseRepository<T extends Record<string, any>> {
         updatedAt: new Date(),
       })
       .where(where);
-    
+
     return (result as any).count || 0;
   }
 
@@ -154,11 +132,9 @@ export abstract class BaseRepository<T extends Record<string, any>> {
       // For tables without id field
       return false;
     }
-    
-    const result = await this.db
-      .delete(this.table)
-      .where(eq(this.table.id, id));
-    
+
+    const result = await this.db.delete(this.table).where(eq(this.table.id, id));
+
     return ((result as any).count || 0) > 0;
   }
 
@@ -166,10 +142,8 @@ export abstract class BaseRepository<T extends Record<string, any>> {
    * Delete many records
    */
   async deleteMany(where: any): Promise<number> {
-    const result = await this.db
-      .delete(this.table)
-      .where(where);
-    
+    const result = await this.db.delete(this.table).where(where);
+
     return (result as any).count || 0;
   }
 
@@ -177,14 +151,12 @@ export abstract class BaseRepository<T extends Record<string, any>> {
    * Count records
    */
   async count(where?: any): Promise<number> {
-    let query = this.db
-      .select({ count: sql`count(*)` })
-      .from(this.table);
-    
+    let query = this.db.select({ count: sql`count(*)` }).from(this.table);
+
     if (where) {
       query = query.where(where) as any;
     }
-    
+
     const result = await query;
     return Number(result[0]?.count || 0);
   }
@@ -200,9 +172,7 @@ export abstract class BaseRepository<T extends Record<string, any>> {
   /**
    * Run in transaction
    */
-  async transaction<R>(
-    callback: (tx: typeof this.db) => Promise<R>
-  ): Promise<R> {
+  async transaction<R>(callback: (tx: typeof this.db) => Promise<R>): Promise<R> {
     return this.db.transaction(async (tx) => {
       const originalDb = this.db;
       this.db = tx as any;

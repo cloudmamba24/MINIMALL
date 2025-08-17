@@ -1,5 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
+import { type NextRequest, NextResponse } from "next/server";
 
 // Define public routes that don't require authentication
 const publicRoutes = [
@@ -48,27 +48,21 @@ export async function middleware(request: NextRequest) {
     const signature = request.headers.get("x-shopify-hmac-sha256");
     const shop = request.headers.get("x-shopify-shop-domain");
     const topic = request.headers.get("x-shopify-topic");
-    
+
     // Log webhook attempt
     if (!signature) {
       Sentry.captureMessage("Webhook request without signature", {
         level: "warning",
-        tags: { path: pathname, shop: shop || "unknown", topic: topic || "unknown" }
+        tags: { path: pathname, shop: shop || "unknown", topic: topic || "unknown" },
       });
-      
-      return NextResponse.json(
-        { error: "Webhook signature required" },
-        { status: 401 }
-      );
+
+      return NextResponse.json({ error: "Webhook signature required" }, { status: 401 });
     }
-    
+
     if (!shop) {
-      return NextResponse.json(
-        { error: "Shop domain required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Shop domain required" }, { status: 400 });
     }
-    
+
     // Add security headers and continue to route handler for full validation
     const response = NextResponse.next();
     response.headers.set("X-Content-Type-Options", "nosniff");
@@ -150,7 +144,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   } catch (error) {
     Sentry.captureException(error, {
-      tags: { component: "middleware", path: pathname }
+      tags: { component: "middleware", path: pathname },
     });
 
     // For API routes, return JSON error

@@ -1,64 +1,64 @@
 {
-	"name": "@minimall/core",
-	"version": "0.1.0",
-	"private": true,
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"import": "./dist/index.js",
-			"require": "./dist/index.js",
-			"types": "./dist/index.d.ts"
-		},
-		"./client": {
-			"import": "./dist/client.js",
-			"require": "./dist/client.js",
-			"types": "./dist/client.d.ts"
-		},
-		"./server": {
-			"import": "./dist/server.js",
-			"require": "./dist/server.js",
-			"types": "./dist/server.d.ts"
-		},
-		"./services/instagram-api": {
-			"import": "./dist/services/instagram-api.js",
-			"require": "./dist/services/instagram-api.js",
-			"types": "./dist/services/instagram-api.d.ts"
-		},
-		"./services/tiktok-api": {
-			"import": "./dist/services/tiktok-api.js",
-			"require": "./dist/services/tiktok-api.js",
-			"types": "./dist/services/tiktok-api.d.ts"
-		},
-		"./config": {
-			"import": "./dist/config.js",
-			"require": "./dist/config.js",
-			"types": "./dist/config.d.ts"
-		},
-		"./error-handler": {
-			"import": "./dist/error-handler.js",
-			"require": "./dist/error-handler.js",
-			"types": "./dist/error-handler.d.ts"
-		}
-	},
-	"scripts": {
-		"build": "tsc",
-		"dev": "tsc --watch",
-		"lint": "biome check .",
-		"lint:fix": "biome check . --apply",
-		"type-check": "tsc --noEmit",
-		"test": "vitest run",
-		"test:watch": "vitest",
-		"test:coverage": "vitest run --coverage"
-	},
-	"files": ["dist/**"],
-	"dependencies": {
-		"@minimall/db": "*",
-		"drizzle-orm": "^0.44.4",
-		"zod": "^3.24.1"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "^1.9.4",
-		"typescript": "^5.7.2"
-	}
+  "name": "@minimall/core",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./client": {
+      "import": "./dist/client.js",
+      "require": "./dist/client.js",
+      "types": "./dist/client.d.ts"
+    },
+    "./server": {
+      "import": "./dist/server.js",
+      "require": "./dist/server.js",
+      "types": "./dist/server.d.ts"
+    },
+    "./services/instagram-api": {
+      "import": "./dist/services/instagram-api.js",
+      "require": "./dist/services/instagram-api.js",
+      "types": "./dist/services/instagram-api.d.ts"
+    },
+    "./services/tiktok-api": {
+      "import": "./dist/services/tiktok-api.js",
+      "require": "./dist/services/tiktok-api.js",
+      "types": "./dist/services/tiktok-api.d.ts"
+    },
+    "./config": {
+      "import": "./dist/config.js",
+      "require": "./dist/config.js",
+      "types": "./dist/config.d.ts"
+    },
+    "./error-handler": {
+      "import": "./dist/error-handler.js",
+      "require": "./dist/error-handler.js",
+      "types": "./dist/error-handler.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --apply",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "files": ["dist/**"],
+  "dependencies": {
+    "@minimall/db": "*",
+    "drizzle-orm": "^0.44.4",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "typescript": "^5.7.2"
+  }
 }

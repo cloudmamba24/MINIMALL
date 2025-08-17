@@ -32,7 +32,7 @@ export interface ShopifyProduct {
   updated_at: string;
   published_at: string | null;
   template_suffix: string | null;
-  status: 'active' | 'archived' | 'draft';
+  status: "active" | "archived" | "draft";
   published_scope: string;
   tags: string;
   admin_graphql_api_id: string;
@@ -245,18 +245,18 @@ export interface ShopifyCustomer {
 
 // Webhook types
 export type ShopifyWebhookTopic =
-  | 'app/uninstalled'
-  | 'orders/create'
-  | 'orders/updated'
-  | 'orders/cancelled'
-  | 'products/create'
-  | 'products/update'
-  | 'products/delete'
-  | 'customers/create'
-  | 'customers/update'
-  | 'customers/delete'
-  | 'shop/update'
-  | 'themes/publish';
+  | "app/uninstalled"
+  | "orders/create"
+  | "orders/updated"
+  | "orders/cancelled"
+  | "products/create"
+  | "products/update"
+  | "products/delete"
+  | "customers/create"
+  | "customers/update"
+  | "customers/delete"
+  | "shop/update"
+  | "themes/publish";
 
 // Storefront API types
 export interface StorefrontProduct {

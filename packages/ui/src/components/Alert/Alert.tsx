@@ -1,9 +1,9 @@
-import React from 'react';
-import styles from './Alert.module.css';
+import type React from "react";
+import styles from "./Alert.module.css";
 
 interface AlertProps {
   children: React.ReactNode;
-  type?: 'info' | 'success' | 'warning' | 'error';
+  type?: "info" | "success" | "warning" | "error";
   title?: string;
   onClose?: () => void;
   className?: string;
@@ -11,16 +11,16 @@ interface AlertProps {
 
 export const Alert: React.FC<AlertProps> = ({
   children,
-  type = 'info',
+  type = "info",
   title,
   onClose,
-  className = '',
+  className = "",
 }) => {
   const icons = {
-    info: 'ℹ️',
-    success: '✅',
-    warning: '⚠️',
-    error: '❌',
+    info: "ℹ️",
+    success: "✅",
+    warning: "⚠️",
+    error: "❌",
   };
 
   return (

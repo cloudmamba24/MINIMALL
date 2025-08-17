@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './Form.module.css';
+import type React from "react";
+import styles from "./Form.module.css";
 
 interface FormProps {
   children: React.ReactNode;
@@ -17,14 +17,14 @@ interface FormFieldProps {
 
 interface FormActionsProps {
   children: React.ReactNode;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
   className?: string;
 }
 
 export const Form: React.FC<FormProps> & {
   Field: React.FC<FormFieldProps>;
   Actions: React.FC<FormActionsProps>;
-} = ({ children, onSubmit, className = '' }) => {
+} = ({ children, onSubmit, className = "" }) => {
   return (
     <form className={`${styles.form} ${className}`} onSubmit={onSubmit}>
       {children}
@@ -37,7 +37,7 @@ const FormField: React.FC<FormFieldProps> = ({
   children,
   error,
   required,
-  className = '',
+  className = "",
 }) => {
   return (
     <div className={`${styles.field} ${className}`}>
@@ -51,15 +51,9 @@ const FormField: React.FC<FormFieldProps> = ({
   );
 };
 
-const FormActions: React.FC<FormActionsProps> = ({
-  children,
-  align = 'right',
-  className = '',
-}) => {
+const FormActions: React.FC<FormActionsProps> = ({ children, align = "right", className = "" }) => {
   return (
-    <div className={`${styles.actions} ${styles[`align-${align}`]} ${className}`}>
-      {children}
-    </div>
+    <div className={`${styles.actions} ${styles[`align-${align}`]} ${className}`}>{children}</div>
   );
 };
 

@@ -1,18 +1,18 @@
-import React from 'react';
-import styles from './Loading.module.css';
+import type React from "react";
+import styles from "./Loading.module.css";
 
 interface LoadingProps {
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   text?: string;
   fullScreen?: boolean;
   className?: string;
 }
 
 export const Loading: React.FC<LoadingProps> = ({
-  size = 'medium',
+  size = "medium",
   text,
   fullScreen = false,
-  className = '',
+  className = "",
 }) => {
   const content = (
     <div className={`${styles.loading} ${className}`}>

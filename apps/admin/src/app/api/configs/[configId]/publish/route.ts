@@ -117,10 +117,10 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
 
       if (!revalidateResponse.ok) {
         const { handleError } = await import("@minimall/core/error-handler");
-        handleError(
-          new Error(`Cache invalidation failed: ${await revalidateResponse.text()}`),
-          { component: "config-publish", action: "cache-invalidation" }
-        );
+        handleError(new Error(`Cache invalidation failed: ${await revalidateResponse.text()}`), {
+          component: "config-publish",
+          action: "cache-invalidation",
+        });
         // Don't fail the publish if cache invalidation fails
       } else {
         console.log(`Cache invalidated successfully for config: ${configId}`);

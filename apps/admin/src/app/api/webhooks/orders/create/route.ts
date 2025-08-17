@@ -51,14 +51,14 @@ export async function POST(request: NextRequest) {
       allowedTopics: ["orders/create"],
       rateLimit: {
         maxRequests: 50,
-        windowMs: 60000 // 50 requests per minute per shop
-      }
+        windowMs: 60000, // 50 requests per minute per shop
+      },
     });
-    
+
     if (!validation.isValid) {
       return validation.error!;
     }
-    
+
     const { shop, body } = validation;
     const db = getDatabaseConnection();
     const shopifyDomain = shop!; // shop is guaranteed to be defined after validation
@@ -287,4 +287,3 @@ function mapAttributionProperty(
     data.utm.content = value;
   }
 }
-

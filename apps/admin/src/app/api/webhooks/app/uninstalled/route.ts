@@ -14,14 +14,14 @@ export async function POST(request: NextRequest) {
       allowedTopics: ["app/uninstalled"],
       rateLimit: {
         maxRequests: 5, // Lower limit for uninstall webhook
-        windowMs: 60000 // 5 per minute per shop
-      }
+        windowMs: 60000, // 5 per minute per shop
+      },
     });
-    
+
     if (!validation.isValid) {
       return validation.error!;
     }
-    
+
     const { shop, topic, body } = validation;
     const webhookHandler = getWebhookHandler();
 

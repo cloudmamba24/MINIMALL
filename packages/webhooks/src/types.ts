@@ -5,7 +5,7 @@
 export interface WebhookConfig {
   topic: string;
   address: string;
-  format: 'json' | 'xml';
+  format: "json" | "xml";
   fields?: string[];
   metafield_namespaces?: string[];
   api_version?: string;

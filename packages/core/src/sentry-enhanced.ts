@@ -15,7 +15,7 @@ declare global {
  */
 export function initSentryEnhanced() {
   const dsn = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
-  
+
   // Only initialize if DSN is provided
   if (!dsn) {
     if (process.env.NODE_ENV === "production") {
@@ -27,33 +27,33 @@ export function initSentryEnhanced() {
 
   Sentry.init({
     dsn,
-    
+
     // Environment configuration
     environment: process.env.NODE_ENV || "development",
-    
+
     // Release tracking for better error grouping
-    release: process.env.VERCEL_GIT_COMMIT_SHA || 
-             process.env.GITHUB_SHA || 
-             process.env.npm_package_version ||
-             "unknown",
-    
-    
+    release:
+      process.env.VERCEL_GIT_COMMIT_SHA ||
+      process.env.GITHUB_SHA ||
+      process.env.npm_package_version ||
+      "unknown",
+
     // Performance Monitoring
     tracesSampleRate: getSampleRate(),
     profilesSampleRate: getSampleRate(),
-    
+
     // Integrations are automatically included in @sentry/nextjs v8+
-    
+
     // Breadcrumb configuration
     maxBreadcrumbs: 50,
-    
+
     // Before send hook for filtering and enrichment
     beforeSend(event, hint) {
       // Skip in development unless debugging
       if (process.env.NODE_ENV === "development" && !process.env.SENTRY_DEBUG) {
         return null;
       }
-      
+
       // Enrich with user context
       if (!event.user && global.currentUser) {
         event.user = {
@@ -61,7 +61,7 @@ export function initSentryEnhanced() {
           email: global.currentUser.email,
         };
       }
-      
+
       // Add shop context for Shopify apps
       if (global.currentShop) {
         event.tags = {
@@ -69,14 +69,14 @@ export function initSentryEnhanced() {
           shop_domain: global.currentShop,
         };
       }
-      
+
       // Add deployment context
       event.tags = {
         ...event.tags,
         deployment: process.env.VERCEL_ENV || "local",
         region: process.env.VERCEL_REGION || "unknown",
       };
-      
+
       // Filter out known non-critical errors
       const error = hint.originalException;
       if (error && error instanceof Error) {
@@ -84,40 +84,39 @@ export function initSentryEnhanced() {
         if (error.message?.includes("ECONNREFUSED") && process.env.NODE_ENV !== "production") {
           return null;
         }
-        
+
         // Skip abort errors from cancelled requests
         if (error.name === "AbortError") {
           return null;
         }
-        
+
         // Skip Next.js hydration errors in development
         if (error.message?.includes("Hydration") && process.env.NODE_ENV !== "production") {
           return null;
         }
       }
-      
+
       // Add error classification
       classifyError(event, error);
-      
+
       return event;
     },
-    
+
     // Before breadcrumb hook
     beforeBreadcrumb(breadcrumb) {
       // Filter out noisy breadcrumbs
       if (breadcrumb.category === "console" && breadcrumb.level === "debug") {
         return null;
       }
-      
+
       // Sanitize sensitive data from breadcrumbs
       if (breadcrumb.data) {
         breadcrumb.data = sanitizeData(breadcrumb.data);
       }
-      
+
       return breadcrumb;
     },
-    
-    
+
     // Ignore certain errors
     ignoreErrors: [
       // Browser extensions
@@ -130,14 +129,14 @@ export function initSentryEnhanced() {
       // Safari specific
       "AbortError: Fetch is aborted",
     ],
-    
+
     // Deny URLs - don't track errors from these
     denyUrls: [
       // Chrome extensions
       /extensions\//i,
       /^chrome:\/\//i,
       /^chrome-extension:\/\//i,
-      // Firefox extensions  
+      // Firefox extensions
       /^moz-extension:\/\//i,
       // Safari extensions
       /^safari-extension:\/\//i,
@@ -146,10 +145,10 @@ export function initSentryEnhanced() {
 
   // Set up global error handlers
   setupGlobalErrorHandlers();
-  
+
   // Log successful initialization
   console.log(`✅ Sentry initialized for ${process.env.NODE_ENV} environment`);
-  
+
   // Set initial context
   setInitialContext();
 }
@@ -159,9 +158,9 @@ export function initSentryEnhanced() {
  */
 function getSampleRate(): number {
   if (process.env.SENTRY_SAMPLE_RATE) {
-    return parseFloat(process.env.SENTRY_SAMPLE_RATE);
+    return Number.parseFloat(process.env.SENTRY_SAMPLE_RATE);
   }
-  
+
   switch (process.env.NODE_ENV) {
     case "production":
       return 0.1; // 10% in production
@@ -177,7 +176,7 @@ function getSampleRate(): number {
  */
 function classifyError(event: any, error: unknown): void {
   if (!event.tags) event.tags = {};
-  
+
   if (error instanceof Error) {
     // Database errors
     if (error.message?.includes("DATABASE") || error.message?.includes("POSTGRES")) {
@@ -207,22 +206,29 @@ function classifyError(event: any, error: unknown): void {
  */
 function sanitizeData(data: any): any {
   if (typeof data !== "object" || data === null) return data;
-  
+
   const sanitized = { ...data };
   const sensitiveKeys = [
-    "password", "token", "secret", "api_key", "apiKey",
-    "authorization", "cookie", "session", "credit_card"
+    "password",
+    "token",
+    "secret",
+    "api_key",
+    "apiKey",
+    "authorization",
+    "cookie",
+    "session",
+    "credit_card",
   ];
-  
+
   for (const key in sanitized) {
     const lowerKey = key.toLowerCase();
-    if (sensitiveKeys.some(sensitive => lowerKey.includes(sensitive))) {
+    if (sensitiveKeys.some((sensitive) => lowerKey.includes(sensitive))) {
       sanitized[key] = "[REDACTED]";
     } else if (typeof sanitized[key] === "object") {
       sanitized[key] = sanitizeData(sanitized[key]);
     }
   }
-  
+
   return sanitized;
 }
 
@@ -238,12 +244,12 @@ function setupGlobalErrorHandlers(): void {
         level: "error",
       });
     });
-    
+
     // Track client-side performance
     if (window.performance && window.performance.timing) {
       const navTiming = window.performance.timing;
       const pageLoadTime = navTiming.loadEventEnd - navTiming.navigationStart;
-      
+
       Sentry.addBreadcrumb({
         category: "navigation",
         message: "Page load performance",
@@ -259,13 +265,13 @@ function setupGlobalErrorHandlers(): void {
         level: "error",
       });
     });
-    
+
     process.on("uncaughtException", (error) => {
       Sentry.captureException(error, {
         tags: { error_type: "uncaught_exception" },
         level: "fatal",
       });
-      
+
       // Give Sentry time to send the error before crashing
       Sentry.flush(2000).then(() => {
         process.exit(1);
@@ -285,7 +291,7 @@ function setInitialContext(): void {
     vercel_env: process.env.VERCEL_ENV,
     region: process.env.VERCEL_REGION,
   });
-  
+
   // Set app version
   if (process.env.npm_package_version) {
     Sentry.setTag("app_version", process.env.npm_package_version);
@@ -295,10 +301,7 @@ function setInitialContext(): void {
 /**
  * Helper to capture exceptions with context
  */
-export function captureException(
-  error: unknown,
-  context?: any
-): string {
+export function captureException(error: unknown, context?: any): string {
   return Sentry.captureException(error, {
     ...context,
     fingerprint: context?.fingerprint || ["{{ default }}"],
@@ -310,7 +313,7 @@ export function captureException(
  */
 export function addBreadcrumb(
   message: string,
-  category: string = "custom",
+  category = "custom",
   level: Sentry.SeverityLevel = "info",
   data?: Record<string, any>
 ): void {
@@ -352,23 +355,23 @@ export function setShopContext(shopDomain: string | null): void {
 /**
  * Performance monitoring helper
  */
-export function startTransaction(
-  name: string,
-  op: string = "navigation"
-): any {
-  return Sentry.startSpan({
-    name,
-    op,
-  }, (span) => {
-    span.setAttribute("component", typeof window !== "undefined" ? "client" : "server");
-    return span;
-  });
+export function startTransaction(name: string, op = "navigation"): any {
+  return Sentry.startSpan(
+    {
+      name,
+      op,
+    },
+    (span) => {
+      span.setAttribute("component", typeof window !== "undefined" ? "client" : "server");
+      return span;
+    }
+  );
 }
 
 /**
  * Flush all pending events
  */
-export async function flush(timeout: number = 2000): Promise<boolean> {
+export async function flush(timeout = 2000): Promise<boolean> {
   return Sentry.flush(timeout);
 }
 

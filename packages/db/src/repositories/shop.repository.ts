@@ -1,7 +1,7 @@
-import { eq } from 'drizzle-orm';
-import { BaseRepository } from './base.repository';
-import { shops } from '../schema';
-import type { Shop } from '@minimall/types';
+import type { Shop } from "@minimall/types";
+import { eq } from "drizzle-orm";
+import { shops } from "../schema";
+import { BaseRepository } from "./base.repository";
 
 /**
  * Shop repository with business logic
@@ -23,34 +23,32 @@ export class ShopRepository extends BaseRepository<Shop> {
    */
   async getAllShops(limit?: number): Promise<Shop[]> {
     const options: any = {
-      orderBy: [{ column: 'createdAt', direction: 'desc' }],
+      orderBy: [{ column: "createdAt", direction: "desc" }],
     };
-    
+
     if (limit !== undefined) {
       options.limit = limit;
     }
-    
+
     return this.findAll(options);
   }
-
 
   /**
    * Create or update shop
    */
   async upsert(data: Partial<Shop>): Promise<Shop> {
     const existing = await this.findByDomain(data.shopDomain!);
-    
+
     if (existing) {
       const updated = await this.update(existing.shopDomain, data);
       if (!updated) {
-        throw new Error('Failed to update shop');
+        throw new Error("Failed to update shop");
       }
       return updated;
     }
-    
+
     return this.create(data);
   }
-
 
   /**
    * Update shop storefront token
@@ -64,5 +62,4 @@ export class ShopRepository extends BaseRepository<Shop> {
       })
       .where(eq(shops.shopDomain, domain));
   }
-
 }
