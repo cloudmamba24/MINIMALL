@@ -23,6 +23,7 @@ export {
 
 // Export R2 service
 export * from "./r2";
+export { getR2ServiceRequired } from "./r2-required";
 
 // Server-only exports (Node.js crypto, etc.)
 // Note: Authentication is server-only due to crypto module usage

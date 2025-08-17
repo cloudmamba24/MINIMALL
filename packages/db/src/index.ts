@@ -78,3 +78,9 @@ export * from "./query-cache";
 
 // Export connection pool utilities
 export { getDatabaseConnection, clearDatabaseConnection, getDb } from "./connection-pool";
+
+// Export enhanced connection with retry logic
+export { 
+  getDatabaseConnectionWithRetry, 
+  getDatabaseStatus 
+} from "./connection-with-retry";

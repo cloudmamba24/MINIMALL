@@ -1,5 +1,5 @@
 import { type SiteConfig, edgeCache, getR2Service } from "@minimall/core";
-import { configVersions, configs, db } from "@minimall/db";
+import { configVersions, configs, getDatabaseConnection } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { and, desc, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
@@ -19,8 +19,17 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Configuration ID is required" }, { status: 400 });
     }
 
+    const db = getDatabaseConnection();
     if (!db) {
-      return NextResponse.json({ error: "Database not available" }, { status: 503 });
+      console.error("[Publish API] Database connection unavailable");
+      return NextResponse.json(
+        { 
+          error: "Database connection failed",
+          message: "Unable to publish configuration. Database is not available.",
+          success: false 
+        },
+        { status: 503 }
+      );
     }
 
     // Get the current draft version
@@ -80,13 +89,16 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
         console.error("Failed to publish to R2:", r2Error);
 
         // Rollback database changes if R2 publish fails (atomic rollback)
-        await db
+        const dbRollback = getDatabaseConnection();
+        if (dbRollback) {
+          await dbRollback
           .update(configVersions)
           .set({
             isPublished: false,
             publishedAt: null,
           })
           .where(eq(configVersions.id, publishedVersion.id));
+        }
 
         return NextResponse.json(
           { error: "Failed to publish to production storage" },

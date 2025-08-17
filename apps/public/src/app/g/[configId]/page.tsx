@@ -40,7 +40,7 @@ async function loadConfigWithCache(configId: string, draftVersion?: string): Pro
 
       // Fallback strategy
       if (configId === "demo") {
-        const shopDomain = "demo-shop.myshopify.com";
+        const shopDomain = process.env.SHOPIFY_DOMAIN || "cloudmamba.myshopify.com";
         const accessToken =
           process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN ||
           process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;

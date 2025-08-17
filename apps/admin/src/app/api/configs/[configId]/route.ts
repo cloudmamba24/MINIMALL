@@ -1,5 +1,5 @@
 import { type SiteConfig, edgeCache, getR2Service } from "@minimall/core";
-import { configVersions, configs, db } from "@minimall/db";
+import { configVersions, configs, getDatabaseConnection } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { desc, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
@@ -36,8 +36,20 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     }
 
     // Fallback to database for configurations under development
-    if (db) {
-      try {
+    const db = getDatabaseConnection();
+    if (!db) {
+      console.error("[Config API] Database connection unavailable");
+      return NextResponse.json(
+        { 
+          error: "Database connection failed",
+          message: "Unable to load configuration. Database is not available.",
+          success: false 
+        },
+        { status: 503 }
+      );
+    }
+    
+    try {
         const configRecord = await db
           .select()
           .from(configs)
@@ -80,11 +92,15 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
         });
       } catch (dbError) {
         console.error("Database config fetch failed:", dbError);
+        return NextResponse.json(
+          { 
+            error: "Database query failed",
+            message: dbError instanceof Error ? dbError.message : "Failed to fetch configuration from database",
+            success: false 
+          },
+          { status: 500 }
+        );
       }
-    }
-
-    // If all else fails, return 404
-    return NextResponse.json({ error: "Configuration not found" }, { status: 404 });
   } catch (error) {
     console.error("Failed to get configuration:", error);
     Sentry.captureException(error);
@@ -124,9 +140,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Atomic save operation: Database only; R2 writes happen exclusively on publish
     let versionId: string | null = null;
 
-    if (db) {
-      try {
-        // Use transaction for atomic database operations
+    const db = getDatabaseConnection();
+    if (!db) {
+      console.error("[Config API] Database connection unavailable for update");
+      return NextResponse.json(
+        { 
+          error: "Database connection failed",
+          message: "Unable to save configuration. Database is not available.",
+          success: false 
+        },
+        { status: 503 }
+      );
+    }
+    
+    try {
+      // Use transaction for atomic database operations
         const result = await db.transaction(async (tx) => {
           // Ensure the config record exists
           await tx
@@ -182,30 +210,27 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           { status: 500 }
         );
       }
-    } else {
-      return NextResponse.json({ error: "Database not available" }, { status: 503 });
-    }
 
-    // Add Sentry context
-    Sentry.addBreadcrumb({
-      category: "config-update",
-      message: `Updated configuration: ${configId}`,
-      data: {
-        configId,
+      // Add Sentry context
+      Sentry.addBreadcrumb({
+        category: "config-update",
+        message: `Updated configuration: ${configId}`,
+        data: {
+          configId,
+          versionId,
+          shop: validatedConfig.shop,
+          slug: validatedConfig.slug,
+          contentItems: validatedConfig.content?.length || 0,
+        },
+        level: "info",
+      });
+
+      return NextResponse.json({
+        success: true,
+        config: validatedConfig,
         versionId,
-        shop: validatedConfig.shop,
-        slug: validatedConfig.slug,
-        contentItems: validatedConfig.content?.length || 0,
-      },
-      level: "info",
-    });
-
-    return NextResponse.json({
-      success: true,
-      config: validatedConfig,
-      versionId,
-      message: "Configuration updated successfully",
-    });
+        message: "Configuration updated successfully",
+      });
   } catch (error) {
     console.error("Failed to update configuration:", error);
     Sentry.captureException(error);
@@ -241,12 +266,31 @@ export async function DELETE(_request: NextRequest, { params }: RouteParams) {
     }
 
     // Delete from database
-    if (db) {
-      try {
-        await db.delete(configs).where(eq(configs.id, configId));
-      } catch (dbError) {
-        console.warn("Failed to delete from database:", dbError);
-      }
+    const db = getDatabaseConnection();
+    if (!db) {
+      console.error("[Config API] Database connection unavailable for deletion");
+      return NextResponse.json(
+        { 
+          error: "Database connection failed",
+          message: "Unable to delete configuration. Database is not available.",
+          success: false 
+        },
+        { status: 503 }
+      );
+    }
+    
+    try {
+      await db.delete(configs).where(eq(configs.id, configId));
+    } catch (dbError) {
+      console.error("Failed to delete from database:", dbError);
+      return NextResponse.json(
+        { 
+          error: "Database deletion failed",
+          message: dbError instanceof Error ? dbError.message : "Failed to delete configuration",
+          success: false 
+        },
+        { status: 500 }
+      );
     }
 
     // Add Sentry context

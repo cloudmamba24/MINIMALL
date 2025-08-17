@@ -150,3 +150,8 @@ test-results/
 
 # Documentation screenshots with spaces
 docs/assets/Reference Media/
+
+# Local development and testing files
+test-*.js
+r2-cors-*.json
+dev.log

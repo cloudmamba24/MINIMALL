@@ -1,5 +1,5 @@
 import { createDefaultSiteConfig, extractShopFromDomain } from "@minimall/core";
-import { configVersions, configs, db } from "@minimall/db";
+import { configVersions, configs, getDatabaseConnection } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { desc, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
@@ -7,8 +7,17 @@ import { type NextRequest, NextResponse } from "next/server";
 // GET /api/configs - list configs
 export async function GET(_request: NextRequest) {
   try {
+    const db = getDatabaseConnection();
     if (!db) {
-      return NextResponse.json({ success: true, items: [] });
+      console.error("[Configs API] Database connection unavailable");
+      return NextResponse.json(
+        { 
+          error: "Database connection failed",
+          message: "Unable to connect to database. Please check DATABASE_URL configuration.",
+          success: false 
+        },
+        { status: 503 }
+      );
     }
 
     const items = await db.select().from(configs).orderBy(desc(configs.updatedAt)).limit(50);
@@ -64,8 +73,17 @@ export async function POST(request: NextRequest) {
 
     const config = createDefaultSiteConfig(shopDomain);
 
+    const db = getDatabaseConnection();
     if (!db) {
-      return NextResponse.json({ error: "Database not available" }, { status: 503 });
+      console.error("[Configs API] Database connection unavailable for config creation");
+      return NextResponse.json(
+        { 
+          error: "Database connection failed",
+          message: "Unable to connect to database. Configuration cannot be saved.",
+          success: false 
+        },
+        { status: 503 }
+      );
     }
 
     // Save to DB as a draft version
