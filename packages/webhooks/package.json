@@ -1,0 +1,16 @@
+{
+  "name": "@minimall/webhooks",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": ["src"],
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@minimall/types": "*",
+    "@minimall/db": "*",
+    "@sentry/nextjs": "^8.45.0"
+  }
+}
