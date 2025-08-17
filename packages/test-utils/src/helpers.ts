@@ -1,6 +1,6 @@
 import { type RenderOptions, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { ReactElement, ReactNode } from 'react';
+import React, { type ReactElement, type ReactNode } from 'react';
 
 /**
  * Test helper utilities
@@ -15,7 +15,7 @@ export function renderWithProviders(
 ) {
   const AllProviders = ({ children }: { children: ReactNode }) => {
     // Add your providers here (Redux, Router, Theme, etc.)
-    return <>{children}</>;
+    return React.createElement(React.Fragment, null, children);
   };
 
   return render(ui, { wrapper: AllProviders, ...options });
@@ -138,6 +138,7 @@ export function mockDate(date: Date | string): () => void {
       if (args.length === 0) {
         super(mockDate.getTime());
       } else {
+        // @ts-ignore - spread args to super
         super(...args);
       }
     }

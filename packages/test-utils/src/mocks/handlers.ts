@@ -32,12 +32,12 @@ export const handlers = [
   }),
 
   http.post("/api/configs", async ({ request }) => {
-    const body = await request.json();
+    const body = await request.json() as any;
     return HttpResponse.json({
       success: true,
       data: {
         id: "test-config-id",
-        ...body,
+        ...(body || {}),
       },
     });
   }),

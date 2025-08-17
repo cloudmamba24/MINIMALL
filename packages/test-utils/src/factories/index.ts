@@ -6,16 +6,8 @@ import type { Config, Shop, ShopifyOrder, ShopifyProduct } from "@minimall/types
  */
 
 export const createShop = (overrides?: Partial<Shop>): Shop => ({
-  id: faker.string.uuid(),
-  domain: faker.internet.domainName(),
-  name: faker.company.name(),
-  email: faker.internet.email(),
-  accessToken: faker.string.alphanumeric(32),
-  scope: "read_products,write_products",
-  status: "active",
-  installedAt: faker.date.past(),
-  uninstalledAt: null,
-  metadata: {},
+  shopDomain: faker.internet.domainName(),
+  storefrontAccessToken: faker.string.alphanumeric(32),
   createdAt: faker.date.past(),
   updatedAt: faker.date.recent(),
   ...overrides,
@@ -23,22 +15,9 @@ export const createShop = (overrides?: Partial<Shop>): Shop => ({
 
 export const createConfig = (overrides?: Partial<Config>): Config => ({
   id: faker.string.uuid(),
-  shopId: faker.string.uuid(),
-  name: faker.commerce.productName(),
+  shop: faker.internet.domainName(),
   slug: faker.lorem.slug(),
-  settings: {
-    theme: {
-      primaryColor: faker.internet.color(),
-      secondaryColor: faker.internet.color(),
-      fontFamily: "Inter",
-      borderRadius: "8px",
-      spacing: "16px",
-    },
-    blocks: [],
-  },
-  status: "draft",
-  publishedAt: null,
-  version: 1,
+  currentVersionId: null,
   createdAt: faker.date.past(),
   updatedAt: faker.date.recent(),
   ...overrides,
