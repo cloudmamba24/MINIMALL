@@ -48,8 +48,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
 
 	return (
 		<div className={`${styles.dropdown} ${className}`} ref={dropdownRef}>
-			<div 
-				className={styles.trigger} 
+			<div
+				className={styles.trigger}
 				onClick={() => setIsOpen(!isOpen)}
 				onKeyDown={(e) => {
 					if (e.key === "Enter" || e.key === " ") {

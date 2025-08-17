@@ -1,5 +1,5 @@
 import type { InputProps } from "@minimall/types";
-import React from "react";
+import React, { useId } from "react";
 import { cn } from "../../utils/cn";
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -19,6 +19,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		},
 		ref,
 	) => {
+		const inputId = useId();
 		const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 			onChange?.(e.target.value);
 		};
@@ -26,7 +27,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 		return (
 			<div className="w-full">
 				{label && (
-					<label className="block text-sm font-medium text-gray-700 mb-1">
+					<label
+						htmlFor={inputId}
+						className="block text-sm font-medium text-gray-700 mb-1"
+					>
 						{label}
 						{required && <span className="text-red-500 ml-1">*</span>}
 					</label>
@@ -40,6 +44,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 					)}
 
 					<input
+						id={inputId}
 						ref={ref}
 						type={type}
 						disabled={disabled}

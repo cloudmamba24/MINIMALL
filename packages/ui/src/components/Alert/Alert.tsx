@@ -34,7 +34,12 @@ export const Alert: React.FC<AlertProps> = ({
 				<div className={styles.message}>{children}</div>
 			</div>
 			{onClose && (
-				<button type="button" className={styles.close} onClick={onClose} aria-label="Close">
+				<button
+					type="button"
+					className={styles.close}
+					onClick={onClose}
+					aria-label="Close"
+				>
 					×
 				</button>
 			)}

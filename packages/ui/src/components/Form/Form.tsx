@@ -42,10 +42,12 @@ const FormField: React.FC<FormFieldProps> = ({
 	return (
 		<div className={`${styles.field} ${className}`}>
 			<label className={styles.label}>
-				{label}
-				{required && <span className={styles.required}>*</span>}
+				<span className={styles.labelText}>
+					{label}
+					{required && <span className={styles.required}>*</span>}
+				</span>
+				{children}
 			</label>
-			{children}
 			{error && <span className={styles.error}>{error}</span>}
 		</div>
 	);

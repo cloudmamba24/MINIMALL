@@ -51,11 +51,19 @@ export const Modal: React.FC<ModalProps> = ({
 		<div className="fixed inset-0 z-50 overflow-y-auto">
 			<div className="flex min-h-screen items-center justify-center p-4">
 				{/* Overlay */}
-				<div
-					className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-					onClick={closeOnOverlayClick ? onClose : undefined}
-					aria-hidden="true"
-				/>
+				{closeOnOverlayClick ? (
+					<button
+						type="button"
+						className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+						onClick={onClose}
+						aria-label="Close modal"
+					/>
+				) : (
+					<div
+						className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+						aria-hidden="true"
+					/>
+				)}
 
 				{/* Modal */}
 				<div

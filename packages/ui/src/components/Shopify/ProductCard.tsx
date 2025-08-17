@@ -37,6 +37,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 		<div
 			className={`${styles.card} ${className}`}
 			onClick={onClick}
+			onKeyDown={(e) => {
+				if (onClick && (e.key === "Enter" || e.key === " ")) {
+					onClick();
+				}
+			}}
 			role={onClick ? "button" : undefined}
 			tabIndex={onClick ? 0 : undefined}
 		>
