@@ -284,3 +284,13 @@ export interface StorefrontProduct {
     }>;
   };
 }
+
+export interface StorefrontVariant {
+  id: string;
+  title: string;
+  price: {
+    amount: string;
+    currencyCode: string;
+  };
+  availableForSale: boolean;
+}

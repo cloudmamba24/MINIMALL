@@ -3,70 +3,64 @@
  */
 
 export interface Shop {
-  id: string;
-  domain: string;
-  name: string;
-  email: string;
-  accessToken: string;
-  scope: string;
-  installedAt: Date;
-  uninstalledAt?: Date | null;
-  status: 'active' | 'inactive' | 'uninstalled';
-  metadata?: Record<string, any>;
+  shopDomain: string;
+  storefrontAccessToken: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface Config {
   id: string;
-  shopId: string;
-  name: string;
+  shop: string;
   slug: string;
-  settings: Record<string, any>;
-  status: 'draft' | 'published' | 'archived';
-  publishedAt?: Date | null;
-  version: number;
+  currentVersionId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface Session {
   id: string;
-  shopId: string;
-  token: string;
-  userId?: string;
-  isOnline: boolean;
-  scope: string;
-  expiresAt?: Date;
+  configId?: string | null;
+  cartData?: any;
+  expiresAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface Asset {
   id: string;
-  shopId: string;
-  configId?: string;
-  url: string;
-  key: string;
+  shopDomain: string;
   type: string;
-  size: number;
-  mimeType: string;
-  metadata?: Record<string, any>;
+  r2Key: string;
+  originalFilename: string;
+  fileSize: number;
+  dimensions?: any;
+  variants: any[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface AnalyticsEvent {
   id: string;
-  shopId: string;
+  event: string;
   configId: string;
+  userId?: string | null;
   sessionId: string;
-  eventType: string;
-  eventData: Record<string, any>;
-  userAgent?: string;
-  ipAddress?: string;
-  referrer?: string;
-  createdAt: Date;
+  properties: Record<string, any>;
+  userAgent?: string | null;
+  referrer?: string | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  utmTerm?: string | null;
+  utmContent?: string | null;
+  blockId?: string | null;
+  layoutPreset?: string | null;
+  variantId?: string | null;
+  experimentKey?: string | null;
+  device: string;
+  country?: string | null;
+  timestamp: Date;
 }
 
 export interface RevenueAttribution {
@@ -87,11 +81,59 @@ export interface RevenueAttribution {
 
 export interface WebhookLog {
   id: string;
-  shopId: string;
+  shopDomain: string;
+  event: string;
   topic: string;
   payload: Record<string, any>;
-  status: 'pending' | 'processed' | 'failed';
-  error?: string;
-  processedAt?: Date;
+  processed: boolean;
+  processedAt?: Date | null;
   createdAt: Date;
+}
+
+export interface ConfigVersion {
+  id: string;
+  configId: string;
+  version: string;
+  data: any;
+  isPublished: boolean;
+  createdBy: string;
+  createdAt: Date;
+  publishedAt?: Date | null;
+  scheduledAt?: Date | null;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  shopDomain: string;
+  role: string;
+  permissions: any[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PerformanceMetric {
+  id: number;
+  configId: string;
+  lcp?: number | null;
+  fid?: number | null;
+  cls?: number | null;
+  ttfb?: number | null;
+  loadTime?: number | null;
+  userAgent?: string | null;
+  connection?: string | null;
+  viewportWidth?: number | null;
+  viewportHeight?: number | null;
+  timestamp: Date;
+}
+
+export interface FeatureFlag {
+  id: string;
+  shopDomain: string;
+  flagName: string;
+  enabled: boolean;
+  value?: any;
+  createdAt: Date;
+  updatedAt: Date;
 }

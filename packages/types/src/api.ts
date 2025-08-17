@@ -117,7 +117,7 @@ export interface AssetUploadRequest {
 
 export type AssetType = 'image' | 'video' | 'document' | 'font';
 
-export interface Asset {
+export interface ApiAsset {
   id: string;
   url: string;
   type: AssetType;
@@ -129,7 +129,7 @@ export interface Asset {
 }
 
 // Analytics API types
-export interface AnalyticsEvent {
+export interface ApiAnalyticsEvent {
   type: EventType;
   configId: string;
   sessionId: string;

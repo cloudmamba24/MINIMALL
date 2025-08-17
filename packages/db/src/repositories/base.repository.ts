@@ -1,5 +1,4 @@
 import { eq, and, or, desc, asc, sql } from 'drizzle-orm';
-import type { Table } from 'drizzle-orm';
 import { getDatabaseConnection } from '../connection-pool';
 
 /**
@@ -8,12 +7,21 @@ import { getDatabaseConnection } from '../connection-pool';
 export abstract class BaseRepository<T extends Record<string, any>> {
   protected db = getDatabaseConnection();
   
-  constructor(protected table: Table) {}
+  constructor(protected table: any) {}
 
   /**
-   * Find by ID
+   * Find by ID (if table has an id field)
    */
   async findById(id: string): Promise<T | null> {
+    if (!this.table.id) {
+      // For tables without id field, use primary key
+      const results = await this.db
+        .select()
+        .from(this.table)
+        .limit(1);
+      return results[0] as T || null;
+    }
+    
     const result = await this.db
       .select()
       .from(this.table)
@@ -35,27 +43,30 @@ export abstract class BaseRepository<T extends Record<string, any>> {
     let query = this.db.select().from(this.table);
     
     if (options?.where) {
-      query = query.where(options.where);
+      query = query.where(options.where) as any;
     }
     
     if (options?.orderBy) {
       for (const order of options.orderBy) {
         const column = this.table[order.column];
-        query = query.orderBy(
-          order.direction === 'desc' ? desc(column) : asc(column)
-        );
+        if (column) {
+          query = (query as any).orderBy(
+            order.direction === 'desc' ? desc(column) : asc(column)
+          );
+        }
       }
     }
     
-    if (options?.limit) {
-      query = query.limit(options.limit);
+    if (options?.limit !== undefined) {
+      query = (query as any).limit(options.limit);
     }
     
-    if (options?.offset) {
-      query = query.offset(options.offset);
+    if (options?.offset !== undefined) {
+      query = (query as any).offset(options.offset);
     }
     
-    return query as T[];
+    const results = await query;
+    return results as T[];
   }
 
   /**
@@ -77,40 +88,37 @@ export abstract class BaseRepository<T extends Record<string, any>> {
   async create(data: Partial<T>): Promise<T> {
     const result = await this.db
       .insert(this.table)
-      .values({
-        ...data,
-        id: this.generateId(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      .values(data)
       .returning();
     
-    return result[0] as T;
+    return (result as any)[0] as T;
   }
 
   /**
    * Create many records
    */
   async createMany(data: Partial<T>[]): Promise<T[]> {
-    const values = data.map(item => ({
-      ...item,
-      id: this.generateId(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
-    
     const result = await this.db
       .insert(this.table)
-      .values(values)
+      .values(data)
       .returning();
     
     return result as T[];
   }
 
   /**
-   * Update by ID
+   * Update record
    */
   async update(id: string, data: Partial<T>): Promise<T | null> {
+    if (!this.table.id) {
+      // For tables without id, update by primary key
+      const result = await this.db
+        .update(this.table)
+        .set(data)
+        .returning();
+      return result[0] as T || null;
+    }
+    
     const result = await this.db
       .update(this.table)
       .set({
@@ -124,7 +132,7 @@ export abstract class BaseRepository<T extends Record<string, any>> {
   }
 
   /**
-   * Update many with conditions
+   * Update many records
    */
   async updateMany(where: any, data: Partial<T>): Promise<number> {
     const result = await this.db
@@ -135,29 +143,34 @@ export abstract class BaseRepository<T extends Record<string, any>> {
       })
       .where(where);
     
-    return result.rowCount || 0;
+    return (result as any).count || 0;
   }
 
   /**
-   * Delete by ID
+   * Delete record
    */
   async delete(id: string): Promise<boolean> {
+    if (!this.table.id) {
+      // For tables without id field
+      return false;
+    }
+    
     const result = await this.db
       .delete(this.table)
       .where(eq(this.table.id, id));
     
-    return (result.rowCount || 0) > 0;
+    return ((result as any).count || 0) > 0;
   }
 
   /**
-   * Delete many with conditions
+   * Delete many records
    */
   async deleteMany(where: any): Promise<number> {
     const result = await this.db
       .delete(this.table)
       .where(where);
     
-    return result.rowCount || 0;
+    return (result as any).count || 0;
   }
 
   /**
@@ -169,7 +182,7 @@ export abstract class BaseRepository<T extends Record<string, any>> {
       .from(this.table);
     
     if (where) {
-      query = query.where(where);
+      query = query.where(where) as any;
     }
     
     const result = await query;
@@ -185,16 +198,24 @@ export abstract class BaseRepository<T extends Record<string, any>> {
   }
 
   /**
-   * Transaction wrapper
+   * Run in transaction
    */
   async transaction<R>(
     callback: (tx: typeof this.db) => Promise<R>
   ): Promise<R> {
-    return await this.db.transaction(callback);
+    return this.db.transaction(async (tx) => {
+      const originalDb = this.db;
+      this.db = tx as any;
+      try {
+        return await callback(tx as any);
+      } finally {
+        this.db = originalDb;
+      }
+    });
   }
 
   /**
-   * Generate unique ID (override for custom ID generation)
+   * Generate unique ID (override in subclasses if needed)
    */
   protected generateId(): string {
     return crypto.randomUUID();

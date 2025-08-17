@@ -1,4 +1,4 @@
-import { eq, and, or, like } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { BaseRepository } from './base.repository';
 import { shops } from '../schema';
 import type { Shop } from '@minimall/types';
@@ -15,102 +15,54 @@ export class ShopRepository extends BaseRepository<Shop> {
    * Find shop by domain
    */
   async findByDomain(domain: string): Promise<Shop | null> {
-    return this.findOne(eq(shops.domain, domain));
+    return this.findOne(eq(shops.shopDomain, domain));
   }
 
   /**
-   * Find active shops
+   * Get all shops
    */
-  async findActiveShops(limit?: number): Promise<Shop[]> {
-    return this.findAll({
-      where: eq(shops.status, 'active'),
+  async getAllShops(limit?: number): Promise<Shop[]> {
+    const options: any = {
       orderBy: [{ column: 'createdAt', direction: 'desc' }],
-      limit,
-    });
+    };
+    
+    if (limit !== undefined) {
+      options.limit = limit;
+    }
+    
+    return this.findAll(options);
   }
 
-  /**
-   * Search shops by name or domain
-   */
-  async searchShops(query: string): Promise<Shop[]> {
-    return this.findAll({
-      where: or(
-        like(shops.name, `%${query}%`),
-        like(shops.domain, `%${query}%`)
-      ),
-    });
-  }
 
   /**
    * Create or update shop
    */
   async upsert(data: Partial<Shop>): Promise<Shop> {
-    const existing = await this.findByDomain(data.domain!);
+    const existing = await this.findByDomain(data.shopDomain!);
     
     if (existing) {
-      return this.update(existing.id, data)!;
+      const updated = await this.update(existing.shopDomain, data);
+      if (!updated) {
+        throw new Error('Failed to update shop');
+      }
+      return updated;
     }
     
     return this.create(data);
   }
 
+
   /**
-   * Mark shop as uninstalled
+   * Update shop storefront token
    */
-  async markUninstalled(domain: string): Promise<void> {
+  async updateStorefrontToken(domain: string, storefrontAccessToken: string): Promise<void> {
     await this.db
       .update(shops)
       .set({
-        status: 'uninstalled',
-        uninstalledAt: new Date(),
+        storefrontAccessToken,
         updatedAt: new Date(),
       })
-      .where(eq(shops.domain, domain));
+      .where(eq(shops.shopDomain, domain));
   }
 
-  /**
-   * Update shop access token
-   */
-  async updateAccessToken(domain: string, accessToken: string): Promise<void> {
-    await this.db
-      .update(shops)
-      .set({
-        accessToken,
-        updatedAt: new Date(),
-      })
-      .where(eq(shops.domain, domain));
-  }
-
-  /**
-   * Get shop statistics
-   */
-  async getStatistics(): Promise<{
-    total: number;
-    active: number;
-    inactive: number;
-    uninstalled: number;
-  }> {
-    const stats = await this.db
-      .select({
-        status: shops.status,
-        count: sql`count(*)`,
-      })
-      .from(shops)
-      .groupBy(shops.status);
-    
-    const result = {
-      total: 0,
-      active: 0,
-      inactive: 0,
-      uninstalled: 0,
-    };
-    
-    for (const stat of stats) {
-      const count = Number(stat.count);
-      result.total += count;
-      result[stat.status] = count;
-    }
-    
-    return result;
-  }
 }
