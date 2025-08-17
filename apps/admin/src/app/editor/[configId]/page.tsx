@@ -79,7 +79,7 @@ export default function EditorPage({ params }: EditorPageProps) {
   // Load configuration on mount
   useEffect(() => {
     loadConfig();
-  }, [loadConfig]);
+  }, [configId]); // Only reload when configId changes, not on every render
 
   // Warn about unsaved changes
   useEffect(() => {
