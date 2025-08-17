@@ -36,6 +36,7 @@ pids
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov
+**/coverage/
 
 # nyc test coverage
 .nyc_output
@@ -134,3 +135,17 @@ storybook-static
 
 # Personal development scripts (optional)
 # scripts/
+
+# Local development tools
+scripts/pre-deploy-check.sh
+scripts/pre-push-check.sh
+scripts/quick-test.sh
+scripts/local-deployment.sh
+.husky/
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# Documentation screenshots with spaces
+docs/assets/Reference Media/
