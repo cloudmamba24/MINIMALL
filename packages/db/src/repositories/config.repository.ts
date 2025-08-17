@@ -46,7 +46,7 @@ export class ConfigRepository extends BaseRepository<Config> {
   /**
    * Get config versions
    */
-  async getVersionHistory(configId: string): Promise<any[]> {
+  async getVersionHistory(_configId: string): Promise<any[]> {
     // Implement version history if you have a versions table
     // For now, return empty array
     return [];

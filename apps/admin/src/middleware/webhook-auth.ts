@@ -3,7 +3,7 @@
  * Validates webhook signatures to ensure requests are from Shopify
  */
 
-import crypto from "crypto";
+import crypto from "node:crypto";
 import * as Sentry from "@sentry/nextjs";
 import { type NextRequest, NextResponse } from "next/server";
 
