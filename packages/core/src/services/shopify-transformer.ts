@@ -17,10 +17,16 @@ import type {
 /**
  * Transform GraphQL MoneyV2 to our MoneyV2 type
  */
-export function transformMoney(graphqlMoney: { amount: string; currencyCode: string }): MoneyV2 {
+export function transformMoney(graphqlMoney: { amount: string; currencyCode: string } | null | undefined): MoneyV2 {
+  if (!graphqlMoney || !graphqlMoney.amount) {
+    return {
+      amount: "0.00",
+      currencyCode: "USD",
+    };
+  }
   return {
     amount: graphqlMoney.amount,
-    currencyCode: graphqlMoney.currencyCode,
+    currencyCode: graphqlMoney.currencyCode || "USD",
   };
 }
 
@@ -188,8 +194,8 @@ export function transformProduct(graphqlProduct: {
         )
       ) || [],
     priceRange: {
-      minVariantPrice: transformMoney(graphqlProduct.priceRange.minVariantPrice),
-      maxVariantPrice: transformMoney(graphqlProduct.priceRange.maxVariantPrice),
+      minVariantPrice: transformMoney(graphqlProduct.priceRange?.minVariantPrice),
+      maxVariantPrice: transformMoney(graphqlProduct.priceRange?.maxVariantPrice),
     },
     tags: graphqlProduct.tags || [],
     productType: graphqlProduct.productType || "",
