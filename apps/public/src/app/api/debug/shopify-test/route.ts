@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createEnhancedSiteConfig } from "@minimall/core/server";
 
 export async function GET() {
   try {
@@ -21,29 +22,34 @@ export async function GET() {
       });
     }
 
-    // Import dynamically to match the page logic
-    const { createShopifyStorefrontService } = await import("@minimall/core/services/shopify-storefront");
-    const { transformProduct } = await import("@minimall/core/services/shopify-transformer");
+    // Use the same function as the demo page
+    const config = await createEnhancedSiteConfig(shopDomain, accessToken);
 
-    const shopifyService = createShopifyStorefrontService(shopDomain, accessToken);
-    const searchResult = await shopifyService.searchProducts("*", 3);
-    
-    const products = (searchResult.products as unknown[]).map((p) =>
-      transformProduct(p as any)
+    // Check if the config has real data
+    const hasRealData = config.categories.some((cat) =>
+      cat.categoryType[1]?.children?.some((item) =>
+        item.card[1]?.image?.includes("cdn.shopify.com")
+      )
     );
 
-    console.log(`Successfully loaded ${products.length} products`);
+    // Get a sample image URL from the shop products
+    const shopProducts = config.categories.find(cat => cat.id === "shop")?.categoryType[1]?.children || [];
+    const sampleProduct = shopProducts[0];
+
+    console.log(`Config created with ${shopProducts.length} products, hasRealData: ${hasRealData}`);
 
     return NextResponse.json({
       success: true,
       shopDomain,
-      productCount: products.length,
-      sampleProduct: products[0] ? {
-        id: products[0].id,
-        title: products[0].title,
-        imageUrl: products[0].images[0]?.url,
-        imageContainsShopify: products[0].images[0]?.url?.includes("cdn.shopify.com"),
+      hasRealData,
+      productCount: shopProducts.length,
+      sampleProduct: sampleProduct ? {
+        id: sampleProduct.id,
+        title: sampleProduct.title,
+        imageUrl: sampleProduct.card[1]?.image,
+        imageContainsShopify: sampleProduct.card[1]?.image?.includes("cdn.shopify.com"),
       } : null,
+      testImageUrls: shopProducts.slice(0, 3).map(p => p.card[1]?.image).filter(Boolean),
     });
 
   } catch (error) {

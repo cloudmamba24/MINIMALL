@@ -429,8 +429,17 @@ export function getR2Service(): R2ConfigService | null {
 	const bucketName = process.env.R2_BUCKET_NAME;
 
 	if (!endpoint || !accessKeyId || !secretAccessKey || !bucketName) {
-		console.warn(
-			"R2 environment variables not configured. R2 operations will be skipped.",
+		const missing = [];
+		if (!endpoint) missing.push('R2_ENDPOINT');
+		if (!accessKeyId) missing.push('R2_ACCESS_KEY');
+		if (!secretAccessKey) missing.push('R2_SECRET');
+		if (!bucketName) missing.push('R2_BUCKET_NAME');
+		
+		console.error(
+			`[R2] Missing required environment variables: ${missing.join(', ')}`,
+		);
+		console.error(
+			"[R2] Please configure these in your .env.local file for R2 storage to work.",
 		);
 		return null;
 	}

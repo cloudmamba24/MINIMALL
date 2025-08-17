@@ -30,7 +30,7 @@ export class ShopifyStorefrontService {
   constructor(config: ShopifyStorefrontConfig) {
     this.domain = config.domain;
     this.accessToken = config.accessToken;
-    this.endpoint = `https://${this.domain}/api/2024-01/graphql.json`;
+    this.endpoint = `https://${this.domain}/api/2024-10/graphql.json`;
   }
 
   /**

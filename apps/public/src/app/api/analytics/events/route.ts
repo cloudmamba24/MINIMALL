@@ -80,68 +80,65 @@ export async function POST(request: NextRequest) {
     const data = analyticsEventSchema.parse(body);
 
     // Add Sentry context
-    Sentry.withScope((scope) => {
-      scope.setTag("analytics_event", data.event);
-      scope.setContext("analytics_data", {
+    Sentry.addBreadcrumb({
+      category: "analytics",
+      message: `Event: ${data.event}`,
+      data: {
         event: data.event,
         configId: data.configId,
         sessionId: data.sessionId,
         properties: data.properties,
-      });
-
-      // Log analytics events only in debug/dev
-      logger.debug(`Analytics Event: ${data.event}`, {
-        configId: data.configId,
-        sessionId: data.sessionId,
-        properties: data.properties,
-      });
-
-      // Save to database
-      if (db) {
-        db.insert(analyticsEvents)
-          .values({
-            event: data.event,
-            configId: data.configId || "unknown",
-            userId: data.userId,
-            sessionId: data.sessionId,
-            device: detectDevice(request.headers.get("user-agent")), // Required field
-            properties: data.properties,
-            userAgent: data.userAgent || request.headers.get("user-agent"),
-            referrer: data.referrer || request.headers.get("referer"),
-            utmSource: data.utmSource,
-            utmMedium: data.utmMedium,
-            utmCampaign: data.utmCampaign,
-            utmTerm: data.utmTerm,
-            utmContent: data.utmContent,
-            timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
-          })
-          .catch((dbError) => {
-            console.warn("Failed to save analytics event to database:", dbError);
-            Sentry.captureException(dbError);
-          });
-      }
-
-      // Add breadcrumb for Sentry
-      Sentry.addBreadcrumb({
-        category: "analytics",
-        message: `Event: ${data.event}`,
-        data: {
-          event: data.event,
-          configId: data.configId,
-          sessionId: data.sessionId,
-          properties: data.properties,
-        },
-        level: "info",
-      });
-
-      // Track specific events with Sentry
-      if (
-        data.event.startsWith("rum_javascript_error") ||
-        data.event.startsWith("rum_unhandled_rejection")
-      ) {
-        Sentry.captureMessage(`RUM Error: ${data.event}`, "warning");
-      }
+      },
+      level: "info",
     });
+
+    // Track specific events with Sentry
+    if (
+      data.event.startsWith("rum_javascript_error") ||
+      data.event.startsWith("rum_unhandled_rejection")
+    ) {
+      Sentry.captureMessage(`RUM Error: ${data.event}`, "warning");
+    }
+
+    // Log analytics events only in debug/dev
+    logger.debug(`Analytics Event: ${data.event}`, {
+      configId: data.configId,
+      sessionId: data.sessionId,
+      properties: data.properties,
+    });
+
+    // Save to database
+    if (!db) {
+      console.error("[Analytics] Database not available - events will be lost");
+      // Still return success to not break client tracking, but log the issue
+      Sentry.captureMessage("Analytics database unavailable", "warning");
+    } else {
+      try {
+        await db.insert(analyticsEvents).values({
+          event: data.event,
+          configId: data.configId || "unknown",
+          userId: data.userId,
+          sessionId: data.sessionId,
+          device: detectDevice(request.headers.get("user-agent")), // Required field
+          properties: data.properties,
+          userAgent: data.userAgent || request.headers.get("user-agent"),
+          referrer: data.referrer || request.headers.get("referer"),
+          utmSource: data.utmSource,
+          utmMedium: data.utmMedium,
+          utmCampaign: data.utmCampaign,
+          utmTerm: data.utmTerm,
+          utmContent: data.utmContent,
+          timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
+        });
+      } catch (dbError) {
+        console.error("[Analytics] Failed to save event:", dbError);
+        Sentry.captureException(dbError, {
+          tags: { component: "analytics-events" },
+          extra: { event: data.event, configId: data.configId }
+        });
+        // Don't fail the request - analytics shouldn't break the app
+      }
+    }
 
     return NextResponse.json(
       { success: true },
