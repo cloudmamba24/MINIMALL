@@ -141,6 +141,7 @@ scripts/pre-deploy-check.sh
 scripts/pre-push-check.sh
 scripts/quick-test.sh
 scripts/local-deployment.sh
+scripts/validate-all.sh
 .husky/
 
 # Test artifacts
