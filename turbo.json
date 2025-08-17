@@ -12,6 +12,7 @@
         "DATABASE_URL",
         "NEXT_PUBLIC_*",
         "SHOPIFY_*",
+        "STOREFRONT_API_TOKEN",
         "R2_*",
         "NEXTAUTH_*",
         "SENTRY_*"
