@@ -18,7 +18,9 @@
     "db:studio": "drizzle-kit studio",
     "db:migrate": "tsx src/migrate.ts"
   },
-  "files": ["dist/**"],
+  "files": [
+    "dist/**"
+  ],
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
     "@planetscale/database": "^1.19.0",
@@ -28,6 +30,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/pg": "^8.11.10",
+    "@vitest/coverage-v8": "^3.2.4",
     "drizzle-kit": "^0.31.4",
     "typescript": "^5.7.2"
   }

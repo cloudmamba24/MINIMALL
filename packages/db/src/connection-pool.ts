@@ -3,8 +3,8 @@
  * Singleton pattern to ensure single connection pool across the application
  */
 
-import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 
 type DatabaseConnection = ReturnType<typeof drizzle>;
@@ -29,7 +29,7 @@ class DatabasePool {
    */
   getConnection(connectionUrl?: string): DatabaseConnection {
     const url = connectionUrl || process.env.DATABASE_URL;
-    
+
     if (!url) {
       throw new Error(
         "DATABASE_URL is not configured. Please set the DATABASE_URL environment variable."
