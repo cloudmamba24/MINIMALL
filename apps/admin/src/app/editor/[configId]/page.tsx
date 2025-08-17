@@ -53,7 +53,13 @@ export default function EditorPage({ params }: EditorPageProps) {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/configs/${configId}`);
+      // Try bypass route first to avoid database issues
+      let response = await fetch(`/api/configs/${configId}/bypass`);
+      if (!response.ok) {
+        // Fallback to regular route if bypass fails
+        response = await fetch(`/api/configs/${configId}`);
+      }
+      
       if (!response.ok) {
         throw new Error(`Failed to load configuration: ${response.statusText}`);
       }
