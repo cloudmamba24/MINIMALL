@@ -3,6 +3,7 @@
 import { AnalyticsDashboard } from "@/components/analytics-dashboard";
 import { AssetManager } from "@/components/assets/asset-manager";
 import { VisualEditor } from "@/components/editor/visual-editor";
+import { InstagramVisualEditor } from "@/components/editor/instagram-visual-editor";
 import { LivePreview } from "@/components/preview/live-preview";
 import type { SiteConfig } from "@minimall/core";
 import {
@@ -233,92 +234,21 @@ export default function EditorPage({ params }: EditorPageProps) {
           </div>
         )}
 
-        <Layout>
-          {/* Main editor area */}
-          <Layout.Section>
-            <Card>
-              <Tabs tabs={tabs} selected={activeTab} onSelect={setActiveTab} />
+        <div className="flex gap-6">
+          {/* Main editor area - 2/3 width */}
+          <div className="flex-1">
+            <InstagramVisualEditor
+              config={config}
+              onConfigChange={handleConfigChange}
+              onPreview={handlePreview}
+            />
+          </div>
 
-              <div className="p-6">
-                {activeTab === 0 && (
-                  <VisualEditor
-                    config={config}
-                    onConfigChange={handleConfigChange}
-                    onPreview={handlePreview}
-                  />
-                )}
-
-                {activeTab === 1 && (
-                  <AssetManager
-                    onSelectAsset={(asset) => {
-                      setToast({ content: `Selected asset: ${asset.originalName}` });
-                    }}
-                    folder={`configs/${configId}/assets`}
-                  />
-                )}
-
-                {activeTab === 2 && (
-                  <div className="space-y-4">
-                    <Card>
-                      <div className="p-4">
-                        <Text as="h3" variant="headingMd" fontWeight="bold" tone="base">
-                          Configuration Settings
-                        </Text>
-                        <div className="mt-4">
-                          <LegacyStack>
-                            <div>
-                              <strong>Shop Domain:</strong> {config.settings?.shopDomain || "N/A"}
-                            </div>
-                            <div>
-                              <strong>Config ID:</strong> {config.id}
-                            </div>
-                            <div>
-                              <strong>Created:</strong>{" "}
-                              {new Date(config.createdAt).toLocaleDateString()}
-                            </div>
-                            <div>
-                              <strong>Last Updated:</strong>{" "}
-                              {new Date(config.updatedAt).toLocaleDateString()}
-                            </div>
-                          </LegacyStack>
-                        </div>
-                      </div>
-                    </Card>
-
-                    <Card>
-                      <div className="p-4">
-                        <Text as="h3" variant="headingMd" fontWeight="bold" tone="base">
-                          SEO Settings
-                        </Text>
-                        <div className="mt-4">
-                          <p>SEO configuration options will be added here.</p>
-                        </div>
-                      </div>
-                    </Card>
-
-                    <Card>
-                      <div className="p-4">
-                        <Text as="h3" variant="headingMd" fontWeight="bold" tone="base">
-                          Theme Settings
-                        </Text>
-                        <div className="mt-4">
-                          <p>Theme customization options will be added here.</p>
-                        </div>
-                      </div>
-                    </Card>
-                  </div>
-                )}
-
-                {activeTab === 3 && <AnalyticsDashboard configId={configId} />}
-              </div>
-            </Card>
-          </Layout.Section>
-
-          {/* Live preview sidebar */}
-          <Layout.Section variant="oneThird">
+          {/* Live preview sidebar - 1/3 width */}
+          <div className="w-96">
             <LivePreview config={config} isLoading={loading} error={error} onRefresh={loadConfig} />
-          </Layout.Section>
-        </Layout>
+          </div>
+        </div>
 
         {/* Toast notifications */}
         {toast && (
