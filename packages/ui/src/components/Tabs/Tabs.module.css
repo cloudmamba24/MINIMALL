@@ -1,48 +1,48 @@
 .tabs {
-  width: 100%;
+	width: 100%;
 }
 
 .tabList {
-  display: flex;
-  border-bottom: 2px solid #e5e7eb;
-  margin-bottom: 1.5rem;
+	display: flex;
+	border-bottom: 2px solid #e5e7eb;
+	margin-bottom: 1.5rem;
 }
 
 .tab {
-  padding: 0.75rem 1.5rem;
-  background: none;
-  border: none;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #6b7280;
-  cursor: pointer;
-  position: relative;
-  transition: color 0.15s;
+	padding: 0.75rem 1.5rem;
+	background: none;
+	border: none;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: #6b7280;
+	cursor: pointer;
+	position: relative;
+	transition: color 0.15s;
 }
 
 .tab:hover:not(.disabled) {
-  color: #374151;
+	color: #374151;
 }
 
 .tab.active {
-  color: #3b82f6;
+	color: #3b82f6;
 }
 
 .tab.active::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: #3b82f6;
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background-color: #3b82f6;
 }
 
 .tab.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+	opacity: 0.5;
+	cursor: not-allowed;
 }
 
 .tabContent {
-  padding: 1rem 0;
+	padding: 1rem 0;
 }

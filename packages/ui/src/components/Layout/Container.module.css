@@ -1,40 +1,40 @@
 .container {
-  width: 100%;
-  margin: 0 auto;
+	width: 100%;
+	margin: 0 auto;
 }
 
 .container.padding {
-  padding: 0 1rem;
+	padding: 0 1rem;
 }
 
 .max-sm {
-  max-width: 640px;
+	max-width: 640px;
 }
 
 .max-md {
-  max-width: 768px;
+	max-width: 768px;
 }
 
 .max-lg {
-  max-width: 1024px;
+	max-width: 1024px;
 }
 
 .max-xl {
-  max-width: 1280px;
+	max-width: 1280px;
 }
 
 .max-full {
-  max-width: 100%;
+	max-width: 100%;
 }
 
 @media (min-width: 640px) {
-  .container.padding {
-    padding: 0 1.5rem;
-  }
+	.container.padding {
+		padding: 0 1.5rem;
+	}
 }
 
 @media (min-width: 1024px) {
-  .container.padding {
-    padding: 0 2rem;
-  }
+	.container.padding {
+		padding: 0 2rem;
+	}
 }
