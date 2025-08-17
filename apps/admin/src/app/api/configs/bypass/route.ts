@@ -14,7 +14,8 @@ export async function POST(request: NextRequest) {
     const r2 = getR2Service();
     if (r2) {
       try {
-        await r2.putConfig(config.id, config);
+        // Use the correct method name
+        await r2.saveConfig(config.id, config);
         console.log(`Config ${config.id} saved to R2`);
       } catch (error) {
         console.warn("Could not save to R2:", error);
