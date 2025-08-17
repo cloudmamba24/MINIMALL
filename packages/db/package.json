@@ -18,9 +18,7 @@
     "db:studio": "drizzle-kit studio",
     "db:migrate": "tsx src/migrate.ts"
   },
-  "files": [
-    "dist/**"
-  ],
+  "files": ["dist/**"],
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
     "@planetscale/database": "^1.19.0",
