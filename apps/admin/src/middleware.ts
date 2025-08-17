@@ -4,6 +4,9 @@ import { type NextRequest, NextResponse } from "next/server";
 // Define public routes that don't require authentication
 const publicRoutes = [
   "/",
+  "/editor",
+  "/analytics", 
+  "/settings",
   "/api/auth/shopify/install",
   "/api/auth/shopify/callback",
   "/api/auth/session",
