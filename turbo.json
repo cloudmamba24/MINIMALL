@@ -1,61 +1,65 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
-  "globalEnv": ["NEXT_PUBLIC_APP_ENV"],
-  "tasks": {
+  "globalDependencies": ["**/.env.*local", "tsconfig.base.json"],
+  "globalEnv": ["NODE_ENV", "CI"],
+  "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"],
       "env": [
-        "R2_ENDPOINT",
-        "R2_ACCESS_KEY",
-        "R2_SECRET",
-        "R2_BUCKET_NAME",
-        "NEXT_PUBLIC_BASE_URL",
         "NODE_ENV",
-        "NEXT_PUBLIC_APP_ENV",
-        "SHOPIFY_API_KEY",
-        "SHOPIFY_API_SECRET",
-        "SHOPIFY_SCOPES",
-        "NEXT_PUBLIC_SHOPIFY_API_KEY",
         "DATABASE_URL",
-        "NEXTAUTH_SECRET",
-        "NEXTAUTH_URL",
-        "NEXT_PUBLIC_APP_URL",
-        "JWT_SECRET",
-        "SHOPIFY_WEBHOOK_SECRET",
-        "SHOPIFY_STOREFRONT_ACCESS_TOKEN",
-        "NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
-        "SENTRY_DSN",
-        "NEXT_PUBLIC_SENTRY_DSN",
-        "STOREFRONT_API_TOKEN",
-        "NEXT_PUBLIC_APP_ENV"
+        "NEXT_PUBLIC_*",
+        "SHOPIFY_*",
+        "R2_*",
+        "NEXTAUTH_*",
+        "SENTRY_*"
       ]
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "dependsOn": ["^build"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "outputs": [],
+      "cache": true
     },
     "type-check": {
-      "dependsOn": ["^type-check"]
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "cache": true
     },
     "test": {
       "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
-    },
-    "test:watch": {
-      "cache": false,
-      "persistent": true
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV", "CI"]
     },
     "test:coverage": {
       "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV", "CI"]
+    },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "env": ["PLAYWRIGHT_BASE_URL", "NODE_ENV"]
     },
     "clean": {
       "cache": false
+    },
+    "db:generate": {
+      "cache": false,
+      "outputs": ["src/generated/**"],
+      "env": ["DATABASE_URL"]
+    },
+    "db:push": {
+      "cache": false,
+      "env": ["DATABASE_URL"]
+    },
+    "db:migrate": {
+      "cache": false,
+      "env": ["DATABASE_URL"]
     }
   }
 }
