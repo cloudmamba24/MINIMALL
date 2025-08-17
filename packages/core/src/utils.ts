@@ -47,13 +47,18 @@ export async function createEnhancedSiteConfig(
 	);
 	const { transformProduct } = await import("./services/shopify-transformer");
 
+	// Clean up shop domain - remove https:// prefix and trailing slashes
+	const cleanShopDomain = shopDomain
+		.replace(/^https?:\/\//, '')  // Remove http:// or https://
+		.replace(/\/$/, '');           // Remove trailing slash
+
 	let realProducts: unknown[] = [];
 
 	// Fetch real products if we have access token
 	if (accessToken) {
 		try {
 			const shopifyService = createShopifyStorefrontService(
-				shopDomain,
+				cleanShopDomain,
 				accessToken,
 			);
 
@@ -100,7 +105,7 @@ export async function createEnhancedSiteConfig(
 	const productsToUse =
 		realProducts.length > 0 ? realProducts.slice(0, 4) : ([] as unknown[]);
 
-	return createSiteConfigWithProducts(shopDomain, productsToUse, accessToken);
+	return createSiteConfigWithProducts(cleanShopDomain, productsToUse, accessToken);
 }
 
 /**
