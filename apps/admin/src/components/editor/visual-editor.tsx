@@ -82,16 +82,22 @@ const categoryToContentItem = (category: Category): ContentItem => {
   const [categoryType, categoryDetails] = category.categoryType || [];
 
   // For product categories, extract product info from children
-  let productInfo = {};
+  let productInfo: {
+    productId?: string | undefined;
+    title?: string | undefined;
+    description?: string | undefined;
+    src?: string | undefined;
+  } = {};
+  
   if (categoryType === "products" && categoryDetails?.children?.length > 0) {
     const firstProduct = categoryDetails.children[0];
     if (firstProduct?.card?.[1]) {
       const productCard = firstProduct.card[1];
       productInfo = {
-        productId: productCard.productId || firstProduct.id,
+        productId: (productCard as any).productId || firstProduct.id,
         title: firstProduct.title || category.title,
-        description: productCard.description || cardDetails.description,
-        src: productCard.image || productCard.imageUrl,
+        description: productCard.description || cardDetails.description || undefined,
+        src: productCard.image || (productCard as any).imageUrl || undefined,
       };
     }
   }
@@ -428,10 +434,10 @@ export function VisualEditor({ config, onConfigChange, onPreview }: VisualEditor
             type: "product",
             title: product.title || "Product",
             description: productCard.description || undefined,
-            position: category.order * 100 + index, // Maintain order within category
+            position: (category.order || 0) * 100 + index, // Maintain order within category
             isVisible: product.visible !== false,
-            productId: productCard.productId || product.id,
-            src: productCard.image || productCard.imageUrl,
+            productId: (productCard as any).productId || product.id,
+            src: productCard.image || (productCard as any).imageUrl,
             showPrice: true,
             showDescription: true,
           });
