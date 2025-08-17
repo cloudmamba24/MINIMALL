@@ -75,3 +75,6 @@ export * from "./query-monitor";
 
 // Export query caching utilities
 export * from "./query-cache";
+
+// Export connection pool utilities
+export { getDatabaseConnection, clearDatabaseConnection, getDb } from "./connection-pool";

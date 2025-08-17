@@ -15,6 +15,9 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+.env/.env.local
+apps/*/.env.local
+**/.env.local
 
 # Sensitive API keys and credentials
 ContextFiles/Keys.txt

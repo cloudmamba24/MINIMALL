@@ -38,7 +38,10 @@ export class WebhookHandler {
         Buffer.from(computedSignature, "base64")
       );
     } catch (error) {
-      console.error("Webhook signature verification failed:", error);
+      Sentry.captureException(error, {
+        level: "warning",
+        tags: { component: "webhook-verification" }
+      });
       return false;
     }
   }
@@ -72,7 +75,7 @@ export class WebhookHandler {
         level: "info",
       });
     } catch (error) {
-      console.error(`Webhook processing failed for ${topic}:`, error);
+      // Error already captured by Sentry
       Sentry.captureException(error, {
         tags: {
           webhook_topic: topic,
@@ -87,8 +90,8 @@ export class WebhookHandler {
   }
 
   private async storeWebhook(context: WebhookContext, _rawBody: string): Promise<void> {
-    const { createDatabase, webhooks } = await import("@minimall/db");
-    const db = createDatabase(process.env.DATABASE_URL || "");
+    const { getDatabaseConnection, webhooks } = await import("@minimall/db");
+    const db = getDatabaseConnection();
 
     await db.insert(webhooks).values({
       shopDomain: context.shop,
@@ -101,8 +104,8 @@ export class WebhookHandler {
   }
 
   private async markWebhookProcessed(context: WebhookContext): Promise<void> {
-    const { createDatabase, webhooks } = await import("@minimall/db");
-    const db = createDatabase(process.env.DATABASE_URL || "");
+    const { getDatabaseConnection, webhooks } = await import("@minimall/db");
+    const db = getDatabaseConnection();
 
     await db
       .update(webhooks)
@@ -146,14 +149,18 @@ export class WebhookHandler {
         break;
 
       default:
-        console.log(`Unhandled webhook topic: ${topic}`);
+        Sentry.addBreadcrumb({
+          category: "webhook",
+          message: `Unhandled webhook topic: ${topic}`,
+          level: "warning"
+        });
     }
   }
 
   private async handleAppUninstall(context: WebhookContext): Promise<void> {
     const { shop } = context;
-    const { createDatabase } = await import("@minimall/db");
-    const _db = createDatabase(process.env.DATABASE_URL || "");
+    const { getDatabaseConnection } = await import("@minimall/db");
+    const _db = getDatabaseConnection();
 
     try {
       // Clean up shop data (be careful with cascade deletions)
@@ -241,15 +248,19 @@ export class WebhookHandler {
   private async handleShopRedact(context: WebhookContext): Promise<void> {
     const { shop } = context;
 
-    console.log(`Shop redaction request for shop: ${shop}`);
+    Sentry.addBreadcrumb({
+      category: "gdpr",
+      message: `Shop redaction request for shop: ${shop}`,
+      level: "info"
+    });
 
     // TODO: Implement GDPR shop data deletion
     // - This is called 48 hours after app uninstall
     // - Remove all remaining shop data
     // - Clean up any backup or cached data
 
-    const { createDatabase, webhooks, analyticsEvents, configs } = await import("@minimall/db");
-    const db = createDatabase(process.env.DATABASE_URL || "");
+    const { getDatabaseConnection, webhooks, analyticsEvents, configs } = await import("@minimall/db");
+    const db = getDatabaseConnection();
 
     try {
       // Remove all remaining data for this shop

@@ -129,9 +129,10 @@ export default function EditorPage({ params }: EditorPageProps) {
   const openLivePreview = useCallback(() => {
     if (config) {
       const baseUrl =
-        process.env.NODE_ENV === "development"
+        process.env.NEXT_PUBLIC_BASE_URL ||
+        (process.env.NODE_ENV === "development"
           ? "http://localhost:3000"
-          : window.location.origin.replace(":3001", ":3000");
+          : window.location.origin.replace(":3001", ":3000"));
 
       window.open(`${baseUrl}/g/${configId}?preview=true&timestamp=${Date.now()}`, "_blank");
     }

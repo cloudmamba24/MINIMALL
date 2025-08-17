@@ -44,40 +44,73 @@ export const validateEnv = (
 	try {
 		return envSchema.parse(env);
 	} catch (error) {
-		console.error("❌ Environment validation failed:");
-
 		if (error instanceof z.ZodError) {
+			const errorMessages: string[] = [];
+			const missingRequired: string[] = [];
+			const invalidFormat: string[] = [];
+			
 			error.errors.forEach((err) => {
-				console.error(`  - ${err.path.join(".")}: ${err.message}`);
+				const fieldPath = err.path.join(".");
+				errorMessages.push(`  - ${fieldPath}: ${err.message}`);
 
 				// Helpful debugging info from our documentation
 				const envKey = err.path[0] as string;
 				const currentValue = env[envKey];
 
 				if (!currentValue) {
-					console.error("    Current value: undefined");
-					console.error(
+					missingRequired.push(envKey);
+					errorMessages.push("    Current value: undefined");
+					errorMessages.push(
 						"    💡 Check your .env.local file or deployment environment",
 					);
 				} else if (err.code === "invalid_string" && err.validation === "url") {
-					console.error(`    Current value: "${currentValue}"`);
-					console.error(
+					invalidFormat.push(`${envKey} (invalid URL)`);
+					errorMessages.push(`    Current value: "${currentValue}"`);
+					errorMessages.push(
 						"    💡 Must be a valid URL (include http:// or https://)",
 					);
 				} else if (err.code === "too_small") {
-					console.error(`    Current value length: ${currentValue.length}`);
-					console.error(`    💡 Minimum length required: ${err.minimum}`);
+					invalidFormat.push(`${envKey} (too short)`);
+					errorMessages.push(`    Current value length: ${currentValue.length}`);
+					errorMessages.push(`    💡 Minimum length required: ${err.minimum}`);
 				}
 			});
+			
+			// Create a comprehensive error message
+			let errorSummary = "\n❌ Environment validation failed:\n\n";
+			
+			if (missingRequired.length > 0) {
+				errorSummary += "Missing required environment variables:\n";
+				missingRequired.forEach(key => {
+					errorSummary += `  • ${key}\n`;
+				});
+				errorSummary += "\n";
+			}
+			
+			if (invalidFormat.length > 0) {
+				errorSummary += "Invalid format for environment variables:\n";
+				invalidFormat.forEach(item => {
+					errorSummary += `  • ${item}\n`;
+				});
+				errorSummary += "\n";
+			}
+			
+			errorSummary += "Details:\n";
+			errorSummary += errorMessages.join("\n");
+			
+			// In production, fail hard with clear message
+			if (env.NODE_ENV === "production") {
+				throw new Error(errorSummary);
+			}
+			
+			// In development, show detailed error but continue
+			console.error(errorSummary);
+			console.warn("\n⚠️  Continuing with invalid environment in development mode\n");
+			return envSchema.parse({}); // Return defaults
 		}
 
-		// In production, fail hard. In development, warn and continue
-		if (env.NODE_ENV === "production") {
-			throw new Error("Environment validation failed in production");
-		}
-
-		console.warn("⚠️  Continuing with invalid environment in development mode");
-		return envSchema.parse({}); // Return defaults
+		// If it's not a Zod error, throw it as is
+		throw error;
 	}
 };
 

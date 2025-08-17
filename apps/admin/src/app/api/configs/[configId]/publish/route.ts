@@ -100,11 +100,12 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
     // Invalidate edge cache for published config
     const tagsToInvalidate = [`config:${configId}`, `config:${configId}:published`];
     const invalidatedCount = edgeCache.invalidateByTags(tagsToInvalidate);
-    console.log(`Invalidated ${invalidatedCount} published cache entries for config: ${configId}`);
+    // Log cache invalidation for monitoring
 
     // Trigger cache invalidation on the public app
     try {
-      const publicAppUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const { getPublicUrl } = await import("@minimall/core/config");
+      const publicAppUrl = process.env.NEXT_PUBLIC_BASE_URL || getPublicUrl();
       const revalidateResponse = await fetch(`${publicAppUrl}/api/config/revalidate`, {
         method: "POST",
         headers: {
@@ -115,7 +116,11 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       });
 
       if (!revalidateResponse.ok) {
-        console.warn("Cache invalidation failed:", await revalidateResponse.text());
+        const { handleError } = await import("@minimall/core/error-handler");
+        handleError(
+          new Error(`Cache invalidation failed: ${await revalidateResponse.text()}`),
+          { component: "config-publish", action: "cache-invalidation" }
+        );
         // Don't fail the publish if cache invalidation fails
       } else {
         console.log(`Cache invalidated successfully for config: ${configId}`);

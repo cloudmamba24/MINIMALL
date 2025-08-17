@@ -214,9 +214,10 @@ async function publishScheduledVersion(version: ScheduledVersion): Promise<void>
 async function invalidateConfigCache(configId: string): Promise<void> {
   try {
     // Call the cache invalidation endpoint
+    const { getAdminUrl } = await import("@minimall/core/config");
     const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXTAUTH_URL || "http://localhost:3000";
+      : process.env.NEXTAUTH_URL || getAdminUrl();
 
     const response = await fetch(`${baseUrl}/api/config/revalidate`, {
       method: "POST",

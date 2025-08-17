@@ -1,8 +1,8 @@
-import crypto from "node:crypto";
-import { db, revenueAttributions, shops } from "@minimall/db";
+import { getDatabaseConnection, revenueAttributions, shops } from "@minimall/db";
 import * as Sentry from "@sentry/nextjs";
 import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
+import { validateWebhook } from "../../../../../middleware/webhook-auth";
 
 /**
  * Shopify Order Creation Webhook Handler
@@ -46,23 +46,24 @@ interface ShopifyLineItem {
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify webhook authenticity
-    const body = await request.text();
-    const shopifyHmac = request.headers.get("X-Shopify-Hmac-Sha256");
-    const shopifyDomain = request.headers.get("X-Shopify-Shop-Domain");
-
-    if (!shopifyDomain) {
-      console.error("Missing Shopify shop domain in webhook");
-      return NextResponse.json({ error: "Missing shop domain" }, { status: 400 });
+    // Validate webhook signature and rate limiting
+    const validation = await validateWebhook(request, {
+      allowedTopics: ["orders/create"],
+      rateLimit: {
+        maxRequests: 50,
+        windowMs: 60000 // 50 requests per minute per shop
+      }
+    });
+    
+    if (!validation.isValid) {
+      return validation.error!;
     }
+    
+    const { shop, body } = validation;
+    const db = getDatabaseConnection();
+    const shopifyDomain = shop!; // shop is guaranteed to be defined after validation
 
-    // Verify HMAC signature
-    if (!verifyShopifyWebhook(body, shopifyHmac)) {
-      console.error("Invalid webhook signature");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-    }
-
-    const order: ShopifyOrder = JSON.parse(body);
+    const order: ShopifyOrder = body;
 
     console.log(`Processing order webhook for order #${order.order_number} from ${shopifyDomain}`);
 
@@ -287,26 +288,3 @@ function mapAttributionProperty(
   }
 }
 
-/**
- * Verify Shopify webhook HMAC signature
- */
-function verifyShopifyWebhook(body: string, receivedHmac: string | null): boolean {
-  if (!receivedHmac) {
-    return false;
-  }
-
-  const webhookSecret = process.env.SHOPIFY_WEBHOOK_SECRET;
-  if (!webhookSecret) {
-    console.warn("SHOPIFY_WEBHOOK_SECRET not configured - skipping signature verification");
-    return true; // Allow in development
-  }
-
-  const hmac = crypto.createHmac("sha256", webhookSecret);
-  hmac.update(body, "utf8");
-  const computedHmac = hmac.digest("base64");
-
-  return crypto.timingSafeEqual(
-    Buffer.from(receivedHmac, "base64"),
-    Buffer.from(computedHmac, "base64")
-  );
-}

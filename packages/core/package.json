@@ -29,6 +29,16 @@
 			"import": "./dist/services/tiktok-api.js",
 			"require": "./dist/services/tiktok-api.js",
 			"types": "./dist/services/tiktok-api.d.ts"
+		},
+		"./config": {
+			"import": "./dist/config.js",
+			"require": "./dist/config.js",
+			"types": "./dist/config.d.ts"
+		},
+		"./error-handler": {
+			"import": "./dist/error-handler.js",
+			"require": "./dist/error-handler.js",
+			"types": "./dist/error-handler.d.ts"
 		}
 	},
 	"scripts": {

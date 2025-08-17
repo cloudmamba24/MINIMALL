@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 // Define public routes that don't require authentication
 const publicRoutes = [
@@ -6,10 +7,18 @@ const publicRoutes = [
   "/api/auth/shopify/install",
   "/api/auth/shopify/callback",
   "/api/auth/session",
-  "/api/webhooks",
   "/_next",
   "/favicon.ico",
   "/admin/auth/error",
+];
+
+// Webhook endpoints require signature validation, not session auth
+const webhookRoutes = [
+  "/api/webhooks/app/uninstalled",
+  "/api/webhooks/orders/create",
+  "/api/webhooks/products",
+  "/api/webhooks/customers",
+  "/api/webhooks/shop/redact",
 ];
 
 // Define routes that require authentication
@@ -17,6 +26,10 @@ const protectedApiRoutes = ["/api/configs", "/api/assets", "/api/analytics"];
 
 function isPublicRoute(pathname: string): boolean {
   return publicRoutes.some((route) => pathname.startsWith(route));
+}
+
+function isWebhookRoute(pathname: string): boolean {
+  return webhookRoutes.some((route) => pathname.startsWith(route));
 }
 
 function isProtectedApiRoute(pathname: string): boolean {
@@ -29,6 +42,39 @@ function isAdminRoute(pathname: string): boolean {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Handle webhook routes with signature validation
+  if (isWebhookRoute(pathname)) {
+    const signature = request.headers.get("x-shopify-hmac-sha256");
+    const shop = request.headers.get("x-shopify-shop-domain");
+    const topic = request.headers.get("x-shopify-topic");
+    
+    // Log webhook attempt
+    if (!signature) {
+      Sentry.captureMessage("Webhook request without signature", {
+        level: "warning",
+        tags: { path: pathname, shop: shop || "unknown", topic: topic || "unknown" }
+      });
+      
+      return NextResponse.json(
+        { error: "Webhook signature required" },
+        { status: 401 }
+      );
+    }
+    
+    if (!shop) {
+      return NextResponse.json(
+        { error: "Shop domain required" },
+        { status: 400 }
+      );
+    }
+    
+    // Add security headers and continue to route handler for full validation
+    const response = NextResponse.next();
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    response.headers.set("X-Frame-Options", "DENY");
+    return response;
+  }
 
   // Skip middleware for public routes
   if (isPublicRoute(pathname)) {
@@ -103,7 +149,9 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch (error) {
-    console.error("Middleware error:", error);
+    Sentry.captureException(error, {
+      tags: { component: "middleware", path: pathname }
+    });
 
     // For API routes, return JSON error
     if (pathname.startsWith("/api/")) {
