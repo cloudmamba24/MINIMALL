@@ -25,6 +25,10 @@ import {
 } from "@shopify/polaris-icons";
 import { useCallback, useMemo, useState } from "react";
 import { ProductCollectionBuilder } from "./product-collection-builder";
+import { ProductHotspotTagger } from "./product-hotspot-tagger";
+import { DragDropOrganizer } from "./drag-drop-organizer";
+import { PhonePreview } from "../preview/phone-preview";
+import { MiniCart } from "../cart/mini-cart";
 
 interface InstagramVisualEditorProps {
   config: SiteConfig;
@@ -43,6 +47,9 @@ export function InstagramVisualEditor({
   const [selectedCollection, setSelectedCollection] = useState<string>("");
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [activeView, setActiveView] = useState<EditorView>("collections");
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [selectedPost, setSelectedPost] = useState<string | null>(null);
+  const [productHotspots, setProductHotspots] = useState<any>({});
 
   // Extract shop products from config
   const shopCategory = config.categories?.find((c) => c.id === "shop");
@@ -115,11 +122,13 @@ export function InstagramVisualEditor({
   }, []);
 
   return (
-    <div className="instagram-visual-editor">
-      <Card>
-        <Tabs tabs={tabs} selected={selectedTab} onSelect={setSelectedTab} />
-        
-        <div className="p-6">
+    <div className="instagram-visual-editor flex gap-6">
+      {/* Editor Panel */}
+      <div className="flex-1">
+        <Card>
+          <Tabs tabs={tabs} selected={selectedTab} onSelect={setSelectedTab} />
+          
+          <div className="p-6">
           {selectedTab === 0 && (
             // Sync Products Tab
             <ProductCollectionBuilder
@@ -143,17 +152,18 @@ export function InstagramVisualEditor({
                       Drag and drop to organize your store sections
                     </Text>
                     
-                    <div className="mt-4 space-y-2">
-                      {["Instagram Feed", "Shop Products", "Lookbook", "About"].map((section) => (
-                        <Card key={section}>
-                          <div className="p-3 flex items-center gap-3">
-                            <Icon source={DragHandleIcon} />
-                            <Text variant="bodyMd" as="span">
-                              {section}
-                            </Text>
-                          </div>
-                        </Card>
-                      ))}
+                    <div className="mt-4">
+                      <DragDropOrganizer
+                        items={[
+                          { id: "instagram", title: "Instagram Feed", type: "section" },
+                          { id: "shop", title: "Shop Products", type: "section" },
+                          { id: "lookbook", title: "Lookbook", type: "section" },
+                          { id: "about", title: "About", type: "section" },
+                        ]}
+                        onItemsChange={(items) => {
+                          console.log("Reordered sections:", items);
+                        }}
+                      />
                     </div>
                   </div>
                 </Card>
@@ -241,7 +251,11 @@ export function InstagramVisualEditor({
                           )}
                         </div>
                         <div className="p-3">
-                          <Button size="slim" fullWidth>
+                          <Button 
+                            size="slim" 
+                            fullWidth
+                            onClick={() => setSelectedPost(post.id)}
+                          >
                             Tag Products
                           </Button>
                         </div>
@@ -249,12 +263,97 @@ export function InstagramVisualEditor({
                     </Grid.Cell>
                   ))}
                 </Grid>
+                
+                {/* Product Hotspot Tagger for selected post */}
+                {selectedPost && (
+                  <div className="mt-4">
+                    {(() => {
+                      const post = instagramPosts.find(p => p.id === selectedPost);
+                      if (!post) return null;
+                      return (
+                        <ProductHotspotTagger
+                          imageUrl={post.image || "/api/placeholder/600/600"}
+                          products={products}
+                          hotspots={productHotspots[selectedPost] || []}
+                          onHotspotsChange={(hotspots) => {
+                            setProductHotspots((prev: any) => ({
+                              ...prev,
+                              [selectedPost]: hotspots
+                            }));
+                          }}
+                        />
+                      );
+                    })()}
+                  </div>
+                )}
               </Layout.Section>
             </Layout>
           )}
-        </div>
-      </Card>
+          </div>
+        </Card>
+      </div>
 
+      {/* Phone Preview Panel */}
+      <div className="w-96">
+        <Card>
+          <div className="p-4">
+            <div className="flex justify-between items-center mb-4">
+              <Text variant="headingMd" as="h3">
+                Live Preview
+              </Text>
+              <MiniCart
+                items={cartItems}
+                onUpdateQuantity={(productId, quantity) => {
+                  setCartItems((prev: any[]) => 
+                    prev.map(item => 
+                      item.productId === productId 
+                        ? { ...item, quantity }
+                        : item
+                    )
+                  );
+                }}
+                onRemoveItem={(productId) => {
+                  setCartItems((prev: any[]) => prev.filter(item => item.productId !== productId));
+                }}
+                onCheckout={() => {
+                  console.log("Checkout with items:", cartItems);
+                }}
+              />
+            </div>
+            
+            <PhonePreview
+              config={config}
+              onProductClick={(productId) => {
+                console.log("Product clicked:", productId);
+              }}
+              onAddToCart={(productId) => {
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                  const existingItem = cartItems.find(item => item.productId === productId);
+                  if (existingItem) {
+                    setCartItems((prev: any[]) => 
+                      prev.map(item => 
+                        item.productId === productId 
+                          ? { ...item, quantity: item.quantity + 1 }
+                          : item
+                      )
+                    );
+                  } else {
+                    setCartItems((prev: any[]) => [...prev, {
+                      id: `cart-${Date.now()}`,
+                      productId,
+                      title: product.title,
+                      price: parseFloat(product.price?.replace("$", "") || "0"),
+                      quantity: 1,
+                      image: product.image,
+                    }]);
+                  }
+                }
+              }}
+            />
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }
