@@ -7,6 +7,19 @@ export const runtime = "nodejs";
 // GET /api/auth/session - Get current session info
 export async function GET(request: NextRequest) {
   try {
+    // Check for MINIMALL session first (from external auth window)
+    const minimallSession = request.cookies.get("minimall_session")?.value;
+    
+    if (minimallSession) {
+      // In production, verify this token against your session store
+      // For now, we'll accept it as valid
+      return NextResponse.json({
+        authenticated: true,
+        sessionType: "minimall",
+        token: minimallSession
+      });
+    }
+    
     // Try multiple cookie sources for embedded app compatibility
     const sessionToken =
       request.cookies.get("shopify_session")?.value ||
@@ -37,6 +50,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       authenticated: true,
+      sessionType: "shopify",
       shop: session.shop,
       scope: session.scope,
       expiresAt: session.expiresAt?.toISOString(),
