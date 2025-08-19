@@ -1,466 +1,513 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { 
-  Home,
-  Grid3x3,
+  Sparkles,
   TrendingUp,
-  Instagram,
-  Settings,
-  Plus,
-  Play,
+  ShoppingBag,
+  Users,
+  Eye,
   Heart,
   MessageCircle,
   Bookmark,
-  ShoppingBag,
-  Sparkles,
-  Zap,
-  Camera,
-  Video,
-  DollarSign,
-  Users,
-  Eye,
+  Instagram,
+  Plus,
   ArrowUpRight,
   ArrowDownRight,
-  MoreHorizontal,
+  Grid3x3,
+  Zap,
+  Activity,
+  DollarSign,
+  BarChart3,
+  Package,
+  ChevronRight,
+  Play,
+  Palette,
+  Camera,
+  Video,
+  Music,
+  Share2,
   Bell,
   Search,
   Menu,
   X,
-  ChevronRight,
-  ExternalLink,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
-  BarChart3,
-  Package,
-  Tag,
-  Palette,
-  Link2,
-  Share2,
-  Download,
-  Upload,
-  RefreshCw,
+  Globe,
   Target,
-  Flame
+  Flame,
+  Star,
+  Award,
+  Crown,
+  Gem
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import Image from "next/image";
+import { useState, useEffect, useRef } from "react";
+import Tilt from "react-parallax-tilt";
+import { useInView } from "react-intersection-observer";
+import { cn } from "@/lib/utils";
 
-interface QuickStat {
-  label: string;
-  value: string;
-  change: number;
-  icon: React.ReactNode;
-  color: string;
-}
-
-interface RecentPost {
-  id: string;
-  image: string;
-  likes: number;
-  comments: number;
-  saves: number;
-  revenue: number;
-  products: number;
-  timestamp: string;
-}
-
-export default function ModernAdminDashboard() {
-  const router = useRouter();
-  const [greeting, setGreeting] = useState("");
-  const [selectedPeriod, setSelectedPeriod] = useState<"day" | "week" | "month">("week");
-  const [showNotifications, setShowNotifications] = useState(false);
+// Particle Background Component
+function ParticleBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) setGreeting("Good morning");
-    else if (hour < 18) setGreeting("Good afternoon");
-    else setGreeting("Good evening");
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles: any[] = [];
+    const particleCount = 100;
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2,
+        speedX: (Math.random() - 0.5) * 0.5,
+        speedY: (Math.random() - 0.5) * 0.5,
+        opacity: Math.random() * 0.5 + 0.2
+      });
+    }
+
+    function animate() {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach(particle => {
+        ctx.fillStyle = `rgba(168, 85, 247, ${particle.opacity})`;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        particle.x += particle.speedX;
+        particle.y += particle.speedY;
+
+        if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1;
+        if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1;
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const quickStats: QuickStat[] = [
-    {
-      label: "Total Revenue",
-      value: "$12,847",
-      change: 23.5,
-      icon: <DollarSign className="w-5 h-5" />,
-      color: "from-green-500 to-emerald-600"
-    },
-    {
-      label: "Profile Views",
-      value: "48.2K",
-      change: 18.2,
-      icon: <Eye className="w-5 h-5" />,
-      color: "from-purple-500 to-pink-600"
-    },
-    {
-      label: "Engagement Rate",
-      value: "8.7%",
-      change: -2.1,
-      icon: <Heart className="w-5 h-5" />,
-      color: "from-pink-500 to-red-500"
-    },
-    {
-      label: "Active Products",
-      value: "142",
-      change: 5,
-      icon: <Package className="w-5 h-5" />,
-      color: "from-blue-500 to-cyan-600"
+  return (
+    <canvas 
+      ref={canvasRef} 
+      className="fixed inset-0 z-0 opacity-50"
+      style={{ pointerEvents: 'none' }}
+    />
+  );
+}
+
+// 3D Card Component
+function Card3D({ children, className = "" }: { children: React.ReactNode, className?: string }) {
+  return (
+    <Tilt
+      className={cn("transform-gpu", className)}
+      tiltMaxAngleX={10}
+      tiltMaxAngleY={10}
+      perspective={1000}
+      transitionSpeed={2000}
+      scale={1.05}
+      gyroscope={true}
+    >
+      <div className="relative group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl opacity-0 group-hover:opacity-75 blur transition duration-1000 group-hover:duration-200" />
+        <div className="relative bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 p-6 transition-all duration-300">
+          {children}
+        </div>
+      </div>
+    </Tilt>
+  );
+}
+
+// Animated Counter Component
+function AnimatedCounter({ value, prefix = "", suffix = "" }: { value: number, prefix?: string, suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const { ref, inView } = useInView({ threshold: 0.3, triggerOnce: true });
+
+  useEffect(() => {
+    if (inView) {
+      const timer = setInterval(() => {
+        setCount(prev => {
+          const increment = Math.ceil(value / 50);
+          if (prev + increment >= value) {
+            clearInterval(timer);
+            return value;
+          }
+          return prev + increment;
+        });
+      }, 30);
+      return () => clearInterval(timer);
     }
+  }, [inView, value]);
+
+  return (
+    <span ref={ref} className="font-bold text-3xl">
+      {prefix}{count.toLocaleString()}{suffix}
+    </span>
+  );
+}
+
+// Instagram Grid Preview
+function InstagramGrid() {
+  const posts = [
+    { id: 1, type: 'image', likes: 5432, comments: 234, gradient: 'from-purple-500 to-pink-500' },
+    { id: 2, type: 'video', likes: 8765, comments: 432, gradient: 'from-blue-500 to-cyan-500' },
+    { id: 3, type: 'reel', likes: 12345, comments: 678, gradient: 'from-green-500 to-emerald-500' },
+    { id: 4, type: 'image', likes: 3456, comments: 123, gradient: 'from-orange-500 to-red-500' },
+    { id: 5, type: 'video', likes: 9876, comments: 456, gradient: 'from-indigo-500 to-purple-500' },
+    { id: 6, type: 'image', likes: 6789, comments: 234, gradient: 'from-pink-500 to-rose-500' },
   ];
 
-  const recentPosts: RecentPost[] = [
-    {
-      id: "1",
-      image: "https://source.unsplash.com/400x400/?fashion,product",
-      likes: 3421,
-      comments: 234,
-      saves: 567,
-      revenue: 2340,
-      products: 3,
-      timestamp: "2 hours ago"
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {posts.map((post, index) => (
+        <motion.div
+          key={post.id}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: index * 0.1 }}
+          whileHover={{ scale: 1.05, zIndex: 10 }}
+          className="relative aspect-square rounded-xl overflow-hidden cursor-pointer group"
+        >
+          <div className={`absolute inset-0 bg-gradient-to-br ${post.gradient}`} />
+          
+          {/* Content Type Icon */}
+          <div className="absolute top-2 right-2 z-10">
+            {post.type === 'video' && <Video className="w-5 h-5 text-white drop-shadow-lg" />}
+            {post.type === 'reel' && <Play className="w-5 h-5 text-white drop-shadow-lg" />}
+            {post.type === 'image' && <Camera className="w-5 h-5 text-white drop-shadow-lg" />}
+          </div>
+
+          {/* Hover Overlay */}
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+            <div className="text-white text-center">
+              <div className="flex items-center gap-4 justify-center">
+                <div className="flex items-center gap-1">
+                  <Heart className="w-5 h-5" fill="white" />
+                  <span className="text-sm font-bold">{post.likes.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <MessageCircle className="w-5 h-5" fill="white" />
+                  <span className="text-sm font-bold">{post.comments}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+// Main Dashboard Component
+export default function ModernDashboard() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { scrollYProgress } = useScroll();
+  const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+  const stats = [
+    { 
+      label: "Total Revenue", 
+      value: 128470, 
+      change: 23.5, 
+      icon: <DollarSign className="w-6 h-6" />,
+      prefix: "$",
+      gradient: "from-emerald-400 to-green-600"
     },
-    {
-      id: "2",
-      image: "https://source.unsplash.com/400x400/?beauty,cosmetics",
-      likes: 5632,
-      comments: 423,
-      saves: 892,
-      revenue: 4567,
-      products: 5,
-      timestamp: "5 hours ago"
+    { 
+      label: "Profile Views", 
+      value: 482000, 
+      change: 18.2, 
+      icon: <Eye className="w-6 h-6" />,
+      suffix: "",
+      gradient: "from-purple-400 to-pink-600"
     },
-    {
-      id: "3",
-      image: "https://source.unsplash.com/400x400/?jewelry,accessories",
-      likes: 2187,
-      comments: 156,
-      saves: 234,
-      revenue: 1234,
-      products: 2,
-      timestamp: "1 day ago"
+    { 
+      label: "Engagement Rate", 
+      value: 8.7, 
+      change: -2.1, 
+      icon: <Heart className="w-6 h-6" />,
+      suffix: "%",
+      gradient: "from-pink-400 to-red-600"
     },
-    {
-      id: "4",
-      image: "https://source.unsplash.com/400x400/?shoes,sneakers",
-      likes: 8934,
-      comments: 672,
-      saves: 1234,
-      revenue: 6789,
-      products: 4,
-      timestamp: "2 days ago"
+    { 
+      label: "Active Products", 
+      value: 142, 
+      change: 5, 
+      icon: <Package className="w-6 h-6" />,
+      gradient: "from-blue-400 to-cyan-600"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Modern Navigation Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-black/80 border-b border-white/10">
+    <div className="min-h-screen bg-black text-white overflow-hidden">
+      {/* Animated Background */}
+      <ParticleBackground />
+      
+      {/* Gradient Orbs */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-600/20 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-purple-600/10 to-pink-600/10 rounded-full blur-3xl animate-aurora" />
+      </div>
+
+      {/* Progress Bar */}
+      <motion.div 
+        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 to-pink-600 z-50 origin-left"
+        style={{ scaleX }}
+      />
+
+      {/* Header */}
+      <header className="relative z-40 backdrop-blur-xl bg-black/30 border-b border-white/10">
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-8">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-tr from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-white" />
+              {/* Logo */}
+              <motion.div 
+                className="flex items-center gap-3"
+                whileHover={{ scale: 1.05 }}
+              >
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 blur-lg opacity-50" />
+                  <div className="relative w-12 h-12 bg-gradient-to-tr from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center">
+                    <Crown className="w-7 h-7 text-white" />
+                  </div>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto]">
                     MINIMALL
                   </h1>
-                  <p className="text-xs text-gray-500">Creator Studio</p>
+                  <p className="text-xs text-gray-400">Creator Studio Pro</p>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Search Bar */}
-              <div className="hidden md:flex items-center gap-2 bg-white/5 rounded-full px-4 py-2 border border-white/10">
+              <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-white/5 backdrop-blur-xl rounded-full border border-white/10 hover:border-purple-500/50 transition-all duration-300 w-96">
                 <Search className="w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search posts, products, analytics..."
-                  className="bg-transparent text-sm text-white placeholder-gray-500 outline-none w-64"
+                  placeholder="Search anything..."
+                  className="bg-transparent text-sm text-white placeholder-gray-500 outline-none flex-1"
                 />
+                <kbd className="px-2 py-0.5 text-xs bg-white/10 rounded">⌘K</kbd>
               </div>
             </div>
 
+            {/* Right Actions */}
             <div className="flex items-center gap-4">
-              {/* Quick Actions */}
-              <button
-                onClick={() => router.push("/editor/new")}
-                className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full hover:shadow-lg hover:shadow-purple-500/25 transition-all"
-              >
-                <Plus className="w-4 h-4" />
-                <span className="text-sm font-medium">Create</span>
-              </button>
-
-              {/* Notifications */}
-              <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 hover:bg-white/5 rounded-full transition-colors"
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative p-2 hover:bg-white/5 rounded-xl transition-colors"
               >
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full animate-pulse" />
-              </button>
+                <span className="absolute top-1 right-1 w-2 h-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full animate-pulse" />
+              </motion.button>
 
-              {/* Profile */}
-              <button className="flex items-center gap-3 hover:bg-white/5 rounded-full p-1 pr-3 transition-colors">
-                <div className="w-8 h-8 bg-gradient-to-tr from-purple-600 to-pink-600 rounded-full" />
-                <span className="text-sm hidden md:block">@creator</span>
-              </button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/editor/new')}
+                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full font-medium hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Create</span>
+              </motion.button>
+
+              <div className="flex items-center gap-3 px-3 py-1.5 bg-white/5 backdrop-blur-xl rounded-full border border-white/10">
+                <div className="relative">
+                  <div className="w-10 h-10 bg-gradient-to-tr from-purple-600 to-pink-600 rounded-full" />
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-black" />
+                </div>
+                <div className="hidden md:block">
+                  <p className="text-sm font-medium">Creator Pro</p>
+                  <p className="text-xs text-gray-400">Level 42</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="px-6 flex items-center gap-6 border-t border-white/5">
-          <button className="py-3 border-b-2 border-purple-500 text-purple-400">
-            <span className="text-sm font-medium">Overview</span>
-          </button>
-          <button 
-            onClick={() => router.push("/editor")}
-            className="py-3 border-b-2 border-transparent text-gray-400 hover:text-white transition-colors"
-          >
-            <span className="text-sm font-medium">Content</span>
-          </button>
-          <button 
-            onClick={() => router.push("/analytics")}
-            className="py-3 border-b-2 border-transparent text-gray-400 hover:text-white transition-colors"
-          >
-            <span className="text-sm font-medium">Analytics</span>
-          </button>
-          <button 
-            onClick={() => router.push("/instagram")}
-            className="py-3 border-b-2 border-transparent text-gray-400 hover:text-white transition-colors"
-          >
-            <span className="text-sm font-medium">Instagram</span>
-          </button>
-          <button 
-            onClick={() => router.push("/settings")}
-            className="py-3 border-b-2 border-transparent text-gray-400 hover:text-white transition-colors"
-          >
-            <span className="text-sm font-medium">Settings</span>
-          </button>
+        <div className="px-6 flex items-center gap-1 overflow-x-auto no-scrollbar">
+          {['Overview', 'Content', 'Analytics', 'Products', 'Instagram'].map((tab) => (
+            <motion.button
+              key={tab}
+              onClick={() => setActiveTab(tab.toLowerCase())}
+              className={cn(
+                "px-4 py-3 text-sm font-medium transition-all duration-300 relative",
+                activeTab === tab.toLowerCase() 
+                  ? "text-white" 
+                  : "text-gray-400 hover:text-white"
+              )}
+              whileHover={{ y: -2 }}
+              whileTap={{ y: 0 }}
+            >
+              {tab}
+              {activeTab === tab.toLowerCase() && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-600 to-pink-600"
+                />
+              )}
+            </motion.button>
+          ))}
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="p-6 max-w-7xl mx-auto">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">
-            {greeting}, Creator ✨
+      <main className="relative z-10 p-6 max-w-7xl mx-auto">
+        {/* Welcome Section with Animated Text */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <h2 className="text-5xl font-bold mb-3">
+            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto]">
+              Welcome back, Creator
+            </span>{" "}
+            <motion.span
+              animate={{ rotate: [0, 20, 0] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="inline-block"
+            >
+              ✨
+            </motion.span>
           </h2>
-          <p className="text-gray-400">Here's how your content is performing today</p>
-        </div>
+          <p className="text-gray-400 text-lg">Your empire is growing. Here's what's happening today.</p>
+        </motion.div>
 
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {quickStats.map((stat, index) => (
+        {/* Stats Grid with 3D Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="relative group"
             >
-              <div className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl blur-xl -z-10 className={stat.color}" />
-              <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all">
+              <Card3D>
                 <div className="flex items-start justify-between mb-4">
-                  <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.color}`}>
+                  <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.gradient} shadow-lg`}>
                     {stat.icon}
                   </div>
-                  <div className={`flex items-center gap-1 text-xs ${
+                  <div className={cn(
+                    "flex items-center gap-1 text-sm font-bold",
                     stat.change > 0 ? "text-green-400" : "text-red-400"
-                  }`}>
-                    {stat.change > 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                    <span>{Math.abs(stat.change)}%</span>
+                  )}>
+                    {stat.change > 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+                    {Math.abs(stat.change)}%
                   </div>
                 </div>
-                <p className="text-2xl font-bold mb-1">{stat.value}</p>
-                <p className="text-sm text-gray-400">{stat.label}</p>
-              </div>
+                <AnimatedCounter 
+                  value={stat.value} 
+                  prefix={stat.prefix} 
+                  suffix={stat.suffix}
+                />
+                <p className="text-gray-400 mt-2">{stat.label}</p>
+              </Card3D>
             </motion.div>
           ))}
         </div>
 
-        {/* Two Column Layout */}
+        {/* Content Grid */}
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Recent Posts Performance */}
-          <div className="lg:col-span-2 bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold">Recent Posts Performance</h3>
-              <button className="text-sm text-purple-400 hover:text-purple-300 transition-colors">
-                View all →
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {recentPosts.map((post) => (
-                <div key={post.id} className="group cursor-pointer">
-                  <div className="relative aspect-square rounded-xl overflow-hidden mb-3">
-                    <Image
-                      src={post.image}
-                      alt="Post"
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="flex items-center gap-1">
-                            <Heart className="w-3 h-3" fill="currentColor" />
-                            {post.likes > 1000 ? `${(post.likes / 1000).toFixed(1)}k` : post.likes}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <ShoppingBag className="w-3 h-3" />
-                            ${post.revenue}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-xs text-gray-400">
-                      <span>{post.products} products</span>
-                      <span>{post.timestamp}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs">
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="w-3 h-3" />
-                        {post.comments}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Bookmark className="w-3 h-3" />
-                        {post.saves}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Actions & Insights */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                <button
-                  onClick={() => router.push("/editor/new")}
-                  className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-500/20 rounded-lg">
-                      <Grid3x3 className="w-4 h-4 text-purple-400" />
-                    </div>
-                    <span className="text-sm">Create New Grid</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors" />
-                </button>
-
-                <button
-                  onClick={() => router.push("/instagram")}
-                  className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-pink-500/20 rounded-lg">
-                      <Instagram className="w-4 h-4 text-pink-400" />
-                    </div>
-                    <span className="text-sm">Import from Instagram</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors" />
-                </button>
-
-                <button className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors group">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-500/20 rounded-lg">
-                      <Tag className="w-4 h-4 text-green-400" />
-                    </div>
-                    <span className="text-sm">Tag Products</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors" />
+          {/* Instagram Grid Preview */}
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:col-span-2"
+          >
+            <Card3D className="h-full">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold flex items-center gap-2">
+                  <Instagram className="w-5 h-5" />
+                  Recent Posts Performance
+                </h3>
+                <button className="text-sm text-purple-400 hover:text-purple-300 transition-colors">
+                  View all →
                 </button>
               </div>
-            </div>
+              <InstagramGrid />
+            </Card3D>
+          </motion.div>
 
-            {/* Trending Now */}
-            <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 backdrop-blur-xl rounded-2xl p-6 border border-purple-500/30">
+          {/* Right Sidebar */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="space-y-6"
+          >
+            {/* Trending Section */}
+            <Card3D>
               <div className="flex items-center gap-2 mb-4">
                 <Flame className="w-5 h-5 text-orange-400" />
-                <h3 className="text-lg font-semibold">Trending Now</h3>
+                <h3 className="text-lg font-bold">Trending Now</h3>
               </div>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-300">Summer Collection</span>
-                  <span className="text-xs text-purple-400">+234% 🔥</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-300">Minimalist Jewelry</span>
-                  <span className="text-xs text-purple-400">+189%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-300">Sustainable Fashion</span>
-                  <span className="text-xs text-purple-400">+156%</span>
-                </div>
+                {[
+                  { name: "Summer Collection", growth: "+234%", hot: true },
+                  { name: "Minimalist Jewelry", growth: "+189%" },
+                  { name: "Sustainable Fashion", growth: "+156%" }
+                ].map((trend) => (
+                  <div key={trend.name} className="flex items-center justify-between p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                    <span className="text-sm">{trend.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-purple-400 font-bold">{trend.growth}</span>
+                      {trend.hot && <span className="text-xs">🔥</span>}
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            </Card3D>
 
-            {/* Pro Tips */}
-            <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
-              <div className="flex items-center gap-2 mb-4">
-                <Zap className="w-5 h-5 text-yellow-400" />
-                <h3 className="text-lg font-semibold">Pro Tip</h3>
+            {/* Quick Actions */}
+            <Card3D>
+              <h3 className="text-lg font-bold mb-4">Quick Actions</h3>
+              <div className="space-y-2">
+                {[
+                  { icon: <Grid3x3 className="w-4 h-4" />, label: "Create Grid", color: "from-purple-600 to-pink-600" },
+                  { icon: <Instagram className="w-4 h-4" />, label: "Import Posts", color: "from-blue-600 to-cyan-600" },
+                  { icon: <Sparkles className="w-4 h-4" />, label: "AI Generate", color: "from-green-600 to-emerald-600" }
+                ].map((action) => (
+                  <motion.button
+                    key={action.label}
+                    whileHover={{ x: 5 }}
+                    className="w-full flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 bg-gradient-to-r ${action.color} rounded-lg`}>
+                        {action.icon}
+                      </div>
+                      <span className="text-sm">{action.label}</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-white transition-colors" />
+                  </motion.button>
+                ))}
               </div>
-              <p className="text-sm text-gray-300 mb-3">
-                Posts with 3-5 product tags get 47% more engagement than those with just one.
-              </p>
-              <button className="text-sm text-purple-400 hover:text-purple-300 transition-colors">
-                Learn more →
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Performance Chart */}
-        <div className="mt-6 bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Performance Overview</h3>
-            <div className="flex items-center gap-2">
-              {["day", "week", "month"].map((period) => (
-                <button
-                  key={period}
-                  onClick={() => setSelectedPeriod(period as any)}
-                  className={`px-3 py-1 rounded-lg text-sm transition-all ${
-                    selectedPeriod === period
-                      ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
-                      : "text-gray-400 hover:text-white"
-                  }`}
-                >
-                  {period.charAt(0).toUpperCase() + period.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Placeholder for actual chart */}
-          <div className="h-64 flex items-center justify-center border border-white/10 rounded-xl">
-            <div className="text-center">
-              <BarChart3 className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">Performance chart will be rendered here</p>
-            </div>
-          </div>
+            </Card3D>
+          </motion.div>
         </div>
       </main>
-
-      {/* Floating Action Button for Mobile */}
-      <button
-        onClick={() => router.push("/editor/new")}
-        className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/50 z-50"
-      >
-        <Plus className="w-6 h-6 text-white" />
-      </button>
     </div>
   );
 }
