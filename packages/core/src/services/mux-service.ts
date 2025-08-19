@@ -41,7 +41,6 @@ export class MuxService {
         cors_origin: process.env.NEXT_PUBLIC_BASE_URL || "*",
         new_asset_settings: {
           playback_policy: ["public"],
-          video_quality: "plus", // Better quality for Instagram-style content
           mp4_support: "standard", // Enable MP4 for fallback
         },
       });
@@ -66,9 +65,8 @@ export class MuxService {
   }) {
     try {
       const asset = await Video.assets.create({
-        inputs: [{ url }],
+        input: [{ url }],
         playback_policy: ["public"],
-        video_quality: "plus",
         mp4_support: "standard",
         test: options?.testMode,
         // Generate thumbnails
