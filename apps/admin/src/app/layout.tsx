@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { ShopifyAppProvider } from "../providers/shopify-app-provider";
 import "../styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "MiniMall Admin",
-  description: "Admin dashboard for MiniMall link-in-bio platform",
+  title: "MINIMALL Creator Studio",
+  description: "Instagram-native shopping experience creator",
 };
 
 export default function RootLayout({
@@ -13,9 +12,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <ShopifyAppProvider>{children}</ShopifyAppProvider>
+    <html lang="en" className="dark">
+      <body className="bg-black text-white">
+        {children}
       </body>
     </html>
   );

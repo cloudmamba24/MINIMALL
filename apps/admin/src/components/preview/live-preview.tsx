@@ -1,15 +1,16 @@
 "use client";
 
 import type { SiteConfig } from "@minimall/core";
-import { Banner, Button, ButtonGroup, Card, Select, Spinner, Text } from "@shopify/polaris";
-import {
-  DesktopIcon,
-  ExternalIcon,
-  MobileIcon,
-  RefreshIcon,
-  TabletIcon,
-} from "@shopify/polaris-icons";
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { 
+  Monitor, 
+  Smartphone, 
+  Tablet, 
+  RefreshCw, 
+  ExternalLink,
+  AlertCircle,
+  Loader2
+} from "lucide-react";
 
 interface LivePreviewProps {
   config: SiteConfig;
@@ -120,7 +121,6 @@ export function LivePreview({
           setPreviewError(event.data.error || "Preview error occurred");
           break;
         case "CONFIG_APPLIED":
-          // Config was successfully applied in preview
           // Config successfully applied in preview iframe
           break;
       }
@@ -150,93 +150,113 @@ export function LivePreview({
 
   if (!config || !config.id) {
     return (
-      <Card>
-        <div className="p-8 text-center">
-          <Text variant="headingMd" as="h2">
-            Live Preview
-          </Text>
-          <Text variant="bodyLg" tone="subdued" as="p">
-            No configuration selected for preview
-          </Text>
+      <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/10">
+        <div className="text-center">
+          <h2 className="text-xl font-bold mb-2">Live Preview</h2>
+          <p className="text-gray-400">No configuration selected for preview</p>
         </div>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <div className="p-4 border-b">
+    <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden">
+      <div className="p-4 border-b border-white/10">
         <div className="flex items-center justify-between">
           <div>
-            <Text variant="headingMd" as="h2">
-              Live Preview
-            </Text>
-            <Text variant="bodySm" tone="subdued" as="span">
+            <h2 className="text-lg font-semibold">Live Preview</h2>
+            <span className="text-sm text-gray-400">
               {config.id} • {dimensions.label}
-            </Text>
+            </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {/* Viewport selector */}
-            <ButtonGroup variant="segmented">
-              <Button
-                pressed={viewport === "mobile"}
+            <div className="flex bg-white/5 rounded-xl p-1">
+              <button
                 onClick={() => setViewport("mobile")}
-                icon={MobileIcon}
-              />
-              <Button
-                pressed={viewport === "tablet"}
+                className={`p-2 rounded-lg transition-all ${
+                  viewport === "mobile" 
+                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white" 
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <Smartphone className="w-4 h-4" />
+              </button>
+              <button
                 onClick={() => setViewport("tablet")}
-                icon={TabletIcon}
-              />
-              <Button
-                pressed={viewport === "desktop"}
+                className={`p-2 rounded-lg transition-all ${
+                  viewport === "tablet" 
+                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white" 
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <Tablet className="w-4 h-4" />
+              </button>
+              <button
                 onClick={() => setViewport("desktop")}
-                icon={DesktopIcon}
-              />
-            </ButtonGroup>
+                className={`p-2 rounded-lg transition-all ${
+                  viewport === "desktop" 
+                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white" 
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <Monitor className="w-4 h-4" />
+              </button>
+            </div>
 
             {/* Action buttons */}
-            <ButtonGroup>
-              <Button icon={RefreshIcon} onClick={refreshPreview}>
-                Refresh
-              </Button>
-              <Button icon={ExternalIcon} onClick={openInNewTab}>
-                Open
-              </Button>
-            </ButtonGroup>
+            <div className="flex gap-2">
+              <button
+                onClick={refreshPreview}
+                className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span className="text-sm">Refresh</span>
+              </button>
+              <button
+                onClick={openInNewTab}
+                className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span className="text-sm">Open</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Error banner */}
       {(error || previewError) && (
-        <div className="p-4">
-          <Banner tone="critical">{error || previewError}</Banner>
+        <div className="p-4 border-b border-white/10">
+          <div className="flex items-center gap-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <AlertCircle className="w-5 h-5 text-red-400" />
+            <span className="text-sm text-red-400">{error || previewError}</span>
+          </div>
         </div>
       )}
 
       {/* Preview container */}
-      <div className="p-4">
+      <div className="p-6 bg-black/30">
         <div
-          className="relative bg-gray-100 rounded-lg overflow-hidden"
+          className="relative bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden"
           style={{ minHeight: "400px" }}
         >
           {/* Loading overlay */}
           {(isLoading || iframeLoading) && (
-            <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-10">
+            <div className="absolute inset-0 bg-black/80 backdrop-blur flex items-center justify-center z-10">
               <div className="text-center">
-                <Spinner size="large" />
-                <Text variant="bodyMd" as="p">
+                <Loader2 className="w-8 h-8 animate-spin text-purple-500 mx-auto mb-3" />
+                <p className="text-sm text-gray-400">
                   {isLoading ? "Loading configuration..." : "Loading preview..."}
-                </Text>
+                </p>
               </div>
             </div>
           )}
 
           {/* Preview iframe */}
           <div
-            className="mx-auto bg-white shadow-lg rounded-lg overflow-hidden"
+            className="mx-auto bg-white rounded-lg overflow-hidden shadow-2xl"
             style={{
               width: dimensions.width * scale,
               height: dimensions.height * scale,
@@ -261,7 +281,7 @@ export function LivePreview({
           </div>
 
           {/* Preview info overlay */}
-          <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded text-sm">
+          <div className="absolute top-4 right-4 bg-black/75 backdrop-blur text-white px-3 py-2 rounded-lg text-xs font-mono">
             {dimensions.width} × {dimensions.height}
             {scale < 1 && ` (${Math.round(scale * 100)}%)`}
           </div>
@@ -269,12 +289,12 @@ export function LivePreview({
 
         {/* Preview tips */}
         <div className="mt-4 text-center">
-          <Text variant="bodySm" tone="subdued" as="p">
+          <p className="text-sm text-gray-500">
             Changes are automatically reflected in the preview. Use the refresh button if updates
             don't appear.
-          </Text>
+          </p>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
