@@ -1,5 +1,4 @@
-import { db } from "@minimall/db";
-import { users } from "@minimall/db/schema";
+import { db, users } from "@minimall/db";
 import { eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
@@ -10,6 +9,10 @@ export async function POST(request: NextRequest) {
     const { usernameOrEmail, password, shopDomain } = body;
 
     // Find user by email or Instagram username
+    if (!db) {
+      return NextResponse.json({ error: "Database unavailable" }, { status: 500 });
+    }
+    
     const foundUsers = await db
       .select()
       .from(users)
@@ -23,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     if (foundUsers.length === 0) {
       // Try to find by Instagram username in permissions
-      const allUsers = await db.select().from(users);
+      const allUsers = await db!.select().from(users);
       const userByInstagram = allUsers.find(user => {
         if (user.permissions && Array.isArray(user.permissions)) {
           return (user.permissions as any[]).some(
@@ -44,6 +47,13 @@ export async function POST(request: NextRequest) {
     }
 
     const user = foundUsers[0];
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: "invalid_credentials", message: "Invalid username/email or password" },
+        { status: 401 }
+      );
+    }
 
     // Verify password
     const passwordHash = crypto

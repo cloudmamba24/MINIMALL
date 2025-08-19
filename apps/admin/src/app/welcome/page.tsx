@@ -1,10 +1,10 @@
 "use client";
 
 import { Button, Card, Layout, Page, Text, BlockStack, Box } from "@shopify/polaris";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function WelcomePage() {
+function WelcomePageContent() {
   const searchParams = useSearchParams();
   const shop = searchParams.get("shop");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -187,5 +187,12 @@ export default function WelcomePage() {
         </Layout.Section>
       </Layout>
     </Page>
+  );
+}
+export default function WelcomePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-gray-500">Loading...</div></div>}>
+      <WelcomePageContent />
+    </Suspense>
   );
 }

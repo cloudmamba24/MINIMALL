@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function LaunchpadPage() {
+function LaunchpadPageContent() {
   const searchParams = useSearchParams();
   const shop = searchParams.get("shop");
   const [activeTab, setActiveTab] = useState("launchpad");
@@ -217,5 +217,12 @@ export default function LaunchpadPage() {
         )}
       </main>
     </div>
+  );
+}
+export default function LaunchpadPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-gray-500">Loading...</div></div>}>
+      <LaunchpadPageContent />
+    </Suspense>
   );
 }

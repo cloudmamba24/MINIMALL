@@ -1,5 +1,4 @@
-import { db } from "@minimall/db";
-import { users } from "@minimall/db/schema";
+import { db, users } from "@minimall/db";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
@@ -18,6 +17,10 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Check if Instagram username already exists
+    if (!db) {
+      return NextResponse.json({ error: "Database unavailable" }, { status: 500 });
+    }
+    
     const existingUser = await db
       .select()
       .from(users)
@@ -27,7 +30,7 @@ export async function POST(request: NextRequest) {
     if (existingUser.length > 0) {
       // Check if it's the Instagram username that matches
       const userData = existingUser[0];
-      if (userData.permissions && 
+      if (userData && userData.permissions && 
           Array.isArray(userData.permissions) && 
           (userData.permissions as any[]).some((p: any) => p.instagram === instagramUsername)) {
         return NextResponse.json(
@@ -52,7 +55,7 @@ export async function POST(request: NextRequest) {
       .digest("hex");
 
     // Create new user
-    const newUser = await db
+    const newUser = await db!
       .insert(users)
       .values({
         email,
@@ -73,14 +76,22 @@ export async function POST(request: NextRequest) {
     const token = crypto.randomBytes(32).toString("hex");
     
     // Store session (you might want to use Redis or a session table)
+    const createdUser = newUser[0];
+    if (!createdUser) {
+      return NextResponse.json(
+        { error: "signup_failed", message: "Failed to create account" },
+        { status: 500 }
+      );
+    }
+    
     const response = NextResponse.json(
       { 
         success: true, 
         token,
         user: {
-          id: newUser[0].id,
-          email: newUser[0].email,
-          name: newUser[0].name
+          id: createdUser.id,
+          email: createdUser.email,
+          name: createdUser.name
         }
       },
       { status: 201 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 interface ShopData {
@@ -9,7 +9,7 @@ interface ShopData {
   shopDomain: string;
 }
 
-export default function SignUpPage() {
+function SignUpForm() {
   const searchParams = useSearchParams();
   const shop = searchParams.get("shop");
   const isEmbedded = searchParams.get("embedded") === "true";
@@ -341,5 +341,13 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-gray-500">Loading...</div></div>}>
+      <SignUpForm />
+    </Suspense>
   );
 }

@@ -74,7 +74,7 @@ export function StoryProgressBars({
 
   // Sync with video playback if using requestVideoFrameCallback
   useEffect(() => {
-    if (!isVideo || !window.requestVideoFrameCallback) return;
+    if (!isVideo || !(window as any).requestVideoFrameCallback) return;
 
     const video = document.querySelector('video:not([data-ignore-progress])') as HTMLVideoElement;
     if (!video) return;
@@ -90,18 +90,18 @@ export function StoryProgressBars({
         if (videoProgress >= 99.5) {
           onComplete();
         } else if (!isPaused) {
-          frameId = video.requestVideoFrameCallback(updateProgressFromVideo);
+          frameId = (video as any).requestVideoFrameCallback(updateProgressFromVideo);
         }
       }
     };
 
     if ('requestVideoFrameCallback' in video) {
-      frameId = video.requestVideoFrameCallback(updateProgressFromVideo);
+      frameId = (video as any).requestVideoFrameCallback(updateProgressFromVideo);
     }
 
     return () => {
-      if (frameId && video.cancelVideoFrameCallback) {
-        video.cancelVideoFrameCallback(frameId);
+      if (frameId && (video as any).cancelVideoFrameCallback) {
+        (video as any).cancelVideoFrameCallback(frameId);
       }
     };
   }, [currentIndex, isVideo, isPaused, onComplete]);

@@ -44,36 +44,42 @@ export function AdaptiveVideoPlayer({
 
   // If we have a Mux playback ID, use Mux Player
   if (playbackId) {
-    return (
-      <MuxPlayer
-        playbackId={playbackId}
-        poster={poster}
-        autoPlay={autoPlay}
-        muted={muted}
-        loop={loop}
-        controls={controls}
-        className={className}
-        onPlay={onPlay}
-        onPause={onPause}
-        onEnded={onEnded}
-        onTimeUpdate={(e: any) => {
-          const video = e.target as HTMLVideoElement;
-          onTimeUpdate?.(video.currentTime, video.duration);
-        }}
-        onLoadedMetadata={(e: any) => {
-          const video = e.target as HTMLVideoElement;
-          onLoadedMetadata?.(video.duration);
-        }}
-        streamType="on-demand"
-        primaryColor="#8B5CF6"
-        secondaryColor="#EC4899"
-        // Instagram-style customizations
-        style={{
-          "--controls-backdrop-color": "rgba(0, 0, 0, 0.5)",
-          "--controls-text-color": "#ffffff",
-        } as React.CSSProperties}
-      />
-    );
+    const muxProps: any = {
+      playbackId,
+      autoPlay,
+      muted,
+      loop,
+      className,
+      streamType: "on-demand",
+      primaryColor: "#8B5CF6",
+      secondaryColor: "#EC4899",
+      style: {
+        "--controls-backdrop-color": "rgba(0, 0, 0, 0.5)",
+        "--controls-text-color": "#ffffff",
+      } as React.CSSProperties,
+    };
+
+    if (poster) muxProps.poster = poster;
+    if (onPlay) muxProps.onPlay = onPlay;
+    if (onPause) muxProps.onPause = onPause;
+    if (onEnded) muxProps.onEnded = onEnded;
+    if (onTimeUpdate) {
+      muxProps.onTimeUpdate = (e: any) => {
+        const video = e.target as HTMLVideoElement;
+        onTimeUpdate(video.currentTime, video.duration);
+      };
+    }
+    if (onLoadedMetadata) {
+      muxProps.onLoadedMetadata = (e: any) => {
+        const video = e.target as HTMLVideoElement;
+        onLoadedMetadata(video.duration);
+      };
+    }
+    if (controls === false) {
+      muxProps["data-controls"] = "false";
+    }
+
+    return <MuxPlayer {...muxProps} />;
   }
 
   // Setup HLS.js for non-Mux HLS streams
@@ -218,13 +224,16 @@ export function useVideoPreloader(urls: string[], currentIndex: number) {
     const links: HTMLLinkElement[] = [];
 
     preloadIndexes.forEach((index) => {
-      const link = document.createElement("link");
-      link.rel = "prefetch";
-      link.as = "fetch";
-      link.href = urls[index];
-      link.crossOrigin = "anonymous";
-      document.head.appendChild(link);
-      links.push(link);
+      const url = urls[index];
+      if (url) {
+        const link = document.createElement("link");
+        link.rel = "prefetch";
+        link.as = "fetch";
+        link.href = url;
+        link.crossOrigin = "anonymous";
+        document.head.appendChild(link);
+        links.push(link);
+      }
     });
 
     return () => {

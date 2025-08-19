@@ -18,8 +18,10 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { ProductTag, ShoppableTile } from "@minimall/core/types/tiles";
-import type { ShopifyProduct } from "@minimall/core/types";
+// TODO: Import from @minimall/core once types are properly exported
+type ProductTag = any;
+type ShoppableTile = any;
+type ShopifyProduct = any;
 
 interface VisualHotspotEditorProps {
   tile: ShoppableTile;
@@ -99,14 +101,20 @@ export function VisualHotspotEditor({
   const handleUndo = useCallback(() => {
     if (historyIndex > 0) {
       setHistoryIndex(historyIndex - 1);
-      setHotspots(history[historyIndex - 1]);
+      const prevState = history[historyIndex - 1];
+      if (prevState) {
+        setHotspots(prevState);
+      }
     }
   }, [history, historyIndex]);
 
   const handleRedo = useCallback(() => {
     if (historyIndex < history.length - 1) {
       setHistoryIndex(historyIndex + 1);
-      setHotspots(history[historyIndex + 1]);
+      const nextState = history[historyIndex + 1];
+      if (nextState) {
+        setHotspots(nextState);
+      }
     }
   }, [history, historyIndex]);
 

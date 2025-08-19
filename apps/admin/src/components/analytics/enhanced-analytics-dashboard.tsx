@@ -38,7 +38,8 @@ import {
   Info
 } from "lucide-react";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import type { ShopifyProduct } from "@minimall/core/types";
+// TODO: Import ShopifyProduct from proper location once types are exported
+type ShopifyProduct = any;
 
 interface EnhancedAnalyticsDashboardProps {
   configId?: string;

@@ -41,10 +41,13 @@ export function BottomSheetModal({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      controls.start({
-        y: `${100 - snapPoints[currentSnapIndex]}%`,
-        transition: { type: "spring", damping: 30, stiffness: 300 },
-      });
+      const snapPoint = snapPoints[currentSnapIndex];
+      if (snapPoint !== undefined) {
+        controls.start({
+          y: `${100 - snapPoint}%`,
+          transition: { type: "spring", damping: 30, stiffness: 300 },
+        });
+      }
     } else {
       document.body.style.overflow = "";
     }
@@ -81,10 +84,13 @@ export function BottomSheetModal({
     });
 
     setCurrentSnapIndex(nearestIndex);
-    controls.start({
-      y: `${100 - snapPoints[nearestIndex]}%`,
-      transition: { type: "spring", damping: 30, stiffness: 300 },
-    });
+    const snapPoint = snapPoints[nearestIndex];
+    if (snapPoint !== undefined) {
+      controls.start({
+        y: `${100 - snapPoint}%`,
+        transition: { type: "spring", damping: 30, stiffness: 300 },
+      });
+    }
   };
 
   const modalContent = (

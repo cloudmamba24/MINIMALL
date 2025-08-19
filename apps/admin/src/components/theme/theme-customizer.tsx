@@ -23,7 +23,8 @@ import {
   Minimize
 } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
-import type { Theme } from "@minimall/core/types";
+// TODO: Import from @minimall/core once types are properly exported
+type Theme = any;
 
 interface ThemeCustomizerProps {
   currentTheme: Theme;

@@ -3,7 +3,8 @@
 import { SwipeableModal } from "@/components/ui/bottom-sheet-modal";
 import { StoryProgressBars } from "@/components/ui/story-progress-bars";
 import { useModalCarousel } from "@/hooks/use-modal-router";
-import type { Tile } from "@minimall/core/types/tiles";
+// TODO: Import from @minimall/core once types are properly exported
+type Tile = any;
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Eye, EyeOff, Pause, Play, ShoppingBag, Volume2, VolumeX } from "lucide-react";
 import Image from "next/image";
@@ -51,6 +52,8 @@ export function InstagramPostModal({ tiles, onProductClick, onNavigate }: Instag
   // Touch gesture handlers for hold-to-pause
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     const touch = e.touches[0];
+    if (!touch) return;
+    
     touchStartRef.current = {
       x: touch.clientX,
       y: touch.clientY,
@@ -76,6 +79,8 @@ export function InstagramPostModal({ tiles, onProductClick, onNavigate }: Instag
     if (!touchStartRef.current) return;
 
     const touch = e.changedTouches[0];
+    if (!touch) return;
+    
     const deltaX = touch.clientX - touchStartRef.current.x;
     const deltaY = touch.clientY - touchStartRef.current.y;
     const deltaTime = Date.now() - touchStartRef.current.time;
@@ -309,7 +314,7 @@ export function InstagramPostModal({ tiles, onProductClick, onNavigate }: Instag
                   {/* Product Hotspots */}
                   {currentTile.type === "shoppable" && showHotspots && currentTile.hotspotsVisible && (
                     <div className="absolute inset-0">
-                      {currentTile.products.map((tag, index) => (
+                      {currentTile.products.map((tag: any, index: number) => (
                         <motion.button
                           key={tag.id}
                           className="absolute"

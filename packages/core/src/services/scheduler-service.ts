@@ -1,5 +1,4 @@
-import { db } from "@minimall/db";
-import { configVersions } from "@minimall/db/schema";
+import { db, configVersions } from "@minimall/db";
 import { and, eq, lte, isNull, or } from "drizzle-orm";
 import type { Tile } from "../types/tiles";
 
@@ -62,6 +61,7 @@ export class SchedulerService {
   async schedulePublish(tileId: string, scheduledFor: Date, configId: string) {
     try {
       // Create a scheduled version
+      if (!db) throw new Error("Database not available");
       const result = await db.insert(configVersions).values({
         configId,
         version: `scheduled-${Date.now()}`,
@@ -93,6 +93,7 @@ export class SchedulerService {
    */
   async scheduleUnpublish(tileId: string, scheduledFor: Date, configId: string) {
     try {
+      if (!db) throw new Error("Database not available");
       const result = await db.insert(configVersions).values({
         configId,
         version: `scheduled-unpublish-${Date.now()}`,
@@ -124,6 +125,7 @@ export class SchedulerService {
    */
   async cancelScheduled(scheduledVersionId: string) {
     try {
+      if (!db) throw new Error("Database not available");
       await db.delete(configVersions).where(
         and(
           eq(configVersions.id, scheduledVersionId),
@@ -146,6 +148,7 @@ export class SchedulerService {
    */
   async getScheduledContent(configId: string) {
     try {
+      if (!db) throw new Error("Database not available");
       const scheduled = await db
         .select()
         .from(configVersions)
@@ -173,6 +176,7 @@ export class SchedulerService {
 
     try {
       // Find all scheduled content that should be processed
+      if (!db) throw new Error("Database not available");
       const due = await db
         .select()
         .from(configVersions)
@@ -224,6 +228,7 @@ export class SchedulerService {
       }
 
       // Mark as published
+      if (!db) throw new Error("Database not available");
       await db
         .update(configVersions)
         .set({
@@ -248,6 +253,7 @@ export class SchedulerService {
     future.setDate(future.getDate() + days);
 
     try {
+      if (!db) throw new Error("Database not available");
       const upcoming = await db
         .select()
         .from(configVersions)

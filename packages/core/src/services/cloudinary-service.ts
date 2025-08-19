@@ -102,9 +102,9 @@ export class CloudinaryService {
     const cropOptions = this.getAspectRatioCrop(options?.aspectRatio || "1:1");
 
     return sizes.map(width => {
-      return cloudinary.url(publicId, {
-        width,
+      const options = {
         ...cropOptions,
+        width,
         crop: "fill",
         gravity: "auto",
         quality: "auto:best",
@@ -112,7 +112,8 @@ export class CloudinaryService {
         dpr: "auto",
         responsive: true,
         secure: true,
-      });
+      };
+      return cloudinary.url(publicId, options);
     });
   }
 
